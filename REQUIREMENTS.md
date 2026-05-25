@@ -5,7 +5,7 @@
 - 项目：go-scaffold
 - 阶段：需求确认
 - 状态：COMPLETED
-- 最后更新：2026-05-25
+- 最后更新：2026-05-26
 - 输入：用户发送“下一步”，按当前文档默认值确认 `TASK-OPT-002`
 
 ## 确认结果
@@ -49,7 +49,7 @@
 |---|---|---|---|
 | REQ-OPT-P2-001 | auth/rbac 实现 | 当前 README 明确暂不实现，需要单独需求确认 | [DEFERRED] |
 | REQ-OPT-P2-002 | 插件系统 rpc/ws/discovery 扩展 | 插件 v1 已完成，扩展需独立提升 | [DEFERRED] |
-| REQ-OPT-P2-003 | CI/CD 与部署 | 当前阶段聚焦项目治理和优化路线 | [DEFERRED] |
+| REQ-OPT-P2-003 | CI/CD 与部署 | 首切片已完成 CI 质量门禁和部署说明；远程部署 `.env` 模板和手动 staging 远程部署 workflow 已完成；镜像发布、production 部署和真实运行仍需单独确认 | [CONFIRMED] |
 | REQ-OPT-P2-004 | 性能基准测试 | 需先完成测试矩阵和功能边界收拢 | [DEFERRED] |
 | REQ-OPT-P2-005 | 脚手架生成器 | 需先确认框架化抽取路线 | [DEFERRED] |
 

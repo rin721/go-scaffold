@@ -16,8 +16,8 @@
 | BL-004 | 统一 AutoMigrate、initdb、SQL 脚本迁移策略 | 迁移边界风险 | P1 | 需要架构决策 | [DEFERRED] |
 | BL-005 | 明确 `pkg/sqlgen` 未实现能力的边界 | TODO/unsupported 风险 | P1 | 已提升为 TASK-P1-008 并完成 | [COMPLETED] |
 | BL-006 | 分阶段中文化包 README | 中文项目要求 | P1 | 第一阶段 `pkg/*/README.md` 已由 TASK-P1-017 完成；历史文档更大范围中文化仍需单独确认 | [COMPLETED] |
-| BL-007 | 增加 CI 质量门禁 | 质量工程 | P2 | 超出启动确认阶段 | [DEFERRED] |
-| BL-008 | 增加部署说明 | 发布工程 | P2 | 超出当前阶段 | [DEFERRED] |
+| BL-007 | 增加 CI 质量门禁 | 质量工程 | P2 | 已提升为 TASK-P2-001 并完成 | [COMPLETED] |
+| BL-008 | 增加部署说明 | 发布工程 | P2 | 已提升为 TASK-P2-001 并完成 | [COMPLETED] |
 | BL-009 | 实现 auth/rbac 模块 | 未来功能 | P2 | README 当前说明暂不实现 | [DEFERRED] |
 | BL-010 | 增加脚手架生成器 | 产品化方向 | P2 | 需要确认框架化抽取路线 | [DEFERRED] |
 | BL-011 | 增加性能基准测试 | 性能质量 | P2 | 需要先稳定功能边界 | [DEFERRED] |
@@ -33,6 +33,8 @@
 | BL-021 | 明确 `types/result` 是否属于 HTTP 契约 | `MODULES.md` types 边界 | P1 | 已提升为 TASK-P1-009 并完成 | [COMPLETED] |
 | BL-022 | 收拢 `pkg/plugin` 被动注册边界 | 用户架构修正 | P1 | 已提升为 TASK-P1-010 并完成 | [COMPLETED] |
 | BL-023 | 为 `pkg/utils` 内部支撑工具补最小测试 | `MODULES.md` pkg 分类草案 | P2 | 已提升为 TASK-P1-014 / TS-P1-014 并完成 | [COMPLETED] |
+| BL-024 | 增加真实 CD、镜像发布或远程部署自动化 | CI/CD 首切片后续 | P2 | 远程部署 `.env` 模板已由 TASK-P2-002 完成；手动 staging 远程部署 workflow 已由 TASK-P2-003 完成；镜像发布、production 和真实运行仍需单独确认 | [PARTIAL_COMPLETED] |
+| BL-025 | 统一 Go 文件 gofmt 格式 | CI 格式审计 | P2 | 当前仓库存在历史 gofmt 漂移，批量格式化会触碰大量 Go 文件，需单独确认后执行 | [DEFERRED] |
 
 ## 提升规则
 

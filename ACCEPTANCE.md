@@ -3,7 +3,7 @@
 ## 验收状态
 
 - Project：go-scaffold
-- Phase：Agent 状态一致性修复完成
+- Phase：P2 远程部署 workflow 完成
 - Status：COMPLETED
 - Last Updated：2026-05-26
 
@@ -79,6 +79,10 @@
 - app 装配与 reload/config 集成测试：COMPLETED，`internal/app/app_integration_test.go` 和 `internal/app/reloadapp/reload_test.go` 已覆盖真实 app 装配、配置变更 hook 与 reload 分发
 - 包 README 第一阶段中文化：COMPLETED，`pkg/*/README.md` 已统一主要中文读者文本并同步过期风险描述
 - TASK-INFRA-003 状态一致性修复：COMPLETED，背景文档中的 TASK-P1-016 前旧待办表述已修复
+- TASK-P2-001 CI 质量门禁与部署说明：COMPLETED，CI workflow 和手动部署说明已新增
+- TASK-NEXT-SCOPE-010 真实 CD 范围确认：COMPLETED，用户已确认使用远程部署和 `.env` 风格配置
+- TASK-P2-002 远程部署 env 模板：COMPLETED，`.env.deploy.example` 已新增，真实 `.env.deploy` 已忽略
+- TASK-P2-003 手动远程部署 workflow：COMPLETED，staging/manual/Secrets/SSH/Docker Compose 路径已新增，本会话未执行真实部署
 - Agent 基础设施补齐：COMPLETED
 - Agent 基础设施一致性修复：COMPLETED
 - 代码实现：COMPLETED，TASK-P1-016 已完成并通过验证
@@ -348,3 +352,48 @@
 | ACC-P1-084 | 未修改 Go 代码、依赖、配置 schema、HTTP 路由或数据库 schema | 核对 git diff 范围 | 是 | [CONFIRMED] |
 | ACC-P1-085 | 全量回归通过 | `go test ./... -count=1` | 是 | [CONFIRMED] |
 | ACC-P1-086 | diff 空白检查通过 | `git diff --check` | 是 | [CONFIRMED] |
+
+## TASK-P2-001 验收
+
+| ID | 验收项 | 方法 | 必须 | 状态 |
+|---|---|---|---|---|
+| ACC-P2-001 | CI workflow 已新增且不使用 secrets | 检查 `.github/workflows/ci.yml` | 是 | [CONFIRMED] |
+| ACC-P2-002 | CI 包含 gofmt 漂移报告、全量测试、server 构建和空白检查 | 检查 `.github/workflows/ci.yml` | 是 | [CONFIRMED] |
+| ACC-P2-003 | 部署说明记录配置入口、手动运行和 initdb 边界 | 检查 `docs/deployment.md` | 是 | [CONFIRMED] |
+| ACC-P2-004 | README 有 CI 与部署说明入口 | 检查 `README.md` | 是 | [CONFIRMED] |
+| ACC-P2-005 | 未执行真实部署、未推送镜像、未写入密钥 | 核对变更范围 | 是 | [CONFIRMED] |
+| ACC-P2-006 | 全量回归通过 | `go test ./... -count=1` | 是 | [CONFIRMED] |
+| ACC-P2-007 | server 构建通过 | `go build -o <temp> ./cmd/server` | 是 | [CONFIRMED] |
+| ACC-P2-008 | diff 空白检查通过 | `git diff --check` | 是 | [CONFIRMED] |
+
+## TASK-NEXT-SCOPE-010 验收
+
+| ID | 验收项 | 方法 | 必须 | 状态 |
+|---|---|---|---|---|
+| ACC-P2-009 | 用户选择 C 已记录 | 检查 `STATUS.md`、`TASKS.md`、`TIME_SLICES.md` | 是 | [CONFIRMED] |
+| ACC-P2-010 | 真实 CD 缺少的目标平台、环境和 secrets 决策已列出 | 检查 `TASKS.md`、`TIME_SLICES.md` | 是 | [CONFIRMED] |
+| ACC-P2-011 | 确认前不实现真实 CD workflow、不推送镜像、不连接远程环境 | 核对变更范围 | 是 | [CONFIRMED] |
+| ACC-P2-012 | 用户确认使用远程部署 | 用户回复 | 是 | [CONFIRMED] |
+| ACC-P2-013 | 用户确认远程部署 `.env` 风格配置 | 用户回复 | 是 | [CONFIRMED] |
+
+## TASK-P2-002 验收
+
+| ID | 验收项 | 方法 | 必须 | 状态 |
+|---|---|---|---|---|
+| ACC-P2-014 | `.env.deploy.example` 存在且仅包含占位值 | 检查文件 | 是 | [CONFIRMED] |
+| ACC-P2-015 | 真实 `.env.deploy` 被 Git 忽略 | 检查 `.gitignore` | 是 | [CONFIRMED] |
+| ACC-P2-016 | 部署说明记录远程部署变量边界 | 检查 `docs/deployment.md` | 是 | [CONFIRMED] |
+| ACC-P2-017 | 未实现真实部署 workflow、未连接服务器、未写入密钥 | 核对变更范围 | 是 | [CONFIRMED] |
+
+## TASK-P2-003 验收
+
+| ID | 验收项 | 方法 | 必须 | 状态 |
+|---|---|---|---|---|
+| ACC-P2-018 | 远程部署 workflow 仅手动触发并要求确认词 | 检查 `.github/workflows/deploy-remote.yml` | 是 | [CONFIRMED] |
+| ACC-P2-019 | workflow 当前只支持 staging，不自动生产发布 | 检查 workflow inputs 和校验步骤 | 是 | [CONFIRMED] |
+| ACC-P2-020 | workflow 使用 `DEPLOY_ENV_FILE`、`DEPLOY_SSH_KEY` 等 GitHub Secrets，不写真实值 | 检查 workflow 和 `.env.deploy.example` | 是 | [CONFIRMED] |
+| ACC-P2-021 | workflow 校验 `.env.deploy` 必需变量并执行 SSH/Docker Compose 部署路径 | 检查 workflow | 是 | [CONFIRMED] |
+| ACC-P2-022 | 部署说明包含 Secrets、远程主机前置条件和手动触发步骤 | 检查 `docs/deployment.md` | 是 | [CONFIRMED] |
+| ACC-P2-023 | workflow YAML 可解析且 actionlint 通过 | 临时 Go YAML 解析；actionlint | 是 | [CONFIRMED] |
+| ACC-P2-024 | diff 空白检查通过 | `git diff --check` | 是 | [CONFIRMED] |
+| ACC-P2-025 | 本会话未执行真实部署、未连接服务器、未推送镜像、未写入密钥 | 核对变更范围和执行命令 | 是 | [CONFIRMED] |

@@ -217,3 +217,36 @@
 - Reason：包 README 中仍存在英文标题、插件 README 英文主体和过期测试风险描述；第一阶段限定在 `pkg/*/README.md` 可降低范围扩张风险。
 - Consequences：允许修改包 README 和必要状态/架构文档；不修改 Go 代码、依赖、配置 schema、HTTP 路由或数据库 schema。历史文档更大范围中文化仍需单独确认。
 - Related Tasks：TASK-P1-017
+
+### DEC-021：提升 CI 质量门禁与部署说明首切片
+
+- Date：2026-05-26
+- Status：ACCEPTED_WITH_RISK
+- Context：当前状态为 `NONE / COMPLETED`，用户在后续方向中选择 D，对应 CI/CD 与部署方向；该方向与 `REQ-OPT-P2-003`、`BL-007` 和 `BL-008` 对齐。
+- Decision：将首切片限定为 TASK-P2-001 / TS-P2-001：新增 GitHub Actions CI 质量门禁和手动部署说明，不实现真实 CD、不推送镜像、不连接服务器、不使用 secrets。
+- Alternatives：继续保持 defer；直接实现 Docker/镜像发布/云部署；先只写部署文档不加 CI。
+- Reason：CI 质量门禁和部署说明能降低发布前回归风险，且不触碰生产环境或密钥；真实 CD 需要更多环境、权限和回滚策略确认。
+- Consequences：允许新增 `.github/workflows/ci.yml`、`docs/deployment.md` 和 README 入口；真实 CD、镜像发布和远程部署自动化进入 Backlog。
+- Related Tasks：TASK-P2-001
+
+### DEC-022：进入真实 CD / 镜像发布 / 远程部署自动化范围确认
+
+- Date：2026-05-26
+- Status：ACCEPTED_WITH_RISK
+- Context：TASK-P2-001 完成后，用户在后续方向中选择 C，对应 `BL-024` 真实 CD、镜像发布或远程部署自动化；随后用户补充使用远程部署。
+- Decision：不直接实现真实 CD；先完成安全的远程部署 `.env` 风格模板 TASK-P2-002 / TS-P2-002。真实 workflow、镜像发布和远程连接仍需后续单独确认。
+- Alternatives：继续保持 `BL-024` defer；只实现 staging/manual dry-run；直接实现生产部署 workflow。
+- Reason：真实 CD 涉及远程环境、密钥、镜像仓库和发布权限，缺少这些输入时实现 workflow 会造成错误发布或凭据暴露风险。
+- Consequences：允许提交 `.env.deploy.example` 和忽略真实 `.env.deploy`；在 TASK-P2-003 确认前不得提交真实服务器值、密钥或自动部署 workflow。后续用户已确认并完成手动 staging workflow。
+- Related Tasks：TASK-NEXT-SCOPE-010、TASK-P2-002
+
+### DEC-023：实现手动 staging 远程部署 workflow
+
+- Date：2026-05-26
+- Status：ACCEPTED_WITH_RISK
+- Context：TASK-P2-002 完成后，用户明确回复“确认实现远程部署 workflow”。
+- Decision：实现 TASK-P2-003 / TS-P2-003，新增 `.github/workflows/deploy-remote.yml`，采用 `workflow_dispatch` 手动触发、`confirm=deploy` 确认词、staging-only 环境、GitHub Secrets 注入 `.env.deploy` 和 SSH key，并在远程主机执行 Docker Compose pull/up 与 health/ready 检查。
+- Alternatives：继续保持 workflow defer；直接实现 production workflow；同时实现 Dockerfile 和镜像发布。
+- Reason：手动 staging workflow 能落地远程部署路径，同时避免自动生产发布、真实密钥入库和镜像发布范围膨胀。
+- Consequences：允许提交 workflow 和部署说明；不在本会话触发 workflow、不连接远程服务器、不推送镜像、不写真实密钥。Dockerfile、镜像发布、production 和生产迁移框架仍需单独确认。
+- Related Tasks：TASK-P2-003

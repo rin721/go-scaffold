@@ -3,7 +3,7 @@
 ## 风险登记状态
 
 - Project：go-scaffold
-- Phase：Agent 状态一致性修复完成
+- Phase：P2 远程部署 workflow 完成
 - Status：COMPLETED
 - Last Updated：2026-05-26
 
@@ -189,6 +189,30 @@
 - Status：[CONFIRMED] 已处理
 - Blocking：No。
 
+### RISK-016：CI/CD 误触发生产动作
+
+- Type：Release/Safety
+- Severity：High
+- Probability：Medium
+- Impact：如果 CI/CD workflow 自动连接生产环境、推送镜像或执行部署，可能造成未授权发布、密钥暴露或生产变更。
+- Trigger：在未确认密钥、环境、权限和回滚策略前实现自动 CD。
+- Mitigation：TASK-P2-001 已新增只读 CI 质量门禁和手动部署说明；TASK-P2-003 已新增手动 staging 远程部署 workflow，仍不在本会话触发远程连接、不推送镜像、不写真实 secrets。production、镜像发布和真实运行仍需单独确认。
+- Owner：User/Agent
+- Status：[CONFIRMED] 非生产 CI 与手动 staging 远程部署 workflow 已受控落地
+- Blocking：No；会阻塞 production 自动化，直到用户单独确认。
+
+### RISK-017：真实 CD 输入不足导致错误发布
+
+- Type：Release/Safety
+- Severity：High
+- Probability：High
+- Impact：在未确认镜像仓库、远程环境、触发策略和 secrets 权限前实现真实 CD，可能导致错误环境发布、凭据暴露、镜像覆盖或不可回滚变更。
+- Trigger：用户选择 C 并确认使用远程部署；TASK-P2-002 已提供 `.env.deploy.example`，TASK-P2-003 已新增手动 staging 远程部署 workflow；镜像发布、production 和真实运行仍未确认。
+- Mitigation：`.env.deploy.example` 只提供占位变量，真实 `.env.deploy` 已被忽略；workflow 当前仅手动触发 staging 且要求确认词；本会话不触发 workflow、不连接远程环境、不读取真实 secrets、不部署生产。
+- Owner：User/Agent
+- Status：[CONFIRMED] env 模板和手动 staging workflow 已完成；production、镜像发布和真实运行仍受阻
+- Blocking：Yes，阻塞 production / 镜像发布 / 真实运行后续范围。
+
 ## 决策状态
 
 | ID | 决策 | 阻塞内容 | 状态 |
@@ -201,3 +225,5 @@
 | RD-006 | 确认 auth/JWT 范围 | 已确认延后处理 | [CONFIRMED] |
 | RD-007 | 确认 `pkg/plugin` 注册责任 | 用户修正为被动注册边界 | [CONFIRMED] |
 | RD-008 | 确认包 README 中文化第一阶段 | `pkg/*/README.md` 已完成第一阶段中文化 | [CONFIRMED] |
+| RD-009 | 确认 CI/CD 与部署首切片 | 仅新增 CI 质量门禁和部署说明，不做真实 CD | [CONFIRMED] |
+| RD-010 | 确认真实 CD / 镜像发布 / 远程部署自动化边界 | 用户选择 C 并确认远程部署；env 模板和手动 staging workflow 已完成，production 与镜像发布仍需确认 | [CONFIRMED] |

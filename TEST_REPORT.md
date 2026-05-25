@@ -3,38 +3,87 @@
 ## 最新验证
 
 - 日期：2026-05-26
-- 任务 ID：TASK-INFRA-003
-- 时间切片 ID：TS-INFRA-003
+- 任务 ID：TASK-P2-003
+- 时间切片 ID：TS-P2-003
 - 状态：COMPLETED
-- 范围：修复 TASK-P1-016/017 后背景文档状态漂移；生成状态诊断报告，并同步 app 装配、配置变更 hook、reload/config 与 `pkg/i18n` 测试完成事实。不修改 Go 代码、依赖、配置 schema、HTTP 路由或数据库 schema。
+- 范围：新增手动 staging 远程部署 workflow、Secrets/`.env.deploy` 配置说明和状态文档；不执行真实部署、不推送镜像、不连接服务器、不写入真实 secrets。
 
 ## 执行命令
 
 | 命令 | 结果 | 备注 |
 |---|---|---|
 | 必读文件读取 | PASS | 已读取 `AGENTS.md`、Agent 规则、状态、任务、切片、需求、架构、验收、问题、测试报告和交接文档 |
-| 状态诊断报告 | PASS | 已新增 `docs/reports/status_diagnostics/2026-05-26-task-p1-017-post-completion-doc-drift.md` |
-| `go test ./... -count=1` | PASS | 全量回归通过 |
-| `git diff --check` | PASS | 仅有 Windows LF/CRLF 转换警告 |
+| 用户修正审查 | ACCEPTED_WITH_RISK | 用户明确确认实现远程部署 workflow；限定 staging/manual/Secrets/SSH/Docker Compose，不执行真实部署 |
+| 临时 Go YAML 解析 | PASS | 使用 `gopkg.in/yaml.v3` 临时解析 `.github/workflows/deploy-remote.yml` |
+| `go run github.com/rhysd/actionlint/cmd/actionlint@latest .github/workflows/ci.yml .github/workflows/deploy-remote.yml` | PASS | actionlint 未报告 workflow 问题 |
+| `git diff --check` | PASS | 仅有 Windows LF/CRLF 转换警告；本切片未修改 Go 代码 |
 
 ## 结果
 
-- [CONFIRMED] `ARCHITECTURE.md`、`MODULES.md`、`PROJECT_BRIEF.md` 和 `ROADMAP.md` 不再把 TASK-P1-016 已覆盖路径描述为待补范围。
-- [CONFIRMED] `pkg/i18n` 已补测试事实已同步到架构风险表述。
-- [CONFIRMED] 状态、任务、时间切片、验收、问题记录、变更记录和交接说明已更新到 TASK-INFRA-003 完成状态。
+- [CONFIRMED] `.github/workflows/deploy-remote.yml` 已新增。
+- [CONFIRMED] workflow 仅手动触发，要求 `confirm=deploy`，当前只支持 `staging`。
+- [CONFIRMED] workflow 使用 GitHub Secrets 注入 `.env.deploy`、SSH key 和可选 registry token，不写真实值。
+- [CONFIRMED] workflow 校验 `.env.deploy` 必需变量，并定义 SSH/SCP、Docker Compose pull/up 和 health/ready 检查路径。
+- [CONFIRMED] `docs/deployment.md` 和 README 已补 workflow、Secrets、远程主机前置条件和手动触发说明。
 - [CONFIRMED] 未修改 Go 代码、导出业务 API、配置 schema、HTTP 路由、数据库 schema、`go.mod` 或 `go.sum`。
-- [CONFIRMED] 当前无自动下一实现任务。
+- [CONFIRMED] 未执行真实部署、未推送镜像、未连接服务器、未使用真实密钥。
+- [CONFIRMED] 当前无自动下一实现任务；镜像发布、production 和真实运行仍需单独确认。
 
 ## 失败项
 
-- 无新增失败项。
+- 无阻塞失败项。
 
 ## 验证结论
 
-- TASK-INFRA-003 可以标记为 `COMPLETED`。
-- 当前无自动下一实现任务；后续任何工作需要用户重新确认并建立新的任务/时间切片。
+- TASK-P2-003 可以标记为 `COMPLETED`。
+- 当前无自动下一实现任务；镜像发布、production 部署或生产迁移框架需要单独确认。
 
 ## 历史报告
+
+### 2026-05-26 TASK-P2-003 TS-P2-003
+
+- 用户明确确认实现远程部署 workflow。
+- 新增 `.github/workflows/deploy-remote.yml`。
+- workflow 使用 `workflow_dispatch`、`confirm=deploy` 和 staging-only 输入。
+- workflow 从 `DEPLOY_ENV_FILE` Secret 读取 `.env.deploy` 内容，校验必需变量，再通过 SSH/SCP 上传到远程 `DEPLOY_PATH`。
+- workflow 在远程执行 Docker Compose pull/up，并检查 health/ready。
+- `docs/deployment.md`、`.env.deploy.example` 和 README 已补 workflow、Secrets 与远程前置条件说明。
+- 临时 Go YAML 解析：PASS。
+- `go run github.com/rhysd/actionlint/cmd/actionlint@latest .github/workflows/ci.yml .github/workflows/deploy-remote.yml`：PASS。
+- `git diff --check`：PASS，仅有 Windows LF/CRLF 转换警告。
+- Go 测试未运行：本切片未修改 Go 代码、依赖、配置 schema、HTTP 路由或数据库 schema。
+- 结论：TASK-P2-003 完成；当前无自动下一实现任务。
+
+### 2026-05-26 TASK-P2-002 TS-P2-002
+
+- 用户要求远程部署使用 `.env` 风格文件配置。
+- 新增 `.env.deploy.example`。
+- `.gitignore` 新增 `.env.deploy`。
+- `docs/deployment.md` 和 README 已补远程部署变量说明。
+- 未修改 `.github/workflows/*`、Go 代码、依赖、真实配置或密钥。
+- `git diff --check`：PASS，仅有 Windows LF/CRLF 转换警告。
+- 结论：TASK-P2-002 完成；当前无自动下一实现任务。
+
+### 2026-05-26 TASK-NEXT-SCOPE-010 TS-NEXT-SCOPE-010
+
+- 用户选择 C，意图进入真实 CD / 镜像发布 / 远程部署自动化，并补充使用远程部署。
+- 审查结论：`NEEDS_USER_DECISION`。
+- 已记录待确认项：镜像仓库、SSH/Docker 等远程方式、发布环境、触发策略和 GitHub Secrets 命名。
+- 未修改 `.github/workflows/*`、Go 代码、依赖、真实配置或密钥。
+- `git diff --check`：PASS，仅有 Windows LF/CRLF 转换警告。
+- 结论：已进入 TASK-P2-002 / TS-P2-002 并完成远程部署 env 模板。
+
+### 2026-05-26 TASK-P2-001 TS-P2-001
+
+- 用户选择 D，确认进入 CI/CD 与部署方向首切片。
+- 新增 `.github/workflows/ci.yml`，CI 报告 gofmt 漂移，并执行全量测试、server 构建和空白检查。
+- 新增 `docs/deployment.md`，记录手动部署边界、配置入口、发布前检查、initdb 边界和真实 CD 非目标。
+- 更新 README、需求、架构、测试矩阵、Backlog、风险、决策、验收、状态和交接文档。
+- gofmt 漂移审计：KNOWN_DRIFT，发现 82 个历史格式漂移文件，已记录 `BL-025`。
+- `go test ./... -count=1`：PASS。
+- `go build -o <temp> ./cmd/server`：PASS。
+- `git diff --check`：PASS，仅有 Windows LF/CRLF 转换警告。
+- 结论：TASK-P2-001 完成；当前无自动下一实现任务。
 
 ### 2026-05-26 TASK-INFRA-003 TS-INFRA-003
 

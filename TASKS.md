@@ -5,7 +5,7 @@
 - Task ID：NONE
 - Status：COMPLETED
 - Time Slice：NONE
-- Summary：TASK-INFRA-003 已完成并通过验证；当前无自动下一实现任务，后续工作必须由用户重新确认并提升为任务/时间切片。
+- Summary：TASK-P2-003 已完成手动 staging 远程部署 GitHub Actions workflow、Secrets/`.env.deploy` 配置说明和状态文档更新；当前无自动下一实现任务。
 
 ## 任务列表
 
@@ -1027,6 +1027,165 @@
   - 测试结果：PASS；`git diff --check` 仅有 Windows LF/CRLF 转换警告。
   - Next Task：NONE；后续工作需用户重新确认并建立新的任务/时间切片。
 
+## P2 任务
+
+### TASK-P2-001：补 CI 质量门禁与部署说明
+
+- Status：COMPLETED
+- Matrix：REQ-OPT-P2-003、BL-007、BL-008、TM-P2-001、RISK-016
+- Source：
+  - 用户选择 D，确认进入 CI/CD 与部署方向。
+  - `BL-007`：增加 CI 质量门禁。
+  - `BL-008`：增加部署说明。
+- Priority：P2
+- Type：质量工程+文档；不执行真实部署。
+- Goal：新增非生产 CI 质量门禁和手动部署说明，固定发布前最小检查、配置入口和当前部署边界。
+- Allowed Files：
+  - `.github/workflows/ci.yml`
+  - `docs/deployment.md`
+  - `README.md`
+  - 项目状态文档：`STATUS.md`、`TASKS.md`、`TIME_SLICES.md`、`REQUIREMENTS.md`、`ARCHITECTURE.md`、`TEST_MATRIX.md`、`ACCEPTANCE.md`、`TEST_REPORT.md`、`CHANGELOG.md`、`BACKLOG.md`、`RISK_REGISTER.md`、`ISSUES.md`、`DECISIONS.md`、`ROADMAP.md`、`PROJECT_BRIEF.md`、`AGENT_HANDOFF.md`
+- Forbidden Files：
+  - Go 源码和测试文件。
+  - `go.mod`、`go.sum`。
+  - 数据库 schema、真实生产配置、真实 `.env`、密钥或部署凭据。
+  - 会连接远程环境、推送镜像或执行部署的脚本。
+- Non-Goals：
+  - 不实现真实 CD。
+  - 不新增 Dockerfile、镜像仓库发布、Kubernetes、systemd 或云平台部署模板。
+  - 不处理生产密钥。
+  - 不执行生产命令或远程部署。
+- Verification：
+  - gofmt 漂移审计：KNOWN_DRIFT（历史 Go 文件格式漂移，未在本切片批量格式化，已进入 `BL-025`）
+  - `go test ./... -count=1`：PASS
+  - `go build -o <temp> ./cmd/server`：PASS
+  - `git diff --check`：PASS，仅有 Windows LF/CRLF 转换警告
+- Exit Conditions：
+  - [CONFIRMED] CI workflow 只执行只读质量门禁，不使用 secrets、不推送镜像、不连接远程环境。
+  - [CONFIRMED] 部署说明记录配置入口、发布前检查、手动启动、initdb 边界和未实现的真实 CD 项。
+  - [CONFIRMED] README 有 CI 与部署说明入口。
+  - [CONFIRMED] 本地等价验证通过。
+  - [CONFIRMED] 状态、变更、测试报告、问题和交接文档已更新。
+- Evidence：
+  - 修改文件：`.github/workflows/ci.yml`、`docs/deployment.md`、`README.md` 和项目状态文档。
+  - CI 内容：checkout、setup-go、gofmt 漂移报告（非阻塞）、`go test ./... -count=1 -mod=readonly`、server 构建、`git diff --check`。
+  - 部署说明内容：发布前检查、配置入口、手动运行、initdb 边界、手动发布步骤和未实现项。
+  - Next Task：NONE；真实 CD、镜像发布和远程部署自动化需用户重新确认并建立新的任务/时间切片。
+
+
+### TASK-NEXT-SCOPE-010：确认真实 CD / 镜像发布 / 远程部署自动化边界
+
+- Status：COMPLETED
+- Time Slice：TS-NEXT-SCOPE-010
+- Source：用户选择 C；`BL-024`；`REQ-OPT-P2-003` 后续范围。
+- Goal：在不实现真实部署、不读取密钥、不连接远程环境的前提下，确认后续真实 CD 自动化的安全边界和实现输入。
+- Review Result：NEEDS_USER_DECISION。
+- Required Decisions：
+  - 镜像仓库与镜像命名策略。
+  - 远程部署已确认；仍需确认是否采用 SSH 到 Linux 服务器 + Docker Compose 作为默认运行方式。
+  - 发布环境、触发方式和审批策略。
+  - GitHub Secrets 名称和权限边界。
+  - 是否允许首个实现切片只做 staging/manual dry-run，而不碰 production。
+- Allowed Files：
+  - `STATUS.md`
+  - `TASKS.md`
+  - `TIME_SLICES.md`
+  - `REQUIREMENTS.md`
+  - `ARCHITECTURE.md`
+  - `TEST_MATRIX.md`
+  - `ACCEPTANCE.md`
+  - `BACKLOG.md`
+  - `RISK_REGISTER.md`
+  - `DECISIONS.md`
+  - `TEST_REPORT.md`
+  - `CHANGELOG.md`
+  - `ISSUES.md`
+  - `AGENT_HANDOFF.md`
+- Forbidden Files：
+  - `.github/workflows/*`（确认前不得实现真实 CD）
+  - Go 源码和测试文件
+  - `go.mod`、`go.sum`
+  - Dockerfile、Kubernetes、systemd、云平台部署模板
+  - 真实 `.env`、密钥、部署凭据或生产配置
+- Verification：
+  - `git diff --check`
+- Exit Conditions：
+  - [CONFIRMED] 用户确认使用远程部署，并确认使用 `.env` 风格文件配置。
+  - [CONFIRMED] 已创建并完成 TASK-P2-002 / TS-P2-002。
+  - [CONFIRMED] 确认前不实现镜像推送、远程部署、生产发布或密钥读取。
+
+### TASK-P2-002：补远程部署 env 配置模板
+
+- Status：COMPLETED
+- Time Slice：TS-P2-002
+- Source：用户要求“远程部署 .env 来配置”。
+- Goal：提供可提交的远程部署变量模板和说明，同时确保真实 `.env.deploy` 不会进入 Git。
+- Allowed Files：
+  - `.env.deploy.example`
+  - `.gitignore`
+  - `README.md`
+  - `docs/deployment.md`
+  - 项目状态文档
+- Forbidden Files：
+  - 真实 `.env` / `.env.deploy`
+  - `.github/workflows/*` 自动部署实现
+  - Go 源码和测试文件
+  - `go.mod`、`go.sum`
+  - Dockerfile、Kubernetes、systemd、云平台部署模板
+  - 真实密钥、服务器地址、部署凭据或生产配置
+- Verification：
+  - `git diff --check`
+- Evidence：
+  - 新增 `.env.deploy.example`，仅包含占位值和说明。
+  - `.gitignore` 新增 `.env.deploy`。
+  - `docs/deployment.md` 增加远程部署变量说明。
+  - `README.md` 增加模板入口。
+  - 未实现真实部署 workflow、未连接服务器、未读取 secrets。
+
+### TASK-P2-003：实现手动远程部署 workflow
+
+- Status：COMPLETED
+- Time Slice：TS-P2-003
+- Matrix：BL-024、TM-P2-004、RISK-016、RISK-017
+- Source：用户明确回复“确认实现远程部署 workflow”。
+- Priority：P2
+- Type：CI/CD 配置与文档；不执行真实部署。
+- Goal：新增手动触发的 GitHub Actions 远程部署 workflow，读取 GitHub Secrets 中的 `.env.deploy` 内容和 SSH 密钥，通过 SSH 到远程 Linux 主机执行 Docker Compose 拉取镜像、重启服务和健康检查。
+- Allowed Files：
+  - `.github/workflows/deploy-remote.yml`
+  - `.env.deploy.example`
+  - `README.md`
+  - `docs/deployment.md`
+  - 项目状态文档
+- Forbidden Files：
+  - 真实 `.env` / `.env.deploy`
+  - Go 源码和测试文件
+  - `go.mod`、`go.sum`
+  - 数据库 schema、真实服务器地址、真实 token、SSH 私钥、密码或生产配置
+  - Dockerfile、Kubernetes、systemd、云平台部署模板
+- Non-Goals：
+  - 不在本地或当前会话执行 GitHub workflow。
+  - 不连接远程服务器、不推送镜像、不执行真实部署。
+  - 不实现生产数据库迁移框架。
+  - 不新增业务功能或修改 Go API。
+- Verification：
+  - workflow YAML 语法/结构检查
+  - `git diff --check`
+- Exit Conditions：
+  - [CONFIRMED] workflow 只通过 `workflow_dispatch` 手动触发，默认 staging，不自动生产发布。
+  - [CONFIRMED] workflow 使用 GitHub Secrets，不在仓库写入真实部署值。
+  - [CONFIRMED] workflow 能从 `DEPLOY_ENV_FILE` secret 解析 `.env.deploy` 形状，并校验必需变量。
+  - [CONFIRMED] workflow 使用 SSH 执行 Docker Compose pull/up 和 health/ready 检查。
+  - [CONFIRMED] 部署说明记录需要配置的 Secrets、远程主机前置条件和手动触发步骤。
+  - [CONFIRMED] 验证命令通过，状态文档、测试报告和交接说明已更新。
+- Evidence：
+  - 新增 `.github/workflows/deploy-remote.yml`。
+  - workflow 使用 `workflow_dispatch`，需要 `confirm=deploy`，且当前只允许 `staging`。
+  - workflow 读取 `DEPLOY_ENV_FILE`、`DEPLOY_SSH_KEY`、可选 `DEPLOY_SSH_KNOWN_HOSTS`、可选 `GHCR_USERNAME` / `GHCR_TOKEN`。
+  - workflow 解析和校验 `.env.deploy`，通过 SSH/SCP 上传 env 文件，并在远程执行 Docker Compose pull/up 与 health/ready 检查。
+  - `docs/deployment.md` 已补 Secrets、远程主机前置条件和手动触发步骤。
+  - 验证：临时 Go YAML 解析 PASS；`go run github.com/rhysd/actionlint/cmd/actionlint@latest .github/workflows/ci.yml .github/workflows/deploy-remote.yml` PASS；`git diff --check` PASS。
+  - 未执行真实部署、未连接远程服务器、未写入真实密钥、未推送镜像、未修改 Go 代码。
 
 ## 历史任务
 

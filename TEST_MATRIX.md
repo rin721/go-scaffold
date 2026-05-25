@@ -16,7 +16,7 @@
 | P0 基线 | 保证当前可运行链路不被破坏 | 是 | 每个后续代码切片至少运行相关包测试和 `go test ./... -count=1` |
 | P0 新增测试 | 覆盖 app、router、demo、config 关键路径 | 是 | 优先服务边界收拢，不追求一次性全覆盖 |
 | P1 边界测试 | 覆盖迁移、CLI、公共包 API | 否 | 按后续任务逐项补齐 |
-| P2 质量工程 | CI、性能、发布前验证 | 否 | 进入 Backlog 或后续阶段 |
+| P2 质量工程 | CI、性能、发布前验证 | 否 | CI 质量门禁、部署说明、远程部署 env 模板和手动 staging 远程部署 workflow 已完成；性能、镜像发布和 production 仍按后续任务处理 |
 
 ## 当前基线
 
@@ -54,6 +54,15 @@
 | TM-P1-012 | app 装配与 reload/config 集成测试 | 用临时配置、临时 SQLite 和 fake 组件覆盖真实 app 装配、配置变更 hook、reload 分发和关闭配置路径 | `internal/app/app_integration_test.go`、`internal/app/reloadapp/reload_test.go` | `go test ./internal/app/... -count=1`；`go test ./... -count=1` | [CONFIRMED] TASK-P1-016 已覆盖 server/initdb 装配、配置 hook、reload 未变化/单组件变化/关闭可选组件/database reload 不隐式迁移；不启动真实 HTTP server | BL-002、RISK-008 |
 | TM-P1-013 | `pkg/*` README 第一阶段中文化 | 将包 README 的主要读者文本统一为中文，并同步已完成测试后的明显过期风险描述 | `pkg/*/README.md`、需求/架构/模块和状态文档 | `go test ./... -count=1`；`git diff --check` | [CONFIRMED] TASK-P1-017 已完成第一阶段 `pkg/*/README.md` 中文化；未修改 Go 代码、依赖、配置 schema、HTTP 路由或数据库 schema | BL-006、RISK-005 |
 
+## P2 正式测试矩阵
+
+| ID | 范围 | 验证目标 | 建议文件范围 | 验证命令 | 退出条件 | 关联风险 |
+|---|---|---|---|---|---|---|
+| TM-P2-001 | CI 质量门禁与部署说明 | 为仓库建立非生产 CI 门禁，并记录手动部署边界、配置入口和发布前检查 | `.github/workflows/ci.yml`、`docs/deployment.md`、`README.md`、状态文档 | gofmt 漂移报告（非阻塞）；`go test ./... -count=1`；`go build -o <temp> ./cmd/server`；`git diff --check` | [CONFIRMED] TASK-P2-001 已新增 CI workflow 和部署说明；不使用 secrets、不推送镜像、不执行真实部署；历史 gofmt 漂移记录到 BL-025 | BL-007、BL-008、RISK-016 |
+| TM-P2-002 | 真实 CD 范围确认 | 确认镜像发布、远程部署、环境、触发策略和 secrets 边界 | 项目状态文档 | `git diff --check` | [CONFIRMED] 用户已选择 C、确认使用远程部署和 `.env` 风格配置，并明确确认实现远程部署 workflow | BL-024、RISK-016、RISK-017 |
+| TM-P2-003 | 远程部署 env 模板 | 提供可提交的远程部署变量模板，并忽略真实 `.env.deploy` | `.env.deploy.example`、`.gitignore`、`docs/deployment.md`、`README.md`、状态文档 | `git diff --check` | [CONFIRMED] TASK-P2-002 已新增模板；不包含真实密钥、服务器地址或远程部署动作 | BL-024、RISK-017 |
+| TM-P2-004 | 手动远程部署 workflow | 新增手动 staging 远程部署 workflow，校验 `.env.deploy` 形状，通过 SSH/Docker Compose 执行远程拉取、重启和 health/ready 检查 | `.github/workflows/deploy-remote.yml`、`.env.deploy.example`、`docs/deployment.md`、`README.md`、状态文档 | 临时 Go YAML 解析；`go run github.com/rhysd/actionlint/cmd/actionlint@latest .github/workflows/ci.yml .github/workflows/deploy-remote.yml`；`git diff --check` | [CONFIRMED] TASK-P2-003 已新增 workflow 和说明；本会话不执行真实部署、不连接远程服务器、不写入真实密钥 | BL-024、RISK-016、RISK-017 |
+
 ## P1 优化任务草案
 
 | 任务 ID | 标题 | 优先级 | 类型 | 允许文件范围 | 验证命令 | 退出条件 | 状态 |
@@ -76,6 +85,10 @@
 | TASK-P1-015 | 补 app/router/middleware 最小集成测试 | P1 | 测试 | `internal/transport/http/**/*_test.go`、必要时 `internal/middleware/**/*_test.go`、`internal/modules/demo/**/*_test.go`、状态文档 | `go test ./internal/transport/http ./internal/middleware ./internal/modules/demo/... -count=1`；`go test ./... -count=1` | [CONFIRMED] demo Todo HTTP 集成和 TraceID/CORS/Recovery 链路有最小测试覆盖 | COMPLETED |
 | TASK-P1-016 | 补 app 装配与 reload/config 剩余集成测试 | P1 | 测试 | `internal/app/app_integration_test.go`、`internal/app/reloadapp/reload_test.go`、必要时 `internal/app/**` 或 `internal/config/**`、状态文档 | `go test ./internal/app/... -count=1`；`go test ./... -count=1` | [CONFIRMED] app.New server/initdb 装配、配置变更 hook 和 reload/config 分发路径有最小测试覆盖 | COMPLETED |
 | TASK-P1-017 | 分阶段中文化 `pkg/*` README | P1 | 文档 | `pkg/*/README.md`、需求/架构/模块和状态文档 | `go test ./... -count=1`；`git diff --check` | [CONFIRMED] 第一阶段包 README 中文化完成，未新增功能承诺或修改代码 | COMPLETED |
+| TASK-P2-001 | 补 CI 质量门禁与部署说明 | P2 | 质量工程+文档 | `.github/workflows/ci.yml`、`docs/deployment.md`、`README.md`、状态文档 | `go test ./... -count=1`；`go build -o <temp> ./cmd/server`；`git diff --check` | [CONFIRMED] CI 只做非生产质量门禁；部署说明记录手动边界和后续真实 CD 非目标 | COMPLETED |
+| TASK-NEXT-SCOPE-010 | 确认真实 CD / 镜像发布 / 远程部署自动化边界 | P2 | 确认 | 项目状态文档 | `git diff --check` | [CONFIRMED] 用户确认远程部署并使用 `.env` 风格配置 | COMPLETED |
+| TASK-P2-002 | 补远程部署 env 配置模板 | P2 | 发布配置文档 | `.env.deploy.example`、`.gitignore`、`docs/deployment.md`、`README.md`、状态文档 | `git diff --check` | [CONFIRMED] 模板存在，真实 `.env.deploy` 被忽略，不实现真实部署 | COMPLETED |
+| TASK-P2-003 | 实现手动远程部署 workflow | P2 | CI/CD 配置+文档 | `.github/workflows/deploy-remote.yml`、`.env.deploy.example`、`docs/deployment.md`、`README.md`、状态文档 | 临时 Go YAML 解析；actionlint；`git diff --check` | [CONFIRMED] workflow 手动触发、staging 限定、Secrets 注入、SSH/Docker Compose 部署路径和文档说明均已完成 | COMPLETED |
 
 ## 推荐执行顺序
 
@@ -95,11 +108,13 @@
 14. TASK-P1-015：补 router/middleware/demo HTTP 集成测试。
 15. TASK-P1-016：补 app 装配与 reload/config 剩余集成测试。
 16. TASK-P1-017：分阶段中文化 `pkg/*` README。
+17. TASK-P2-001：补 CI 质量门禁与部署说明。
+18. TASK-P2-003：实现手动远程部署 workflow。
 
 当前合法下一项：
 
-- [COMPLETED] TASK-P1-017 已完成；第一阶段包 README 中文化通过验证，当前无自动下一实现任务。
-- [CONFIRMED] 后续更大范围中文化、auth/rbac、生产迁移、CI/CD、部署或插件扩展仍必须由用户重新确认并拆成新的任务/时间切片。
+- [COMPLETED] TASK-P2-003 已完成；手动 staging 远程部署 workflow 通过 YAML 解析、actionlint 和 diff 检查，当前无自动下一实现任务。
+- [CONFIRMED] 后续镜像发布、production 部署、生产迁移、auth/rbac 或插件扩展仍必须由用户重新确认并拆成新的任务/时间切片。
 
 ## 验收门禁
 
@@ -113,4 +128,4 @@
 
 - [CONFIRMED] 本文不要求一次性实现所有测试代码；具体测试按 P1 时间切片逐项落地。
 - [CONFIRMED] 本文不修改 Go 代码、配置结构、数据库结构或 HTTP 路由。
-- [CONFIRMED] 本文不提升 auth/rbac、插件 rpc/ws/discovery、CI/CD 或部署任务。
+- [CONFIRMED] 本文不提升 auth/rbac、插件 rpc/ws/discovery、镜像发布、production 部署或生产迁移任务。

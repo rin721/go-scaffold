@@ -43,3 +43,10 @@ go run ./cmd/server server
 ```bash
 go test ./... -count=1
 ```
+
+## CI 与部署
+
+- CI 质量门禁见 `.github/workflows/ci.yml`。
+- 手动远程部署 workflow 见 `.github/workflows/deploy-remote.yml`。
+- 部署边界、Secrets 配置和发布前检查见 `docs/deployment.md`。
+- 远程部署变量模板见 `.env.deploy.example`；真实 `.env.deploy` 不应提交。

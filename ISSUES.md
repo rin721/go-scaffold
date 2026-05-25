@@ -40,6 +40,10 @@
 - ISSUE-P1-016：无未解决失败项。TASK-P1-016 新增 app 装配与 reload/config 集成测试后，`go test ./internal/app/... -count=1`、`go test ./... -count=1` 与 `git diff --check` 均通过。
 - ISSUE-P1-017：无未解决失败项。TASK-P1-017 第一阶段包 README 中文化后，`go test ./... -count=1` 与 `git diff --check` 均通过。
 - ISSUE-INFRA-003：TASK-P1-016/017 完成后部分背景文档仍保留旧待办表述。已在 TASK-INFRA-003 中修复，诊断报告见 `docs/reports/status_diagnostics/2026-05-26-task-p1-017-post-completion-doc-drift.md`。
+- ISSUE-P2-001：无未解决阻塞失败项。TASK-P2-001 新增 CI 质量门禁与部署说明后，全量测试、server 构建和 `git diff --check` 均通过；gofmt 漂移审计发现 82 个历史格式漂移文件，已记录 `BL-025`。
+- ISSUE-P2-002：无实现失败项。用户选择 C 并确认使用远程部署后，当时真实 CD 自动化仍因缺少镜像仓库、SSH/Docker 等远程方式、环境、触发策略和 secrets 命名而处于 `PENDING_USER_CONFIRMATION`；后续已由 TASK-P2-003 完成手动 staging workflow。
+- ISSUE-P2-003：无新增失败项。TASK-P2-002 仅新增 `.env.deploy.example` 和忽略真实 `.env.deploy`，当时未实现 workflow、未连接远程环境、未写入密钥；后续已由 TASK-P2-003 完成手动 staging workflow。
+- ISSUE-P2-004：无新增失败项。TASK-P2-003 新增手动 staging 远程部署 workflow 后，临时 Go YAML 解析、actionlint 和 `git diff --check` 均通过；未执行真实部署、未连接远程服务器、未写入真实密钥。
 
 ## 历史说明
 
@@ -65,5 +69,7 @@
 - 2026-05-26：记录 TASK-P1-016 无未解决失败项，app 装配与 reload/config 集成测试通过。
 - 2026-05-26：记录 TASK-P1-017 无未解决失败项，第一阶段包 README 中文化和全量回归通过。
 - 2026-05-26：记录并关闭 TASK-P1-016/017 后背景文档状态漂移。
+- 2026-05-26：记录 TASK-P2-001 无未解决失败项，CI 质量门禁和部署说明首切片完成。
+- 2026-05-26：记录 TASK-P2-003 无新增失败项，手动 staging 远程部署 workflow 通过静态验证。
 - 2026-05-25：记录并关闭 `AGENTS.md` 缺失导致的 Agent 入口冲突。
 - 2026-05-25：创建 `ISSUES.md`，补齐 `docs/ai/prompt.md` 要求的项目问题记录入口。

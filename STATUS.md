@@ -3,7 +3,7 @@
 ## 项目状态
 
 - 项目：go-scaffold
-- 当前阶段：Agent 状态一致性修复完成
+- 当前阶段：P2 远程部署 workflow 完成
 - 总体状态：COMPLETED
 - 最后更新：2026-05-26
 - 最近 Agent：Codex
@@ -15,7 +15,7 @@
 - 当前任务 ID：NONE
 - 当前时间切片 ID：NONE
 - 当前状态：COMPLETED
-- 为什么这是当前唯一合法状态：[CONFIRMED] TASK-INFRA-003 / TS-INFRA-003 已修复 TASK-P1-016/017 后背景文档状态漂移；当前无自动下一实现任务，后续工作需用户重新确认并建立新的任务/时间切片。
+- 为什么这是当前唯一合法状态：[CONFIRMED] TASK-P2-003 / TS-P2-003 已完成手动 staging 远程部署 workflow 和配置说明；当前没有已确认的自动下一实现任务。
 
 ## 阶段状态
 
@@ -48,9 +48,13 @@
 | app/router/middleware 集成测试 | COMPLETED | TASK-P1-015 已新增 `internal/transport/http/router_integration_test.go`，覆盖 demo Todo HTTP CRUD、TraceID、CORS 和 Recovery 链路 |
 | app 装配与 reload/config 集成测试 | COMPLETED | TASK-P1-016 已新增 `internal/app/app_integration_test.go` 和 `internal/app/reloadapp/reload_test.go`，覆盖真实 app server/initdb 装配、配置变更 hook 和 reload 分发 |
 | pkg README 中文化 | COMPLETED | TASK-P1-017 已完成第一阶段 `pkg/*/README.md` 中文化，不修改 Go 代码或依赖 |
-| 实现 | COMPLETED | 当前文档切片 TASK-P1-017 已完成 |
-| 验证 | COMPLETED | `go test ./... -count=1` 和 `git diff --check` 均通过；diff 检查仅有 Windows LF/CRLF 转换警告 |
-| 交接 | COMPLETED | `AGENT_HANDOFF.md` 已更新到 TASK-P1-017 完成状态 |
+| CI 质量门禁与部署说明 | COMPLETED | TASK-P2-001 已新增 GitHub Actions CI workflow、手动部署说明和 README 入口，不执行真实部署或使用密钥 |
+| 真实 CD 范围确认 | COMPLETED | 用户选择 C、确认使用远程部署，并进一步确认用 `.env` 风格文件配置；TASK-P2-002 已新增远程部署变量模板 |
+| 远程部署 env 模板 | COMPLETED | `.env.deploy.example` 已新增，`.env.deploy` 已加入 `.gitignore`，部署说明已同步 |
+| 远程部署 workflow | COMPLETED | TASK-P2-003 已新增手动 staging workflow、Secrets 配置说明和远程主机前置条件；未执行真实部署 |
+| 实现 | COMPLETED | 当前 CI/部署说明切片 TASK-P2-001 已完成 |
+| 验证 | COMPLETED | `go test ./... -count=1`、server build 和 `git diff --check` 均通过；gofmt 历史漂移已记录 `BL-025` |
+| 交接 | COMPLETED | `AGENT_HANDOFF.md` 已更新到 TASK-P2-003 完成状态 |
 | Phase 6 收尾 | COMPLETED | 用户选择 A 后已完成 TASK-PHASE6-001；最终回归和交接文档已更新 |
 
 ## 当前关键发现
@@ -67,6 +71,8 @@
 | FIND-012 | `types/result`、错误码和跨层类型边界待明确 | TASK-P1-009 已补 `docs/specs/types_contract_boundary.md`、package doc 和最小测试 | [CONFIRMED] 已处理 |
 | FIND-013 | `pkg/plugin` 主动注册服务边界需收拢 | 用户修正；TASK-P1-010 已改为被动 registry/runtime | [CONFIRMED] 已处理 |
 | FIND-014 | 背景文档保留 TASK-P1-016 前旧状态 | `ARCHITECTURE.md`、`MODULES.md`、`PROJECT_BRIEF.md`、`ROADMAP.md`；TASK-INFRA-003 已修复 | [CONFIRMED] 已处理 |
+| FIND-015 | CI/CD 与部署缺少首个安全边界 | `REQ-OPT-P2-003`、`BL-007`、`BL-008`；用户选择 D | [CONFIRMED] TASK-P2-001 已处理非生产 CI 门禁和部署说明 |
+| FIND-016 | 真实 CD 自动化缺少环境与密钥决策 | `BL-024`；用户选择 C、确认远程部署，并确认使用 `.env` 风格配置和实现 workflow | [CONFIRMED] 手动 staging 远程部署 workflow 已补；镜像发布、production 和真实运行仍需单独确认 |
 | FIND-006 | P1 执行顺序尚未确认 | `TEST_MATRIX.md`、`RISK_REGISTER.md` RISK-009；用户再次发送“下一步” | [CONFIRMED] 已确认 |
 | FIND-007 | `AGENTS.md` 被状态文件声明已补齐但实际缺失 | `Test-Path AGENTS.md`、`docs/reports/status_diagnostics/2026-05-25-task-infra-002-agents-md-missing.md` | [CONFIRMED] 已修复 |
 | FIND-008 | `/health`、`/ready` 路由缺少 smoke test | `TEST_MATRIX.md` TM-P0-003；TASK-P1-003 已补测试 | [CONFIRMED] 已处理 |
@@ -84,6 +90,8 @@
 | CONFIRM-NEXT-006 | 选择 `pkg/cache` 行为测试完成后的后续范围 | 已确认：用户选择 B，提升 `pkg/utils` 内部支撑测试 | A: 进入 Phase 6 收尾；B: 提升内部支撑测试；C: 结束本轮 | COMPLETED |
 | CONFIRM-NEXT-007 | 选择 `pkg/utils` 内部支撑测试完成后的后续范围 | 已确认：用户回复 `b`，选择 B | A: 进入 Phase 6 收尾；B: 提升 app/router/middleware 等集成测试；C: 结束本轮 | COMPLETED |
 | CONFIRM-NEXT-008 | 选择 app/router/middleware 集成测试完成后的后续范围 | 已确认：用户选择 A，进入 Phase 6 收尾 | A: 进入 Phase 6 收尾；B: 继续 app 装配/reload/config 等剩余集成测试；C: 结束本轮 | COMPLETED |
+| CONFIRM-NEXT-009 | 选择 TASK-INFRA-003 后的后续方向 | 已确认：用户选择 D，进入 CI/CD 与部署方向首切片 | D: CI/CD 与部署；首切片限定 CI 质量门禁与部署说明 | COMPLETED |
+| CONFIRM-NEXT-010 | 确认真实 CD / 镜像发布 / 远程部署自动化边界 | 已确认：用户选择 C、使用远程部署、通过 `.env` 风格模板配置，并明确确认实现远程部署 workflow | TASK-P2-003 已完成 | COMPLETED |
 
 ## 待验证
 
@@ -99,14 +107,14 @@
 
 ## 最近执行
 
-- 摘要：用户发送“下一步”后执行状态恢复检查；TASK-INFRA-003 已修复 TASK-P1-016/017 后背景文档状态漂移。
-- 变更文件：新增状态诊断报告，更新 `ARCHITECTURE.md`、`MODULES.md`、`PROJECT_BRIEF.md`、`ROADMAP.md` 和项目状态文档。
-- 执行命令：`go test ./... -count=1`；`git diff --check`。
-- 测试结果：PASS；`git diff --check` 仅有 Windows LF/CRLF 转换警告。
-- 完成判断：TASK-INFRA-003 / TS-INFRA-003 已完成。
+- 摘要：用户明确确认实现远程部署 workflow；TASK-P2-003 / TS-P2-003 已完成。
+- 变更文件：新增 `.github/workflows/deploy-remote.yml`，更新 `.env.deploy.example`、`README.md`、`docs/deployment.md` 和项目状态文档。
+- 执行命令：必读文件读取；临时 Go YAML 解析；`go run github.com/rhysd/actionlint/cmd/actionlint@latest .github/workflows/ci.yml .github/workflows/deploy-remote.yml`；`git diff --check`。
+- 测试结果：YAML 解析 PASS；actionlint PASS；`git diff --check` PASS，仅有 Windows LF/CRLF 转换警告；未运行 Go 测试，因为未修改 Go 代码。
+- 完成判断：TASK-P2-003 / TS-P2-003 已完成。
 
 ## 下一步
 
 - 合法下一步：NONE。
 - 进入条件：无自动下一实现任务。
-- 完成后状态：当前已完成；后续更大范围中文化、auth/rbac、生产迁移、CI/CD 或部署等工作仍需用户重新确认并建立新的任务/时间切片。
+- 完成后状态：如需继续镜像发布、Dockerfile、production 部署或生产迁移框架，需要单独确认并建立新的任务/时间切片。

@@ -1,0 +1,237 @@
+name: Remote Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      deploy_env:
+        description: Deployment environment. Production is intentionally not enabled in this workflow.
+        required: true
+        type: choice
+        options:
+          - staging
+        default: staging
+      confirm:
+        description: Type "deploy" to confirm this remote deployment run.
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: remote-deploy-${{ inputs.deploy_env }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy to remote host
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment: ${{ inputs.deploy_env }}
+
+    env:
+      SELECTED_DEPLOY_ENV: ${{ inputs.deploy_env }}
+      DEPLOY_ENV_FILE_CONTENT: ${{ secrets.DEPLOY_ENV_FILE }}
+      DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+      DEPLOY_SSH_KNOWN_HOSTS: ${{ secrets.DEPLOY_SSH_KNOWN_HOSTS }}
+      GHCR_USERNAME: ${{ secrets.GHCR_USERNAME }}
+      GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Confirm manual deployment
+        env:
+          CONFIRM_INPUT: ${{ inputs.confirm }}
+        run: |
+          set -euo pipefail
+          if [ "${CONFIRM_INPUT}" != "deploy" ]; then
+            echo "::error::Type deploy in the confirm input to run this workflow."
+            exit 1
+          fi
+
+      - name: Write deployment env file
+        run: |
+          set -euo pipefail
+          if [ -z "${DEPLOY_ENV_FILE_CONTENT}" ]; then
+            echo "::error::Missing DEPLOY_ENV_FILE secret."
+            exit 1
+          fi
+
+          deploy_env_file="${RUNNER_TEMP}/.env.deploy"
+          printf '%s\n' "${DEPLOY_ENV_FILE_CONTENT}" > "${deploy_env_file}"
+          chmod 600 "${deploy_env_file}"
+          echo "DEPLOY_ENV_FILE_PATH=${deploy_env_file}" >> "${GITHUB_ENV}"
+
+      - name: Parse deployment env
+        run: |
+          set -euo pipefail
+          allowed_keys=' DEPLOY_ENV DEPLOY_HOST DEPLOY_PORT DEPLOY_USER DEPLOY_PATH DEPLOY_COMPOSE_FILE DEPLOY_SERVICE DEPLOY_CONFIG_PATH DEPLOY_IMAGE DEPLOY_HEALTH_URL DEPLOY_READY_URL '
+
+          line=""
+          while IFS= read -r line || [ -n "${line}" ]; do
+            line="${line%$'\r'}"
+            if [[ -z "${line//[[:space:]]/}" || "${line}" =~ ^[[:space:]]*# ]]; then
+              continue
+            fi
+
+            if [[ ! "${line}" =~ ^([A-Z0-9_]+)=(.*)$ ]]; then
+              echo "::error::Invalid .env.deploy line. Use KEY=value syntax."
+              exit 1
+            fi
+
+            key="${BASH_REMATCH[1]}"
+            value="${BASH_REMATCH[2]}"
+            if [[ "${allowed_keys}" != *" ${key} "* ]]; then
+              echo "::warning::Ignoring unsupported deploy env key ${key}."
+              continue
+            fi
+
+            printf '::add-mask::%s\n' "${value}"
+            {
+              printf '%s<<__DEPLOY_ENV__\n' "${key}"
+              printf '%s\n' "${value}"
+              printf '__DEPLOY_ENV__\n'
+            } >> "${GITHUB_ENV}"
+          done < "${DEPLOY_ENV_FILE_PATH}"
+
+      - name: Validate deployment inputs
+        run: |
+          set -euo pipefail
+          required_vars=(
+            DEPLOY_ENV
+            DEPLOY_HOST
+            DEPLOY_PORT
+            DEPLOY_USER
+            DEPLOY_PATH
+            DEPLOY_COMPOSE_FILE
+            DEPLOY_SERVICE
+            DEPLOY_IMAGE
+            DEPLOY_HEALTH_URL
+            DEPLOY_READY_URL
+          )
+
+          for key in "${required_vars[@]}"; do
+            if [ -z "${!key:-}" ]; then
+              echo "::error::Missing required deploy env key ${key}."
+              exit 1
+            fi
+          done
+
+          if [ "${DEPLOY_ENV}" != "${SELECTED_DEPLOY_ENV}" ]; then
+            echo "::error::DEPLOY_ENV must match the selected workflow environment."
+            exit 1
+          fi
+
+          if [ "${DEPLOY_ENV}" != "staging" ]; then
+            echo "::error::This workflow only supports staging until production deployment is confirmed separately."
+            exit 1
+          fi
+
+          if [ "${DEPLOY_HOST}" = "example.com" ] || [[ "${DEPLOY_IMAGE}" == *"/OWNER/"* ]]; then
+            echo "::error::Replace placeholder DEPLOY_HOST and DEPLOY_IMAGE before deployment."
+            exit 1
+          fi
+
+          [[ "${DEPLOY_HOST}" =~ ^[A-Za-z0-9._-]+$ ]] || { echo "::error::Invalid DEPLOY_HOST."; exit 1; }
+          [[ "${DEPLOY_PORT}" =~ ^[0-9]+$ ]] || { echo "::error::Invalid DEPLOY_PORT."; exit 1; }
+          [[ "${DEPLOY_USER}" =~ ^[A-Za-z0-9._-]+$ ]] || { echo "::error::Invalid DEPLOY_USER."; exit 1; }
+          [[ "${DEPLOY_PATH}" =~ ^/[A-Za-z0-9._/-]+$ ]] || { echo "::error::Invalid DEPLOY_PATH."; exit 1; }
+          [[ "${DEPLOY_COMPOSE_FILE}" =~ ^[A-Za-z0-9._/-]+$ ]] || { echo "::error::Invalid DEPLOY_COMPOSE_FILE."; exit 1; }
+          [[ "${DEPLOY_SERVICE}" =~ ^[A-Za-z0-9._-]+$ ]] || { echo "::error::Invalid DEPLOY_SERVICE."; exit 1; }
+          [[ "${DEPLOY_IMAGE}" =~ ^[^[:space:]]+$ ]] || { echo "::error::Invalid DEPLOY_IMAGE."; exit 1; }
+          [[ "${DEPLOY_HEALTH_URL}" =~ ^https?://[^[:space:]]+$ ]] || { echo "::error::Invalid DEPLOY_HEALTH_URL."; exit 1; }
+          [[ "${DEPLOY_READY_URL}" =~ ^https?://[^[:space:]]+$ ]] || { echo "::error::Invalid DEPLOY_READY_URL."; exit 1; }
+
+          if [ -z "${DEPLOY_SSH_KEY}" ]; then
+            echo "::error::Missing DEPLOY_SSH_KEY secret."
+            exit 1
+          fi
+
+      - name: Configure SSH
+        run: |
+          set -euo pipefail
+          install -m 700 -d "${HOME}/.ssh"
+          printf '%s\n' "${DEPLOY_SSH_KEY}" > "${HOME}/.ssh/deploy_key"
+          chmod 600 "${HOME}/.ssh/deploy_key"
+
+          if [ -n "${DEPLOY_SSH_KNOWN_HOSTS}" ]; then
+            printf '%s\n' "${DEPLOY_SSH_KNOWN_HOSTS}" > "${HOME}/.ssh/known_hosts"
+          else
+            ssh-keyscan -p "${DEPLOY_PORT}" "${DEPLOY_HOST}" > "${HOME}/.ssh/known_hosts" 2>/dev/null
+          fi
+          chmod 600 "${HOME}/.ssh/known_hosts"
+          echo "DEPLOY_SSH_KEY_PATH=${HOME}/.ssh/deploy_key" >> "${GITHUB_ENV}"
+
+      - name: Upload deployment env
+        run: |
+          set -euo pipefail
+          ssh_opts=(-i "${DEPLOY_SSH_KEY_PATH}" -p "${DEPLOY_PORT}" -o BatchMode=yes -o StrictHostKeyChecking=yes)
+          target="${DEPLOY_USER}@${DEPLOY_HOST}"
+
+          ssh "${ssh_opts[@]}" "${target}" "mkdir -p -- '${DEPLOY_PATH}'"
+          scp -i "${DEPLOY_SSH_KEY_PATH}" -P "${DEPLOY_PORT}" -o BatchMode=yes -o StrictHostKeyChecking=yes \
+            "${DEPLOY_ENV_FILE_PATH}" "${target}:${DEPLOY_PATH}/.env.deploy.tmp"
+          ssh "${ssh_opts[@]}" "${target}" "chmod 600 '${DEPLOY_PATH}/.env.deploy.tmp' && mv '${DEPLOY_PATH}/.env.deploy.tmp' '${DEPLOY_PATH}/.env.deploy'"
+
+      - name: Deploy with Docker Compose
+        run: |
+          set -euo pipefail
+
+          sq() {
+            local value="${1}"
+            printf "'%s'" "${value//\'/\'\\\'\'}"
+          }
+
+          ssh_opts=(-i "${DEPLOY_SSH_KEY_PATH}" -p "${DEPLOY_PORT}" -o BatchMode=yes -o StrictHostKeyChecking=yes)
+          target="${DEPLOY_USER}@${DEPLOY_HOST}"
+          remote_env="DEPLOY_PATH=$(sq "${DEPLOY_PATH}")"
+          remote_env="${remote_env} DEPLOY_COMPOSE_FILE=$(sq "${DEPLOY_COMPOSE_FILE}")"
+          remote_env="${remote_env} DEPLOY_SERVICE=$(sq "${DEPLOY_SERVICE}")"
+          remote_env="${remote_env} DEPLOY_IMAGE=$(sq "${DEPLOY_IMAGE}")"
+          remote_env="${remote_env} DEPLOY_HEALTH_URL=$(sq "${DEPLOY_HEALTH_URL}")"
+          remote_env="${remote_env} DEPLOY_READY_URL=$(sq "${DEPLOY_READY_URL}")"
+          remote_env="${remote_env} GHCR_USERNAME=$(sq "${GHCR_USERNAME:-}")"
+          remote_env="${remote_env} GHCR_TOKEN=$(sq "${GHCR_TOKEN:-}")"
+
+          ssh "${ssh_opts[@]}" "${target}" "${remote_env} bash -se" <<'REMOTE'
+          set -euo pipefail
+          cd "${DEPLOY_PATH}"
+
+          if docker compose version >/dev/null 2>&1; then
+            compose=(docker compose)
+          elif command -v docker-compose >/dev/null 2>&1; then
+            compose=(docker-compose)
+          else
+            echo "docker compose or docker-compose is required on the remote host." >&2
+            exit 1
+          fi
+
+          if [ -n "${GHCR_USERNAME}" ] && [ -n "${GHCR_TOKEN}" ]; then
+            printf '%s' "${GHCR_TOKEN}" | docker login ghcr.io -u "${GHCR_USERNAME}" --password-stdin >/dev/null
+          fi
+
+          docker pull "${DEPLOY_IMAGE}"
+          "${compose[@]}" --env-file .env.deploy -f "${DEPLOY_COMPOSE_FILE}" pull "${DEPLOY_SERVICE}"
+          "${compose[@]}" --env-file .env.deploy -f "${DEPLOY_COMPOSE_FILE}" up -d "${DEPLOY_SERVICE}"
+
+          check_url() {
+            local name="${1}"
+            local url="${2}"
+
+            for attempt in $(seq 1 30); do
+              if curl -fsS --max-time 5 "${url}" >/dev/null; then
+                echo "${name} check passed."
+                return 0
+              fi
+              sleep 2
+            done
+
+            echo "${name} check failed." >&2
+            return 1
+          }
+
+          check_url health "${DEPLOY_HEALTH_URL}"
+          check_url ready "${DEPLOY_READY_URL}"
+          REMOTE

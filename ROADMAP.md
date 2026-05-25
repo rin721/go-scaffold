@@ -113,6 +113,7 @@
   - TASK-P1-015 已完成：`internal/transport/http/router_integration_test.go` 已覆盖 demo Todo HTTP 集成和 TraceID/CORS/Recovery 链路。
   - TASK-P1-016 已完成：`internal/app/app_integration_test.go` 和 `internal/app/reloadapp/reload_test.go` 已覆盖 app 装配、配置变更 hook 与 reload/config 分发。
   - TASK-P1-017 已完成：第一阶段 `pkg/*/README.md` 中文化已完成。
+  - TASK-P2-001 已完成：CI 质量门禁与部署说明首切片已完成，不执行真实部署。
 - 收尾决策：
   - [CONFIRMED] Phase 6 收尾已完成；后续用户又明确确认并完成 TASK-P1-016 与 TASK-P1-017。
   - [CONFIRMED] 当前无自动下一实现任务，后续更大范围中文化、生产迁移、auth/rbac、CI/CD 或部署仍需重新确认。
@@ -126,3 +127,34 @@
   - `CHANGELOG.md` 已记录 TASK-PHASE6-001、TASK-P1-016、TASK-P1-017 和 TASK-INFRA-003。
   - `AGENT_HANDOFF.md` 已说明当前无自动下一实现任务。
   - 下一状态：追加测试、包 README 中文化和状态一致性修复完成；后续工作需要用户重新确认。
+
+## Phase 7：CI/CD 与部署首切片
+
+- 目标：建立非生产 CI 质量门禁，并记录手动部署边界。
+- 状态：COMPLETED
+- 输出：
+  - `.github/workflows/ci.yml` 已新增。
+  - `docs/deployment.md` 已新增。
+  - `README.md` 已新增 CI 与部署入口。
+  - `BL-007` 和 `BL-008` 已关闭。
+  - 真实 CD、镜像发布、远程部署自动化进入 Backlog，需单独确认。
+
+## Phase 8：真实 CD 范围确认
+
+- 目标：确认真实 CD、镜像发布和远程部署自动化的目标平台、安全边界与实现输入；用户已确认使用远程部署。
+- 状态：COMPLETED
+- 当前切片：
+  - TASK-NEXT-SCOPE-010 / TS-NEXT-SCOPE-010。
+  - TASK-P2-002 / TS-P2-002。
+- 待确认：
+  - 镜像仓库、发布环境、触发方式和审批策略。
+  - GitHub Secrets 名称和权限边界。
+  - production 部署是否开始实现。
+- 已完成：
+  - `.env.deploy.example` 远程部署变量模板。
+  - `.env.deploy` Git 忽略规则。
+  - 部署说明中的远程变量边界。
+  - 手动 staging 远程部署 workflow。
+- 约束：
+  - 本会话未执行远程部署、不推送镜像、不连接远程环境、不读取真实 secrets。
+  - 镜像发布、production、生产迁移框架仍需单独确认。

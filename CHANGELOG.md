@@ -2,6 +2,58 @@
 
 ## 最新变更
 
+### 2026-05-26 - TASK-P2-003 - TS-P2-003
+
+- 变更：用户明确确认实现远程部署 workflow。
+- 变更：新增 `.github/workflows/deploy-remote.yml`，提供手动触发的 staging 远程部署 workflow。
+- 变更：workflow 使用 `DEPLOY_ENV_FILE`、`DEPLOY_SSH_KEY`、可选 `DEPLOY_SSH_KNOWN_HOSTS`、可选 `GHCR_USERNAME` / `GHCR_TOKEN` 等 GitHub Secrets。
+- 变更：workflow 校验 `.env.deploy` 必需变量，要求 `confirm=deploy`，通过 SSH/SCP 上传 `.env.deploy`，并在远程执行 Docker Compose pull/up 和 health/ready 检查。
+- 变更：`.env.deploy.example`、`docs/deployment.md` 和 README 已补 workflow、Secrets、远程主机前置条件和手动触发说明。
+- 范围：未修改 Go 代码、依赖、配置 schema、HTTP 路由、数据库 schema、真实 `.env`、真实服务器地址、部署凭据或密钥；未执行真实部署、未连接远程服务器、未推送镜像。
+- 验证：
+  - 临时 Go YAML 解析：PASS
+  - `go run github.com/rhysd/actionlint/cmd/actionlint@latest .github/workflows/ci.yml .github/workflows/deploy-remote.yml`：PASS
+  - `git diff --check`：PASS，仅有 Windows LF/CRLF 转换警告
+- 状态：TASK-P2-003 COMPLETED；当前无自动下一实现任务。
+
+### 2026-05-26 - TASK-P2-002 - TS-P2-002
+
+- 变更：用户要求远程部署使用 `.env` 风格文件配置。
+- 变更：新增 `.env.deploy.example`，提供远程部署目标、Docker Compose、镜像和健康检查变量占位。
+- 变更：`.gitignore` 新增 `.env.deploy`，避免真实远程部署配置进入 Git。
+- 变更：`docs/deployment.md` 增加远程部署变量说明，README 增加模板入口。
+- 变更：同步需求、架构、测试矩阵、验收、Backlog、风险、决策、状态、测试报告和交接文档。
+- 范围：未修改 `.github/workflows/*`，未实现真实部署、未连接服务器、未推送镜像、未写入真实密钥。
+- 验证：
+  - `git diff --check`：PASS，仅有 Windows LF/CRLF 转换警告
+- 状态：TASK-P2-002 COMPLETED；当前无自动下一实现任务。
+
+### 2026-05-26 - TASK-NEXT-SCOPE-010 - TS-NEXT-SCOPE-010
+
+- 变更：用户选择 C，意图进入真实 CD / 镜像发布 / 远程部署自动化。
+- 变更：用户补充使用远程部署；默认建议收敛为 GHCR + 手动触发 + staging + SSH 到 Linux 服务器 + Docker Compose。
+- 变更：执行用户修正审查，结论为 `NEEDS_USER_DECISION`，确认前不得实现真实 CD workflow、推送镜像、连接远程环境或读取 secrets。
+- 变更：新增 TASK-NEXT-SCOPE-010 / TS-NEXT-SCOPE-010 待确认状态，要求补充镜像仓库、SSH/Docker 等远程方式、发布环境、触发策略和 secrets 命名。
+- 范围：仅更新项目状态文档；未修改 `.github/workflows/*`、Go 代码、依赖、配置 schema、数据库 schema、真实配置或密钥。
+- 验证：
+  - `git diff --check`：PASS，仅有 Windows LF/CRLF 转换警告
+- 状态：COMPLETED；后续由 TASK-P2-002 完成远程部署 env 模板。
+
+### 2026-05-26 - TASK-P2-001 - TS-P2-001
+
+- 变更：用户选择 D，确认进入 CI/CD 与部署方向首切片。
+- 变更：新增 `.github/workflows/ci.yml`，建立 GitHub Actions CI 质量门禁，报告 gofmt 漂移并执行全量测试、server 构建和空白检查。
+- 变更：新增 `docs/deployment.md`，记录发布前检查、配置入口、手动运行、`initdb` 边界、手动发布步骤和未实现项。
+- 变更：README 新增 CI 与部署说明入口。
+- 变更：同步 `REQUIREMENTS.md`、`ARCHITECTURE.md`、`TEST_MATRIX.md`、`ACCEPTANCE.md`、`BACKLOG.md`、`RISK_REGISTER.md`、`DECISIONS.md`、`ISSUES.md`、`TEST_REPORT.md` 和 `AGENT_HANDOFF.md`。
+- 范围：未修改 Go 代码、测试文件、导出业务 API、配置 schema、HTTP 路由、数据库 schema、`go.mod`、`go.sum`、真实配置、部署凭据或密钥。
+- 验证：
+  - gofmt 漂移审计：KNOWN_DRIFT（历史 Go 文件格式漂移，已记录 `BL-025`）
+  - `go test ./... -count=1`：PASS
+  - `go build -o <temp> ./cmd/server`：PASS
+  - `git diff --check`：PASS，仅有 Windows LF/CRLF 转换警告
+- 状态：TASK-P2-001 COMPLETED；当前无自动下一实现任务。
+
 ### 2026-05-26 - TASK-INFRA-003 - TS-INFRA-003
 
 - 变更：用户发送“下一步”后执行状态恢复检查，发现背景文档仍保留 TASK-P1-016 前的 app 装配、reload/config 待补表述。

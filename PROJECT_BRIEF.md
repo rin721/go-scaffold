@@ -3,7 +3,7 @@
 ## 项目身份
 
 - Project：go-scaffold
-- Current Phase：P1 追加测试与包 README 中文化完成
+- Current Phase：P2 远程部署 env 模板完成
 - Overall Status：COMPLETED
 - Last Updated：2026-05-26
 - Source Rule：`docs/ai/prompt.md`
@@ -36,6 +36,7 @@
 - [CONFIRMED] 已有 health、ready 和 demo Todo CRUD API。
 - [CONFIRMED] 基础设施包覆盖数据库、日志、HTTP server、缓存、国际化、存储、执行器、SQL 生成、插件、工具等能力。
 - [CONFIRMED] 当前全量测试通过。
+- [CONFIRMED] 当前已建立非生产 CI 质量门禁、手动部署说明和手动 staging 远程部署 workflow。
 - [INFERRED] `internal/app` 的组合根适合成为后续边界治理的中心。
 
 ## 当前问题
@@ -66,11 +67,14 @@
 - [CONFIRMED] TASK-P1-015 已完成，demo Todo HTTP 集成和 TraceID/CORS/Recovery 链路已有最小路由级测试。
 - [CONFIRMED] TASK-P1-016 已完成，app 装配、配置变更 hook 与 reload/config 分发路径已有最小集成测试。
 - [CONFIRMED] TASK-P1-017 已完成，第一阶段 `pkg/*/README.md` 中文化已同步。
+- [CONFIRMED] TASK-P2-001 已完成，CI 质量门禁和部署说明首切片已落地。
+- [CONFIRMED] TASK-P2-003 已完成，手动 staging 远程部署 workflow 已落地。
 - [CONFIRMED] 当前无自动下一实现任务。
 
 ### P2
 
 - [DEFERRED] auth/rbac、部署流水线、性能测试、多租户、脚手架生成器、插件系统 rpc/ws/discovery 扩展。
+- [CONFIRMED] 用户已选择真实 CD、镜像发布和远程部署自动化方向，并确认使用远程部署；TASK-P2-002 已补 `.env.deploy.example` 变量模板，TASK-P2-003 已补手动 staging 远程部署 workflow。镜像发布、production 和真实运行仍需单独确认。
 
 ## 非目标
 

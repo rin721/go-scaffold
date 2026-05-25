@@ -40,6 +40,7 @@ types/*
 | 数据库迁移 | dev-prod 分层 | [CONFIRMED] TASK-P1-005 已明确 demo `AutoMigrate`、`initdb`、reload 职责；生产迁移框架仍延后 | [CONFIRMED] |
 | 插件系统 | v1 local/http 保留；注册责任已收拢为被动 registry/runtime | [CONFIRMED] TASK-P1-010 已完成；rpc/ws/discovery 留在 Backlog | [CONFIRMED] |
 | auth/JWT | 当前不实现，示例存在范围漂移 | 后续决定删除、保留占位或提升需求 | [CONFIRMED] |
+| CI/CD 与部署 | 先建立非生产质量门禁、手动部署说明、远程部署变量模板和手动 staging 远程部署 workflow；生产发布仍需单独确认 | [CONFIRMED] TASK-P2-001 已新增 CI workflow 和部署说明；TASK-P2-002 已新增 `.env.deploy.example`；TASK-P2-003 已新增手动 staging 远程部署 workflow；镜像发布和 production 仍需单独确认 | [CONFIRMED] |
 
 ## 需要详细分析的模块
 
@@ -98,4 +99,6 @@ types/*
 - [CONFIRMED] 用户明确要求实施 TASK-P1-016，app 装配、配置变更 hook 与 reload/config 剩余集成测试已完成。
 - [CONFIRMED] 用户选择 A，`BL-006` 第一阶段包 README 中文化已完成 TASK-P1-017。
 - [CONFIRMED] TASK-INFRA-003 已修复 TASK-P1-016/017 后背景文档中的旧状态漂移。
+- [CONFIRMED] 用户选择 D，CI 质量门禁与部署说明首切片已完成 TASK-P2-001。
+- [CONFIRMED] 用户选择 C，进入真实 CD / 镜像发布 / 远程部署自动化范围确认；TASK-P2-002 已完成远程部署 `.env` 模板，TASK-P2-003 已完成手动 staging 远程部署 workflow。
 - [DEFERRED] 生产迁移框架需要单独需求和架构确认，不属于当前切片。
