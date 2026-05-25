@@ -2,6 +2,43 @@
 
 ## 最新变更
 
+### 2026-05-26 - TASK-INFRA-003 - TS-INFRA-003
+
+- 变更：用户发送“下一步”后执行状态恢复检查，发现背景文档仍保留 TASK-P1-016 前的 app 装配、reload/config 待补表述。
+- 变更：新增 `docs/reports/status_diagnostics/2026-05-26-task-p1-017-post-completion-doc-drift.md`。
+- 变更：同步 `ARCHITECTURE.md`、`MODULES.md`、`PROJECT_BRIEF.md` 和 `ROADMAP.md`，确认 TASK-P1-016 已覆盖 app 装配、配置变更 hook 与 reload/config 分发路径。
+- 变更：同步 `STATUS.md`、`TASKS.md`、`TIME_SLICES.md`、`ACCEPTANCE.md`、`TEST_REPORT.md`、`ISSUES.md`、`RISK_REGISTER.md` 和 `AGENT_HANDOFF.md`。
+- 范围：未修改 Go 代码、测试文件、导出业务 API、配置 schema、HTTP 路由、数据库 schema、`go.mod`、`go.sum`、部署配置或密钥。
+- 验证：
+  - `go test ./... -count=1`：PASS
+  - `git diff --check`：PASS，仅有 Windows LF/CRLF 转换警告
+- 状态：TASK-INFRA-003 COMPLETED；当前无自动下一实现任务。
+
+### 2026-05-26 - TASK-P1-017 - TS-P1-017
+
+- 变更：用户选择 A，确认进入 `BL-006` 第一阶段包 README 中文化。
+- 变更：统一 `pkg/*/README.md` 包标题，将 `pkg/plugin/README.md` 英文主体转为中文，并把 License/FAQ/Unsupported 等读者文本中文化。
+- 变更：同步 `pkg/cache`、`pkg/cli`、`pkg/executor`、`pkg/httpserver`、`pkg/i18n`、`pkg/storage`、`pkg/yaml2go` README 中过期的“缺少测试”风险描述。
+- 变更：同步 `REQUIREMENTS.md`、`ARCHITECTURE.md`、`MODULES.md`、`TEST_MATRIX.md`、`ACCEPTANCE.md`、`BACKLOG.md`、`RISK_REGISTER.md`、`DECISIONS.md`、`ISSUES.md`、`TEST_REPORT.md` 和 `AGENT_HANDOFF.md`。
+- 范围：未修改 Go 代码、导出业务 API、配置 schema、HTTP 路由、数据库 schema、`go.mod`、`go.sum`、部署配置或密钥。
+- 验证：
+  - `go test ./... -count=1`：PASS
+  - `git diff --check`：PASS，仅有 Windows LF/CRLF 转换警告
+- 状态：TASK-P1-017 COMPLETED；当前无自动下一实现任务。
+
+### 2026-05-26 - TASK-P1-016 - TS-P1-016
+
+- 变更：用户明确要求实施 TASK-P1-016，确认提升 `BL-002` 剩余 app 装配、reload/config 集成测试范围。
+- 变更：新增 `internal/app/app_integration_test.go`，使用临时 YAML、临时 SQLite 和真实 `app.New` 覆盖 server/initdb 装配、demo schema 创建、资源 shutdown 和 app 配置变更 hook。
+- 变更：新增 `internal/app/reloadapp/reload_test.go`，使用 fake cache/database/logger/executor/httpserver/storage 覆盖 reload 未变化跳过、单组件变化分发、Redis/executor/storage 关闭置空和 database reload 不隐式迁移。
+- 范围：未修改导出业务 API、配置 schema、HTTP 路由、数据库 schema、`go.mod`、`go.sum`、部署配置或密钥。
+- 验证：
+  - `gofmt -w internal/app/app_integration_test.go internal/app/reloadapp/reload_test.go`：PASS
+  - `go test ./internal/app/... -count=1`：PASS
+  - `go test ./... -count=1`：PASS
+  - `git diff --check`：PASS，仅有 Windows LF/CRLF 转换警告
+- 状态：TASK-P1-016 COMPLETED；当前无自动下一实现任务。
+
 ### 2026-05-26 - TASK-PHASE6-001 - TS-PHASE6-001
 
 - 变更：用户选择 A，确认进入 Phase 6 收尾与交接。

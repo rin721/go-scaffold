@@ -111,9 +111,11 @@
   - TASK-P1-014 已完成：`pkg/utils` 已补最小确定性行为测试。
   - TASK-NEXT-SCOPE-007 已完成：用户选择 B，提升 app/router/middleware 等集成测试。
   - TASK-P1-015 已完成：`internal/transport/http/router_integration_test.go` 已覆盖 demo Todo HTTP 集成和 TraceID/CORS/Recovery 链路。
+  - TASK-P1-016 已完成：`internal/app/app_integration_test.go` 和 `internal/app/reloadapp/reload_test.go` 已覆盖 app 装配、配置变更 hook 与 reload/config 分发。
+  - TASK-P1-017 已完成：第一阶段 `pkg/*/README.md` 中文化已完成。
 - 收尾决策：
-  - [CONFIRMED] 用户选择 A，进入 Phase 6 收尾。
-  - [DEFERRED] app 装配、reload/config 等剩余集成测试未继续实现，后续必须重新确认后提升。
+  - [CONFIRMED] Phase 6 收尾已完成；后续用户又明确确认并完成 TASK-P1-016 与 TASK-P1-017。
+  - [CONFIRMED] 当前无自动下一实现任务，后续更大范围中文化、生产迁移、auth/rbac、CI/CD 或部署仍需重新确认。
 
 ## Phase 6：收尾与交接
 
@@ -121,6 +123,6 @@
 - 状态：COMPLETED
 - 输出：
   - `TEST_REPORT.md` 已记录最终回归。
-  - `CHANGELOG.md` 已记录 TASK-PHASE6-001。
+  - `CHANGELOG.md` 已记录 TASK-PHASE6-001、TASK-P1-016、TASK-P1-017 和 TASK-INFRA-003。
   - `AGENT_HANDOFF.md` 已说明当前无自动下一实现任务。
-  - 下一状态：本轮项目优化收尾完成；后续工作需要用户重新确认。
+  - 下一状态：追加测试、包 README 中文化和状态一致性修复完成；后续工作需要用户重新确认。

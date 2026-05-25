@@ -5,7 +5,7 @@
 - Task ID：NONE
 - Status：COMPLETED
 - Time Slice：NONE
-- Summary：TASK-PHASE6-001 已完成，本轮项目优化收尾结束；后续新工作必须由用户重新确认并提升为任务/时间切片。
+- Summary：TASK-INFRA-003 已完成并通过验证；当前无自动下一实现任务，后续工作必须由用户重新确认并提升为任务/时间切片。
 
 ## 任务列表
 
@@ -166,6 +166,41 @@
   - `docs/templates/*` 已标准化为可复用模板。
   - 状态诊断报告已写入 `docs/reports/status_diagnostics/2026-05-25-task-infra-002-agents-md-missing.md`。
   - 当前合法下一步恢复为 TASK-P1-002。
+
+### TASK-INFRA-003：修复 TASK-P1-017 后背景文档状态漂移
+
+- Status：COMPLETED
+- Goal：修复用户发送“下一步”时发现的状态漂移：核心状态已确认 TASK-P1-016 和 TASK-P1-017 完成，但部分背景文档仍保留 app 装配、reload/config 后续待补的旧表述。
+- Reason：
+  - `AGENTS.md` 要求“下一步”前读取状态文档，并在文档冲突时先生成状态诊断报告并修复 Agent 基础设施。
+  - `ARCHITECTURE.md`、`MODULES.md`、`PROJECT_BRIEF.md` 和 `ROADMAP.md` 中存在 TASK-P1-016 前的残留表述。
+- Allowed Files：
+  - `ARCHITECTURE.md`
+  - `MODULES.md`
+  - `PROJECT_BRIEF.md`
+  - `ROADMAP.md`
+  - `STATUS.md`
+  - `TASKS.md`
+  - `TIME_SLICES.md`
+  - `ACCEPTANCE.md`
+  - `TEST_REPORT.md`
+  - `CHANGELOG.md`
+  - `ISSUES.md`
+  - `RISK_REGISTER.md`
+  - `AGENT_HANDOFF.md`
+  - `docs/reports/status_diagnostics/*`
+- Forbidden Files：
+  - Go 源码和测试文件。
+  - `go.mod`、`go.sum`。
+  - 数据库 schema、部署配置、真实密钥文件。
+- Verification：
+  - `go test ./... -count=1`：PASS
+  - `git diff --check`：PASS，仅有 Windows LF/CRLF 转换警告
+- Completion Evidence：
+  - 新增 `docs/reports/status_diagnostics/2026-05-26-task-p1-017-post-completion-doc-drift.md`。
+  - 背景文档已同步 TASK-P1-016 完成事实，不再把 app 装配、配置变更 hook 或 reload/config 剩余集成测试描述为待补范围。
+  - `pkg/i18n` 已补测试事实已同步到架构表述。
+  - 当前合法下一步恢复为 `NONE / COMPLETED`。
 
 ## P1 任务草案
 
@@ -885,7 +920,112 @@
 - Evidence：
   - 修改文件：项目状态文档、验收、测试报告、变更记录、风险/Backlog、决策记录和交接说明。
   - 验证：`go test ./... -count=1` PASS；`git diff --check` PASS，仅有 Windows LF/CRLF 转换警告。
-  - 结论：Phase 6 收尾完成；app 装配、reload/config 等剩余集成路径保留为后续确认范围。
+  - 结论：Phase 6 收尾完成；当时 app 装配、reload/config 等剩余集成路径保留为后续确认范围，后续已由 TASK-P1-016 覆盖并关闭。
+
+### TASK-P1-016：补 app 装配与 reload/config 剩余集成测试
+
+- Status：COMPLETED
+- Matrix：BL-002、TM-P0-004、TM-P0-006、TM-P1-012、RISK-008
+- Source：
+  - 用户明确要求实施 TASK-P1-016 计划。
+  - `BL-002` 剩余范围中 app 装配、配置变更 hook 与 reload 路径尚未覆盖。
+  - `TASK-PHASE6-001` 已记录该范围保留为后续确认事项。
+- Priority：P1
+- Type：测试；若新增测试暴露当前 `internal/app/**` 或必要 `internal/config/**` 范围内缺陷，只做最小修复。
+- Goal：新增 app 装配与 reload/config 集成测试，覆盖 server/initdb 模式最小装配链路、配置变更 hook、reload 分发与关闭配置路径。
+- Allowed Files：
+  - `internal/app/app_integration_test.go`
+  - `internal/app/reloadapp/reload_test.go`
+  - 必要时限当前范围修复文件：`internal/app/**`、`internal/config/**`
+  - 项目状态文档：`STATUS.md`、`TASKS.md`、`TIME_SLICES.md`、`TEST_MATRIX.md`、`ACCEPTANCE.md`、`TEST_REPORT.md`、`CHANGELOG.md`、`BACKLOG.md`、`RISK_REGISTER.md`、`ISSUES.md`、`DECISIONS.md`、`AGENT_HANDOFF.md`
+- Forbidden Files：
+  - `cmd/**/*`
+  - `pkg/**/*`，除既有接口只读使用外不得修改
+  - `types/**/*`
+  - `go.mod`
+  - `go.sum`
+  - 数据库 schema、部署配置、真实密钥文件
+- Non-Goals：
+  - 不新增导出业务 API、配置 schema、HTTP 路由或数据库 schema。
+  - 不启动真实 HTTP server。
+  - 不依赖 Redis/MySQL/Postgres/外部网络。
+  - 不重构 app 装配、reload、config 或 demo 模块。
+- Steps：
+  1. 更新当前任务与时间切片状态，确认唯一合法范围。
+  2. 新增 `internal/app/app_integration_test.go`，用临时 YAML、临时 SQLite 和真实 `app.New` 覆盖 server/initdb/config hook 路径。
+  3. 新增 `internal/app/reloadapp/reload_test.go`，用 fake 组件覆盖 reload 分发、关闭配置和 database reload 不隐式迁移路径。
+  4. 运行格式化、相关包测试、全量回归和 diff 检查。
+  5. 更新验收、测试报告、变更、风险、Backlog、问题和交接文档。
+- Verification：
+  - `gofmt -w internal/app/app_integration_test.go internal/app/reloadapp/reload_test.go`
+  - `go test ./internal/app/... -count=1`
+  - `go test ./... -count=1`
+  - `git diff --check`
+- Exit Conditions：
+  - [CONFIRMED] server 模式真实 app 装配链路有测试覆盖，且资源可 `Shutdown`。
+  - [CONFIRMED] initdb 模式只初始化数据库并创建 demo schema，不装配 HTTP transport。
+  - [CONFIRMED] `ConfigManager.Update` 能触发 app hook 并更新 `Core.Config`，不启动真实 server。
+  - [CONFIRMED] reload 分发逻辑覆盖未变化、变化、关闭 Redis/executor/storage 和 database reload 不隐式迁移路径。
+  - [CONFIRMED] 相关包测试、全量回归和 diff 检查通过。
+  - [CONFIRMED] 状态文档、测试报告和交接说明已更新。
+- Evidence：
+  - 修改文件：`internal/app/app_integration_test.go`、`internal/app/reloadapp/reload_test.go`、项目状态文档。
+  - 覆盖内容：真实 `app.New` server/initdb 装配、demo schema 创建、app 配置变更 hook、reload 组件分发、可选组件关闭置空、database reload 不触发 demo schema 隐式迁移。
+  - 命令：`gofmt -w internal/app/app_integration_test.go internal/app/reloadapp/reload_test.go`；`go test ./internal/app/... -count=1`；`go test ./... -count=1`；`git diff --check`。
+  - 测试结果：PASS；`git diff --check` 仅有 Windows LF/CRLF 转换警告。
+  - Next Task：NONE；后续工作需用户重新确认并建立新的任务/时间切片。
+
+### TASK-P1-017：分阶段中文化 `pkg/*` README
+
+- Status：COMPLETED
+- Matrix：BL-006、RISK-005、TM-P1-013、TM-P0-006
+- Source：
+  - TASK-P1-016 完成后，用户选择 A。
+  - `BL-006`：分阶段中文化包 README。
+  - `RISK-005`：包 README 中英混杂。
+- Priority：P1
+- Type：文档；不新增功能、不修改代码。
+- Goal：将第一阶段包 README 中文化范围限定为 `pkg/*/README.md`，统一包标题、说明、边界、风险和许可证等面向阅读者的中文表达，同时保留 Go 标识符、配置键、命令、代码示例和必要英文技术名词。
+- Allowed Files：
+  - `pkg/*/README.md`
+  - `REQUIREMENTS.md`
+  - `ARCHITECTURE.md`
+  - `MODULES.md`
+  - 项目状态文档：`STATUS.md`、`TASKS.md`、`TIME_SLICES.md`、`TEST_MATRIX.md`、`ACCEPTANCE.md`、`TEST_REPORT.md`、`CHANGELOG.md`、`BACKLOG.md`、`RISK_REGISTER.md`、`ISSUES.md`、`DECISIONS.md`、`AGENT_HANDOFF.md`
+- Forbidden Files：
+  - `cmd/**/*`
+  - `internal/**/*`
+  - `types/**/*`
+  - `pkg/**/*` 中除 `README.md` 以外的文件
+  - `go.mod`
+  - `go.sum`
+  - 数据库 schema、部署配置、真实密钥文件
+- Non-Goals：
+  - 不改 Go 代码、配置 schema、HTTP 路由、数据库 schema 或依赖。
+  - 不补新的行为测试。
+  - 不重写全部历史文档或模板。
+  - 不把 API 标识符、代码示例、协议名、环境变量名强行翻译。
+- Steps：
+  1. 审查当前 `pkg/*/README.md` 的中英文混杂点和过期风险描述。
+  2. 翻译或收拢标题、段落、边界说明、风险说明和许可证等读者可见文本。
+  3. 保留代码示例和 API 名称，避免文档与实现不一致。
+  4. 运行全量回归和 diff 空白检查。
+  5. 更新验收、测试报告、变更、Backlog、风险、问题和交接文档。
+- Verification：
+  - `go test ./... -count=1`
+  - `git diff --check`
+- Exit Conditions：
+  - [CONFIRMED] 13 个 `pkg/*/README.md` 已检查；当前阶段主要读者文本已中文化或保留为必要技术名词。
+  - [CONFIRMED] README 中与已完成测试状态明显冲突的风险描述已同步。
+  - [CONFIRMED] 未修改 Go 代码、依赖、配置 schema、HTTP 路由或数据库 schema。
+  - [CONFIRMED] 全量回归和 diff 检查通过。
+  - [CONFIRMED] 状态文档、测试报告和交接说明已更新。
+- Evidence：
+  - 修改文件：`pkg/cache/README.md`、`pkg/cli/README.md`、`pkg/database/README.md`、`pkg/executor/README.md`、`pkg/httpserver/README.md`、`pkg/i18n/README.md`、`pkg/logger/README.md`、`pkg/plugin/README.md`、`pkg/sqlgen/README.md`、`pkg/storage/README.md`、`pkg/utils/README.md`、`pkg/yaml2go/README.md`、需求/架构/模块和项目状态文档。
+  - `pkg/crypto/README.md` 已检查，当前标题和主体已符合第一阶段中文化要求，未产生内容修改。
+  - 命令：`go test ./... -count=1`；`git diff --check`。
+  - 测试结果：PASS；`git diff --check` 仅有 Windows LF/CRLF 转换警告。
+  - Next Task：NONE；后续工作需用户重新确认并建立新的任务/时间切片。
 
 
 ## 历史任务

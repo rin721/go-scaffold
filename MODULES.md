@@ -25,7 +25,7 @@ types/*
 - [CONFIRMED] `cmd/server` 是进程入口和 CLI 边界。
 - [CONFIRMED] `internal/app` 是组合根，负责初始化、模式构建、热重载和生命周期。
 - [CONFIRMED] `internal/modules/demo` 是当前唯一业务示例模块。
-- [CONFIRMED] `pkg/*` 采用混合 API 策略，需逐包标注公共 API、内部支撑或待确认。
+- [CONFIRMED] `pkg/*` 采用混合 API 策略，已逐包标注公共 API、内部支撑或待确认。
 - [CONFIRMED] `types/*` 当前承载常量、错误码、响应类型和少量类型别名。
 
 ## 模块总览
@@ -33,12 +33,12 @@ types/*
 | 模块 | 当前职责 | 边界定位 | 测试状态 | 主要风险 |
 |---|---|---|---|---|
 | `cmd/server` | CLI 入口、server/initdb/tests 命令、信号处理 | 进程入口 | tests 命令语义测试已补 | `runApp` 内部 `os.Exit` 仍需后续隔离才能测试启动失败路径 |
-| `internal/app` | 组合根、启动模式、生命周期、热重载 | 应用装配层 | demo 迁移策略测试已补 | reload 其他副作用测试不足 |
-| `internal/config` | 配置结构、加载、环境变量覆盖、热重载 | 配置边界 | 有测试 | TASK-P1-001 和 TASK-P1-002 已收拢 copy/update 与环境变量策略；reload 路径仍需后续覆盖 |
+| `internal/app` | 组合根、启动模式、生命周期、热重载 | 应用装配层 | demo 迁移策略测试、真实 app 装配测试和 reload/config 分发测试已补 | 更大范围端到端启动仍需单独确认 |
+| `internal/config` | 配置结构、加载、环境变量覆盖、热重载 | 配置边界 | 有测试 | TASK-P1-001、TASK-P1-002 和 TASK-P1-016 已收拢 copy/update、环境变量策略和配置变更 hook/reload 分发 |
 | `internal/middleware` | Gin 中间件：i18n、CORS、logger、recovery、traceid | HTTP 横切层 | router 级 TraceID/CORS/Recovery 集成测试已补 | i18n/logger 细粒度行为仍可后续增强 |
-| `internal/transport/http` | Gin router、health/ready、demo API 注册 | 传输层 | health/ready smoke test 和 demo HTTP 集成测试已补 | app 装配级启动链路仍需后续覆盖 |
+| `internal/transport/http` | Gin router、health/ready、demo API 注册 | 传输层 | health/ready smoke test、demo HTTP 集成测试和 app 装配级 server/initdb 测试已补 | 真实 HTTP server 启动仍非当前测试目标 |
 | `internal/modules/demo` | Todo 示例业务模块 | 标准示例模块 | service/repository CRUD 基线和 handler/router HTTP 集成已补 | 示例与生产约束需继续保持分离 |
-| `pkg/*` | 可复用基础设施、公共工具和内部支撑工具 | 混合 API | 部分有测试 | [CONFIRMED] TASK-P1-007 已逐包分类；包 README 中英混杂仍待后续中文化 |
+| `pkg/*` | 可复用基础设施、公共工具和内部支撑工具 | 混合 API | 主要公共包与内部支撑路径已有最小测试 | [CONFIRMED] TASK-P1-017 已完成第一阶段包 README 中文化 |
 | `types/*` | 公共常量、错误码、HTTP 响应结构、类型别名 | 跨层契约和 HTTP/Gin 响应契约 | `types/constants`、`types/errors`、`types/result` 有测试 | auth 错误码仅为预留契约，auth/rbac 不在当前功能范围 |
 
 ## `cmd/server`
@@ -86,14 +86,14 @@ types/*
 
 - [CONFIRMED] demo schema 迁移触发策略已在 TASK-P1-005 收拢：server-start/initdb 执行，reload 跳过。
 - [CONFIRMED] `ModeInitDB` 明确作为 demo schema bootstrap 入口；生产/bootstrap 迁移框架仍延后。
-- [RISK] 热重载路径没有测试，尤其是数据库、HTTP server 和 storage 的重载副作用。
+- [CONFIRMED] reload/config 分发路径已在 TASK-P1-016 使用 fake 组件覆盖未变化、单组件变化、可选组件关闭和 database reload 不隐式迁移。
 - [RISK] `initapp` 同时负责大量映射和构建逻辑，后续新增模块时容易膨胀。
 
 ### 优化候选
 
-- [DEFERRED] 建立 app 装配链路测试，覆盖 server/initdb 模式。
+- [CONFIRMED] TASK-P1-016 已建立 app 装配链路测试，覆盖 server/initdb 模式。
 - [CONFIRMED] 将 demo schema 自动迁移标注为 dev/demo 策略，并与 `initdb`/SQL 脚本分层。
-- [DEFERRED] 为 reload 路径增加配置变更单元测试或集成测试。
+- [CONFIRMED] TASK-P1-016 已为 reload 路径增加配置变更和分发集成测试。
 
 ## `internal/config`
 
@@ -113,7 +113,7 @@ types/*
 - [CONFIRMED] `manager.copyConfig` 字段覆盖问题已在 TASK-P1-001 修复并补测试。
 - [CONFIRMED] 数据库环境变量策略已在 TASK-P1-002 收拢为 `DB_*` 优先，旧 `REI_APP_DB_*` 作为兼容 fallback。
 - [CONFIRMED] `.env.example` 已移除未实现 JWT 示例，并与实际环境变量覆盖策略对齐。
-- [RISK] 配置 reload 路径仍缺少测试文件。
+- [CONFIRMED] 配置 reload 路径已由 TASK-P1-016 使用 fake 组件覆盖分发、关闭配置和 database reload 不隐式迁移。
 
 ### 优化候选
 
@@ -202,7 +202,7 @@ types/*
 | 包 | 当前定位 | README 分类 | 测试 | 主要风险 |
 |---|---|---|---|---|
 | `pkg/cache` | 公共基础设施 API | [CONFIRMED] 已写入 | 有 | [CONFIRMED] TASK-P1-013 已覆盖配置、Redis 读写、批量、计数器、TTL/Expire、缺失键和 reload 语义 |
-| `pkg/cli` | 公共工具 API | [CONFIRMED] 已写入 | `cmd/server` 已覆盖命令使用；包自身无测试 | flag parser 和 help 输出无包级测试 |
+| `pkg/cli` | 公共工具 API | [CONFIRMED] 已写入 | 有 | [CONFIRMED] flag parser、help 输出和错误包装已有最小包级测试 |
 | `pkg/crypto` | 公共基础设施 API | [CONFIRMED] 已写入 | 有 | 当前稳定实现仅 bcrypt |
 | `pkg/database` | 公共基础设施 API | [CONFIRMED] 已写入 | 有 | Hook/Reload/多驱动路径覆盖不足 |
 | `pkg/executor` | 公共基础设施 API | [CONFIRMED] 已写入 | 有 | [CONFIRMED] TASK-P1-012 已覆盖配置校验、任务执行、缺失池、过载、关闭、失败 reload 和 panic handler |
@@ -213,7 +213,7 @@ types/*
 | `pkg/sqlgen` | 公共工具 API | [CONFIRMED] 已写入 | 有 | [CONFIRMED] 高级查询、批量删除、DB reverse 和部分 rollback 边界已显式 unsupported / partial |
 | `pkg/storage` | 公共基础设施 API | [CONFIRMED] 已写入 | 有 | [CONFIRMED] TASK-P1-012 已覆盖内存文件系统读写、复制、MIME、Excel、图片和配置错误路径 |
 | `pkg/utils` | 内部支撑工具包 | [CONFIRMED] 已写入 | 有 | [CONFIRMED] TASK-P1-014 已覆盖 Snowflake、地址校验、端口查找、设备 ID 和 i18n helper 最小行为；默认 Snowflake panic 策略保持不变 |
-| `pkg/yaml2go` | 公共工具 API | [CONFIRMED] 已写入 | 无 | 原 `cmd/server tests` 演示依赖已移除；包自身仍无测试 |
+| `pkg/yaml2go` | 公共工具 API | [CONFIRMED] 已写入 | 有 | [CONFIRMED] 多文件生成、错误输入和配置校验已有最小包级测试 |
 
 ## `types/*` 边界
 
@@ -242,7 +242,7 @@ types/*
 | BC-003 | demo schema 在 server/initdb/reload 路径自动迁移 | dev/prod 迁移职责混乱 | [CONFIRMED] TASK-P1-005 已明确 server-start/initdb 执行、reload 跳过 |
 | BC-004 | `cmd/server tests` 不运行测试 | CLI 语义误导 | [CONFIRMED] TASK-P1-006 已改为真实测试入口 |
 | BC-005 | `pkg/sqlgen` README/代码存在未实现能力 | 公共工具 API 期望不稳定 | [CONFIRMED] TASK-P1-008 已显式 unsupported 或文档化 partial 能力 |
-| BC-006 | 多个关键路径无测试 | 后续重构回归风险高 | P1 先建测试矩阵 |
+| BC-006 | 多个关键路径无测试 | 后续重构回归风险高 | [CONFIRMED] P1 已补配置、router、demo、app 装配、reload/config 和主要 `pkg/*` 最小测试 |
 
 ## 测试矩阵草案
 
@@ -252,10 +252,10 @@ types/*
 | TM-002 | app 启动 | 使用测试配置构建 `app.New`，验证 core/infra/modules/transport 非空 | P0 | [NOT_STARTED] |
 | TM-003 | health/ready | 使用 `httptest` 验证 `/health`、数据库正常/缺失/失败时 `/ready` | P0 | [CONFIRMED] TASK-P1-003 已覆盖 |
 | TM-004 | demo CRUD | 使用 SQLite 临时库跑 Create/List/Get/Update/Delete | P0 | [CONFIRMED] TASK-P1-004 已覆盖 service/repository 基线；TASK-P1-015 已覆盖 HTTP handler/router 集成 |
-| TM-005 | config load/override | 验证 YAML、`${VAR:default}`、环境变量覆盖、无效配置报错 | P0 | [IN_PROGRESS] 环境覆盖已补测试 |
+| TM-005 | config load/override | 验证 YAML、`${VAR:default}`、环境变量覆盖、无效配置报错 | P0 | [CONFIRMED] 环境覆盖已补测试 |
 | TM-006 | config update/copy | 验证 `Update` 后不丢失 InitDB/Executor/Storage/CORS 等字段 | P0 | [CONFIRMED] TASK-P1-001 已覆盖 |
 | TM-007 | migration boundary | 验证 server/initdb/reload 对 demo schema 的触发策略 | P1 | [CONFIRMED] TASK-P1-005 已覆盖 |
-| TM-008 | pkg API | 为无测试的公共包补最小行为测试 | P1 | [CONFIRMED] `BL-020` 首批 TASK-P1-011、第二批 TASK-P1-012 和第三批 TASK-P1-013 已覆盖公共 `pkg/*` 行为测试；内部支撑测试另列 Backlog |
+| TM-008 | pkg API | 为无测试的公共包补最小行为测试 | P1 | [CONFIRMED] `BL-020` 首批 TASK-P1-011、第二批 TASK-P1-012 和第三批 TASK-P1-013 已覆盖公共 `pkg/*` 行为测试；`pkg/utils` 内部支撑测试已由 TASK-P1-014 覆盖 |
 
 ## P1 优化候选项
 
@@ -276,8 +276,10 @@ types/*
 - [CONFIRMED] TASK-P1-014 已完成，`pkg/utils` 内部支撑工具有最小确定性行为测试。
 - [CONFIRMED] TASK-P1-015 已完成，router/middleware/demo HTTP 集成路径有最小测试覆盖。
 - [CONFIRMED] TASK-PHASE6-001 已完成，Phase 6 收尾与交接已完成。
+- [CONFIRMED] TASK-P1-016 已完成，app 装配、配置变更 hook 与 reload/config 剩余集成路径有最小测试覆盖。
 - [CONFIRMED] 测试矩阵草案已生成。
 - [CONFIRMED] P1 优化候选项已生成。
 - [CONFIRMED] 已按 P1 切片进行受控 Go 测试代码修改或文档分类：TASK-P1-001、TASK-P1-002、TASK-P1-003、TASK-P1-004、TASK-P1-005、TASK-P1-006、TASK-P1-007、TASK-P1-008 均已完成并验证通过。
 - [CONFIRMED] `types/*` 契约边界已完成。
 - [CONFIRMED] 用户已选择 A，`BL-020` 首批 `pkg/*` 行为测试已完成 TASK-P1-011 / TS-P1-011，第二批已完成 TASK-P1-012 / TS-P1-012，第三批 `pkg/cache` 已完成 TASK-P1-013 / TS-P1-013。
+- [CONFIRMED] 用户选择 A，`BL-006` 第一阶段包 README 中文化已完成 TASK-P1-017 / TS-P1-017。

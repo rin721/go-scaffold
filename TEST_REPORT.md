@@ -3,26 +3,26 @@
 ## 最新验证
 
 - 日期：2026-05-26
-- 任务 ID：TASK-PHASE6-001
-- 时间切片 ID：TS-PHASE6-001
+- 任务 ID：TASK-INFRA-003
+- 时间切片 ID：TS-INFRA-003
 - 状态：COMPLETED
-- 范围：Phase 6 收尾与交接，仅更新项目状态文档、最终验证记录、变更记录、问题记录、风险/Backlog 和交接说明；不新增 Go 代码或测试。
+- 范围：修复 TASK-P1-016/017 后背景文档状态漂移；生成状态诊断报告，并同步 app 装配、配置变更 hook、reload/config 与 `pkg/i18n` 测试完成事实。不修改 Go 代码、依赖、配置 schema、HTTP 路由或数据库 schema。
 
 ## 执行命令
 
 | 命令 | 结果 | 备注 |
 |---|---|---|
 | 必读文件读取 | PASS | 已读取 `AGENTS.md`、Agent 规则、状态、任务、切片、需求、架构、验收、问题、测试报告和交接文档 |
-| 用户修正审查 | PASS | 用户选择 A，与当前 TASK-NEXT-SCOPE-008 待确认范围一致；结论 ACCEPT |
+| 状态诊断报告 | PASS | 已新增 `docs/reports/status_diagnostics/2026-05-26-task-p1-017-post-completion-doc-drift.md` |
 | `go test ./... -count=1` | PASS | 全量回归通过 |
 | `git diff --check` | PASS | 仅有 Windows LF/CRLF 转换警告 |
 
 ## 结果
 
-- [CONFIRMED] 用户选择 A 已记录，TASK-NEXT-SCOPE-008 已关闭。
-- [CONFIRMED] TASK-PHASE6-001 / TS-PHASE6-001 已完成，项目状态文档已同步到 Phase 6 收尾完成。
-- [CONFIRMED] 本切片未新增或修改 Go 源码、测试文件、依赖、数据库 schema、部署配置或密钥。
-- [CONFIRMED] app 装配、reload/config 等剩余集成路径未在本切片继续实现，保留为后续用户确认范围。
+- [CONFIRMED] `ARCHITECTURE.md`、`MODULES.md`、`PROJECT_BRIEF.md` 和 `ROADMAP.md` 不再把 TASK-P1-016 已覆盖路径描述为待补范围。
+- [CONFIRMED] `pkg/i18n` 已补测试事实已同步到架构风险表述。
+- [CONFIRMED] 状态、任务、时间切片、验收、问题记录、变更记录和交接说明已更新到 TASK-INFRA-003 完成状态。
+- [CONFIRMED] 未修改 Go 代码、导出业务 API、配置 schema、HTTP 路由、数据库 schema、`go.mod` 或 `go.sum`。
 - [CONFIRMED] 当前无自动下一实现任务。
 
 ## 失败项
@@ -31,10 +31,38 @@
 
 ## 验证结论
 
-- TASK-PHASE6-001 可以标记为 `COMPLETED`。
+- TASK-INFRA-003 可以标记为 `COMPLETED`。
 - 当前无自动下一实现任务；后续任何工作需要用户重新确认并建立新的任务/时间切片。
 
 ## 历史报告
+
+### 2026-05-26 TASK-INFRA-003 TS-INFRA-003
+
+- 用户发送“下一步”后执行状态恢复检查，发现背景文档保留 TASK-P1-016 前旧状态。
+- 新增 `docs/reports/status_diagnostics/2026-05-26-task-p1-017-post-completion-doc-drift.md`。
+- 更新 `ARCHITECTURE.md`、`MODULES.md`、`PROJECT_BRIEF.md`、`ROADMAP.md` 和项目状态文档。
+- `go test ./... -count=1`：PASS。
+- `git diff --check`：PASS，仅有 Windows LF/CRLF 转换警告。
+- 结论：TASK-INFRA-003 完成；当前无自动下一实现任务。
+
+### 2026-05-26 TASK-P1-017 TS-P1-017
+
+- 用户选择 A，确认进入 `BL-006` 第一阶段包 README 中文化。
+- 更新 `pkg/cache`、`pkg/cli`、`pkg/database`、`pkg/executor`、`pkg/httpserver`、`pkg/i18n`、`pkg/logger`、`pkg/plugin`、`pkg/sqlgen`、`pkg/storage`、`pkg/utils`、`pkg/yaml2go` README；`pkg/crypto/README.md` 已检查无需修改。
+- 同步 `REQUIREMENTS.md`、`ARCHITECTURE.md`、`MODULES.md` 和项目状态文档。
+- `go test ./... -count=1`：PASS。
+- `git diff --check`：PASS，仅有 Windows LF/CRLF 转换警告。
+- 结论：TASK-P1-017 完成；当前无自动下一实现任务。
+
+### 2026-05-26 TASK-P1-016 TS-P1-016
+
+- 新增 `internal/app/app_integration_test.go`，使用临时 YAML、临时 SQLite 和真实 `app.New` 覆盖 server/initdb 装配、demo schema 创建、资源 shutdown 和 app 配置变更 hook。
+- 新增 `internal/app/reloadapp/reload_test.go`，用 fake cache/database/logger/executor/httpserver/storage 覆盖 reload 分发、可选组件关闭和 database reload 不隐式迁移。
+- `gofmt -w internal/app/app_integration_test.go internal/app/reloadapp/reload_test.go`：PASS。
+- `go test ./internal/app/... -count=1`：PASS。
+- `go test ./... -count=1`：PASS。
+- `git diff --check`：PASS，仅有 Windows LF/CRLF 转换警告。
+- 结论：TASK-P1-016 完成；当前无自动下一实现任务。
 
 ### 2026-05-26 TASK-PHASE6-001 TS-PHASE6-001
 

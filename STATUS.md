@@ -3,7 +3,7 @@
 ## 项目状态
 
 - 项目：go-scaffold
-- 当前阶段：Phase 6 收尾完成
+- 当前阶段：Agent 状态一致性修复完成
 - 总体状态：COMPLETED
 - 最后更新：2026-05-26
 - 最近 Agent：Codex
@@ -15,7 +15,7 @@
 - 当前任务 ID：NONE
 - 当前时间切片 ID：NONE
 - 当前状态：COMPLETED
-- 为什么这是当前唯一合法状态：[CONFIRMED] TASK-PHASE6-001 已完成；当前没有自动推进的实现任务，后续任何新工作都需要用户重新确认。
+- 为什么这是当前唯一合法状态：[CONFIRMED] TASK-INFRA-003 / TS-INFRA-003 已修复 TASK-P1-016/017 后背景文档状态漂移；当前无自动下一实现任务，后续工作需用户重新确认并建立新的任务/时间切片。
 
 ## 阶段状态
 
@@ -38,6 +38,7 @@
 | pkg/sqlgen unsupported 边界标注 | COMPLETED | unsupported 链式查询、批量删除和 DB reverse 已显式返回 `ErrCodeUnsupportedOperation`，README 已标注部分能力边界 |
 | Agent 基础设施补齐 | COMPLETED | `AGENTS.md`、`AGENT_RULES.md`、`SKILLS.md`、项目 skills、reports/specs 和跨工具目录已补齐 |
 | Agent 基础设施一致性修复 | COMPLETED | TASK-INFRA-002 已补齐实际缺失的 `AGENTS.md`，规范化 skills、模板和 `.agents` 适配器 |
+| Agent 状态一致性修复 | COMPLETED | TASK-INFRA-003 已生成状态诊断报告，并修复 TASK-P1-016/017 后背景文档中的旧待办表述 |
 | types/* 契约边界 | COMPLETED | TASK-P1-009 已补契约说明和最小测试，`go test ./types/... -count=1` 与全量回归通过 |
 | pkg/plugin 被动注册边界 | COMPLETED | TASK-P1-010 已移除 manager 主动配置加载/local factory 公共面，local/http 插件改为服务侧显式 `Register` |
 | pkg/* 行为测试首批 | COMPLETED | TASK-P1-011 已补 `pkg/cli`、`pkg/i18n`、`pkg/yaml2go` 最小行为测试，并修复新增测试暴露的 `pkg/yaml2go` 生成 tag/import 顺序缺陷 |
@@ -45,16 +46,18 @@
 | pkg/cache 行为测试第三批 | COMPLETED | TASK-P1-013 已补 `pkg/cache` 隔离行为测试，使用进程内 Redis 测试服务覆盖配置、读写、批量、计数器、过期和 reload 语义 |
 | pkg/utils 内部支撑测试 | COMPLETED | TASK-P1-014 已新增 `pkg/utils/utils_test.go`，覆盖 Snowflake、地址校验、端口查找、设备 ID 和 i18n helper |
 | app/router/middleware 集成测试 | COMPLETED | TASK-P1-015 已新增 `internal/transport/http/router_integration_test.go`，覆盖 demo Todo HTTP CRUD、TraceID、CORS 和 Recovery 链路 |
-| 实现 | COMPLETED | 当前实现切片 TASK-P1-015 已完成 |
-| 验证 | COMPLETED | `go test ./internal/transport/http ./internal/middleware ./internal/modules/demo/... -count=1`、`go test ./... -count=1` 和 `git diff --check` 均通过 |
-| 交接 | COMPLETED | `AGENT_HANDOFF.md` 已更新到 Phase 6 收尾完成状态 |
+| app 装配与 reload/config 集成测试 | COMPLETED | TASK-P1-016 已新增 `internal/app/app_integration_test.go` 和 `internal/app/reloadapp/reload_test.go`，覆盖真实 app server/initdb 装配、配置变更 hook 和 reload 分发 |
+| pkg README 中文化 | COMPLETED | TASK-P1-017 已完成第一阶段 `pkg/*/README.md` 中文化，不修改 Go 代码或依赖 |
+| 实现 | COMPLETED | 当前文档切片 TASK-P1-017 已完成 |
+| 验证 | COMPLETED | `go test ./... -count=1` 和 `git diff --check` 均通过；diff 检查仅有 Windows LF/CRLF 转换警告 |
+| 交接 | COMPLETED | `AGENT_HANDOFF.md` 已更新到 TASK-P1-017 完成状态 |
 | Phase 6 收尾 | COMPLETED | 用户选择 A 后已完成 TASK-PHASE6-001；最终回归和交接文档已更新 |
 
 ## 当前关键发现
 
 | ID | 发现 | 来源 | 状态 |
 |---|---|---|---|
-| FIND-001 | 部分关键路径仍无测试文件 | `go test ./... -count=1` 输出和 `rg --files -g '*_test.go'` | [RISK] |
+| FIND-001 | P1 关键测试缺口已持续收敛 | `go test ./... -count=1`、TASK-P1-003 至 TASK-P1-016 | [CONFIRMED] app/router/demo/config/reload 与主要 `pkg/*` 路径已补最小测试 |
 | FIND-002 | `.env.example` 与数据库环境变量前缀不一致 | `MODULES.md` BC-001；TASK-P1-002 已修复 | [CONFIRMED] 已处理 |
 | FIND-003 | `manager.copyConfig` 未完整复制配置字段 | `MODULES.md` BC-002；TASK-P1-001 已修复 | [CONFIRMED] 已处理 |
 | FIND-004 | demo schema 自动迁移触发点需收拢 | `MODULES.md` BC-003；TASK-P1-005 已固定 server-start/initdb/reload 策略 | [CONFIRMED] 已处理 |
@@ -63,6 +66,7 @@
 | FIND-011 | `pkg/sqlgen` TODO/unsupported 边界不清 | `pkg/sqlgen` README 和源码；TASK-P1-008 已显式返回 unsupported 或文档化 partial 能力 | [CONFIRMED] 已处理 |
 | FIND-012 | `types/result`、错误码和跨层类型边界待明确 | TASK-P1-009 已补 `docs/specs/types_contract_boundary.md`、package doc 和最小测试 | [CONFIRMED] 已处理 |
 | FIND-013 | `pkg/plugin` 主动注册服务边界需收拢 | 用户修正；TASK-P1-010 已改为被动 registry/runtime | [CONFIRMED] 已处理 |
+| FIND-014 | 背景文档保留 TASK-P1-016 前旧状态 | `ARCHITECTURE.md`、`MODULES.md`、`PROJECT_BRIEF.md`、`ROADMAP.md`；TASK-INFRA-003 已修复 | [CONFIRMED] 已处理 |
 | FIND-006 | P1 执行顺序尚未确认 | `TEST_MATRIX.md`、`RISK_REGISTER.md` RISK-009；用户再次发送“下一步” | [CONFIRMED] 已确认 |
 | FIND-007 | `AGENTS.md` 被状态文件声明已补齐但实际缺失 | `Test-Path AGENTS.md`、`docs/reports/status_diagnostics/2026-05-25-task-infra-002-agents-md-missing.md` | [CONFIRMED] 已修复 |
 | FIND-008 | `/health`、`/ready` 路由缺少 smoke test | `TEST_MATRIX.md` TM-P0-003；TASK-P1-003 已补测试 | [CONFIRMED] 已处理 |
@@ -95,14 +99,14 @@
 
 ## 最近执行
 
-- 摘要：用户最新回复 `a`，已接受 TASK-NEXT-SCOPE-008 的选项 A，进入 Phase 6 收尾与交接。
-- 变更文件：本切片仅更新项目状态文档、决策记录、验收、测试报告、变更记录和交接说明。
+- 摘要：用户发送“下一步”后执行状态恢复检查；TASK-INFRA-003 已修复 TASK-P1-016/017 后背景文档状态漂移。
+- 变更文件：新增状态诊断报告，更新 `ARCHITECTURE.md`、`MODULES.md`、`PROJECT_BRIEF.md`、`ROADMAP.md` 和项目状态文档。
 - 执行命令：`go test ./... -count=1`；`git diff --check`。
 - 测试结果：PASS；`git diff --check` 仅有 Windows LF/CRLF 转换警告。
-- 完成判断：TASK-PHASE6-001 可标记为 COMPLETED；当前本轮项目优化收尾完成。
+- 完成判断：TASK-INFRA-003 / TS-INFRA-003 已完成。
 
 ## 下一步
 
-- 合法下一步：无自动下一实现任务。
-- 进入条件：后续如需继续 app 装配/reload/config 集成测试、包 README 中文化、auth/rbac、生产迁移框架或其他优化，必须由用户重新确认并提升为新的任务/时间切片。
-- 完成后状态：本轮 Phase 6 收尾完成，交接可恢复。
+- 合法下一步：NONE。
+- 进入条件：无自动下一实现任务。
+- 完成后状态：当前已完成；后续更大范围中文化、auth/rbac、生产迁移、CI/CD 或部署等工作仍需用户重新确认并建立新的任务/时间切片。

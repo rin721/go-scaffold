@@ -3,7 +3,7 @@
 ## 风险登记状态
 
 - Project：go-scaffold
-- Phase：Phase 6 收尾完成
+- Phase：Agent 状态一致性修复完成
 - Status：COMPLETED
 - Last Updated：2026-05-26
 
@@ -28,7 +28,7 @@
 - Probability：High
 - Impact：后续 Agent 可能继续执行插件系统扩展，而不是项目优化主线。
 - Trigger：`STATUS.md`、`TASKS.md`、`TIME_SLICES.md` 未更新。
-- Mitigation：当前合法任务已随每个切片更新；后续仍需持续同步 `STATUS.md`、`TASKS.md`、`TIME_SLICES.md`、`TEST_REPORT.md` 和 `AGENT_HANDOFF.md`。
+- Mitigation：当前合法任务已随每个切片更新；TASK-INFRA-003 已修复 TASK-P1-016/017 后背景文档旧状态漂移；后续仍需持续同步 `STATUS.md`、`TASKS.md`、`TIME_SLICES.md`、`TEST_REPORT.md` 和 `AGENT_HANDOFF.md`。
 - Owner：Agent
 - Status：[RISK]
 - Blocking：Yes，阻塞“下一步”稳定执行。
@@ -64,9 +64,9 @@
 - Probability：High
 - Impact：中文项目体验不一致，交接成本上升。
 - Trigger：根文档中文化后，包 README 仍保留英文或混合风格。
-- Mitigation：先中文化根文档和模板；包 README 分阶段处理。
+- Mitigation：根文档和模板已中文化；第一阶段 `pkg/*/README.md` 已由 TASK-P1-017 完成，历史文档更大范围中文化仍需单独确认。
 - Owner：Agent
-- Status：[RISK]
+- Status：[CONFIRMED] 第一阶段包 README 中文化已完成
 - Blocking：No。
 
 ### RISK-006：插件系统历史主线干扰当前目标
@@ -100,9 +100,9 @@
 - Probability：Medium
 - Impact：后续代码优化可能回归 app 启动、路由、demo CRUD、配置热更新或迁移。
 - Trigger：多个关键路径当前没有测试文件。
-- Mitigation：`TEST_MATRIX.md` 已生成；TASK-P1-003 已补齐 `internal/transport/http` health/ready smoke test；TASK-P1-004 已补齐 demo Todo service/repository CRUD 测试基线；TASK-P1-005 已补齐 demo 迁移策略测试；TASK-P1-006 已补齐 `cmd/server` tests 命令语义测试；TASK-P1-007 已完成 `pkg/*` API 分类；TASK-P1-008 已补齐 `pkg/sqlgen` unsupported 行为测试；TASK-P1-011 已补齐首批 `pkg/cli`、`pkg/i18n`、`pkg/yaml2go` 行为测试；TASK-P1-012 已补齐第二批 `pkg/executor`、`pkg/httpserver`、`pkg/storage` 行为测试；TASK-P1-013 已补齐 `pkg/cache` 隔离行为测试；TASK-P1-014 已补齐 `pkg/utils` 内部支撑测试；TASK-P1-015 已补齐 router/middleware/demo HTTP 集成测试。
+- Mitigation：`TEST_MATRIX.md` 已生成；TASK-P1-003 已补齐 `internal/transport/http` health/ready smoke test；TASK-P1-004 已补齐 demo Todo service/repository CRUD 测试基线；TASK-P1-005 已补齐 demo 迁移策略测试；TASK-P1-006 已补齐 `cmd/server` tests 命令语义测试；TASK-P1-007 已完成 `pkg/*` API 分类；TASK-P1-008 已补齐 `pkg/sqlgen` unsupported 行为测试；TASK-P1-011 已补齐首批 `pkg/cli`、`pkg/i18n`、`pkg/yaml2go` 行为测试；TASK-P1-012 已补齐第二批 `pkg/executor`、`pkg/httpserver`、`pkg/storage` 行为测试；TASK-P1-013 已补齐 `pkg/cache` 隔离行为测试；TASK-P1-014 已补齐 `pkg/utils` 内部支撑测试；TASK-P1-015 已补齐 router/middleware/demo HTTP 集成测试；TASK-P1-016 已补齐 app 装配、配置变更 hook 与 reload/config 剩余集成测试。
 - Owner：Agent
-- Status：[RISK] 已覆盖多批 `pkg/*` 行为测试、`pkg/utils` 内部支撑测试和 router/middleware/demo HTTP 集成测试；Phase 6 已收尾，app 装配、reload 和配置加载剩余集成路径留待后续重新确认
+- Status：[CONFIRMED] 当前 P1 已覆盖 app/router/demo/config/reload 与主要 `pkg/*` 最小测试路径；更大范围端到端、生产迁移、CI/CD 与 auth/rbac 仍按独立 Backlog 处理
 - Blocking：No，但必须在代码优化前处理。
 
 ### RISK-009：P1 执行顺序未确认
@@ -200,3 +200,4 @@
 | RD-005 | 确认中文化范围 | 已确认根文档和模板优先 | [CONFIRMED] |
 | RD-006 | 确认 auth/JWT 范围 | 已确认延后处理 | [CONFIRMED] |
 | RD-007 | 确认 `pkg/plugin` 注册责任 | 用户修正为被动注册边界 | [CONFIRMED] |
+| RD-008 | 确认包 README 中文化第一阶段 | `pkg/*/README.md` 已完成第一阶段中文化 | [CONFIRMED] |

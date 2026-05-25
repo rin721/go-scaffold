@@ -1,4 +1,4 @@
-# Storage
+# pkg/storage - 文件存储服务
 
 强大的通用文件服务工具库,集成多个主流开源库,提供统一的文件操作接口。
 
@@ -6,7 +6,7 @@
 
 - 定位：[CONFIRMED] 公共基础设施 API。
 - 稳定边界：`Storage`、`Config`、`New`、文件读写、复制、监听和 MIME/媒体辅助能力。
-- 当前风险：[RISK] 文件监听、Excel、图片处理和复制边界缺少包级测试。
+- 当前风险：[CONFIRMED] 复制、MIME、Excel、图片和禁用监听路径已有最小包级测试；真实文件监听事件仍属于后续可扩展测试。
 - 非目标：[CONFIRMED] 本包不定义业务文件目录、权限模型或上传 API。
 
 ## 功能特性
@@ -395,6 +395,6 @@ for i := 0; i < 10; i++ {
 - [github.com/xuri/excelize](https://github.com/xuri/excelize) - Excel处理
 - [github.com/disintegration/imaging](https://github.com/disintegration/imaging) - 图片处理
 
-## License
+## 许可证
 
-MIT License
+本项目使用 MIT 许可证。

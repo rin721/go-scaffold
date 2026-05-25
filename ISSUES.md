@@ -37,6 +37,9 @@
 - ISSUE-P1-015：无未解决失败项。TASK-P1-015 前两次相关包测试失败来自测试构造问题：`httptest.NewRequest` 默认 Host 与 Origin 同源导致 CORS 中间件跳过；固定测试 Host 为 `api.local` 后，相关包测试和全量回归均通过。
 - ISSUE-NEXT-008：无新增失败项。用户选择 A 后，TASK-NEXT-SCOPE-008 已关闭并进入 TASK-PHASE6-001 / TS-PHASE6-001。
 - ISSUE-PHASE6-001：无未解决失败项。Phase 6 收尾仅更新项目状态文档，最终 `go test ./... -count=1` 与 `git diff --check` 均通过。
+- ISSUE-P1-016：无未解决失败项。TASK-P1-016 新增 app 装配与 reload/config 集成测试后，`go test ./internal/app/... -count=1`、`go test ./... -count=1` 与 `git diff --check` 均通过。
+- ISSUE-P1-017：无未解决失败项。TASK-P1-017 第一阶段包 README 中文化后，`go test ./... -count=1` 与 `git diff --check` 均通过。
+- ISSUE-INFRA-003：TASK-P1-016/017 完成后部分背景文档仍保留旧待办表述。已在 TASK-INFRA-003 中修复，诊断报告见 `docs/reports/status_diagnostics/2026-05-26-task-p1-017-post-completion-doc-drift.md`。
 
 ## 历史说明
 
@@ -59,5 +62,8 @@
 - 2026-05-26：记录 TASK-NEXT-SCOPE-007 无新增失败项，router/middleware/demo HTTP 集成测试已排期。
 - 2026-05-26：记录 TASK-P1-015 无未解决失败项，CORS 测试构造问题已修正，相关包测试和全量回归通过。
 - 2026-05-26：记录 TASK-NEXT-SCOPE-008 与 TASK-PHASE6-001 无新增失败项，Phase 6 收尾完成。
+- 2026-05-26：记录 TASK-P1-016 无未解决失败项，app 装配与 reload/config 集成测试通过。
+- 2026-05-26：记录 TASK-P1-017 无未解决失败项，第一阶段包 README 中文化和全量回归通过。
+- 2026-05-26：记录并关闭 TASK-P1-016/017 后背景文档状态漂移。
 - 2026-05-25：记录并关闭 `AGENTS.md` 缺失导致的 Agent 入口冲突。
 - 2026-05-25：创建 `ISSUES.md`，补齐 `docs/ai/prompt.md` 要求的项目问题记录入口。

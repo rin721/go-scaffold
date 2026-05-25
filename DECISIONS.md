@@ -195,3 +195,25 @@
 - Reason：当前 P1 已完成多轮受控补测与边界收拢，选择 A 符合当前确认项，能先冻结本轮成果并留下可恢复交接。
 - Consequences：本收尾切片不新增 Go 代码或测试；app 装配、reload/config 等剩余集成路径继续保留为 Backlog/风险，后续必须重新确认后才能提升。
 - Related Tasks：TASK-NEXT-SCOPE-008、TASK-PHASE6-001
+
+### DEC-019：提升 `BL-002` 剩余 app 装配/reload/config 集成测试
+
+- Date：2026-05-26
+- Status：ACCEPTED
+- Context：Phase 6 收尾后，用户明确要求实施 TASK-P1-016 计划，覆盖 `BL-002` 中尚未完成的 app 装配、配置变更 hook 与 reload/config 剩余路径。
+- Decision：将该剩余范围提升为 TASK-P1-016 / TS-P1-016，限定新增测试文件 `internal/app/app_integration_test.go` 与 `internal/app/reloadapp/reload_test.go`，不新增功能、不启动真实 HTTP server、不依赖外部服务。
+- Alternatives：保持 Phase 6 收尾完成状态并继续 defer；扩大到端到端 server 启动或生产迁移验证；将 reload 与 app 装配拆成两个切片。
+- Reason：用户已提供具体计划和测试边界，范围清晰且能通过临时 SQLite、临时配置和 fake 组件隔离验证。
+- Consequences：允许在 `internal/app/**` 测试范围内补齐集成测试；若测试暴露超出当前范围的缺陷，只能记录为 issue 或单独提升。
+- Related Tasks：TASK-P1-016
+
+### DEC-020：提升 `BL-006` 第一阶段包 README 中文化
+
+- Date：2026-05-26
+- Status：ACCEPTED
+- Context：TASK-P1-017 前当前状态为 `COMPLETED / NONE`，用户在后续方向列表中选择 `a`，对应“包 README 分阶段中文化”；该方向与 `REQ-OPT-P1-005`、`BL-006`、`RISK-005` 对齐。
+- Decision：将 `BL-006` 第一阶段提升为 TASK-P1-017 / TS-P1-017，限定为 `pkg/*/README.md` 主要读者文本中文化，并同步需求、架构、模块和状态文档。
+- Alternatives：继续保持 `BL-006` defer；一次性中文化全部历史文档；转向 auth/rbac、生产迁移、CI/CD 或部署。
+- Reason：包 README 中仍存在英文标题、插件 README 英文主体和过期测试风险描述；第一阶段限定在 `pkg/*/README.md` 可降低范围扩张风险。
+- Consequences：允许修改包 README 和必要状态/架构文档；不修改 Go 代码、依赖、配置 schema、HTTP 路由或数据库 schema。历史文档更大范围中文化仍需单独确认。
+- Related Tasks：TASK-P1-017

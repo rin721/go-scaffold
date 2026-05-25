@@ -1,6 +1,6 @@
-# Plugin Package
+# pkg/plugin - 插件注册与运行时
 
-`pkg/plugin` provides an independent plugin runtime for local and remote plugins.
+`pkg/plugin` 提供独立的插件运行时，用于本地插件和远程 HTTP 插件。
 
 ## API 分类
 
@@ -9,30 +9,26 @@
 - 当前风险：[DEFERRED] rpc/ws/discovery 仍为预留协议，不属于当前稳定能力。
 - 非目标：[CONFIRMED] 本包不依赖 `internal/*`，不感知应用组合层，不主动发现、加载或注册插件服务。
 
-The package does not import `internal/*` and does not know about the application
-composition layer. It is a passive registry/runtime: plugin services or the
-host composition layer create plugin instances, then register them with the
-manager.
+本包不导入 `internal/*`，也不感知应用组合层。它是被动 registry/runtime：插件服务或宿主装配层负责创建插件实例，再把实例注册到 manager。
 
-## Features
+## 功能特性
 
-- Unified `Plugin` interface.
-- `Manager` for passive register, invoke, list, and close operations.
-- Local in-process plugins created by plugin services.
-- HTTP remote plugins through a JSON request/response protocol.
-- Reserved protocol constants for future `rpc` and `ws` adapters.
-- Context-aware invocation.
+- 统一的 `Plugin` 接口。
+- `Manager` 提供被动注册、调用、列出和关闭能力。
+- 本地进程内插件由插件服务显式创建。
+- HTTP 远程插件使用统一 JSON 请求/响应协议。
+- 为后续 `rpc` 和 `ws` 适配器保留协议常量。
+- 调用链路支持 `context.Context`。
 
-## Registration Boundary
+## 注册边界
 
-`pkg/plugin` does not actively load plugin services from configuration. A plugin
-service or host composition layer owns service lifecycle and registration:
+`pkg/plugin` 不会主动从配置加载插件服务。插件服务或宿主装配层负责服务生命周期和注册：
 
-1. Build a local or HTTP plugin instance.
-2. Call `mgr.Register(pluginInstance)`.
-3. Use `mgr.Invoke`, `mgr.List`, and `mgr.Close` as the passive runtime.
+1. 构造本地或 HTTP 插件实例。
+2. 调用 `mgr.Register(pluginInstance)`。
+3. 使用 `mgr.Invoke`、`mgr.List` 和 `mgr.Close` 作为被动运行时能力。
 
-## Local Plugin
+## 本地插件
 
 ```go
 mgr := plugin.NewManager()
@@ -49,10 +45,9 @@ if err != nil {
 err = mgr.Register(echo)
 ```
 
-Local plugin implementations can live in `plugins/*`, but this package does not
-load Go dynamic plugins. That keeps the library cross-platform and independent.
+本地插件实现可以放在 `plugins/*` 中，但本包不会加载 Go dynamic plugin。这样可以保持库跨平台且独立于宿主应用。
 
-## HTTP Plugin
+## HTTP 插件
 
 ```go
 mgr := plugin.NewManager()
@@ -69,7 +64,7 @@ err = mgr.Register(remote)
 resp, err := mgr.Invoke(ctx, "remote", plugin.MustNewRequest("status", nil))
 ```
 
-The HTTP adapter sends:
+HTTP 适配器发送如下请求：
 
 ```json
 {
@@ -79,7 +74,7 @@ The HTTP adapter sends:
 }
 ```
 
-The endpoint should return:
+插件端点应返回如下响应：
 
 ```json
 {
@@ -89,4 +84,4 @@ The endpoint should return:
 }
 ```
 
-HTTP status codes outside `2xx` return `ErrHTTPStatus`.
+HTTP 状态码不在 `2xx` 范围时返回 `ErrHTTPStatus`。

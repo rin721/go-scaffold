@@ -3,7 +3,7 @@
 ## 项目身份
 
 - Project：go-scaffold
-- Current Phase：Phase 6 收尾完成
+- Current Phase：P1 追加测试与包 README 中文化完成
 - Overall Status：COMPLETED
 - Last Updated：2026-05-26
 - Source Rule：`docs/ai/prompt.md`
@@ -16,7 +16,7 @@
 - [CONFIRMED] `go test ./... -count=1` 当前通过，可作为后续优化前的回归基线。
 - [CONFIRMED] 本轮目标是生成和重写中文项目启动材料，重新启动“全项目分析与优化路线”主线。
 - [RISK] 旧状态文档曾停留在插件系统 v1 收尾，容易让后续“下一步”偏离当前目标。
-- [RISK] 根文档、模板和部分包 README 存在中英文混杂。
+- [CONFIRMED] 根文档、模板和第一阶段 `pkg/*/README.md` 中文化已完成；历史文档更大范围中文化仍需单独确认。
 
 ## 一句话目标
 
@@ -44,7 +44,7 @@
 - [RISK] 当前状态主线曾偏向插件系统扩展，而不是全项目优化。
 - [RISK] `pkg/*` 公共性和兼容策略不清。
 - [RISK] demo `AutoMigrate`、`initdb` 命令和 SQL 脚本职责未统一。
-- [RISK] app/router/demo/config reload 等路径缺少集成测试。
+- [CONFIRMED] app/router/demo/config reload 等 P1 最小集成测试已由 TASK-P1-015 和 TASK-P1-016 覆盖。
 - [RISK] JWT/auth 示例与“暂不实现 auth/rbac”的 README 说明存在范围漂移。
 - [RISK] `pkg/sqlgen` 存在 TODO/未实现能力，需要确认是 unsupported、Backlog 还是后续实现。
 
@@ -64,8 +64,9 @@
 - [CONFIRMED] 模块边界清单、测试矩阵、P1 切片、`types/*` 契约边界和 `pkg/plugin` 被动注册边界已完成。
 - [CONFIRMED] TASK-P1-014 已完成，`pkg/utils` 已有最小确定性行为测试。
 - [CONFIRMED] TASK-P1-015 已完成，demo Todo HTTP 集成和 TraceID/CORS/Recovery 链路已有最小路由级测试。
-- [CONFIRMED] 用户选择 A，Phase 6 收尾已完成；当前无自动下一实现任务。
-- [DEFERRED] app 装配、reload/config 等剩余集成测试保留为后续确认范围。
+- [CONFIRMED] TASK-P1-016 已完成，app 装配、配置变更 hook 与 reload/config 分发路径已有最小集成测试。
+- [CONFIRMED] TASK-P1-017 已完成，第一阶段 `pkg/*/README.md` 中文化已同步。
+- [CONFIRMED] 当前无自动下一实现任务。
 
 ### P2
 

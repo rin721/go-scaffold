@@ -11,11 +11,11 @@
 | ID | 标题 | 来源 | 优先级 | 延后原因 | 状态 |
 |---|---|---|---|---|---|
 | BL-001 | 处理 JWT/auth 示例与 README 范围不一致 | `.env.example`、README | P1 | 需要确认 auth/JWT 范围 | [DEFERRED] |
-| BL-002 | 增加 app/router/demo 集成测试 | 测试风险分析 | P1 | router/middleware/demo HTTP 集成已在 TASK-P1-015 覆盖；用户选择 A 完成 Phase 6 收尾，app 装配/reload/config 剩余范围后续仍需单独确认 | [PARTIAL] |
+| BL-002 | 增加 app/router/demo 集成测试 | 测试风险分析 | P1 | router/middleware/demo HTTP 集成已在 TASK-P1-015 覆盖；app 装配、配置变更 hook 与 reload/config 剩余范围已在 TASK-P1-016 覆盖 | [COMPLETED] |
 | BL-003 | 定义 `pkg/*` API 兼容策略 | 包边界风险 | P1 | 需要架构决策 | [DEFERRED] |
 | BL-004 | 统一 AutoMigrate、initdb、SQL 脚本迁移策略 | 迁移边界风险 | P1 | 需要架构决策 | [DEFERRED] |
 | BL-005 | 明确 `pkg/sqlgen` 未实现能力的边界 | TODO/unsupported 风险 | P1 | 已提升为 TASK-P1-008 并完成 | [COMPLETED] |
-| BL-006 | 分阶段中文化包 README | 中文项目要求 | P1 | 需要确认中文化范围 | [DEFERRED] |
+| BL-006 | 分阶段中文化包 README | 中文项目要求 | P1 | 第一阶段 `pkg/*/README.md` 已由 TASK-P1-017 完成；历史文档更大范围中文化仍需单独确认 | [COMPLETED] |
 | BL-007 | 增加 CI 质量门禁 | 质量工程 | P2 | 超出启动确认阶段 | [DEFERRED] |
 | BL-008 | 增加部署说明 | 发布工程 | P2 | 超出当前阶段 | [DEFERRED] |
 | BL-009 | 实现 auth/rbac 模块 | 未来功能 | P2 | README 当前说明暂不实现 | [DEFERRED] |

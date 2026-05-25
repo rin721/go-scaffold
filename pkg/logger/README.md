@@ -1,4 +1,4 @@
-# Logger Package
+# pkg/logger - 结构化日志封装
 
 提供统一的日志接口,基于高性能的 [Zap](https://github.com/uber-go/zap) 日志库,支持结构化日志、配置热更新和多种输出格式。
 
@@ -643,7 +643,7 @@ cfg := &logger.Config{
 
 ## 常见问题
 
-### Q: 如何在 Gin 中使用?
+### 问：如何在 Gin 中使用？
 
 ```go
 func LoggerMiddleware(log logger.Logger) gin.HandlerFunc {
@@ -670,7 +670,7 @@ func LoggerMiddleware(log logger.Logger) gin.HandlerFunc {
 router.Use(LoggerMiddleware(log))
 ```
 
-### Q: 如何禁用 stdout 的 sync 错误?
+### 问：如何禁用 stdout 的 sync 错误？
 
 ```go
 // Sync() 可能在某些平台返回无害错误
@@ -683,7 +683,7 @@ if err := log.Sync(); err != nil {
 }
 ```
 
-### Q: Fatal 和 Error 的区别?
+### 问：Fatal 和 Error 的区别？
 
 - `Error()`: 记录错误,程序继续运行
 - `Fatal()`: 记录错误,调用 `os.Exit(1)` 终止程序

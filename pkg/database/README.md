@@ -1,4 +1,4 @@
-# Database Package
+# pkg/database - 数据库基础设施
 
 提供统一的数据库抽象层,支持 PostgreSQL、MySQL 和 SQLite,并提供连接池管理和配置热更新功能。
 
@@ -597,7 +597,7 @@ cfg.MaxIdleConns = 25
 3. 优化慢查询
 4. 考虑使用读写分离
 
-### Too many connections
+### 连接数过多
 
 **问题**: `too many connections`
 

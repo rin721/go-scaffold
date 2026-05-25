@@ -1,4 +1,4 @@
-# Executor Package
+# pkg/executor - 协程池任务执行器
 
 提供通用的并发任务调度器,基于高性能的 [ants](https://github.com/panjf2000/ants) 协程池库,支持多池隔离、配置热更新和全链路 panic 恢复。
 
@@ -6,7 +6,7 @@
 
 - 定位：[CONFIRMED] 公共基础设施 API。
 - 稳定边界：`Manager`、`Config`、`PoolName`、`NewManager`。
-- 当前风险：[RISK] reload、shutdown、overload 和 panic handler 行为缺少包级测试。
+- 当前风险：[CONFIRMED] reload、shutdown、overload 和 panic handler 已有最小包级测试；业务降级策略仍由调用方定义。
 - 非目标：[CONFIRMED] 本包不调度业务任务优先级，也不定义业务降级策略。
 
 ## 特性
@@ -647,7 +647,7 @@ mgr.Execute("background", func() {
 
 ## 常见问题
 
-### Q: 如何选择阻塞/非阻塞模式?
+### 问：如何选择阻塞/非阻塞模式？
 
 **非阻塞模式 (推荐)**:
 
@@ -661,7 +661,7 @@ mgr.Execute("background", func() {
 - 批处理任务: 必须全部完成
 - 低频场景: 不担心阻塞
 
-### Q: 任务 panic 会发生什么?
+### 问：任务 panic 会发生什么？
 
 所有任务都自动包装 panic 恢复:
 
@@ -670,7 +670,7 @@ mgr.Execute("background", func() {
 3. 池继续正常工作
 4. 可以通过 `SetPanicHandler` 自定义处理
 
-### Q: Reload 会丢失正在执行的任务吗?
+### 问：Reload 会丢失正在执行的任务吗？
 
 不会。重载流程保证:
 
@@ -678,7 +678,7 @@ mgr.Execute("background", func() {
 2. ✅ 旧池等待任务完成 (最多 5 秒)
 3. ✅ 所有任务都会执行完成
 
-### Q: 如何监控池的状态?
+### 问：如何监控池的状态？
 
 目前版本暂无内置指标,未来版本会添加:
 

@@ -1,4 +1,4 @@
-# CLI Package
+# pkg/cli - 命令行工具包
 
 提供企业级通用 CLI 工具框架,支持标准化命令结构、类型安全的参数绑定和可测试性设计,适用于代码生成器、数据迁移工具、运维脚本等场景。
 
@@ -6,7 +6,7 @@
 
 - 定位：[CONFIRMED] 公共工具 API。
 - 稳定边界：`App`、`Command`、`Context`、`Flag`、错误类型和 `GetExitCode`。
-- 当前风险：[RISK] flag parser 和 help 输出仍缺少包级测试，新增 CLI 行为需优先补测试。
+- 当前风险：[CONFIRMED] flag parser、help 输出和错误包装已有最小包级测试；新增 CLI 行为仍需同步补测试。
 - 非目标：[CONFIRMED] 本包不绑定具体业务命令。
 
 ## 特性

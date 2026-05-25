@@ -1,4 +1,4 @@
-# SQLGen
+# pkg/sqlgen - SQL 生成工具
 
 双向 SQL 生成库 - Go 语言实现
 
@@ -13,7 +13,7 @@
 
 - 定位：[CONFIRMED] 公共工具 API。
 - 稳定边界：当前测试覆盖的 SQL 构建、解析、事务和模板能力。
-- 当前风险：[CONFIRMED] TODO/未实现能力已在下方 unsupported 边界中标注。
+- 当前风险：[CONFIRMED] TODO/未实现能力已在下方“不支持能力”边界中标注。
 - 非目标：[CONFIRMED] 本包不替代运行时 ORM，也不直接执行数据库写入。
 
 ## 安装
@@ -143,7 +143,7 @@ type Config struct {
 | `GenerateToFile(path)` | 生成到文件      |
 | `GenerateToDir(dir)`   | 生成到目录      |
 
-## Unsupported / 部分能力边界
+## 不支持能力 / 部分能力边界
 
 以下能力当前不属于稳定可用 API。使用时不得假设其已经按 GORM 或数据库连接语义完整实现。
 
@@ -162,6 +162,6 @@ type Config struct {
 - SQLite
 - SQL Server
 
-## License
+## 许可证
 
 MIT

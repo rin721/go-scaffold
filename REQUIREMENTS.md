@@ -14,7 +14,7 @@
 - [CONFIRMED] `pkg/*` 采用混合策略：可复用基础设施包按公共 API 管理，明确项目内部支撑包不承诺外部兼容。
 - [CONFIRMED] demo 模块暂定为长期标准示例，用于展示模块分层和后续测试样板。
 - [CONFIRMED] 迁移策略采用 dev-prod 分层：开发/demo 可使用 `AutoMigrate`，生产/bootstrap 倾向显式 SQL 或迁移流程。
-- [CONFIRMED] 中文化范围先覆盖根文档和模板，包 README 与历史文档分阶段处理。
+- [CONFIRMED] 中文化范围先覆盖根文档和模板；第一阶段包 README 已纳入 TASK-P1-017，历史文档仍分阶段处理。
 - [CONFIRMED] auth/JWT 先延后处理，不在当前 P0/P1 代码实现范围内。
 
 ## 项目目标
@@ -41,7 +41,7 @@
 | REQ-OPT-P1-002 | 生成测试矩阵 | `MODULES.md` 包含 app 启动、health/ready、demo CRUD、配置加载/重载、迁移策略测试矩阵草案 | [CONFIRMED] |
 | REQ-OPT-P1-003 | 生成设计边界收拢清单 | `MODULES.md` 明确迁移、配置、插件、包 API、demo、auth/JWT 的统一策略风险 | [CONFIRMED] |
 | REQ-OPT-P1-004 | 拆分优化任务和时间切片 | 每个 P1 优化项有允许文件范围、验证命令和退出条件 | [CONFIRMED] |
-| REQ-OPT-P1-005 | 分阶段中文化历史内容 | 根文档优先，包 README 进入后续文档任务 | [NOT_STARTED] |
+| REQ-OPT-P1-005 | 分阶段中文化历史内容 | 根文档和模板已完成；第一阶段 `pkg/*/README.md` 中文化已由 TASK-P1-017 覆盖 | [CONFIRMED] |
 
 ## P2 延后需求
 

@@ -3,7 +3,7 @@
 ## 验收状态
 
 - Project：go-scaffold
-- Phase：Phase 6 收尾完成
+- Phase：Agent 状态一致性修复完成
 - Status：COMPLETED
 - Last Updated：2026-05-26
 
@@ -76,9 +76,12 @@
 - app/router/middleware 集成测试：COMPLETED，`internal/transport/http/router_integration_test.go` 已覆盖 demo Todo HTTP 集成和 TraceID/CORS/Recovery 链路
 - TASK-NEXT-SCOPE-008：COMPLETED，用户选择 A 进入 Phase 6 收尾
 - Phase 6 收尾与交接：COMPLETED，最终回归、变更记录、验收、问题记录和交接说明已更新
+- app 装配与 reload/config 集成测试：COMPLETED，`internal/app/app_integration_test.go` 和 `internal/app/reloadapp/reload_test.go` 已覆盖真实 app 装配、配置变更 hook 与 reload 分发
+- 包 README 第一阶段中文化：COMPLETED，`pkg/*/README.md` 已统一主要中文读者文本并同步过期风险描述
+- TASK-INFRA-003 状态一致性修复：COMPLETED，背景文档中的 TASK-P1-016 前旧待办表述已修复
 - Agent 基础设施补齐：COMPLETED
 - Agent 基础设施一致性修复：COMPLETED
-- 代码实现：COMPLETED，TASK-P1-015 已完成并通过验证
+- 代码实现：COMPLETED，TASK-P1-016 已完成并通过验证
 
 ## Prompt 全量产物验收
 
@@ -96,6 +99,7 @@
 | ACC-INFRA-010 | canonical 与 `.agents` skills 均可通过 skill 验证 | `quick_validate.py` 验证 28 个 skill 目录 | 是 | [CONFIRMED] |
 | ACC-INFRA-011 | 模板不混入当前项目实例事实 | 检查 `docs/templates/*` | 是 | [CONFIRMED] |
 | ACC-INFRA-012 | 状态冲突已形成诊断报告 | 检查 `docs/reports/status_diagnostics/2026-05-25-task-infra-002-agents-md-missing.md` | 是 | [CONFIRMED] |
+| ACC-INFRA-013 | TASK-P1-016/017 后背景文档漂移已形成诊断报告并修复 | 检查 `docs/reports/status_diagnostics/2026-05-26-task-p1-017-post-completion-doc-drift.md` 和状态文档 | 是 | [CONFIRMED] |
 
 ## 测试矩阵与任务拆分验收
 
@@ -322,3 +326,25 @@
 | ACC-PHASE6-003 | 最终全量回归通过 | `go test ./... -count=1` | 是 | [CONFIRMED] |
 | ACC-PHASE6-004 | diff 空白检查通过 | `git diff --check` | 是 | [CONFIRMED] |
 | ACC-PHASE6-005 | 后续工作不会自动开始，必须重新确认 | 检查 `AGENT_HANDOFF.md` 和 `STATUS.md` | 是 | [CONFIRMED] |
+
+## TASK-P1-016 验收
+
+| ID | 验收项 | 方法 | 必须 | 状态 |
+|---|---|---|---|---|
+| ACC-P1-075 | server 模式真实 app 装配链路被覆盖 | `go test ./internal/app/... -count=1` | 是 | [CONFIRMED] |
+| ACC-P1-076 | initdb 模式仅初始化数据库并创建 demo schema，不装配 HTTP transport | `go test ./internal/app/... -count=1` | 是 | [CONFIRMED] |
+| ACC-P1-077 | `ConfigManager.Update` 触发 app hook 并更新 `Core.Config`，不启动真实 server | `go test ./internal/app/... -count=1` | 是 | [CONFIRMED] |
+| ACC-P1-078 | reload 分发覆盖未变化、单组件变化和 Redis/executor/storage 关闭置空路径 | `go test ./internal/app/... -count=1` | 是 | [CONFIRMED] |
+| ACC-P1-079 | database reload 不触发 demo schema 隐式迁移路径 | `go test ./internal/app/... -count=1` | 是 | [CONFIRMED] |
+| ACC-P1-080 | 全量回归通过 | `go test ./... -count=1` | 是 | [CONFIRMED] |
+| ACC-P1-081 | diff 空白检查通过 | `git diff --check` | 是 | [CONFIRMED] |
+
+## TASK-P1-017 验收
+
+| ID | 验收项 | 方法 | 必须 | 状态 |
+|---|---|---|---|---|
+| ACC-P1-082 | 13 个 `pkg/*/README.md` 已检查并完成第一阶段中文化 | 人工检查 `pkg/*/README.md` | 是 | [CONFIRMED] |
+| ACC-P1-083 | README 中与已完成测试状态明显冲突的风险描述已同步 | 人工检查包 README、`ARCHITECTURE.md`、`MODULES.md` | 是 | [CONFIRMED] |
+| ACC-P1-084 | 未修改 Go 代码、依赖、配置 schema、HTTP 路由或数据库 schema | 核对 git diff 范围 | 是 | [CONFIRMED] |
+| ACC-P1-085 | 全量回归通过 | `go test ./... -count=1` | 是 | [CONFIRMED] |
+| ACC-P1-086 | diff 空白检查通过 | `git diff --check` | 是 | [CONFIRMED] |

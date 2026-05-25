@@ -22,7 +22,7 @@
 
 | ID | 范围 | 当前证据 | 命令 | 状态 |
 |---|---|---|---|---|
-| TM-BASE-001 | 全仓库 Go 测试 | 当前通过；`internal/transport/http` 已覆盖 health/ready 与 demo Todo HTTP 集成，`internal/modules/demo/service` 已覆盖 service/repository CRUD，部分 app/reload 路径仍为 `[no test files]` | `go test ./... -count=1` | [CONFIRMED] |
+| TM-BASE-001 | 全仓库 Go 测试 | 当前通过；`internal/transport/http` 已覆盖 health/ready 与 demo Todo HTTP 集成，`internal/modules/demo/service` 已覆盖 service/repository CRUD，`internal/app` 和 `internal/app/reloadapp` 已覆盖 app 装配与 reload/config 路径 | `go test ./... -count=1` | [CONFIRMED] |
 | TM-BASE-002 | 已有包级测试 | `pkg/crypto`、`pkg/database`、`pkg/logger`、`pkg/plugin`、`pkg/sqlgen`、`types/constants` 当前通过 | `go test ./pkg/crypto ./pkg/database ./pkg/logger ./pkg/plugin ./pkg/sqlgen ./types/constants -count=1` | [CONFIRMED] |
 
 ## P0 正式测试矩阵
@@ -32,7 +32,7 @@
 | TM-P0-001 | `internal/config` | 配置加载、`${VAR:default}`、环境变量覆盖、无效配置报错 | `internal/config/*_test.go`、必要 testdata、`.env.example` 只在策略任务中改 | `go test ./internal/config -count=1` | 配置测试存在；失败场景有断言；不会依赖真实外部服务 | BC-001、BC-002 |
 | TM-P0-002 | `internal/config.Manager` | `Update`/copy 后不丢 `InitDB`、`Executor`、`Storage`、`CORS`、`Server.Host` 等字段 | `internal/config/*_test.go`、`internal/config/*.go` | `go test ./internal/config -count=1` | 测试能证明字段完整复制；必要修复已完成 | BC-002 |
 | TM-P0-003 | `internal/transport/http` | `/health`、`/ready` 在数据库正常/缺失/失败时的 HTTP 状态和响应语义 | `internal/transport/http/*_test.go` | `go test ./internal/transport/http -count=1` | [CONFIRMED] TASK-P1-003 已用 `httptest` 覆盖；不启动真实 server | BC-006 |
-| TM-P0-004 | `internal/app` | `app.New` 在 server/initdb 模式的最小装配链路 | `internal/app/**/*_test.go` | `go test ./internal/app/... -count=1` | 使用临时配置；不依赖真实外部服务；资源可关闭 | BC-003、BC-006 |
+| TM-P0-004 | `internal/app` | `app.New` 在 server/initdb 模式的最小装配链路 | `internal/app/**/*_test.go` | `go test ./internal/app/... -count=1` | [CONFIRMED] TASK-P1-016 已使用临时配置和临时 SQLite 覆盖 server/initdb 装配、配置变更 hook、reload 分发；不依赖真实外部服务；资源可关闭 | BC-003、BC-006 |
 | TM-P0-005 | `internal/modules/demo` | demo Todo Create/List/Get/Update/Delete 关键路径 | `internal/modules/demo/**/*_test.go`、`internal/transport/http/*_test.go` | `go test ./internal/modules/demo/... ./internal/transport/http -count=1` | [CONFIRMED] TASK-P1-004 已使用临时 SQLite 覆盖 service/repository 关键行为；TASK-P1-015 已覆盖 handler/router HTTP 集成路径 | BC-003、BC-006 |
 | TM-P0-006 | 全仓库回归 | 每个代码切片完成后确认无全局回归 | 不限制，只读验证 | `go test ./... -count=1` | 全量测试 PASS；新增失败进入修复流程 | FIND-001 |
 
@@ -51,6 +51,8 @@
 | TM-P1-009 | 第三批 `pkg/cache` 隔离行为测试 | 为 `pkg/cache` 补最小包级行为测试，用进程内 Redis 覆盖成功路径和明确错误路径 | `pkg/cache/**/*_test.go`；必要时限当前包实现文件；测试依赖可修改 `go.mod`、`go.sum` | `go test ./pkg/cache -count=1`；`go test ./... -count=1` | [CONFIRMED] `pkg/cache` 已有确定性隔离行为测试；不依赖真实 Redis、数据库、第三方网络服务或生产配置 | BL-020、RISK-008 |
 | TM-P1-010 | `pkg/utils` 内部支撑测试 | 为 `pkg/utils` 补最小确定性行为测试，覆盖 Snowflake、地址校验、端口查找、设备 ID 和 i18n helper 委托 | `pkg/utils/**/*_test.go`；必要时限当前包实现文件 | `go test ./pkg/utils -count=1`；`go test ./... -count=1` | [CONFIRMED] `pkg/utils` 已有最小确定性行为测试；不依赖真实外部网络服务、固定生产端口、数据库或生产配置 | BL-023、RISK-008 |
 | TM-P1-011 | router/middleware/demo HTTP 集成测试 | 用 `httptest` 覆盖 demo Todo HTTP 路由、handler/service/repository 集成，以及 TraceID、CORS、Recovery 中间件链路 | `internal/transport/http/**/*_test.go`、必要时 `internal/middleware/**/*_test.go` 或 `internal/modules/demo/**/*_test.go` | `go test ./internal/transport/http ./internal/middleware ./internal/modules/demo/... -count=1`；`go test ./... -count=1` | [CONFIRMED] TASK-P1-015 已覆盖 demo Todo HTTP CRUD、CORS preflight/actual、TraceID round-trip 和 Recovery trace 响应；不启动真实 HTTP server | BL-002、RISK-008 |
+| TM-P1-012 | app 装配与 reload/config 集成测试 | 用临时配置、临时 SQLite 和 fake 组件覆盖真实 app 装配、配置变更 hook、reload 分发和关闭配置路径 | `internal/app/app_integration_test.go`、`internal/app/reloadapp/reload_test.go` | `go test ./internal/app/... -count=1`；`go test ./... -count=1` | [CONFIRMED] TASK-P1-016 已覆盖 server/initdb 装配、配置 hook、reload 未变化/单组件变化/关闭可选组件/database reload 不隐式迁移；不启动真实 HTTP server | BL-002、RISK-008 |
+| TM-P1-013 | `pkg/*` README 第一阶段中文化 | 将包 README 的主要读者文本统一为中文，并同步已完成测试后的明显过期风险描述 | `pkg/*/README.md`、需求/架构/模块和状态文档 | `go test ./... -count=1`；`git diff --check` | [CONFIRMED] TASK-P1-017 已完成第一阶段 `pkg/*/README.md` 中文化；未修改 Go 代码、依赖、配置 schema、HTTP 路由或数据库 schema | BL-006、RISK-005 |
 
 ## P1 优化任务草案
 
@@ -72,6 +74,8 @@
 | TASK-P1-013 | 补第三批 `pkg/cache` 隔离行为测试 | P1 | 测试 | `pkg/cache/**/*_test.go`、必要时限当前包实现文件、测试依赖、状态文档 | `go test ./pkg/cache -count=1`；`go test ./... -count=1` | [CONFIRMED] `pkg/cache` 有最小隔离行为测试且不依赖真实 Redis | COMPLETED |
 | TASK-P1-014 | 补 `pkg/utils` 内部支撑工具最小行为测试 | P1 | 测试 | `pkg/utils/**/*_test.go`、必要时限当前包实现文件、状态文档 | `go test ./pkg/utils -count=1`；`go test ./... -count=1` | [CONFIRMED] `pkg/utils` 有最小确定性行为测试且不依赖真实外部服务 | COMPLETED |
 | TASK-P1-015 | 补 app/router/middleware 最小集成测试 | P1 | 测试 | `internal/transport/http/**/*_test.go`、必要时 `internal/middleware/**/*_test.go`、`internal/modules/demo/**/*_test.go`、状态文档 | `go test ./internal/transport/http ./internal/middleware ./internal/modules/demo/... -count=1`；`go test ./... -count=1` | [CONFIRMED] demo Todo HTTP 集成和 TraceID/CORS/Recovery 链路有最小测试覆盖 | COMPLETED |
+| TASK-P1-016 | 补 app 装配与 reload/config 剩余集成测试 | P1 | 测试 | `internal/app/app_integration_test.go`、`internal/app/reloadapp/reload_test.go`、必要时 `internal/app/**` 或 `internal/config/**`、状态文档 | `go test ./internal/app/... -count=1`；`go test ./... -count=1` | [CONFIRMED] app.New server/initdb 装配、配置变更 hook 和 reload/config 分发路径有最小测试覆盖 | COMPLETED |
+| TASK-P1-017 | 分阶段中文化 `pkg/*` README | P1 | 文档 | `pkg/*/README.md`、需求/架构/模块和状态文档 | `go test ./... -count=1`；`git diff --check` | [CONFIRMED] 第一阶段包 README 中文化完成，未新增功能承诺或修改代码 | COMPLETED |
 
 ## 推荐执行顺序
 
@@ -89,11 +93,13 @@
 12. TASK-P1-013：补第三批 `pkg/cache` 隔离行为测试。
 13. TASK-P1-014：补 `pkg/utils` 内部支撑工具最小行为测试。
 14. TASK-P1-015：补 router/middleware/demo HTTP 集成测试。
+15. TASK-P1-016：补 app 装配与 reload/config 剩余集成测试。
+16. TASK-P1-017：分阶段中文化 `pkg/*` README。
 
 当前合法下一项：
 
-- [COMPLETED] 本轮测试矩阵执行与 Phase 6 收尾完成；当前无自动下一实现任务。
-- [DEFERRED] app 装配、reload/config 等剩余集成测试仍可后续提升，但必须由用户重新确认并拆成新的任务/时间切片。
+- [COMPLETED] TASK-P1-017 已完成；第一阶段包 README 中文化通过验证，当前无自动下一实现任务。
+- [CONFIRMED] 后续更大范围中文化、auth/rbac、生产迁移、CI/CD、部署或插件扩展仍必须由用户重新确认并拆成新的任务/时间切片。
 
 ## 验收门禁
 
