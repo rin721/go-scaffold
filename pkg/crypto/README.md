@@ -2,6 +2,13 @@
 
 安全、易用的密码加密和验证库，基于成熟的 bcrypt 算法。
 
+## API 分类
+
+- 定位：[CONFIRMED] 公共基础设施 API。
+- 稳定边界：`Crypto` 接口、bcrypt 实现、`Config`、Option 配置函数。
+- 当前风险：[RISK] 当前稳定实现仅覆盖 bcrypt，其他算法配置属于扩展预留。
+- 非目标：[CONFIRMED] 本包不负责认证流程、会话、JWT 或 RBAC。
+
 ## 特性
 
 - ✅ **安全可靠** - 使用 bcrypt 算法，自动加盐

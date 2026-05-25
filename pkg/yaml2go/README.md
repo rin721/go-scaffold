@@ -6,6 +6,13 @@ YAML 转 Go 结构体代码生成工具库
 
 `pkg/yaml2go` 是一个**纯转换工具**，可以将 YAML 格式的配置自动转换为 Go 结构体代码。
 
+## API 分类
+
+- 定位：[CONFIRMED] 公共工具 API。
+- 稳定边界：`Converter`、`Config`、`New`、`Convert` 返回的代码内容结构。
+- 当前风险：[RISK] 包自身缺少测试；原 `cmd/server tests` 演示依赖已在 TASK-P1-006 移除。
+- 非目标：[CONFIRMED] 本包不做文件写入、不管理 CLI 命令、不修改项目配置。
+
 > [!IMPORTANT]
 > **纯转换，不做文件操作**
 >

@@ -2,6 +2,13 @@
 
 `pkg/httpserver` 提供统一的 HTTP 服务器接口，基于标准库 `net/http` 和 Gin 框架，支持配置热更新和优雅关闭。
 
+## API 分类
+
+- 定位：[CONFIRMED] 公共基础设施 API。
+- 稳定边界：`HTTPServer`、`Config`、`Handler`、`New`、配置和 server error 类型。
+- 当前风险：[RISK] start、reload、shutdown 路径缺少包级测试。
+- 非目标：[CONFIRMED] 本包不注册业务路由，不定义 HTTP API 契约。
+
 ## 特性
 
 - **统一接口**: 抽象 HTTP 服务器实现，易于测试和替换

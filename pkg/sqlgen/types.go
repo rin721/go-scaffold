@@ -182,6 +182,9 @@ type QueryContext struct {
 
 	// Returning RETURNING 子句 (PostgreSQL)
 	Returning []string
+
+	// UnsupportedOperation 记录当前链式调用中尚未支持的操作。
+	UnsupportedOperation string
 }
 
 // WhereCondition 表示 WHERE 条件

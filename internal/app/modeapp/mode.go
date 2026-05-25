@@ -64,7 +64,7 @@ func BuildInitDB(core initapp.Core) (BuildResult, error) {
 	}
 
 	infra := initapp.Infrastructure{Database: db}
-	if err := initapp.MigrateDemoSchema(infra.Database, core.Logger); err != nil {
+	if _, err := initapp.MigrateDemoSchemaForTrigger(infra.Database, core.Logger, initapp.DemoMigrationTriggerInitDB); err != nil {
 		return BuildResult{}, err
 	}
 

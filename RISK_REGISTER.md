@@ -3,7 +3,7 @@
 ## 风险登记状态
 
 - Project：go-scaffold
-- Phase：HTTP health/ready smoke test
+- Phase：types/* 契约边界准备
 - Status：IN_PROGRESS
 - Last Updated：2026-05-25
 
@@ -40,10 +40,10 @@
 - Probability：Medium
 - Impact：开发态、测试态和生产态数据库初始化职责混乱。
 - Trigger：demo `AutoMigrate`、`initdb` 命令、SQL 脚本并存但无统一策略。
-- Mitigation：架构确认阶段明确迁移策略。
+- Mitigation：TASK-P1-005 已将 demo 迁移触发策略显式化：server-start/initdb 允许 demo `AutoMigrate`，reload 跳过隐式 schema 变更；生产迁移框架仍延后。
 - Owner：User/Agent
-- Status：[RISK]
-- Blocking：Yes，阻塞数据库相关优化。
+- Status：[CONFIRMED] 触发边界已收拢；生产迁移框架仍延后
+- Blocking：No。
 
 ### RISK-004：`pkg/*` API 兼容不明
 
@@ -52,10 +52,10 @@
 - Probability：Medium
 - Impact：包级重构可能破坏未来或外部使用者。
 - Trigger：未确认 `pkg/*` 是公共复用库、内部支撑或混合策略。
-- Mitigation：在 `DECISIONS.md` 中记录 API 策略后再重构。
+- Mitigation：TASK-P1-007 已逐包标注公共基础设施 API、公共工具 API 或内部支撑工具包；任何 `pkg/*` 破坏性重构仍需单独任务和确认。
 - Owner：User/Agent
-- Status：[RISK]
-- Blocking：Yes，阻塞包级重构。
+- Status：[CONFIRMED] API 分类已完成；破坏性重构仍受门禁约束
+- Blocking：No。
 
 ### RISK-005：包 README 中英混杂
 
@@ -100,9 +100,9 @@
 - Probability：Medium
 - Impact：后续代码优化可能回归 app 启动、路由、demo CRUD、配置热更新或迁移。
 - Trigger：多个关键路径当前没有测试文件。
-- Mitigation：`TEST_MATRIX.md` 已生成；TASK-P1-003 已补齐 `internal/transport/http` health/ready smoke test；后续代码优化仍需按矩阵补 app、demo、CLI、pkg 等测试。
+- Mitigation：`TEST_MATRIX.md` 已生成；TASK-P1-003 已补齐 `internal/transport/http` health/ready smoke test；TASK-P1-004 已补齐 demo Todo service/repository CRUD 测试基线；TASK-P1-005 已补齐 demo 迁移策略测试；TASK-P1-006 已补齐 `cmd/server` tests 命令语义测试；TASK-P1-007 已完成 `pkg/*` API 分类；TASK-P1-008 已补齐 `pkg/sqlgen` unsupported 行为测试；后续代码优化仍需按矩阵补 pkg 行为测试。
 - Owner：Agent
-- Status：[RISK] 部分缓解
+- Status：[RISK] 部分缓解，pkg 行为测试缺口仍存在
 - Blocking：No，但必须在代码优化前处理。
 
 ### RISK-009：P1 执行顺序未确认
@@ -139,6 +139,42 @@
 - Mitigation：TASK-P1-002 已统一为 `DB_*` 优先，旧 `REI_APP_DB_*` 兼容 fallback；`.env.example` 已同步；配置测试已覆盖。
 - Owner：Agent
 - Status：[CONFIRMED] 已修复
+- Blocking：No。
+
+### RISK-012：CLI tests 命令语义误导
+
+- Type：CLI/Testing
+- Severity：Medium
+- Probability：High
+- Impact：开发者可能误以为 `cmd/server tests` 会执行 Go 测试，但旧实现实际运行 yaml2go 示例转换。
+- Trigger：`TestsCommand.Description()` 曾返回 `Run tests`，但 `Execute` 调用 yaml2go converter。
+- Mitigation：TASK-P1-006 已将 `tests` 改为真实 Go test 入口，默认 `go test ./...`，并新增命令语义测试。
+- Owner：Agent
+- Status：[CONFIRMED] 已修复
+- Blocking：No。
+
+### RISK-013：`pkg/sqlgen` 未实现能力边界不清
+
+- Type：Documentation/API
+- Severity：Medium
+- Probability：High
+- Impact：使用者可能把 TODO 或未实现能力误认为可用能力，后续 API 兼容和测试验收会变得含糊。
+- Trigger：`pkg/sqlgen` 文档、TODO 或导出能力没有显式标注 unsupported 边界。
+- Mitigation：TASK-P1-008 已在 `pkg/sqlgen` 允许范围内标注 unsupported 边界；高级查询、批量删除和 DB reverse 均有 `ErrCodeUnsupportedOperation` 测试覆盖。
+- Owner：Agent
+- Status：[CONFIRMED] 已修复
+- Blocking：No。
+
+### RISK-014：`types/*` 契约边界不清
+
+- Type：Architecture/API
+- Severity：Medium
+- Probability：Medium
+- Impact：`types/result` 依赖 Gin 且承担 HTTP 响应契约，若被误认为纯类型包，后续重构或复用会破坏跨层边界；auth/rbac 错误码预留也可能被误解为已实现能力。
+- Trigger：`types/*` 当前承载常量、错误码、响应结构和聚合类型，但公共契约与实现范围尚未完整标注。
+- Mitigation：用户选择 A，`BL-021` / `TM-P1-005` 已提升为 TASK-P1-009，下一切片将明确 `types/*` 契约边界并运行 `go test ./types/... -count=1` 与全量回归。
+- Owner：Agent
+- Status：[RISK] 已提升为当前下一任务
 - Blocking：No。
 
 ## 决策状态

@@ -45,6 +45,10 @@ func (g *Generator) Update(column string, value interface{}) (string, error) {
 // ============================================================================
 
 func (g *Generator) buildUpdate(values interface{}) (string, error) {
+	if err := g.checkUnsupported(); err != nil {
+		return "", err
+	}
+
 	var setClause string
 
 	switch v := values.(type) {

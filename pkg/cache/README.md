@@ -4,6 +4,13 @@
 
 Cache 是一个基于 Redis v9 的缓存库封装，提供统一的缓存操作接口，支持配置热更新（原子化 Reload）。
 
+## API 分类
+
+- 定位：[CONFIRMED] 公共基础设施 API。
+- 稳定边界：`Cache` 接口、`Config`、`DefaultConfig`、`NewRedis`。
+- 当前风险：[RISK] Redis 依赖路径缺少隔离测试，使用方应通过接口注入而不是依赖具体实现。
+- 非目标：[CONFIRMED] 本包不承载业务缓存 key 约定。
+
 ### 特性
 
 - ✅ **统一接口** - 抽象 Cache 接口，隔离具体实现

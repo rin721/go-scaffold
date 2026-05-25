@@ -3,7 +3,7 @@
 ## 验收状态
 
 - Project：go-scaffold
-- Phase：HTTP health/ready smoke test
+- Phase：types/* 契约边界准备
 - Status：IN_PROGRESS
 - Last Updated：2026-05-25
 
@@ -60,9 +60,16 @@
 - 配置 copy/update 测试与修复：COMPLETED
 - 配置环境变量策略收拢：COMPLETED
 - HTTP health/ready smoke test：COMPLETED
+- demo CRUD 测试基线：COMPLETED
+- demo 迁移边界收拢：COMPLETED
+- CLI tests 命令语义收拢：COMPLETED
+- pkg/* API 分类：COMPLETED
+- pkg/sqlgen unsupported 边界标注：COMPLETED
+- 下一阶段范围确认：COMPLETED，用户选择 A，提升 `BL-021` / `TM-P1-005`
+- types/* 契约边界：NOT_STARTED
 - Agent 基础设施补齐：COMPLETED
 - Agent 基础设施一致性修复：COMPLETED
-- 代码实现：IN_PROGRESS
+- 代码实现：IN_PROGRESS，当前合法下一步为 TASK-P1-009 / TS-P1-009
 
 ## Prompt 全量产物验收
 
@@ -90,7 +97,7 @@
 | ACC-OPT-012 | P1 时间切片草案已生成 | 检查 `TIME_SLICES.md` 中 TS-P1-001 至 TS-P1-008 | 是 | [CONFIRMED] |
 | ACC-OPT-013 | 每个 P1 任务有允许文件范围 | 检查 `TASKS.md` 和 `TIME_SLICES.md` | 是 | [CONFIRMED] |
 | ACC-OPT-014 | 每个 P1 任务有验证命令和退出条件 | 检查 `TASKS.md` 和 `TIME_SLICES.md` | 是 | [CONFIRMED] |
-| ACC-OPT-015 | 当前仍未修改 Go 代码 | 检查 git diff | 是 | [CONFIRMED] |
+| ACC-OPT-015 | 任务拆分阶段未修改 Go 代码 | 检查当时 git diff | 是 | [CONFIRMED] |
 
 ## 下一步确认验收
 
@@ -125,3 +132,69 @@
 | ACC-P1-012 | `/ready` 数据库 ping 失败路径返回 503 和错误语义 | `go test ./internal/transport/http -count=1` | 是 | [CONFIRMED] |
 | ACC-P1-013 | `/ready` 数据库 ping 成功路径返回 200 和 `ready` | `go test ./internal/transport/http -count=1` | 是 | [CONFIRMED] |
 | ACC-P1-014 | 全量回归通过 | `go test ./... -count=1` | 是 | [CONFIRMED] |
+
+## TASK-P1-004 验收
+
+| ID | 验收项 | 方法 | 必须 | 状态 |
+|---|---|---|---|---|
+| ACC-P1-015 | demo Todo Create/List/Get/Update/Delete 成功路径被固定 | `go test ./internal/modules/demo/... -count=1` | 是 | [CONFIRMED] |
+| ACC-P1-016 | demo Todo 使用临时 SQLite 或等价隔离数据库 | 检查 `internal/modules/demo/service/todo_test.go` | 是 | [CONFIRMED] |
+| ACC-P1-017 | demo Todo 不依赖真实外部服务 | `go test ./internal/modules/demo/... -count=1` | 是 | [CONFIRMED] |
+| ACC-P1-018 | 空标题校验、not found 和软删除后不可见语义被固定 | `go test ./internal/modules/demo/... -count=1` | 是 | [CONFIRMED] |
+| ACC-P1-019 | 全量回归通过 | `go test ./... -count=1` | 是 | [CONFIRMED] |
+
+## TASK-P1-005 验收
+
+| ID | 验收项 | 方法 | 必须 | 状态 |
+|---|---|---|---|---|
+| ACC-P1-020 | server-start 触发点会执行 demo `AutoMigrate` | `go test ./internal/app/... -count=1` | 是 | [CONFIRMED] |
+| ACC-P1-021 | `initdb` 触发点会执行 demo `AutoMigrate` | `go test ./internal/app/... -count=1` | 是 | [CONFIRMED] |
+| ACC-P1-022 | reload 触发点不会隐式执行 demo `AutoMigrate` | `go test ./internal/app/... -count=1` | 是 | [CONFIRMED] |
+| ACC-P1-023 | dev/demo 与生产/bootstrap 迁移职责已记录 | 检查 `docs/specs/demo_migration_boundary.md` | 是 | [CONFIRMED] |
+| ACC-P1-024 | 全量回归通过 | `go test ./... -count=1` | 是 | [CONFIRMED] |
+
+## TASK-P1-006 验收
+
+| ID | 验收项 | 方法 | 必须 | 状态 |
+|---|---|---|---|---|
+| ACC-P1-025 | `tests` 命令执行 Go tests 而非 yaml2go 示例 | `go test ./cmd/server -count=1` | 是 | [CONFIRMED] |
+| ACC-P1-026 | `tests` 命令描述与行为一致 | 检查 `cmd/server/tests.go` 和 `cmd/server/tests_test.go` | 是 | [CONFIRMED] |
+| ACC-P1-027 | `tests` 支持默认 `./...` 和指定 package pattern | `go test ./cmd/server -count=1` | 是 | [CONFIRMED] |
+| ACC-P1-028 | CLI 语义边界已记录 | 检查 `docs/specs/cli_tests_command_boundary.md` | 是 | [CONFIRMED] |
+| ACC-P1-029 | 全量回归通过 | `go test ./... -count=1` | 是 | [CONFIRMED] |
+
+## TASK-P1-007 验收
+
+| ID | 验收项 | 方法 | 必须 | 状态 |
+|---|---|---|---|---|
+| ACC-P1-030 | 13 个 `pkg/*` 包均有 API 分类 | 检查 `pkg/*/README.md` | 是 | [CONFIRMED] |
+| ACC-P1-031 | 根架构文档包含 `pkg/*` API 分类表 | 检查 `ARCHITECTURE.md` | 是 | [CONFIRMED] |
+| ACC-P1-032 | 模块清单与包 README 分类一致 | 检查 `MODULES.md` | 是 | [CONFIRMED] |
+| ACC-P1-033 | `pkg/*` 破坏性重构仍需单独任务确认 | 检查 `ARCHITECTURE.md` 和 `MODULES.md` | 是 | [CONFIRMED] |
+| ACC-P1-034 | 全量回归通过 | `go test ./... -count=1` | 是 | [CONFIRMED] |
+
+## TASK-P1-008 验收
+
+| ID | 验收项 | 方法 | 必须 | 状态 |
+|---|---|---|---|---|
+| ACC-P1-035 | `pkg/sqlgen` TODO/unsupported 能力边界被显式标注 | 检查 `pkg/sqlgen/*` 和包 README | 是 | [CONFIRMED] |
+| ACC-P1-036 | 如涉及代码行为，unsupported 路径有测试覆盖 | `go test ./pkg/sqlgen -count=1` | 是 | [CONFIRMED] |
+| ACC-P1-037 | 全量回归通过 | `go test ./... -count=1` | 是 | [CONFIRMED] |
+
+## TASK-NEXT-SCOPE 验收
+
+| ID | 验收项 | 方法 | 必须 | 状态 |
+|---|---|---|---|---|
+| ACC-NEXT-001 | 用户已明确选择后续范围 | 用户回复 `a`，对应选项 A | 是 | [CONFIRMED] |
+| ACC-NEXT-002 | `BL-021` / `TM-P1-005` 已提升为正式任务 | 检查 `TASKS.md`、`TIME_SLICES.md`、`TEST_MATRIX.md` | 是 | [CONFIRMED] |
+| ACC-NEXT-003 | 当前合法下一步不再是待确认状态 | 检查 `STATUS.md` 和 `AGENT_HANDOFF.md` | 是 | [CONFIRMED] |
+
+## TASK-P1-009 验收
+
+| ID | 验收项 | 方法 | 必须 | 状态 |
+|---|---|---|---|---|
+| ACC-P1-038 | `types/result` HTTP/Gin 响应契约边界被标注 | 检查 `types/*` 文档或 `docs/specs/types_contract_boundary.md` | 是 | NOT_STARTED |
+| ACC-P1-039 | `types/errors` auth/rbac 预留错误码不暗示当前已实现 auth/rbac | 检查 `types/errors` 文档和契约说明 | 是 | NOT_STARTED |
+| ACC-P1-040 | `types/constants` 和根 `types` 聚合入口的跨层边界被标注 | 检查 `types/*` 文档或契约说明 | 是 | NOT_STARTED |
+| ACC-P1-041 | `types` 包测试通过 | `go test ./types/... -count=1` | 是 | NOT_STARTED |
+| ACC-P1-042 | 全量回归通过 | `go test ./... -count=1` | 是 | NOT_STARTED |

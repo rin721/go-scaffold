@@ -77,7 +77,7 @@ func reloadDatabase(core *initapp.Core, infra *initapp.Infrastructure, cfg *conf
 		core.Logger.Error("failed to reload database", "error", err)
 		return
 	}
-	if err := initapp.MigrateDemoSchema(infra.Database, core.Logger); err != nil {
+	if _, err := initapp.MigrateDemoSchemaForTrigger(infra.Database, core.Logger, initapp.DemoMigrationTriggerReload); err != nil {
 		core.Logger.Error("failed to migrate demo schema after database reload", "error", err)
 		return
 	}

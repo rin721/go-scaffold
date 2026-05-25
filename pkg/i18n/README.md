@@ -2,6 +2,13 @@
 
 提供简单易用的多语言翻译功能,基于 [go-i18n/v2](https://github.com/nicksnyder/go-i18n) 库。
 
+## API 分类
+
+- 定位：[CONFIRMED] 公共基础设施 API。
+- 稳定边界：`I18n`、`Config`、`New`、`Default`、语言常量。
+- 当前风险：[RISK] `MustT` panic 路径和语言文件加载错误路径缺少测试。
+- 非目标：[CONFIRMED] 本包不决定业务文案，也不持有用户语言偏好。
+
 ## ✨ 功能特性
 
 - 🌍 **多语言支持** - 支持任意数量的语言

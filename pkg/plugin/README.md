@@ -2,6 +2,13 @@
 
 `pkg/plugin` provides an independent plugin runtime for local and remote plugins.
 
+## API 分类
+
+- 定位：[CONFIRMED] 公共基础设施 API。
+- 稳定边界：v1 local/http runtime、`Plugin`、`Manager`、`Request`、`Response`、`Definition`。
+- 当前风险：[DEFERRED] rpc/ws/discovery 仍为预留协议，不属于当前稳定能力。
+- 非目标：[CONFIRMED] 本包不依赖 `internal/*`，不感知应用组合层。
+
 The package does not import `internal/*` and does not know about the application
 composition layer. Projects can keep local implementations under `plugins/*`,
 then register factories with the manager.
@@ -68,4 +75,3 @@ The endpoint should return:
 ```
 
 HTTP status codes outside `2xx` return `ErrHTTPStatus`.
-

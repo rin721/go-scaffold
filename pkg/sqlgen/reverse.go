@@ -386,20 +386,17 @@ func (d *DBReverseBuilder) FileNaming(strategy NamingStrategy) *DBReverseBuilder
 
 // Generate 生成代码
 func (d *DBReverseBuilder) Generate() (string, error) {
-	// TODO: 实现从数据库读取 Schema
-	return "", NewError(ErrCodeUnknown, "database reverse not implemented yet")
+	return "", NewUnsupportedError("ReverseDB.Generate")
 }
 
 // GenerateAll 生成所有表的代码
 func (d *DBReverseBuilder) GenerateAll() (map[string]string, error) {
-	// TODO: 实现从数据库读取所有表
-	return nil, NewError(ErrCodeUnknown, "database reverse not implemented yet")
+	return nil, NewUnsupportedError("ReverseDB.GenerateAll")
 }
 
 // GenerateToDir 生成代码到目录
 func (d *DBReverseBuilder) GenerateToDir(dir string) error {
-	// TODO: 实现生成到目录
-	return NewError(ErrCodeUnknown, "database reverse not implemented yet")
+	return NewUnsupportedError("ReverseDB.GenerateToDir")
 }
 
 // matchPattern 匹配通配符模式

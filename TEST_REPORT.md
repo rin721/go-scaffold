@@ -3,28 +3,26 @@
 ## 最新验证
 
 - 日期：2026-05-25
-- 任务 ID：TASK-P1-003
-- 时间切片 ID：TS-P1-003
+- 任务 ID：TASK-NEXT-SCOPE
+- 时间切片 ID：TS-NEXT-SCOPE
 - 状态：COMPLETED
-- 范围：HTTP health/ready router smoke test
+- 范围：确认下一阶段范围并提升 `types/*` 契约边界任务
 
 ## 执行命令
 
 | 命令 | 结果 | 备注 |
 |---|---|---|
-| `gofmt -w internal/transport/http/router_test.go` | PASS | 格式化本切片新增的 Go 测试文件 |
-| `go test ./internal/transport/http -count=1` | PASS | HTTP router smoke test 通过 |
-| `go test ./... -count=1` | PASS | 全量回归通过 |
-| `git diff --check` | PASS | 仅提示 Windows CRLF 转换警告，无 whitespace error |
-| `git status --short` | INFO | 工作区包含本轮、TASK-INFRA-002、TASK-P1-001 的累积未提交变更 |
+| 状态一致性文本检查 | PASS | `STATUS.md`、`TASKS.md`、`TIME_SLICES.md`、`TEST_MATRIX.md` 均指向 TASK-P1-009 / TS-P1-009，且核心状态文件不再保留待确认状态 |
+| `go test ./types/... -count=1` | PASS | 当前 `types` 包基线通过；`types/result` 和 `types/errors` 仍无测试文件，已作为 TS-P1-009 后续范围 |
+| `go test ./... -count=1` | PASS | 全仓库回归通过 |
+| `git diff --check` | PASS | 仅有 Windows LF/CRLF 转换警告 |
 
 ## 结果
 
-- [CONFIRMED] `/health` HTTP 200 和成功响应语义已由测试固定。
-- [CONFIRMED] `/ready` 数据库缺失、ping 失败、ping 成功路径已由测试固定。
-- [CONFIRMED] 本切片未启动真实 HTTP server。
-- [CONFIRMED] HTTP router 包测试和全量回归通过。
-- [RISK] `cmd/server`、`internal/app`、`internal/modules/demo` 等关键路径当前仍无测试文件。
+- [CONFIRMED] 用户选择 A，`BL-021` / `TM-P1-005` 已提升为 TASK-P1-009 / TS-P1-009。
+- [CONFIRMED] `TASK-NEXT-SCOPE` 不再处于待确认状态。
+- [CONFIRMED] 当前唯一合法下一步为 `types/*` 契约边界切片。
+- [CONFIRMED] `types` 包基线和全量回归通过。
 
 ## 失败项
 
@@ -32,10 +30,71 @@
 
 ## 验证结论
 
-- TASK-P1-003 可以标记为 `COMPLETED`。
-- 下一步是 TASK-P1-004：增加 demo CRUD 测试基线。
+- TASK-NEXT-SCOPE 可以标记为 `COMPLETED`。
+- TASK-P1-009 / TS-P1-009 为当前 `NOT_STARTED` 的唯一合法下一步。
 
 ## 历史报告
+
+### 2026-05-25 TASK-NEXT-SCOPE TS-NEXT-SCOPE
+
+- 用户回复 `a`，确认选择 A：提升 `BL-021` / `TM-P1-005`。
+- 新增 TASK-P1-009 / TS-P1-009，目标为明确 `types/*` 契约边界。
+- 核心状态文件一致性检查：PASS。
+- `go test ./types/... -count=1`：PASS。
+- `go test ./... -count=1`：PASS。
+- `git diff --check`：PASS，仅有 Windows LF/CRLF 转换警告。
+
+### 2026-05-25 TASK-P1-008 TS-P1-008
+
+- 用户发送“下一步”，按当前合法任务执行 `pkg/sqlgen` unsupported 边界标注。
+- 新增 `ErrCodeUnsupportedOperation` 和 `NewUnsupportedError`。
+- `Or`、`Not`、`Group`、`Having`、`Distinct`、`Joins`、`DeleteInBatches` 和 `ReverseDB` 未实现路径已显式返回 unsupported。
+- `pkg/sqlgen/README.md` 已标注 unsupported / partial 能力边界。
+- `go test ./pkg/sqlgen -count=1`：PASS。
+- `go test ./... -count=1`：PASS。
+- `git diff --check`：PASS，仅有 Windows LF/CRLF 转换警告。
+
+### 2026-05-25 TASK-P1-007 TS-P1-007
+
+- 用户发送“下一步”，按当前合法任务执行 `pkg/*` API 分类。
+- 为 13 个 `pkg/*/README.md` 新增 API 分类段。
+- `pkg/cache`、`pkg/crypto`、`pkg/database`、`pkg/executor`、`pkg/httpserver`、`pkg/i18n`、`pkg/logger`、`pkg/plugin`、`pkg/storage` 标注为公共基础设施 API。
+- `pkg/cli`、`pkg/sqlgen`、`pkg/yaml2go` 标注为公共工具 API。
+- `pkg/utils` 标注为内部支撑工具包。
+- `go test ./... -count=1`：PASS。
+- `git diff --check`：PASS，仅有 Windows LF/CRLF 转换警告。
+
+### 2026-05-25 TASK-P1-006 TS-P1-006
+
+- 用户发送“下一步”，按当前合法任务执行 CLI tests 命令语义收拢。
+- `cmd/server tests` 从 yaml2go 示例转换改为真实 Go test 入口。
+- 默认执行 `go test ./...`，支持 `--package/-p` 指定测试范围。
+- 新增 `cmd/server/tests_test.go`，覆盖命令元信息、默认包范围、指定包范围和失败返回。
+- 新增 `docs/specs/cli_tests_command_boundary.md`，记录 CLI tests 命令语义。
+- `go test ./cmd/server -count=1`：PASS。
+- `go test ./... -count=1`：PASS。
+- `git diff --check`：PASS，仅有 Windows CRLF 转换警告。
+
+### 2026-05-25 TASK-P1-005 TS-P1-005
+
+- 用户发送“下一步”，按当前合法任务执行 demo 迁移边界收拢。
+- 新增 `DemoMigrationPolicyFor` 和 `MigrateDemoSchemaForTrigger`。
+- server-start/initdb 继续执行 demo `AutoMigrate`；reload 改为跳过 demo `AutoMigrate`。
+- 新增 `internal/app/initapp/demo_migration_test.go`，验证触发策略和迁移行为。
+- 新增 `docs/specs/demo_migration_boundary.md`，记录 dev/demo 与生产/bootstrap 迁移职责。
+- `go test ./internal/app/... -count=1`：PASS。
+- `go test ./... -count=1`：PASS。
+- `git diff --check`：PASS，仅有 Windows CRLF 转换警告。
+
+### 2026-05-25 TASK-P1-004 TS-P1-004
+
+- 用户发送“下一步”，按当前合法任务执行 demo CRUD 测试基线。
+- 新增 `internal/modules/demo/service/todo_test.go`。
+- 使用临时 SQLite 和真实 repository/service 覆盖 Todo Create/List/Get/Update/Delete。
+- 覆盖空标题校验、缺失资源 not found 和软删除后不可见语义。
+- `go test ./internal/modules/demo/... -count=1`：PASS。
+- `go test ./... -count=1`：PASS。
+- `git diff --check`：PASS，仅有 Windows CRLF 转换警告。
 
 ### 2026-05-25 TASK-P1-003 TS-P1-003
 

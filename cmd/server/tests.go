@@ -2,57 +2,98 @@ package main
 
 import (
 	"fmt"
-	"log"
+	"io"
+	"os"
+	"os/exec"
+	"strings"
 
 	"github.com/rei0721/go-scaffold/pkg/cli"
-	"github.com/rei0721/go-scaffold/pkg/yaml2go"
 	"github.com/rei0721/go-scaffold/types/constants"
 )
 
-type TestsCommand struct{}
+const defaultTestPackagePattern = "./..."
+
+type goTestRunner func(stdout, stderr io.Writer, args ...string) error
+
+type TestsCommand struct {
+	runner goTestRunner
+}
+
+func NewTestsCommand() *TestsCommand {
+	return &TestsCommand{}
+}
 
 func (c *TestsCommand) Name() string {
 	return constants.AppTestsCommandName
 }
 
 func (c *TestsCommand) Description() string {
-	return "Run tests"
+	return "Run Go tests"
 }
 
 func (c *TestsCommand) Usage() string {
-	return constants.AppTestsCommandName
+	return fmt.Sprintf("%s [--package=<pattern>]", constants.AppTestsCommandName)
 }
 
 func (c *TestsCommand) Flags() []cli.Flag {
-	return []cli.Flag{}
+	return []cli.Flag{
+		{
+			Name:        "package",
+			ShortName:   "p",
+			Type:        cli.FlagTypeString,
+			Required:    false,
+			Default:     defaultTestPackagePattern,
+			Description: "Go package pattern passed to go test",
+		},
+	}
 }
 
 func (c *TestsCommand) Execute(ctx *cli.Context) error {
-	yamlStr := `
-server:
-  host: localhost
-  port: 8080
-  required: true
-
-database:
-  driver: mysql
-  host: localhost
-  port: 3306
-`
-
-	converter := yaml2go.New(nil)
-
-	result, err := converter.Convert(yamlStr)
-	if err != nil {
-		log.Fatal(err)
+	pattern := defaultTestPackagePattern
+	if ctx != nil {
+		if value := ctx.GetString("package"); value != "" {
+			pattern = value
+		}
 	}
 
-	fmt.Println("=== config.go ===")
-	fmt.Println(result.MainConfig.Content)
-
-	for _, subConfig := range result.SubConfigs {
-		fmt.Printf("\n=== %s ===\n", subConfig.FileName)
-		fmt.Println(subConfig.Content)
+	stdout, stderr := commandOutput(ctx)
+	args := []string{"test", pattern}
+	fmt.Fprintf(stdout, "Running go %s\n", strings.Join(args, " "))
+	if err := c.run(stdout, stderr, args...); err != nil {
+		return fmt.Errorf("go %s failed: %w", strings.Join(args, " "), err)
 	}
+	fmt.Fprintln(stdout, "Go tests passed")
 	return nil
+}
+
+func (c *TestsCommand) run(stdout, stderr io.Writer, args ...string) error {
+	if c.runner != nil {
+		return c.runner(stdout, stderr, args...)
+	}
+	return runGoTest(stdout, stderr, args...)
+}
+
+func runGoTest(stdout, stderr io.Writer, args ...string) error {
+	cmd := exec.Command("go", args...)
+	cmd.Stdout = stdout
+	cmd.Stderr = stderr
+	return cmd.Run()
+}
+
+func commandOutput(ctx *cli.Context) (io.Writer, io.Writer) {
+	if ctx == nil {
+		return os.Stdout, os.Stderr
+	}
+
+	stdout := ctx.Stdout
+	if stdout == nil {
+		stdout = os.Stdout
+	}
+
+	stderr := ctx.Stderr
+	if stderr == nil {
+		stderr = os.Stderr
+	}
+
+	return stdout, stderr
 }

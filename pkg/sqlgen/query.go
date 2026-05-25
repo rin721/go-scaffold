@@ -141,6 +141,10 @@ func (g *Generator) processStructCondition(cond interface{}) *Generator {
 // ============================================================================
 
 func (g *Generator) buildSelect() (string, error) {
+	if err := g.checkUnsupported(); err != nil {
+		return "", err
+	}
+
 	var sb strings.Builder
 
 	sb.WriteString("SELECT ")
@@ -231,40 +235,27 @@ func (g *Generator) buildCondition(cond WhereCondition) string {
 
 // Or 添加 OR 条件
 func (g *Generator) Or(query interface{}, args ...interface{}) *Generator {
-	ng := g.clone()
-	// TODO: 实现 OR 条件支持
-	return ng
+	return g.unsupported("Or")
 }
 
 // Not 添加 NOT 条件
 func (g *Generator) Not(query interface{}, args ...interface{}) *Generator {
-	ng := g.clone()
-	// TODO: 实现 NOT 条件支持
-	return ng
+	return g.unsupported("Not")
 }
 
 // Group 设置 GROUP BY
 func (g *Generator) Group(column string) *Generator {
-	ng := g.clone()
-	// TODO: 实现 GROUP BY 支持
-	return ng
+	return g.unsupported("Group")
 }
 
 // Having 设置 HAVING
 func (g *Generator) Having(query interface{}, args ...interface{}) *Generator {
-	ng := g.clone()
-	// TODO: 实现 HAVING 支持
-	return ng
+	return g.unsupported("Having")
 }
 
 // Distinct 设置 DISTINCT
 func (g *Generator) Distinct(columns ...string) *Generator {
-	ng := g.clone()
-	if len(columns) > 0 {
-		ng.ctx.SelectColumns = columns
-	}
-	// 在 SELECT 时会添加 DISTINCT
-	return ng
+	return g.unsupported("Distinct")
 }
 
 // ============================================================================
@@ -281,7 +272,5 @@ type JoinBuilder struct {
 
 // Joins 添加 JOIN
 func (g *Generator) Joins(query string, args ...interface{}) *Generator {
-	ng := g.clone()
-	// TODO: 实现 JOIN 支持
-	return ng
+	return g.unsupported("Joins")
 }

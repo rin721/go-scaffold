@@ -9,6 +9,13 @@
 - **正向生成 (Model → SQL)**: 接收 Go Struct 和链式条件，返回 SQL 字符串
 - **逆向生成 (SQL → Model)**: 接收 SQL DDL 脚本，返回 Go Struct 代码
 
+## API 分类
+
+- 定位：[CONFIRMED] 公共工具 API。
+- 稳定边界：当前测试覆盖的 SQL 构建、解析、事务和模板能力。
+- 当前风险：[CONFIRMED] TODO/未实现能力已在下方 unsupported 边界中标注。
+- 非目标：[CONFIRMED] 本包不替代运行时 ORM，也不直接执行数据库写入。
+
 ## 安装
 
 ```go
@@ -135,6 +142,18 @@ type Config struct {
 | `GenerateAll()`        | 生成所有表      |
 | `GenerateToFile(path)` | 生成到文件      |
 | `GenerateToDir(dir)`   | 生成到目录      |
+
+## Unsupported / 部分能力边界
+
+以下能力当前不属于稳定可用 API。使用时不得假设其已经按 GORM 或数据库连接语义完整实现。
+
+| 能力 | 当前行为 | 状态 | 建议 |
+|---|---|---|---|
+| `Or` / `Not` / `Group` / `Having` / `Distinct` / `Joins` | 链式调用会记录 unsupported 状态；后续 `Find`、`First`、`Count`、`Pluck`、`Updates` 或 `Delete` 返回 `ErrCodeUnsupportedOperation` | [CONFIRMED] unsupported | 使用 `Where` 写完整 SQL 片段，或单独提升需求 |
+| `DeleteInBatches` | 直接返回 `ErrCodeUnsupportedOperation`，不再退化为普通删除 | [CONFIRMED] unsupported | 使用调用方自行分页生成条件删除 SQL |
+| `ReverseDB(...).Generate` / `GenerateAll` / `GenerateToDir` | 直接返回 `ErrCodeUnsupportedOperation` | [CONFIRMED] unsupported | 使用 `ParseSQL` / `ParseSQLFile` 从 DDL 逆向生成 |
+| `MigrationBuilder.BuildRollback` 中的 `ModifyColumn` 回滚 | 输出 `-- TODO: Restore original type...` 注释，不生成可直接执行的回滚 SQL | [CONFIRMED] partial | 手工补齐原始字段类型后再执行 |
+| `Config.Pretty` | 当前不保证所有 SQL 输出全局格式化；部分 DDL 本身包含换行 | [CONFIRMED] partial | 不要把它作为稳定格式化契约 |
 
 ## 支持的方言
 

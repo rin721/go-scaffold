@@ -54,6 +54,8 @@ const (
 	ErrCodeMissingCondition
 	// ErrCodeEmptyData 空数据
 	ErrCodeEmptyData
+	// ErrCodeUnsupportedOperation 不支持的操作
+	ErrCodeUnsupportedOperation
 )
 
 // ============================================================================
@@ -123,6 +125,11 @@ func WrapError(code ErrorCode, message string, cause error) *Error {
 		Message: message,
 		Cause:   cause,
 	}
+}
+
+// NewUnsupportedError 创建不支持操作错误
+func NewUnsupportedError(operation string) *Error {
+	return NewError(ErrCodeUnsupportedOperation, fmt.Sprintf("unsupported operation: %s", operation))
 }
 
 // IsError 判断是否为 sqlgen 错误

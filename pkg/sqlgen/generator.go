@@ -170,6 +170,21 @@ func (g *Generator) Unscoped() *Generator {
 	return ng
 }
 
+// unsupported 标记当前链路包含尚未支持的操作。
+func (g *Generator) unsupported(operation string) *Generator {
+	ng := g.clone()
+	ng.ctx.UnsupportedOperation = operation
+	return ng
+}
+
+// checkUnsupported 返回当前链路中的 unsupported 操作错误。
+func (g *Generator) checkUnsupported() error {
+	if g.ctx.UnsupportedOperation == "" {
+		return nil
+	}
+	return NewUnsupportedError(g.ctx.UnsupportedOperation)
+}
+
 // ============================================================================
 // 原生 SQL
 // ============================================================================

@@ -2,10 +2,10 @@
 
 ## 当前合法任务
 
-- Task ID：TASK-P1-004
+- Task ID：TASK-P1-009
 - Status：NOT_STARTED
-- Time Slice：TS-P1-004
-- Summary：HTTP health/ready smoke test 已完成。当前合法下一步为 TASK-P1-004。
+- Time Slice：TS-P1-009
+- Summary：用户选择 A，`BL-021` / `TM-P1-005` 已提升；当前唯一合法任务是明确 `types/*` 契约边界。
 
 ## 任务列表
 
@@ -233,7 +233,7 @@
 
 ### TASK-P1-004：增加 demo CRUD 测试基线
 
-- Status：NOT_STARTED
+- Status：COMPLETED
 - Matrix：TM-P0-005、TM-P0-006
 - Goal：为 demo Todo 示例建立 Create/List/Get/Update/Delete 测试基线。
 - Allowed Files：
@@ -245,10 +245,16 @@
 - Exit Conditions：
   - 使用临时 SQLite 或等价隔离数据库。
   - 不依赖真实外部服务。
+- Completion Evidence：
+  - `internal/modules/demo/service/todo_test.go` 已新增。
+  - 测试使用临时 SQLite 和真实 repository/service，不依赖真实外部服务。
+  - `TestTodoServiceCRUD` 覆盖 Create/List/Get/Update/Delete 成功路径和软删除后的不可见语义。
+  - `TestTodoServiceValidationAndNotFound` 覆盖空标题校验、缺失 Get/Update/Delete 的 not found 语义。
+  - `go test ./internal/modules/demo/... -count=1` 和 `go test ./... -count=1` 均通过。
 
 ### TASK-P1-005：明确 demo 迁移边界
 
-- Status：NOT_STARTED
+- Status：COMPLETED
 - Matrix：TM-P1-001、TM-P0-006
 - Goal：收拢 demo `AutoMigrate`、`initdb` 和 reload 的触发策略。
 - Allowed Files：
@@ -259,12 +265,17 @@
   - `go test ./internal/app/... -count=1`
   - `go test ./... -count=1`
 - Exit Conditions：
-  - dev/demo 与生产/bootstrap 迁移职责被明确记录。
-  - 自动迁移触发点可验证。
+  - [CONFIRMED] dev/demo 与生产/bootstrap 迁移职责已记录到 `docs/specs/demo_migration_boundary.md`。
+  - [CONFIRMED] 自动迁移触发点已由 `internal/app/initapp/demo_migration_test.go` 验证。
+- Completion Evidence：
+  - `DemoMigrationPolicyFor` 固定 `server-start`、`initdb`、`reload` 三类触发策略。
+  - `NewModules` 使用 `DemoMigrationTriggerServerStart`，`BuildInitDB` 使用 `DemoMigrationTriggerInitDB`。
+  - `reloadDatabase` 使用 `DemoMigrationTriggerReload`，策略为跳过 demo `AutoMigrate`。
+  - `go test ./internal/app/... -count=1` 和 `go test ./... -count=1` 均通过。
 
 ### TASK-P1-006：收拢 `cmd/server tests` 命令语义
 
-- Status：NOT_STARTED
+- Status：COMPLETED
 - Matrix：TM-P1-002、TM-P0-006
 - Goal：让 `tests` 命令名、描述或行为与真实用途一致。
 - Allowed Files：
@@ -275,12 +286,17 @@
   - `go test ./cmd/server -count=1`
   - `go test ./... -count=1`
 - Exit Conditions：
-  - 命令不再误导为 Go test。
-  - 命令注册或行为有最小测试。
+  - [CONFIRMED] 命令不再误导为 Go test：`tests` 现在执行 `go test`。
+  - [CONFIRMED] 命令注册或行为有最小测试。
+- Completion Evidence：
+  - `cmd/server/tests.go` 已移除 yaml2go 示例转换逻辑。
+  - `TestsCommand` 默认执行 `go test ./...`，并支持 `--package/-p` 指定测试范围。
+  - `cmd/server/tests_test.go` 已覆盖命令元信息、默认包范围、指定包范围和失败返回。
+  - `go test ./cmd/server -count=1` 和 `go test ./... -count=1` 均通过。
 
 ### TASK-P1-007：完成 `pkg/*` 公共/内部分类
 
-- Status：NOT_STARTED
+- Status：COMPLETED
 - Matrix：TM-P1-003、TM-P0-006
 - Goal：逐包标注公共 API、内部支撑或待确认定位。
 - Allowed Files：
@@ -291,12 +307,17 @@
 - Verification：
   - `go test ./... -count=1`
 - Exit Conditions：
-  - 每个 `pkg/*` 包均有定位。
-  - 破坏性重构仍需单独任务确认。
+  - [CONFIRMED] 每个 `pkg/*` 包均有定位。
+  - [CONFIRMED] 破坏性重构仍需单独任务确认。
+- Completion Evidence：
+  - 13 个 `pkg/*/README.md` 已新增 API 分类段。
+  - `ARCHITECTURE.md` 已新增 `pkg/*` API 分类表。
+  - `MODULES.md` 已更新 `pkg/*` API 分类和风险状态。
+  - `go test ./... -count=1` 通过。
 
 ### TASK-P1-008：标注 `pkg/sqlgen` 未实现能力
 
-- Status：NOT_STARTED
+- Status：COMPLETED
 - Matrix：TM-P1-004、TM-P0-006
 - Goal：把 `pkg/sqlgen` TODO/unsupported 能力边界从隐含状态改为明确状态。
 - Allowed Files：
@@ -307,8 +328,64 @@
   - `go test ./pkg/sqlgen -count=1`
   - `go test ./... -count=1`
 - Exit Conditions：
-  - 未实现能力不再暗示可用。
-  - 如涉及代码行为，必须有测试覆盖。
+  - [CONFIRMED] 未实现能力不再暗示可用。
+  - [CONFIRMED] 涉及代码行为的 unsupported 路径已有测试覆盖。
+- Completion Evidence：
+  - `ErrCodeUnsupportedOperation` 和 `NewUnsupportedError` 已新增。
+  - `Or`、`Not`、`Group`、`Having`、`Distinct`、`Joins` 不再静默 no-op，后续生成 SQL 时返回 unsupported 错误。
+  - `DeleteInBatches` 不再退化为普通删除，直接返回 unsupported 错误。
+  - `ReverseDB(...).Generate`、`GenerateAll`、`GenerateToDir` 返回 unsupported 错误。
+  - `pkg/sqlgen/README.md` 已标注 unsupported / partial 能力边界。
+  - `go test ./pkg/sqlgen -count=1` 和 `go test ./... -count=1` 均通过。
+
+### TASK-P1-009：明确 `types/*` 契约边界
+
+- Status：NOT_STARTED
+- Matrix：TM-P1-005、TM-P0-006
+- Goal：明确 `types/constants`、`types/errors`、`types/result` 和根 `types` 聚合入口的公共契约定位，尤其标注 `types/result` 属于 HTTP/Gin 响应契约而非纯类型包。
+- Source：
+  - 用户选择 A。
+  - `BL-021`：明确 `types/result` 是否属于 HTTP 契约。
+  - `TM-P1-005`：`types/result`、错误码、跨层契约边界清晰。
+- Allowed Files：
+  - `types/**/*`
+  - `ARCHITECTURE.md`
+  - `MODULES.md`
+  - `TEST_MATRIX.md`
+  - `ACCEPTANCE.md`
+  - `docs/specs/types_contract_boundary.md`
+  - 项目状态文档
+- Forbidden Files：
+  - `cmd/**/*`
+  - `internal/**/*`
+  - `pkg/**/*`
+  - `go.mod`
+  - `go.sum`
+  - 数据库 schema、部署配置、真实密钥文件
+- Verification：
+  - `go test ./types/... -count=1`
+  - `go test ./... -count=1`
+  - `git diff --check`
+- Exit Conditions：
+  - [CONFIRMED] `types/result` 的 HTTP/Gin 契约定位被文档化。
+  - [CONFIRMED] `types/errors` 中 auth/rbac 预留错误码与当前未实现范围的关系被标注。
+  - [CONFIRMED] `types/constants` 和根 `types` 聚合入口的公共/跨层边界被标注。
+  - [CONFIRMED] 如新增或修改行为测试，相关 `types` 包测试和全量回归通过。
+  - [CONFIRMED] 状态、测试报告、变更日志、风险、Backlog 和交接文档已更新。
+
+### TASK-NEXT-SCOPE：确认下一阶段范围
+
+- Status：COMPLETED
+- Matrix：BL-021、TM-P1-005
+- Goal：确认已完成 P1 列表之后的下一步：提升 Backlog 项、补测试、进入 Phase 6 收尾，或结束本轮。
+- Allowed Files：
+  - 项目状态文档
+- Verification：
+  - 无需 Go 测试，除非用户确认进入新的代码或测试切片。
+- Exit Conditions：
+  - [CONFIRMED] 用户选择 A：提升 `BL-021` / `TM-P1-005`。
+  - [CONFIRMED] 新的任务 TASK-P1-009 和时间切片 TS-P1-009 已写入 `TASKS.md` 和 `TIME_SLICES.md`。
+  - [CONFIRMED] 当前合法任务已推进为 TASK-P1-009。
 
 ## 历史任务
 

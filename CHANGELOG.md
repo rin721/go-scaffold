@@ -2,6 +2,86 @@
 
 ## 最新变更
 
+### 2026-05-25 - TASK-NEXT-SCOPE - TS-NEXT-SCOPE
+
+- 变更：用户选择选项 A，确认提升 `BL-021` / `TM-P1-005`。
+- 变更：新增 TASK-P1-009 / TS-P1-009，作为当前唯一合法下一步，用于明确 `types/*` 契约边界。
+- 变更：更新 `STATUS.md`、`TASKS.md`、`TIME_SLICES.md`、`TEST_MATRIX.md`、`ACCEPTANCE.md`、`BACKLOG.md`、`RISK_REGISTER.md` 和交接相关文档，关闭待确认状态。
+- 测试：
+  - 状态一致性文本检查：PASS
+  - `go test ./types/... -count=1`：PASS
+  - `go test ./... -count=1`：PASS
+  - `git diff --check`：PASS，仅有 Windows LF/CRLF 转换警告
+- 状态：TASK-NEXT-SCOPE COMPLETED；TASK-P1-009 NOT_STARTED。
+
+### 2026-05-25 - TASK-P1-008 - TS-P1-008
+
+- 变更：新增 `ErrCodeUnsupportedOperation` 和 `NewUnsupportedError`，统一表示 `pkg/sqlgen` 未支持能力。
+- 变更：`Or`、`Not`、`Group`、`Having`、`Distinct`、`Joins` 不再静默 no-op，后续 SQL 生成会返回 unsupported 错误。
+- 变更：`DeleteInBatches` 不再退化为普通删除，直接返回 unsupported 错误。
+- 变更：`ReverseDB(...).Generate`、`GenerateAll`、`GenerateToDir` 返回 unsupported 错误。
+- 变更：`pkg/sqlgen/README.md` 标注 unsupported / partial 能力边界，`doc.go` 不再声称完整 GORM 兼容。
+- 变更：新增 `pkg/sqlgen` unsupported 行为测试。
+- 测试：
+  - `gofmt -w pkg/sqlgen/errors.go pkg/sqlgen/types.go pkg/sqlgen/generator.go pkg/sqlgen/query.go pkg/sqlgen/update.go pkg/sqlgen/delete.go pkg/sqlgen/reverse.go pkg/sqlgen/doc.go pkg/sqlgen/sqlgen_test.go`：PASS
+  - `go test ./pkg/sqlgen -count=1`：PASS
+  - `go test ./... -count=1`：PASS
+  - `git diff --check`：PASS，仅有 Windows LF/CRLF 转换警告
+- 状态：TASK-P1-008 COMPLETED；后续范围 PENDING_USER_CONFIRMATION。
+
+### 2026-05-25 - TASK-P1-007 - TS-P1-007
+
+- 变更：为 13 个 `pkg/*/README.md` 新增 API 分类段。
+- 变更：将 `pkg/cache`、`pkg/crypto`、`pkg/database`、`pkg/executor`、`pkg/httpserver`、`pkg/i18n`、`pkg/logger`、`pkg/plugin`、`pkg/storage` 标注为公共基础设施 API。
+- 变更：将 `pkg/cli`、`pkg/sqlgen`、`pkg/yaml2go` 标注为公共工具 API。
+- 变更：将 `pkg/utils` 标注为内部支撑工具包。
+- 变更：同步 `ARCHITECTURE.md` 和 `MODULES.md`，记录稳定边界、测试缺口和后续约束。
+- 变更：将当前合法下一步推进为 TASK-P1-008。
+- 测试：
+  - `go test ./... -count=1`：PASS
+  - `git diff --check`：PASS，仅有 Windows LF/CRLF 转换警告
+- 状态：TASK-P1-007 COMPLETED；TASK-P1-008 NOT_STARTED。
+
+### 2026-05-25 - TASK-P1-006 - TS-P1-006
+
+- 变更：`cmd/server tests` 从 yaml2go 示例转换改为真实 Go test 入口。
+- 变更：新增 `--package/-p`，默认执行 `go test ./...`，可指定 package pattern。
+- 变更：移除 `TestsCommand.Execute` 中的 `log.Fatal` 行为，runner 失败时返回可包装错误。
+- 变更：新增 `cmd/server/tests_test.go`，覆盖命令元信息、默认包范围、指定包范围和失败返回。
+- 变更：新增 `docs/specs/cli_tests_command_boundary.md`，记录 CLI tests 命令语义。
+- 变更：将当前合法下一步推进为 TASK-P1-007。
+- 测试：
+  - `go test ./cmd/server -count=1`：PASS
+  - `go test ./... -count=1`：PASS
+  - `git diff --check`：PASS，仅有 Windows CRLF 转换警告
+- 状态：TASK-P1-006 COMPLETED；TASK-P1-007 NOT_STARTED。
+
+### 2026-05-25 - TASK-P1-005 - TS-P1-005
+
+- 变更：新增 demo 迁移触发策略，显式区分 `server-start`、`initdb` 和 `reload`。
+- 变更：`NewModules` 继续在 server 启动路径执行 demo `AutoMigrate`，`BuildInitDB` 继续作为显式 demo bootstrap 执行迁移。
+- 变更：`reloadDatabase` 改为使用 reload 策略，数据库 reload 不再隐式执行 demo schema 迁移。
+- 变更：新增 `internal/app/initapp/demo_migration_test.go`，用隔离 SQLite 验证触发策略。
+- 变更：新增 `docs/specs/demo_migration_boundary.md`，记录 dev/demo 与生产/bootstrap 迁移职责。
+- 变更：将当前合法下一步推进为 TASK-P1-006。
+- 测试：
+  - `go test ./internal/app/... -count=1`：PASS
+  - `go test ./... -count=1`：PASS
+  - `git diff --check`：PASS，仅有 Windows CRLF 转换警告
+- 状态：TASK-P1-005 COMPLETED；TASK-P1-006 NOT_STARTED。
+
+### 2026-05-25 - TASK-P1-004 - TS-P1-004
+
+- 变更：新增 `internal/modules/demo/service/todo_test.go`，为 demo Todo 建立 service/repository CRUD 测试基线。
+- 变更：使用临时 SQLite 执行真实 repository/service 路径，不依赖外部数据库或 HTTP server。
+- 变更：覆盖 Create/List/Get/Update/Delete 成功路径、空标题校验、缺失资源 not found 和软删除后不可见语义。
+- 变更：将当前合法下一步推进为 TASK-P1-005。
+- 测试：
+  - `go test ./internal/modules/demo/... -count=1`：PASS
+  - `go test ./... -count=1`：PASS
+  - `git diff --check`：PASS，仅有 Windows CRLF 转换警告
+- 状态：TASK-P1-004 COMPLETED；TASK-P1-005 NOT_STARTED。
+
 ### 2026-05-25 - TASK-P1-003 - TS-P1-003
 
 - 变更：新增 `internal/transport/http/router_test.go`，用 `httptest` 固定 `/health` 和 `/ready` 行为。

@@ -184,6 +184,85 @@ func TestFind(t *testing.T) {
 	}
 }
 
+func TestUnsupportedQueryBuildersReturnErrors(t *testing.T) {
+	tests := []struct {
+		name      string
+		operation string
+		build     func(*Generator) *Generator
+	}{
+		{
+			name:      "or",
+			operation: "Or",
+			build: func(gen *Generator) *Generator {
+				return gen.Or("status = ?", 1)
+			},
+		},
+		{
+			name:      "not",
+			operation: "Not",
+			build: func(gen *Generator) *Generator {
+				return gen.Not("status = ?", 1)
+			},
+		},
+		{
+			name:      "group",
+			operation: "Group",
+			build: func(gen *Generator) *Generator {
+				return gen.Group("status")
+			},
+		},
+		{
+			name:      "having",
+			operation: "Having",
+			build: func(gen *Generator) *Generator {
+				return gen.Having("count(*) > ?", 1)
+			},
+		},
+		{
+			name:      "distinct",
+			operation: "Distinct",
+			build: func(gen *Generator) *Generator {
+				return gen.Distinct("status")
+			},
+		},
+		{
+			name:      "joins",
+			operation: "Joins",
+			build: func(gen *Generator) *Generator {
+				return gen.Joins("JOIN profiles ON profiles.user_id = users.id")
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			gen := New(&Config{Dialect: MySQL})
+			var users []TestUser
+			_, err := tt.build(gen).Find(&users)
+			if !IsError(err, ErrCodeUnsupportedOperation) {
+				t.Fatalf("expected unsupported operation error, got %v", err)
+			}
+			if !strings.Contains(err.Error(), tt.operation) {
+				t.Fatalf("expected error to mention %s, got %v", tt.operation, err)
+			}
+		})
+	}
+}
+
+func TestUnsupportedQueryBuilderPropagatesToUpdateAndDelete(t *testing.T) {
+	gen := New(&Config{Dialect: MySQL})
+
+	_, err := gen.Model(&TestUser{}).Or("id = ?", 1).Updates(map[string]interface{}{"status": 2})
+	if !IsError(err, ErrCodeUnsupportedOperation) {
+		t.Fatalf("expected update unsupported operation error, got %v", err)
+	}
+
+	_, err = gen.Not("id = ?", 1).Delete(&TestUser{})
+	if !IsError(err, ErrCodeUnsupportedOperation) {
+		t.Fatalf("expected delete unsupported operation error, got %v", err)
+	}
+}
+
 // ============================================================================
 // UPDATE 测试
 // ============================================================================
@@ -247,6 +326,18 @@ func TestHardDelete(t *testing.T) {
 	}
 }
 
+func TestDeleteInBatchesUnsupported(t *testing.T) {
+	gen := New(&Config{Dialect: MySQL})
+
+	_, err := gen.DeleteInBatches(&TestUser{ID: 1}, 100)
+	if !IsError(err, ErrCodeUnsupportedOperation) {
+		t.Fatalf("expected unsupported operation error, got %v", err)
+	}
+	if !strings.Contains(err.Error(), "DeleteInBatches") {
+		t.Fatalf("expected error to mention DeleteInBatches, got %v", err)
+	}
+}
+
 // ============================================================================
 // 逆向生成测试
 // ============================================================================
@@ -290,6 +381,20 @@ func TestParseSQL(t *testing.T) {
 
 	if !strings.Contains(code, "TableName()") {
 		t.Error("Code should contain TableName method")
+	}
+}
+
+func TestReverseDBUnsupported(t *testing.T) {
+	builder := New(&Config{Dialect: MySQL}).ReverseDB(nil)
+
+	if _, err := builder.Generate(); !IsError(err, ErrCodeUnsupportedOperation) {
+		t.Fatalf("expected Generate unsupported operation error, got %v", err)
+	}
+	if _, err := builder.GenerateAll(); !IsError(err, ErrCodeUnsupportedOperation) {
+		t.Fatalf("expected GenerateAll unsupported operation error, got %v", err)
+	}
+	if err := builder.GenerateToDir(t.TempDir()); !IsError(err, ErrCodeUnsupportedOperation) {
+		t.Fatalf("expected GenerateToDir unsupported operation error, got %v", err)
 	}
 }
 

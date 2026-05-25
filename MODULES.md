@@ -32,13 +32,13 @@ types/*
 
 | 模块 | 当前职责 | 边界定位 | 测试状态 | 主要风险 |
 |---|---|---|---|---|
-| `cmd/server` | CLI 入口、server/initdb/tests 命令、信号处理 | 进程入口 | [no test files] | `tests` 命令实际是 yaml2go 演示，语义易混淆 |
-| `internal/app` | 组合根、启动模式、生命周期、热重载 | 应用装配层 | [no test files] | demo 迁移、reload、副作用测试不足 |
+| `cmd/server` | CLI 入口、server/initdb/tests 命令、信号处理 | 进程入口 | tests 命令语义测试已补 | `runApp` 内部 `os.Exit` 仍需后续隔离才能测试启动失败路径 |
+| `internal/app` | 组合根、启动模式、生命周期、热重载 | 应用装配层 | demo 迁移策略测试已补 | reload 其他副作用测试不足 |
 | `internal/config` | 配置结构、加载、环境变量覆盖、热重载 | 配置边界 | 有测试 | TASK-P1-001 和 TASK-P1-002 已收拢 copy/update 与环境变量策略；reload 路径仍需后续覆盖 |
 | `internal/middleware` | Gin 中间件：i18n、CORS、logger、recovery、traceid | HTTP 横切层 | [no test files] | 中间件链路缺少路由级验证 |
 | `internal/transport/http` | Gin router、health/ready、demo API 注册 | 传输层 | 有 health/ready smoke test | demo 路由缺少 integration 测试 |
-| `internal/modules/demo` | Todo 示例业务模块 | 标准示例模块 | [no test files] | CRUD 关键路径缺少测试，示例与生产约束需分离 |
-| `pkg/*` | 可复用基础设施和工具库 | 混合 API | 部分有测试 | 公共/内部分类未逐包落地，README 中英混杂 |
+| `internal/modules/demo` | Todo 示例业务模块 | 标准示例模块 | service/repository CRUD 基线已补 | handler/router 集成仍需后续覆盖，示例与生产约束需分离 |
+| `pkg/*` | 可复用基础设施、公共工具和内部支撑工具 | 混合 API | 部分有测试 | [CONFIRMED] TASK-P1-007 已逐包分类；包 README 中英混杂仍待后续中文化 |
 | `types/*` | 公共常量、错误码、响应结构、类型别名 | 跨层契约 | `types/constants` 有测试 | auth 错误码存在但 auth/rbac 不在当前功能范围 |
 
 ## `cmd/server`
@@ -57,13 +57,13 @@ types/*
 
 ### 问题和风险
 
-- [RISK] `tests` 命令描述为 `Run tests`，但实际执行 yaml2go 示例转换，不运行 Go 测试。
+- [CONFIRMED] `tests` 命令已在 TASK-P1-006 改为真实 Go test 入口，默认执行 `go test ./...`。
 - [RISK] `runApp` 内部直接 `os.Exit`，后续若要测试启动失败路径，需要额外隔离。
 - [RISK] CLI 命令描述仍是英文，与中文项目方向不一致。
 
 ### 优化候选
 
-- [DEFERRED] 将 `tests` 命令重命名或改为明确的 yaml2go demo 命令。
+- [CONFIRMED] 将 `tests` 命令改为真实测试入口，并新增最小命令语义测试。
 - [DEFERRED] 为 CLI 命令增加最小单元测试或命令注册测试。
 
 ## `internal/app`
@@ -84,15 +84,15 @@ types/*
 
 ### 问题和风险
 
-- [RISK] demo schema 迁移在 `NewModules` 中自动执行，且数据库 reload 后也会再次执行，需明确仅开发/demo 可用。
-- [RISK] `ModeInitDB` 目前也执行 `MigrateDemoSchema`，与 SQL 脚本初始化边界尚未打通。
+- [CONFIRMED] demo schema 迁移触发策略已在 TASK-P1-005 收拢：server-start/initdb 执行，reload 跳过。
+- [CONFIRMED] `ModeInitDB` 明确作为 demo schema bootstrap 入口；生产/bootstrap 迁移框架仍延后。
 - [RISK] 热重载路径没有测试，尤其是数据库、HTTP server 和 storage 的重载副作用。
 - [RISK] `initapp` 同时负责大量映射和构建逻辑，后续新增模块时容易膨胀。
 
 ### 优化候选
 
 - [DEFERRED] 建立 app 装配链路测试，覆盖 server/initdb 模式。
-- [DEFERRED] 将 demo schema 自动迁移标注为 dev/demo 策略，并与 `initdb`/SQL 脚本分层。
+- [CONFIRMED] 将 demo schema 自动迁移标注为 dev/demo 策略，并与 `initdb`/SQL 脚本分层。
 - [DEFERRED] 为 reload 路径增加配置变更单元测试或集成测试。
 
 ## `internal/config`
@@ -186,33 +186,34 @@ types/*
 
 ### 问题和风险
 
-- [RISK] demo CRUD 没有 service/repository/handler 测试。
-- [RISK] demo 自动迁移与生产迁移策略需要隔离。
+- [CONFIRMED] demo service/repository CRUD 基线已在 TASK-P1-004 补齐。
+- [RISK] demo handler/router 集成测试仍未覆盖。
+- [CONFIRMED] demo 自动迁移与生产迁移触发边界已在 TASK-P1-005 隔离。
 - [RISK] demo 作为长期标准示例，需要补齐测试和文档，否则示例质量会影响后续模块。
 
 ### 优化候选
 
-- [DEFERRED] 增加 demo service 单元测试。
+- [CONFIRMED] 增加 demo service/repository CRUD 基线测试。
 - [DEFERRED] 增加 demo CRUD 集成测试。
 - [DEFERRED] 为新模块建立基于 demo 的模板规范。
 
-## `pkg/*` 分类草案
+## `pkg/*` API 分类
 
-| 包 | 当前定位草案 | README | 测试 | 主要风险 |
+| 包 | 当前定位 | README 分类 | 测试 | 主要风险 |
 |---|---|---|---|---|
-| `pkg/cache` | 公共基础设施 API | 有 | 无 | Redis 依赖路径无测试 |
-| `pkg/cli` | 公共/内部待确认 | 有 | 无 | 命令行为无测试 |
-| `pkg/crypto` | 公共基础设施 API | 有 | 有 | 当前仅 bcrypt 能力 |
-| `pkg/database` | 公共基础设施 API | 有 | 有 | Hook/Reload/多驱动路径覆盖不足 |
-| `pkg/executor` | 公共基础设施 API | 有 | 无 | reload/shutdown/overload 行为无测试 |
-| `pkg/httpserver` | 公共基础设施 API | 有 | 无 | start/reload/shutdown 无测试 |
-| `pkg/i18n` | 公共基础设施 API | 有 | 无 | MustT panic 路径需确认 |
-| `pkg/logger` | 公共基础设施 API | 有 | 有 | 文件输出/reload 路径覆盖有限 |
-| `pkg/plugin` | 公共基础设施 API | 有 | 有 | rpc/ws/discovery 明确延后 |
-| `pkg/sqlgen` | 公共工具 API | 有 | 有 | 多个 TODO/未实现能力需显式 unsupported |
-| `pkg/storage` | 公共基础设施 API | 有 | 无 | 文件监听、Excel、图片处理无测试 |
-| `pkg/utils` | 混合工具包 | 有 | 无 | snowflake 默认实例 panic 策略需确认 |
-| `pkg/yaml2go` | 公共工具 API | 有 | 无 | `cmd/server tests` 依赖其演示能力 |
+| `pkg/cache` | 公共基础设施 API | [CONFIRMED] 已写入 | 无 | Redis 依赖路径无测试 |
+| `pkg/cli` | 公共工具 API | [CONFIRMED] 已写入 | `cmd/server` 已覆盖命令使用；包自身无测试 | flag parser 和 help 输出无包级测试 |
+| `pkg/crypto` | 公共基础设施 API | [CONFIRMED] 已写入 | 有 | 当前稳定实现仅 bcrypt |
+| `pkg/database` | 公共基础设施 API | [CONFIRMED] 已写入 | 有 | Hook/Reload/多驱动路径覆盖不足 |
+| `pkg/executor` | 公共基础设施 API | [CONFIRMED] 已写入 | 无 | reload/shutdown/overload/panic handler 无包级测试 |
+| `pkg/httpserver` | 公共基础设施 API | [CONFIRMED] 已写入 | 无 | start/reload/shutdown 无包级测试 |
+| `pkg/i18n` | 公共基础设施 API | [CONFIRMED] 已写入 | 无 | MustT panic 和加载错误路径需测试 |
+| `pkg/logger` | 公共基础设施 API | [CONFIRMED] 已写入 | 有 | 文件输出/轮转路径覆盖有限 |
+| `pkg/plugin` | 公共基础设施 API | [CONFIRMED] 已写入 | 有 | rpc/ws/discovery 明确延后 |
+| `pkg/sqlgen` | 公共工具 API | [CONFIRMED] 已写入 | 有 | [CONFIRMED] 高级查询、批量删除、DB reverse 和部分 rollback 边界已显式 unsupported / partial |
+| `pkg/storage` | 公共基础设施 API | [CONFIRMED] 已写入 | 无 | 文件监听、Excel、图片处理、复制边界无包级测试 |
+| `pkg/utils` | 内部支撑工具包 | [CONFIRMED] 已写入 | 无 | snowflake 默认实例 panic 策略需确认；新增工具需谨慎 |
+| `pkg/yaml2go` | 公共工具 API | [CONFIRMED] 已写入 | 无 | 原 `cmd/server tests` 演示依赖已移除；包自身仍无测试 |
 
 ## `types/*` 边界
 
@@ -223,15 +224,17 @@ types/*
 | `types/result` | Gin 响应 helper、分页结构、trace id 错误响应 | 依赖 Gin，属于 HTTP 契约而不是纯类型包 |
 | `types` | `Crypto` 类型别名、`CacheInjectable` 接口 | 依赖 `pkg/cache`、`pkg/crypto`，需确认是否继续作为公共聚合入口 |
 
+- [CONFIRMED] 用户选择 A，`types/*` 边界已提升为 TASK-P1-009 / TS-P1-009。
+
 ## 设计边界冲突清单
 
 | ID | 冲突 | 影响 | 建议 |
 |---|---|---|---|
 | BC-001 | `.env.example` 使用 `DB_*`，数据库 override 使用 `REI_APP_DB_*` | 环境变量文档与实现不一致 | [CONFIRMED] TASK-P1-002 已统一为 `DB_*` 优先，旧前缀兼容 |
 | BC-002 | `copyConfig` 未覆盖完整配置字段 | 配置 Update/热更新可能丢字段 | [CONFIRMED] TASK-P1-001 已修复并补测试 |
-| BC-003 | demo schema 在 server/initdb/reload 路径自动迁移 | dev/prod 迁移职责混乱 | P1 明确迁移开关和职责 |
-| BC-004 | `cmd/server tests` 不运行测试 | CLI 语义误导 | P1 重命名或改为真实测试入口 |
-| BC-005 | `pkg/sqlgen` README/代码存在未实现能力 | 公共工具 API 期望不稳定 | P1 显式 unsupported 或拆 Backlog |
+| BC-003 | demo schema 在 server/initdb/reload 路径自动迁移 | dev/prod 迁移职责混乱 | [CONFIRMED] TASK-P1-005 已明确 server-start/initdb 执行、reload 跳过 |
+| BC-004 | `cmd/server tests` 不运行测试 | CLI 语义误导 | [CONFIRMED] TASK-P1-006 已改为真实测试入口 |
+| BC-005 | `pkg/sqlgen` README/代码存在未实现能力 | 公共工具 API 期望不稳定 | [CONFIRMED] TASK-P1-008 已显式 unsupported 或文档化 partial 能力 |
 | BC-006 | 多个关键路径无测试 | 后续重构回归风险高 | P1 先建测试矩阵 |
 
 ## 测试矩阵草案
@@ -241,11 +244,11 @@ types/*
 | TM-001 | 全仓库 | `go test ./... -count=1` | P0 | [CONFIRMED] 当前通过 |
 | TM-002 | app 启动 | 使用测试配置构建 `app.New`，验证 core/infra/modules/transport 非空 | P0 | [NOT_STARTED] |
 | TM-003 | health/ready | 使用 `httptest` 验证 `/health`、数据库正常/缺失/失败时 `/ready` | P0 | [CONFIRMED] TASK-P1-003 已覆盖 |
-| TM-004 | demo CRUD | 使用 SQLite 临时库跑 Create/List/Get/Update/Delete | P0 | [NOT_STARTED] |
+| TM-004 | demo CRUD | 使用 SQLite 临时库跑 Create/List/Get/Update/Delete | P0 | [CONFIRMED] TASK-P1-004 已覆盖 service/repository 基线 |
 | TM-005 | config load/override | 验证 YAML、`${VAR:default}`、环境变量覆盖、无效配置报错 | P0 | [IN_PROGRESS] 环境覆盖已补测试 |
 | TM-006 | config update/copy | 验证 `Update` 后不丢失 InitDB/Executor/Storage/CORS 等字段 | P0 | [CONFIRMED] TASK-P1-001 已覆盖 |
-| TM-007 | migration boundary | 验证 server/initdb/reload 对 demo schema 的触发策略 | P1 | [NOT_STARTED] |
-| TM-008 | pkg API | 为无测试的公共包补最小行为测试 | P1 | [NOT_STARTED] |
+| TM-007 | migration boundary | 验证 server/initdb/reload 对 demo schema 的触发策略 | P1 | [CONFIRMED] TASK-P1-005 已覆盖 |
+| TM-008 | pkg API | 为无测试的公共包补最小行为测试 | P1 | [CONFIRMED] TASK-P1-007 已完成分类；测试补齐仍延后 |
 
 ## P1 优化候选项
 
@@ -254,10 +257,10 @@ types/*
 | OPT-P1-001 | 建立 app/router/demo/config 测试矩阵 | 多个关键路径无测试 | 生成测试任务和时间切片 |
 | OPT-P1-002 | 统一配置环境变量策略 | `.env.example` 与实现不一致 | [CONFIRMED] 已完成 |
 | OPT-P1-003 | 修复 `copyConfig` 字段覆盖 | 热更新可能丢配置 | [CONFIRMED] 已完成 |
-| OPT-P1-004 | 明确迁移策略 | `AutoMigrate`、`initdb`、SQL 脚本职责冲突 | 编写迁移边界文档和测试 |
-| OPT-P1-005 | 处理 `cmd/server tests` 命令语义 | 命令名与行为不符 | 重命名或改造为真实测试入口 |
-| OPT-P1-006 | 为 `pkg/*` 完成公共/内部分类 | 混合 API 策略需要落地 | 更新包级文档和 Backlog |
-| OPT-P1-007 | 标注 `pkg/sqlgen` 未实现能力 | TODO/unsupported 边界不清 | 文档化 unsupported 或拆任务 |
+| OPT-P1-004 | 明确迁移策略 | `AutoMigrate`、`initdb`、SQL 脚本职责冲突 | [CONFIRMED] 已编写迁移边界文档和测试 |
+| OPT-P1-005 | 处理 `cmd/server tests` 命令语义 | 命令名与行为不符 | [CONFIRMED] 已改造为真实测试入口 |
+| OPT-P1-006 | 为 `pkg/*` 完成公共/内部分类 | 混合 API 策略需要落地 | [CONFIRMED] 已更新包级 README、`ARCHITECTURE.md` 和本文 |
+| OPT-P1-007 | 标注 `pkg/sqlgen` 未实现能力 | TODO/unsupported 边界不清 | [CONFIRMED] 已完成 |
 
 ## 当前完成判断
 
@@ -265,4 +268,5 @@ types/*
 - [CONFIRMED] 设计边界冲突清单已生成。
 - [CONFIRMED] 测试矩阵草案已生成。
 - [CONFIRMED] P1 优化候选项已生成。
-- [CONFIRMED] 已按 P1 切片进行受控 Go 测试代码修改：TASK-P1-001、TASK-P1-002、TASK-P1-003 均已完成并验证通过。
+- [CONFIRMED] 已按 P1 切片进行受控 Go 测试代码修改或文档分类：TASK-P1-001、TASK-P1-002、TASK-P1-003、TASK-P1-004、TASK-P1-005、TASK-P1-006、TASK-P1-007、TASK-P1-008 均已完成并验证通过。
+- [CONFIRMED] 下一阶段已选择提升 `types/*` 契约边界，当前合法下一步为 TASK-P1-009 / TS-P1-009。

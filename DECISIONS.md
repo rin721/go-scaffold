@@ -107,3 +107,14 @@
 - Reason：分阶段处理可以避免文档任务过大而影响优化主线。
 - Consequences：包 README 中文化进入 Backlog 或后续文档时间切片。
 - Related Tasks：TASK-OPT-003
+
+### DEC-011：提升 `types/*` 契约边界为下一任务
+
+- Date：2026-05-25
+- Status：ACCEPTED
+- Context：TASK-P1-008 完成后，当前已确认 P1 任务列表全部完成，状态进入 `PENDING_USER_CONFIRMATION`，要求在 `BL-021`、`BL-020`、Phase 6 收尾或结束本轮之间选择。
+- Decision：用户选择 A，提升 `BL-021` / `TM-P1-005`，下一任务为 TASK-P1-009 / TS-P1-009：明确 `types/*` 契约边界。
+- Alternatives：提升 `BL-020` 补 `pkg/*` 行为测试；进入 Phase 6 收尾；结束本轮。
+- Reason：`types/result` 依赖 Gin，属于 HTTP 响应契约而非纯类型包；`types/errors` 也包含 auth/rbac 预留错误码，需要先标注边界以免后续复用和重构误判。
+- Consequences：下一次“下一步”只能执行 TS-P1-009，不得插队补 `pkg/*` 测试或进入收尾。
+- Related Tasks：TASK-NEXT-SCOPE、TASK-P1-009

@@ -37,6 +37,10 @@ func (g *Generator) Delete(value interface{}, conds ...interface{}) (string, err
 // ============================================================================
 
 func (g *Generator) buildSoftDelete() (string, error) {
+	if err := g.checkUnsupported(); err != nil {
+		return "", err
+	}
+
 	var sb strings.Builder
 
 	now := time.Now().Format("2006-01-02 15:04:05")
@@ -68,6 +72,10 @@ func (g *Generator) buildSoftDelete() (string, error) {
 // ============================================================================
 
 func (g *Generator) buildHardDelete() (string, error) {
+	if err := g.checkUnsupported(); err != nil {
+		return "", err
+	}
+
 	var sb strings.Builder
 
 	sb.WriteString("DELETE FROM ")
@@ -118,12 +126,7 @@ func (g *Generator) buildDeleteWhereClause() string {
 
 // DeleteInBatches 生成批量删除 SQL
 func (g *Generator) DeleteInBatches(value interface{}, batchSize int) ([]string, error) {
-	// TODO: 实现批量删除
-	sql, err := g.Delete(value)
-	if err != nil {
-		return nil, err
-	}
-	return []string{sql}, nil
+	return nil, NewUnsupportedError("DeleteInBatches")
 }
 
 // ============================================================================

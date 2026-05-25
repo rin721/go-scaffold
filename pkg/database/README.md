@@ -2,6 +2,13 @@
 
 提供统一的数据库抽象层,支持 PostgreSQL、MySQL 和 SQLite,并提供连接池管理和配置热更新功能。
 
+## API 分类
+
+- 定位：[CONFIRMED] 公共基础设施 API。
+- 稳定边界：`Database`、`Reloader`、事务接口、`Config`、`New`、`NewWithHooks`。
+- 当前风险：[RISK] Hook、Reload 和多驱动路径测试覆盖仍有限。
+- 非目标：[CONFIRMED] 本包不定义业务模型或生产迁移流程。
+
 ## 特性
 
 - ✅ **多数据库支持**: PostgreSQL、MySQL、SQLite

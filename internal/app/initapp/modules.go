@@ -12,7 +12,7 @@ import (
 )
 
 func NewModules(core Core, infra Infrastructure) (Modules, error) {
-	if err := MigrateDemoSchema(infra.Database, core.Logger); err != nil {
+	if _, err := MigrateDemoSchemaForTrigger(infra.Database, core.Logger, DemoMigrationTriggerServerStart); err != nil {
 		return Modules{}, err
 	}
 	return Modules{
@@ -20,15 +20,82 @@ func NewModules(core Core, infra Infrastructure) (Modules, error) {
 	}, nil
 }
 
+type DemoMigrationTrigger string
+
+const (
+	DemoMigrationTriggerServerStart DemoMigrationTrigger = "server-start"
+	DemoMigrationTriggerInitDB      DemoMigrationTrigger = "initdb"
+	DemoMigrationTriggerReload      DemoMigrationTrigger = "reload"
+)
+
+type DemoMigrationPolicy struct {
+	Trigger     DemoMigrationTrigger
+	AutoMigrate bool
+	Reason      string
+}
+
+func DemoMigrationPolicyFor(trigger DemoMigrationTrigger) DemoMigrationPolicy {
+	switch trigger {
+	case DemoMigrationTriggerServerStart:
+		return DemoMigrationPolicy{
+			Trigger:     trigger,
+			AutoMigrate: true,
+			Reason:      "demo server startup keeps the local development schema ready",
+		}
+	case DemoMigrationTriggerInitDB:
+		return DemoMigrationPolicy{
+			Trigger:     trigger,
+			AutoMigrate: true,
+			Reason:      "initdb is the explicit demo bootstrap command",
+		}
+	case DemoMigrationTriggerReload:
+		return DemoMigrationPolicy{
+			Trigger:     trigger,
+			AutoMigrate: false,
+			Reason:      "database reload must not perform implicit schema changes",
+		}
+	default:
+		return DemoMigrationPolicy{
+			Trigger:     trigger,
+			AutoMigrate: false,
+			Reason:      "unknown migration trigger requires an explicit policy",
+		}
+	}
+}
+
 func MigrateDemoSchema(db database.Database, log logger.Logger) error {
+	_, err := MigrateDemoSchemaForTrigger(db, log, DemoMigrationTriggerServerStart)
+	return err
+}
+
+func MigrateDemoSchemaForTrigger(db database.Database, log logger.Logger, trigger DemoMigrationTrigger) (DemoMigrationPolicy, error) {
+	policy := DemoMigrationPolicyFor(trigger)
+	if !policy.AutoMigrate {
+		logDemoMigrationSkipped(log, policy)
+		return policy, nil
+	}
 	if db == nil {
-		return nil
+		return policy, nil
 	}
 	if err := db.DB().AutoMigrate(&model.Todo{}); err != nil {
-		return fmt.Errorf("migrate demo schema: %w", err)
+		return policy, fmt.Errorf("migrate demo schema: %w", err)
 	}
-	log.Info("demo schema migrated")
-	return nil
+	logDemoMigrationApplied(log, policy)
+	return policy, nil
+}
+
+func logDemoMigrationApplied(log logger.Logger, policy DemoMigrationPolicy) {
+	if log == nil {
+		return
+	}
+	log.Info("demo schema migrated", "trigger", policy.Trigger, "reason", policy.Reason)
+}
+
+func logDemoMigrationSkipped(log logger.Logger, policy DemoMigrationPolicy) {
+	if log == nil {
+		return
+	}
+	log.Debug("demo schema migration skipped", "trigger", policy.Trigger, "reason", policy.Reason)
 }
 
 func NewDemoModule(db database.Database, log logger.Logger) DemoModule {

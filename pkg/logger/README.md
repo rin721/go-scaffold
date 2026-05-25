@@ -2,6 +2,13 @@
 
 提供统一的日志接口,基于高性能的 [Zap](https://github.com/uber-go/zap) 日志库,支持结构化日志、配置热更新和多种输出格式。
 
+## API 分类
+
+- 定位：[CONFIRMED] 公共基础设施 API。
+- 稳定边界：`Logger`、`Reloader`、`Config`、`New`、`Default`。
+- 当前风险：[RISK] 文件输出和轮转路径测试覆盖有限。
+- 非目标：[CONFIRMED] 本包不定义业务审计字段或日志采集后端。
+
 ## 特性
 
 - ✅ **高性能**: 基于 Zap,比标准库快 10 倍以上

@@ -2,6 +2,13 @@
 
 提供通用的并发任务调度器,基于高性能的 [ants](https://github.com/panjf2000/ants) 协程池库,支持多池隔离、配置热更新和全链路 panic 恢复。
 
+## API 分类
+
+- 定位：[CONFIRMED] 公共基础设施 API。
+- 稳定边界：`Manager`、`Config`、`PoolName`、`NewManager`。
+- 当前风险：[RISK] reload、shutdown、overload 和 panic handler 行为缺少包级测试。
+- 非目标：[CONFIRMED] 本包不调度业务任务优先级，也不定义业务降级策略。
+
 ## 特性
 
 - ✅ **多维资源隔离**: 支持多个独立协程池,防止资源争抢

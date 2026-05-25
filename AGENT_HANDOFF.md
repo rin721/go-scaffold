@@ -1,152 +1,107 @@
 # AGENT_HANDOFF.md
 
-## 最近更新
+## Last Updated
 
-- 日期：2026-05-25
-- Agent：Codex
-- 工具：Codex Desktop
+- Date: 2026-05-25
+- Agent: Codex
+- Tool: Codex Desktop
 
-## 项目快照
+## Project Snapshot
 
-- 项目：go-scaffold
-- 阶段：demo CRUD 测试基线
-- 模块：internal/modules/demo
-- 当前任务：TASK-P1-004
-- 当前时间切片：TS-P1-004
-- 总体状态：IN_PROGRESS
+- Project: go-scaffold
+- Phase: P1 后续范围已确认
+- Module: 项目优化路线
+- Current Task: TASK-P1-009
+- Current Time Slice: TS-P1-009
+- Overall Status: IN_PROGRESS
 
-## 最近完成
+## What Was Done Last
 
-- 按用户计划重新启动“全项目分析与优化路线”主线。
-- 生成/重写六个中文启动模板。
-- 更新核心项目文档和状态文件，避免后续“下一步”继续指向插件系统扩展。
-- 保留插件系统 v1 为历史内容和 Backlog，不删除历史。
-- 执行 `go test ./... -count=1`，结果通过。
-- 用户发送“下一步”后，已按推荐默认值确认项目优化路线和关键边界。
-- 新增 `ROADMAP.md`。
-- 再次收到“下一步”后，已生成 `MODULES.md`，完成模块职责、边界冲突、测试矩阵草案和 P1 优化候选项。
-- 更新任务、时间切片、状态、测试报告、变更日志和交接文档，将合法下一步推进到 TASK-OPT-004。
-- 本轮收到“下一步”后，已生成 `TEST_MATRIX.md`，并把 P1 任务草案与 P1 时间切片草案写入 `TASKS.md` 和 `TIME_SLICES.md`。
-- 已补齐 `ISSUES.md` 作为问题记录入口。
-- 已执行 `go test ./... -count=1`，结果通过；未修改 Go 文件。
-- 用户再次发送“下一步”，已按推荐默认顺序确认 P1 执行顺序。
-- 已完成 TASK-P1-001：修复 `copyConfig` 字段覆盖，并新增配置 copy/update 测试。
-- 已执行 `go test ./internal/config -count=1` 和 `go test ./... -count=1`，结果均通过。
-- 用户确认补齐 Prompt 全量 Agent 基础设施，已完成 TASK-INFRA-001。
-- 已新增 `AGENTS.md`、`CLAUDE.md`、`AGENT_RULES.md`、`SKILLS.md`、缺失模板、reports/specs、跨工具目录和 14 个项目 skills。
-- 已执行 Prompt 全量产物存在性核对和 `go test ./... -count=1`，结果均通过。
-- 用户要求实施 Agent 基础设施一致性修复计划，已完成 TASK-INFRA-002。
-- 已修复 `AGENTS.md` 实际缺失但状态文件声称存在的冲突。
-- 已扩充 14 个 canonical `skills/*/SKILL.md`，新增 14 个 `.agents/skills/*/SKILL.md` 适配器。
-- 已标准化 `docs/templates/*`，新增状态诊断报告。
-- 已执行文件存在性核对、`quick_validate.py` skill 验证、跨工具入口引用一致性检查和 `go test ./... -count=1`，结果均通过。
-- 用户再次发送“下一步”，已完成 TASK-P1-002：统一配置环境变量策略。
-- 数据库环境变量现在以 `DB_*` 为主，旧 `REI_APP_DB_*` 保留为兼容 fallback。
-- `.env.example` 已移除未实现的 JWT 示例，并补齐 Storage/CORS 示例。
-- 已执行 `go test ./internal/config -count=1` 和 `go test ./... -count=1`，结果均通过。
-- 用户再次发送“下一步”，已完成 TASK-P1-003：增加 health/ready 与 router smoke test。
-- 新增 `internal/transport/http/router_test.go`，覆盖 `/health`、`/ready` 数据库缺失、ping 失败、ping 成功路径。
-- 已执行 `go test ./internal/transport/http -count=1` 和 `go test ./... -count=1`，结果均通过。
+- 用户回复 `a`，确认选择 A：提升 `BL-021` / `TM-P1-005`。
+- 完成 TASK-NEXT-SCOPE / TS-NEXT-SCOPE：关闭后续范围待确认状态。
+- 新增 TASK-P1-009 / TS-P1-009，作为当前唯一合法下一步。
+- TASK-P1-009 目标：明确 `types/*` 契约边界，尤其是 `types/result` 的 HTTP/Gin 响应契约、`types/errors` 的 auth/rbac 预留错误码、`types/constants` 与根 `types` 聚合入口。
+- 本次未修改 Go 业务代码。
 
-## 最近变更文件
+## Files Changed Last
 
-| 文件 | 用途 |
-|---|---|
-| `PROJECT_BRIEF.md` | 记录项目当前目标、优势、问题和已确认事项 |
-| `REQUIREMENTS.md` | 记录确认后的优化需求 |
-| `ARCHITECTURE.md` | 记录确认后的高层架构原则和需分析模块 |
-| `ACCEPTANCE.md` | 记录启动阶段和后续代码任务验收门禁 |
-| `RISK_REGISTER.md` | 记录范围、文档、迁移、包 API、测试等风险 |
-| `BACKLOG.md` | 保留未确认优化项和插件扩展项 |
-| `DECISIONS.md` | 保留插件历史决策并新增当前主线切换决策 |
-| `TASKS.md` | 当前合法任务推进到 TASK-P1-004，TASK-P1-003 已完成 |
-| `TIME_SLICES.md` | 当前合法切片推进到 TS-P1-004，TS-P1-003 已完成 |
-| `STATUS.md` | 当前合法下一步切换为 TASK-P1-004 |
-| `TEST_REPORT.md` | 记录 TASK-P1-003 HTTP router 测试和全量测试通过 |
-| `CHANGELOG.md` | 记录 TASK-P1-003 health/ready smoke test |
-| `ROADMAP.md` | 记录治理优先优化路线 |
-| `MODULES.md` | 记录模块职责、边界冲突、测试矩阵草案和 P1 优化候选项 |
-| `TEST_MATRIX.md` | 记录正式测试矩阵、任务草案和推荐执行顺序 |
-| `ISSUES.md` | 补齐失败和阻塞问题记录入口 |
-| `AGENTS.md` | 新增实际缺失的跨 Agent 主入口 |
-| `internal/config/manager.go` | 修复 `copyConfig` 字段覆盖和 slice 深拷贝 |
-| `internal/config/manager_test.go` | 新增配置 copy/update 和环境变量策略测试 |
-| `internal/config/app_database.go` | 数据库环境变量改为 `DB_*` 优先，旧前缀 fallback |
-| `internal/config/constants.go` | 记录旧前缀兼容策略 |
-| `.env.example` | 对齐环境变量策略，移除 JWT 示例，补充 Storage/CORS |
-| `internal/transport/http/router_test.go` | 新增 health/ready router smoke test |
-| `docs/templates/*` | 标准化为可复用模板 |
-| `CLAUDE.md` / `AGENT_RULES.md` / `SKILLS.md` | 统一跨 Agent 入口、规则和 skills 索引 |
-| `skills/*/SKILL.md` | 扩充 14 个 canonical 项目专用 skills |
-| `.agents/skills/*/SKILL.md` | 新增 14 个轻量适配器 |
-| `docs/reports/status_diagnostics/2026-05-25-task-infra-002-agents-md-missing.md` | 记录并关闭 `AGENTS.md` 缺失冲突 |
-| `docs/reports/*` / `docs/specs/*` | 新增报告与规格目录入口 |
-| `.agents/*` / `.cursor/*` / `.kiro/*` / `.codex/*` | 新增跨工具适配入口 |
-
-## 最近执行命令
-
-| 命令 | 结果 |
-|---|---|
-| Agent 基础设施文件存在性核对 | PASS |
-| `quick_validate.py` 验证 28 个 skill 目录 | PASS |
-| 跨工具入口引用一致性检查 | PASS |
-| `go test ./internal/config -count=1` | PASS |
-| `go test ./internal/transport/http -count=1` | PASS |
-| `go test ./... -count=1` | PASS |
-| `git diff --check` | PASS，只有 Windows CRLF 转换警告 |
-
-## 测试状态
-
-- [CONFIRMED] `internal/config` 测试通过。
-- [CONFIRMED] `internal/transport/http` 测试通过。
-- [CONFIRMED] 全量 Go 测试通过。
-- [RISK] `cmd/server`、`internal/app`、`internal/modules/demo` 等关键路径仍无测试文件。
-
-## 当前阻塞项
-
-| ID | 阻塞项 | 需要动作 |
+| File | Change | Reason |
 |---|---|---|
-|  |  |  |
+| `STATUS.md` | 当前合法任务推进到 TASK-P1-009 | 关闭待确认状态 |
+| `TASKS.md` | 新增 TASK-P1-009，TASK-NEXT-SCOPE 标记 COMPLETED | 提升 `BL-021` / `TM-P1-005` |
+| `TIME_SLICES.md` | 新增 TS-P1-009，TS-NEXT-SCOPE 标记 COMPLETED | 明确下一执行切片 |
+| `TEST_MATRIX.md` | 新增 TASK-P1-009 矩阵行 | 绑定 TM-P1-005 和验证命令 |
+| `ACCEPTANCE.md` | 新增 TASK-NEXT-SCOPE 和 TASK-P1-009 验收项 | 明确完成和下一步门禁 |
+| `BACKLOG.md` | 将 BL-021 标为已提升 | 防止重复提升 |
+| `RISK_REGISTER.md` | 新增 RISK-014 | 记录 `types/*` 契约边界风险 |
+| `ARCHITECTURE.md`、`MODULES.md`、`ROADMAP.md`、`DECISIONS.md` | 记录提升决策和下一步 | 保持架构/路线图一致 |
+| `CHANGELOG.md`、`TEST_REPORT.md`、`ISSUES.md`、`AGENT_HANDOFF.md` | 记录证据和交接 | 让下一 Agent 可恢复 |
 
-## 重要决策
+## Commands Run Last
 
-- [CONFIRMED] 本轮不写 Go 代码。
-- [CONFIRMED] 当前主线切回项目治理与优化路线。
-- [CONFIRMED] 插件系统 v1 保留为历史记录。
-- [CONFIRMED] 已确认“治理优先”路线。
-- [CONFIRMED] 已确认 `pkg/*` 混合策略。
-- [CONFIRMED] 已确认 demo 长期标准示例。
-- [CONFIRMED] 已确认迁移 dev-prod 分层。
-- [CONFIRMED] 已确认中文化根文档和模板优先。
-- [CONFIRMED] 已确认 P1 推荐执行顺序。
-- [CONFIRMED] TASK-P1-001 已完成。
-- [CONFIRMED] TASK-INFRA-001 已完成。
-- [CONFIRMED] Prompt 全量 Agent 基础设施产物已补齐。
-- [CONFIRMED] TASK-INFRA-002 已完成。
-- [CONFIRMED] `AGENTS.md` 缺失冲突已修复。
-- [CONFIRMED] 28 个 skill 目录已通过 `quick_validate.py`。
-- [CONFIRMED] TASK-P1-002 已完成。
-- [CONFIRMED] 配置环境变量策略统一为无全局前缀，数据库旧前缀仅兼容。
-- [CONFIRMED] TASK-P1-003 已完成。
-- [CONFIRMED] `/health` 与 `/ready` 状态码和响应语义已被 `httptest` 固定。
+| Command | Result |
+|---|---|
+| 状态一致性文本检查 | PASS |
+| `go test ./types/... -count=1` | PASS |
+| `go test ./... -count=1` | PASS |
+| `git diff --check` | PASS，仅有 Windows LF/CRLF 转换警告 |
 
-## 合法下一步
+## Test Status
 
-- 执行 TASK-P1-004：增加 demo CRUD 测试基线。
-- 允许修改 `internal/modules/demo/**/*_test.go` 和项目状态文档。
-- 目标是用隔离测试固定 demo Todo Create/List/Get/Update/Delete 关键路径。
+- Last package test: `go test ./types/... -count=1`
+- Last full regression: `go test ./... -count=1`
+- Result: PASS
+- Known failures: none
 
-## 禁止事项
+## Current Blockers
 
-- 不修改当前时间切片未授权的 Go 代码。
-- 不重构项目结构。
-- 不实现 Backlog 项。
-- 不继续插件系统 rpc/ws/discovery。
-- 不执行部署或不可逆迁移。
+- None.
 
-## 恢复说明
+## Pending Verification
 
-1. 先读 `STATUS.md`。
-2. 再读 `TASKS.md` 和 `TIME_SLICES.md`。
-3. 如用户只说“下一步”，执行 TASK-P1-004。
-4. TASK-P1-004 允许修改 `internal/modules/demo/**/*_test.go` 和状态文档，必须运行 `go test ./internal/modules/demo/... -count=1` 和 `go test ./... -count=1`。
+- None.
+
+## Important Decisions
+
+- [CONFIRMED] 用户选择 A，提升 `BL-021` / `TM-P1-005`。
+- [CONFIRMED] 当前合法下一步是 TASK-P1-009 / TS-P1-009。
+- [CONFIRMED] TASK-P1-009 不允许修改 `cmd/*`、`internal/*`、`pkg/*`、依赖、数据库 schema 或部署配置。
+- [CONFIRMED] `BL-020` 的 `pkg/*` 行为测试仍未提升，不能插队执行。
+
+## Risks
+
+- `types/result` 依赖 Gin，下一切片需明确它是 HTTP 响应契约而非纯类型包。
+- `types/errors` 包含 auth/rbac 预留错误码，下一切片需避免暗示 auth/rbac 已实现。
+- `pkg/*` 行为测试缺口仍存在，但 `BL-020` 未提升，不能在 TS-P1-009 中处理。
+
+## Backlog Notes
+
+- `pkg/*` 行为测试补齐可按测试矩阵或 Backlog 分包推进。
+- `types/result` 契约边界已从 `BL-021` 提升为 TASK-P1-009。
+- CI/CD remains deferred.
+
+## Legal Next Step
+
+- Task ID: TASK-P1-009
+- Time Slice ID: TS-P1-009
+- Why this is next: 用户选择 A，`BL-021` / `TM-P1-005` 已提升；状态文件、任务清单和时间切片均指向该任务。
+- Entry conditions: 用户发送“下一步”，Agent 读取必读文件后执行 TS-P1-009。
+- Allowed files: `types/**/*`、`ARCHITECTURE.md`、`MODULES.md`、`TEST_MATRIX.md`、`ACCEPTANCE.md`、`docs/specs/types_contract_boundary.md`、项目状态文档。
+- Required verification: `go test ./types/... -count=1`、`go test ./... -count=1`、`git diff --check`。
+
+## Do Not Do
+
+- Do not implement auth/rbac.
+- Do not modify HTTP router, middleware, demo handler, `pkg/*`, dependencies, database schema, deployment config, or production config during TS-P1-009.
+- Do not start `BL-020` / `pkg/*` behavior tests unless user confirms a separate task later.
+- Do not perform breaking `types/*` API refactors unless the current slice explicitly documents and verifies them.
+- Do not change deployment, database schema, dependencies, or production config.
+
+## Recovery Instructions
+
+1. Read `AGENTS.md`.
+2. Read `STATUS.md`.
+3. Read `TASKS.md`.
+4. Read `TIME_SLICES.md`.
+5. Confirm current legal task is TASK-P1-009 / TS-P1-009.
+6. Continue only within TS-P1-009 allowed files and verification commands.

@@ -14,7 +14,7 @@
 - [CONFIRMED] `internal/app` 是组合根和生命周期边界。
 - [CONFIRMED] `internal/modules/demo` 暂定为长期标准示例。
 - [CONFIRMED] `pkg/*` 采用混合策略，后续必须逐包标注公共 API 或内部支撑定位。
-- [CONFIRMED] 迁移采用 dev-prod 分层策略，后续需要把 `AutoMigrate`、`initdb` 和 SQL 脚本职责写清。
+- [CONFIRMED] 迁移采用 dev-prod 分层策略：server-start/initdb 可执行 demo `AutoMigrate`，reload 不执行隐式 schema 变更，生产/bootstrap 迁移框架延后。
 
 ## 目标依赖方向
 
@@ -36,8 +36,8 @@ types/*
 | `internal/app` | 组合根、生命周期、跨层装配 | 生成装配链路清单 | [CONFIRMED] |
 | `internal/transport/http` | HTTP router、middleware、health/ready、API 注册 | 补充 smoke/integration 测试计划 | [CONFIRMED] |
 | `internal/modules/demo` | 长期标准示例 | 生成 demo 分层验收和测试路线 | [CONFIRMED] |
-| `pkg/*` | 混合策略 | 逐包分类：公共 API / 内部支撑 / 待确认 | [CONFIRMED] |
-| 数据库迁移 | dev-prod 分层 | 明确 `AutoMigrate`、`initdb`、SQL 脚本职责 | [CONFIRMED] |
+| `pkg/*` | 混合策略 | [CONFIRMED] TASK-P1-007 已逐包分类为公共基础设施 API、公共工具 API 或内部支撑工具包 | [CONFIRMED] |
+| 数据库迁移 | dev-prod 分层 | [CONFIRMED] TASK-P1-005 已明确 demo `AutoMigrate`、`initdb`、reload 职责；生产迁移框架仍延后 | [CONFIRMED] |
 | 插件系统 | v1 local/http 保留为历史已完成能力 | rpc/ws/discovery 留在 Backlog | [CONFIRMED] |
 | auth/JWT | 当前不实现，示例存在范围漂移 | 后续决定删除、保留占位或提升需求 | [CONFIRMED] |
 
@@ -49,15 +49,37 @@ types/*
 | `internal/config` | 环境覆盖、热更新和默认值职责需统一说明 | TASK-OPT-003 |
 | `internal/transport/http` | health/ready 和 demo 路由缺少集成测试 | TASK-OPT-003 |
 | `internal/modules/demo` | 示例职责与生产约束需分离 | TASK-OPT-003 |
-| `pkg/*` | 公共/内部定位未逐包标记 | TASK-OPT-003 |
-| `types/*` | 错误码和响应类型是否属于公共契约需确认 | TASK-OPT-003 |
+| `pkg/*` | 公共/内部定位已在 TASK-P1-007 标记，`pkg/sqlgen` unsupported 边界已在 TASK-P1-008 标记 | 后续破坏性重构或新能力实现仍需单独确认 |
+| `types/*` | 错误码和响应类型是否属于公共契约需确认 | [CONFIRMED] 已提升为 TASK-P1-009 |
 
 ## 代码变更门禁
 
 - [CONFIRMED] 未完成模块边界清单前，不进入代码优化。
 - [CONFIRMED] 未确认 P1 执行顺序前，不修改 app/router/demo/config/migration 核心路径。
-- [CONFIRMED] 未确认包 API 分类前，不做 `pkg/*` 破坏性重构。
+- [CONFIRMED] 包 API 分类已完成；任何 `pkg/*` 破坏性重构仍需单独任务确认。
+
+## `pkg/*` API 分类
+
+| 包 | 分类 | 稳定边界 | 当前风险 | 状态 |
+|---|---|---|---|---|
+| `pkg/cache` | 公共基础设施 API | `Cache`、`Config`、`DefaultConfig`、`NewRedis` | Redis 依赖路径缺少隔离测试 | [CONFIRMED] |
+| `pkg/cli` | 公共工具 API | `App`、`Command`、`Context`、`Flag`、错误类型、`GetExitCode` | flag parser 和 help 输出缺少包级测试 | [CONFIRMED] |
+| `pkg/crypto` | 公共基础设施 API | `Crypto`、bcrypt 实现、`Config`、Option 配置函数 | 当前稳定实现仅覆盖 bcrypt | [CONFIRMED] |
+| `pkg/database` | 公共基础设施 API | `Database`、`Reloader`、事务接口、`Config`、`New`、`NewWithHooks` | Hook、Reload、多驱动路径覆盖有限 | [CONFIRMED] |
+| `pkg/executor` | 公共基础设施 API | `Manager`、`Config`、`PoolName`、`NewManager` | reload、shutdown、overload、panic handler 缺少包级测试 | [CONFIRMED] |
+| `pkg/httpserver` | 公共基础设施 API | `HTTPServer`、`Config`、`Handler`、`New`、错误类型 | start、reload、shutdown 缺少包级测试 | [CONFIRMED] |
+| `pkg/i18n` | 公共基础设施 API | `I18n`、`Config`、`New`、`Default`、语言常量 | `MustT` panic 和加载错误路径缺少测试 | [CONFIRMED] |
+| `pkg/logger` | 公共基础设施 API | `Logger`、`Reloader`、`Config`、`New`、`Default` | 文件输出和轮转路径覆盖有限 | [CONFIRMED] |
+| `pkg/plugin` | 公共基础设施 API | v1 local/http runtime、`Plugin`、`Manager`、`Request`、`Response`、`Definition` | rpc/ws/discovery 延后 | [CONFIRMED] |
+| `pkg/sqlgen` | 公共工具 API | 当前测试覆盖的 SQL 构建、解析、事务和模板能力；unsupported 路径显式返回 `ErrCodeUnsupportedOperation` 或在 README 标注 partial | 高级查询、批量删除、DB reverse 和部分 rollback 能力不属于当前稳定能力 | [CONFIRMED] |
+| `pkg/storage` | 公共基础设施 API | `Storage`、`Config`、`New`、文件读写、复制、监听和 MIME/媒体辅助能力 | 文件监听、Excel、图片处理、复制边界缺少测试 | [CONFIRMED] |
+| `pkg/utils` | 内部支撑工具包 | 当前供 `internal/*` 和少量 `types/*` 使用的 ID、地址、端口、设备 ID、i18n helper | 能力较杂，默认 Snowflake panic 策略需确认 | [CONFIRMED] |
+| `pkg/yaml2go` | 公共工具 API | `Converter`、`Config`、`New`、`Convert` 返回结构 | 包自身缺少测试 | [CONFIRMED] |
 
 ## 下一架构任务
 
-- [NEEDS_CONFIRMATION] TASK-OPT-005：确认正式测试矩阵和 P1 执行顺序。
+- [CONFIRMED] TASK-P1-005 已完成 demo 迁移触发边界收拢。
+- [CONFIRMED] TASK-P1-007 已完成 `pkg/*` API 分类。
+- [CONFIRMED] TASK-P1-008 已完成 `pkg/sqlgen` unsupported 边界标注。
+- [CONFIRMED] 用户选择 A，TASK-P1-009 将明确 `types/*` 契约边界。
+- [DEFERRED] 生产迁移框架需要单独需求和架构确认，不属于当前切片。

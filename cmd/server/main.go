@@ -16,7 +16,7 @@ func main() {
 
 	app.AddCommand(&AppCommand{})
 	app.AddCommand(&InitdbCommand{})
-	app.AddCommand(&TestsCommand{})
+	app.AddCommand(NewTestsCommand())
 
 	if err := app.Run(os.Args[1:]); err != nil {
 		fmt.Fprintln(os.Stderr, err)
