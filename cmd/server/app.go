@@ -30,16 +30,12 @@ func (c *AppCommand) Flags() []cli.Flag {
 			Required:    false,
 			Default:     constants.AppDefaultConfigPath,
 			Description: "Config file path",
-			EnvVar:      "REI_CONFIG_PATH", // 支持环境变量
+			EnvVar:      "REI_CONFIG_PATH",
 		},
 	}
 }
 
 func (c *AppCommand) Execute(ctx *cli.Context) error {
-	configPath := ctx.GetString("config")
-
-	// 业务逻辑...
-	runApp(configPath)
-
+	runApp(ctx.GetString("config"))
 	return nil
 }

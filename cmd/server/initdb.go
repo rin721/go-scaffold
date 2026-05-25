@@ -9,7 +9,6 @@ import (
 	"github.com/rei0721/go-scaffold/types/constants"
 )
 
-// InitdbCommand 数据库初始化命令
 type InitdbCommand struct{}
 
 func (c *InitdbCommand) Name() string {
@@ -39,11 +38,8 @@ func (c *InitdbCommand) Flags() []cli.Flag {
 }
 
 func (c *InitdbCommand) Execute(ctx *cli.Context) error {
-	configPath := ctx.GetString("config")
-
-	// 创建 App 实例（initdb 模式）
 	application, err := app.New(app.Options{
-		ConfigPath: configPath,
+		ConfigPath: ctx.GetString("config"),
 		Mode:       app.ModeInitDB,
 	})
 	if err != nil {
@@ -51,14 +47,12 @@ func (c *InitdbCommand) Execute(ctx *cli.Context) error {
 		return err
 	}
 
-	// initdb 模式下，New 函数已经执行了初始化
-	// 这里只需要优雅关闭资源
 	defer func() {
-		if application.DB != nil {
-			_ = application.DB.Close()
+		if application.Infra.Database != nil {
+			_ = application.Infra.Database.Close()
 		}
-		if application.Logger != nil {
-			_ = application.Logger.Sync()
+		if application.Core.Logger != nil {
+			_ = application.Core.Logger.Sync()
 		}
 	}()
 

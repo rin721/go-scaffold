@@ -9,7 +9,6 @@ import (
 	"github.com/rei0721/go-scaffold/types/constants"
 )
 
-// TestsCommand 测试命令
 type TestsCommand struct{}
 
 func (c *TestsCommand) Name() string {
@@ -21,7 +20,7 @@ func (c *TestsCommand) Description() string {
 }
 
 func (c *TestsCommand) Usage() string {
-	return fmt.Sprintf("%s", constants.AppTestsCommandName)
+	return constants.AppTestsCommandName
 }
 
 func (c *TestsCommand) Flags() []cli.Flag {
@@ -41,20 +40,16 @@ database:
   port: 3306
 `
 
-	// 创建转换器
 	converter := yaml2go.New(nil)
 
-	// 转换 YAML
 	result, err := converter.Convert(yamlStr)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// 查看主配置
 	fmt.Println("=== config.go ===")
 	fmt.Println(result.MainConfig.Content)
 
-	// 查看子配置
 	for _, subConfig := range result.SubConfigs {
 		fmt.Printf("\n=== %s ===\n", subConfig.FileName)
 		fmt.Println(subConfig.Content)
