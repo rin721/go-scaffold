@@ -3,7 +3,7 @@
 ## Acceptance Status
 
 - Project: go-scaffold
-- Phase: Requirements Confirmation
+- Phase: Plugin System v1 Closeout
 - Status: PENDING_USER_CONFIRMATION
 - Last Updated: 2026-05-25
 
@@ -48,8 +48,22 @@ Future code-level tasks cannot be marked `COMPLETED` unless all apply:
 5. [CONFIRMED] `STATUS.md`, `CHANGELOG.md`, `TEST_REPORT.md`, and `AGENT_HANDOFF.md` are updated.
 6. [CONFIRMED] The next legal step is clear.
 
+## Plugin System Acceptance
+
+| ID | Acceptance Item | Method | Required | Status |
+|---|---|---|---|---|
+| ACC-PLUGIN-001 | `pkg/plugin` compiles independently | `go test ./pkg/plugin -count=1` | Yes | [CONFIRMED] |
+| ACC-PLUGIN-002 | Full repository tests pass | `go test ./... -count=1` | Yes | [CONFIRMED] |
+| ACC-PLUGIN-003 | Local protocol works | `TestLocalPluginInvoke` | Yes | [CONFIRMED] |
+| ACC-PLUGIN-004 | HTTP protocol works | `TestHTTPPluginInvoke` | Yes | [CONFIRMED] |
+| ACC-PLUGIN-005 | Unsupported future protocol is explicit | `TestManagerUnsupportedProtocol` | Yes | [CONFIRMED] |
+| ACC-PLUGIN-006 | App layer untouched | Code review and import boundary | Yes | [CONFIRMED] |
+| ACC-PLUGIN-007 | Plugin v1 API boundary is accepted | User advanced with `下一步` after API review | Yes | [CONFIRMED] |
+
 ## Current Completion Decision
 
 - Requirements documents generated: COMPLETED
 - Requirements phase confirmation: PENDING_USER_CONFIRMATION
-- Code implementation: BLOCKED
+- Plugin system v1 implementation: COMPLETED
+- Plugin system v1 API review: COMPLETED
+- Next implementation scope: PENDING_USER_CONFIRMATION

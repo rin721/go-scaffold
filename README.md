@@ -22,7 +22,7 @@ go run ./cmd/server server
 - `internal/config`: 配置结构、加载、环境变量覆盖、校验。
 - `pkg/database`: 数据库连接、ping、关闭、事务。
 - `pkg/executor`: 独立 goroutine pool manager。
-- `pkg/logger`, `pkg/httpserver`, `pkg/cache`, `pkg/i18n`, `pkg/storage`, `pkg/sqlgen`, `pkg/utils`: 可复用基础设施库。
+- `pkg/logger`, `pkg/httpserver`, `pkg/cache`, `pkg/i18n`, `pkg/storage`, `pkg/sqlgen`, `pkg/plugin`, `pkg/utils`: 可复用基础设施库。
 
 ## Demo Todo API
 

@@ -3,7 +3,7 @@
 ## Requirements Status
 
 - Project: go-scaffold
-- Phase: Requirements Confirmation
+- Phase: Plugin System v1 Closeout
 - Status: PENDING_USER_CONFIRMATION
 - Last Updated: 2026-05-25
 - Input: `PROJECT_BRIEF.md`, `STATUS.md`, user command `下一步`
@@ -41,13 +41,25 @@
 | REQ-P1-004 | Confirm migration strategy | Future `ARCHITECTURE.md` defines `AutoMigrate`, `initdb`, and SQL script boundaries | [NEEDS_CONFIRMATION] |
 | REQ-P1-005 | Define minimum test matrix before code optimization | Future `TEST_REPORT.md` and task docs list unit/integration/smoke commands | [NEEDS_CONFIRMATION] |
 
+## Plugin System Requirements
+
+| ID | Requirement | Acceptance | Status |
+|---|---|---|---|
+| REQ-PLUGIN-001 | Implement plugin system as an independent `pkg/*` library | `pkg/plugin` has no `internal/*` imports and tests pass | [CONFIRMED] |
+| REQ-PLUGIN-002 | Provide unified package style matching other `pkg/*` packages | Package has `Config`, `Manager`, interfaces, constants, errors, README, and tests | [CONFIRMED] |
+| REQ-PLUGIN-003 | Support local plugins | `LocalFactory`, `NewLocal`, and manager local loading are tested | [CONFIRMED] |
+| REQ-PLUGIN-004 | Support HTTP plugins | HTTP adapter invokes JSON `Request`/`Response` endpoints and handles status errors | [CONFIRMED] |
+| REQ-PLUGIN-005 | Reserve future protocol boundaries | `rpc` and `ws` protocol constants exist but return unsupported until adapters are added | [CONFIRMED] |
+| REQ-PLUGIN-006 | Keep application layer untouched | No `internal/app` or business modules changed | [CONFIRMED] |
+| REQ-PLUGIN-007 | Accept v1 API before future expansion | User advances after API review and future protocols remain backlog items | [CONFIRMED] |
+
 ## P2 Requirements
 
 | ID | Requirement | Acceptance | Status |
 |---|---|---|---|
 | REQ-P2-001 | Add auth/rbac after scope confirmation | Backlog item promoted by user decision | [DEFERRED] |
 | REQ-P2-002 | Add deployment or CI quality gates | Backlog item promoted by user decision | [DEFERRED] |
-| REQ-P2-003 | Add scaffold generator or plugin-style module system | Backlog item promoted by architecture decision | [DEFERRED] |
+| REQ-P2-003 | Add scaffold generator | Backlog item promoted by architecture decision | [DEFERRED] |
 | REQ-P2-004 | Add performance benchmark suite | Backlog item promoted after functional boundaries stabilize | [DEFERRED] |
 
 ## Explicit Non-Requirements
@@ -92,5 +104,6 @@
 
 - Requirements document generated: COMPLETED
 - Requirements phase overall: PENDING_USER_CONFIRMATION
-- Next legal phase after user confirmation: Architecture Confirmation
-
+- Plugin system v1 implementation: COMPLETED
+- Plugin system v1 API review: COMPLETED
+- Next legal phase after user confirmation: Select next plugin/system direction

@@ -3,7 +3,7 @@
 ## Project Status
 
 - Project: go-scaffold
-- Current Phase: Requirements Confirmation
+- Current Phase: Plugin System v1 Closeout
 - Overall Status: PENDING_USER_CONFIRMATION
 - Last Updated: 2026-05-25
 - Last Agent: Codex
@@ -11,30 +11,30 @@
 
 ## Current Legal Work
 
-- Current Module: Requirements
-- Current Task ID: REQ-001
-- Current Time Slice ID: TS-REQ-001
+- Current Module: Plugin System
+- Current Task ID: TASK-PLUGIN-003
+- Current Time Slice ID: TS-PLUGIN-003
 - Current Status: PENDING_USER_CONFIRMATION
-- Why this is the only legal next task: [INFERRED] User sent `下一步`, so the startup defaults were used to generate requirements documents; user confirmation is still required before architecture or code implementation.
+- Why this is the only legal next task: [CONFIRMED] User advanced from plugin API review; v1 local/http package is accepted as the current boundary, and the next step must choose whether to extend protocols, add discovery, or return to broader project governance.
 
 ## Phase Status
 
 | Phase | Status | Evidence |
 |---|---|---|
 | Project Intake | COMPLETED | `PROJECT_BRIEF.md` and `docs/templates/*` created |
-| Requirements | PENDING_USER_CONFIRMATION | `REQUIREMENTS.md`, `ACCEPTANCE.md`, `BACKLOG.md`, and `RISK_REGISTER.md` generated |
-| Architecture | NOT_STARTED | Requirements not confirmed |
-| Agent Infrastructure | NOT_STARTED | Full agent document set not yet created |
-| Task Decomposition | NOT_STARTED | Architecture not confirmed |
-| Implementation | BLOCKED | Code changes are out of scope until confirmation |
-| Verification | COMPLETED | Required docs exist, fact labels present, and `go test ./... -count=1` passed |
+| Requirements | COMPLETED | Plugin system requirements added to `REQUIREMENTS.md` |
+| Architecture | COMPLETED | `ARCHITECTURE.md` records plugin system boundaries |
+| Agent Infrastructure | IN_PROGRESS | `TASKS.md`, `TIME_SLICES.md`, `CHANGELOG.md`, `TEST_REPORT.md`, and `AGENT_HANDOFF.md` exist |
+| Task Decomposition | COMPLETED | `TASKS.md` and `TIME_SLICES.md` include plugin system tasks |
+| Implementation | COMPLETED | `pkg/plugin` v1 local/http boundary accepted |
+| Verification | COMPLETED | `go test ./pkg/plugin -count=1` and `go test ./... -count=1` passed |
 | Handoff | COMPLETED | `AGENT_HANDOFF.md` updated |
 
 ## Blockers
 
 | ID | Description | Blocking What | Required Action | Owner |
 |---|---|---|---|---|
-| BLK-001 | [NEEDS_CONFIRMATION] Requirements, optimization direction, and boundaries are not confirmed | Architecture generation and implementation | User confirms or edits `REQUIREMENTS.md` and open questions | User |
+| BLK-001 | [NEEDS_CONFIRMATION] Next plugin/system direction is not selected | Further plugin protocols, discovery, or governance work | User chooses next promoted task | User |
 | BLK-002 | [RISK] `docs/` is untracked until staged/committed | Durable project fact storage | Stage and commit docs after review | User/Agent |
 
 ## Pending User Confirmations
@@ -46,6 +46,8 @@
 | Q-003 | Is the demo module long-term canonical or temporary? | Determines module and test strategy | Keep as canonical example; replace later; remove after templates exist | Architecture confirmation |
 | Q-004 | What is the migration boundary? | Determines database initialization policy | AutoMigrate; SQL scripts; layered dev/prod strategy | Architecture confirmation |
 | Q-005 | Should JWT/auth examples stay out of scope? | Determines documentation cleanup and backlog | Remove/defer JWT examples; keep as future placeholder; promote auth to P1/P0 | Requirements generation |
+| Q-006 | Is `pkg/plugin` v1 API acceptable? | Determines whether rpc/ws/discovery can be planned | Accept v1; request API changes; add examples | [CONFIRMED] Accepted by `下一步` on 2026-05-25 |
+| Q-007 | What should be promoted next? | Determines next implementation scope | RPC adapter; WebSocket adapter; discovery; broader governance route | Plugin v1 closeout |
 
 ## Pending Verification
 
@@ -61,14 +63,14 @@
 
 ## Last Execution
 
-- Summary: Generated formal requirements, acceptance, backlog, and risk register from the accepted startup defaults.
-- Files Changed: `REQUIREMENTS.md`, `ACCEPTANCE.md`, `BACKLOG.md`, `RISK_REGISTER.md`, `STATUS.md`, `TEST_REPORT.md`, `CHANGELOG.md`, `AGENT_HANDOFF.md`.
-- Commands Run: Read `PROJECT_BRIEF.md`, `STATUS.md`, `README.md`, and `docs/ai/prompt.md`; inspected git status and repository files; ran `go test ./... -count=1`; verified required files and fact labels with `rg`.
-- Test Result: PASS (`go test ./... -count=1`).
-- Completion Decision: Requirements document generation is complete; requirements confirmation remains `PENDING_USER_CONFIRMATION`.
+- Summary: Accepted and closed `pkg/plugin` v1 local/http API boundary; left rpc/ws/discovery as explicit future choices.
+- Files Changed: `pkg/plugin/*`, `README.md`, `ARCHITECTURE.md`, `DECISIONS.md`, `TASKS.md`, `TIME_SLICES.md`, `REQUIREMENTS.md`, `ACCEPTANCE.md`, `BACKLOG.md`, `RISK_REGISTER.md`, `STATUS.md`, `TEST_REPORT.md`, `CHANGELOG.md`, `AGENT_HANDOFF.md`.
+- Commands Run: Inspected package style and status docs; ran `gofmt -w pkg/plugin`; ran `go test ./pkg/plugin -count=1`; ran `go test ./... -count=1`.
+- Test Result: PASS (`go test ./pkg/plugin -count=1`, `go test ./... -count=1`).
+- Completion Decision: Plugin system v1 implementation and API review are complete; next promoted task remains `PENDING_USER_CONFIRMATION`.
 
 ## Next Step
 
-- Legal next action: User confirms or revises `REQUIREMENTS.md`, especially Q-REQ-001 through Q-REQ-005.
-- Entry conditions: User explicitly confirms requirements or supplies corrections.
-- Expected output: `ARCHITECTURE.md`, `ROADMAP.md`, `MODULES.md`, and `DECISIONS.md` in the next phase.
+- Legal next action: User selects the next promoted work item.
+- Entry conditions: User chooses RPC adapter, WebSocket adapter, plugin discovery, examples, docs commit/stage, or broader project governance.
+- Expected output: New task and time slice for the selected direction; no opportunistic protocol expansion.

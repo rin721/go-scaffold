@@ -107,6 +107,18 @@
 - Status: [RISK]
 - Blocking: No for requirements, yes before auth-related documentation or implementation changes.
 
+### RISK-008: Plugin System Scope Expansion
+
+- Type: Scope/Architecture
+- Severity: Medium
+- Probability: Medium
+- Impact: Plugin runtime could grow into application composition, service discovery, or dynamic code loading before boundaries are confirmed.
+- Trigger: Adding rpc/ws/discovery/app integration before v1 API review.
+- Mitigation: Keep v1 limited to independent `pkg/plugin` with local and HTTP adapters.
+- Owner: Agent/User
+- Status: [RISK]
+- Blocking: No for v1; yes for further protocol expansion until a candidate is promoted.
+
 ## Required User Decisions
 
 | ID | Decision | Blocking What | Status |
@@ -116,4 +128,4 @@
 | RD-003 | Decide demo module role | Module architecture | [NEEDS_CONFIRMATION] |
 | RD-004 | Decide migration strategy | Database architecture | [NEEDS_CONFIRMATION] |
 | RD-005 | Decide auth/JWT scope | Documentation and backlog promotion | [NEEDS_CONFIRMATION] |
-
+| RD-006 | Select next plugin/system direction after `pkg/plugin` v1 | Further plugin protocols, discovery, examples, or governance route | [NEEDS_CONFIRMATION] |

@@ -21,11 +21,13 @@
 | BL-009 | Add scaffold generator | Productization idea | P2 | Requires architecture and module policy | [DEFERRED] |
 | BL-010 | Add performance benchmark suite | Quality/performance idea | P2 | Requires stable functional boundaries | [DEFERRED] |
 | BL-011 | Add multi-tenancy support | Product architecture idea | P2 | Not confirmed and likely large scope | [DEFERRED] |
-| BL-012 | Add plugin-style module system | Product architecture idea | P2 | Not confirmed and high architecture cost | [DEFERRED] |
+| BL-012 | Add rpc plugin adapter | User plugin request | P2 | v1 only implements local and HTTP | [DEFERRED] |
+| BL-013 | Add ws plugin adapter | User plugin request | P2 | v1 only implements local and HTTP | [DEFERRED] |
+| BL-014 | Add plugin discovery from manifests or registries | Future plugin runtime enhancement | P2 | Requires explicit promotion after v1 API acceptance | [DEFERRED] |
+| BL-015 | Add local/http plugin examples | Plugin v1 closeout | P1 | Useful but not required for core v1 acceptance | [DEFERRED] |
 
 ## Promotion Rules
 
 - [CONFIRMED] A backlog item can be promoted only after user confirmation.
 - [CONFIRMED] Promoted items must be mapped to requirements, architecture, tasks, and time slices.
 - [CONFIRMED] Backlog items must not be implemented opportunistically.
-
