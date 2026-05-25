@@ -1,109 +1,65 @@
 # REQUIREMENTS.md
 
-## Requirements Status
+## 需求状态
 
-- Project: go-scaffold
-- Phase: Plugin System v1 Closeout
-- Status: PENDING_USER_CONFIRMATION
-- Last Updated: 2026-05-25
-- Input: `PROJECT_BRIEF.md`, `STATUS.md`, user command `下一步`
+- 项目：go-scaffold
+- 阶段：需求确认
+- 状态：COMPLETED
+- 最后更新：2026-05-25
+- 输入：用户发送“下一步”，按当前文档默认值确认 `TASK-OPT-002`
 
-## Confirmation Assumption
+## 确认结果
 
-- [INFERRED] The user's `下一步` means the startup package is accepted well enough to generate formal requirements using default assumptions.
-- [INFERRED] Default route is Option A: conservative governance-first optimization.
-- [NEEDS_CONFIRMATION] The user still needs to confirm final requirements before architecture design or code implementation.
+- [CONFIRMED] 优化路线采用“治理优先”。
+- [CONFIRMED] `pkg/*` 采用混合策略：可复用基础设施包按公共 API 管理，明确项目内部支撑包不承诺外部兼容。
+- [CONFIRMED] demo 模块暂定为长期标准示例，用于展示模块分层和后续测试样板。
+- [CONFIRMED] 迁移策略采用 dev-prod 分层：开发/demo 可使用 `AutoMigrate`，生产/bootstrap 倾向显式 SQL 或迁移流程。
+- [CONFIRMED] 中文化范围先覆盖根文档和模板，包 README 与历史文档分阶段处理。
+- [CONFIRMED] auth/JWT 先延后处理，不在当前 P0/P1 代码实现范围内。
 
-## Project Goal
+## 项目目标
 
-- [CONFIRMED] Establish a recoverable, document-driven optimization process for the existing `go-scaffold` repository.
-- [INFERRED] Optimize by first consolidating facts, requirements, boundaries, risks, and verification expectations before touching code.
-- [NEEDS_CONFIRMATION] Later phases will decide whether to keep a conservative route or move into modular refactor/framework extraction.
+- [CONFIRMED] 分析当前项目优缺点，收拢不一致设计边界，形成可拆分、可验证、可交接的优化路线。
+- [CONFIRMED] 优先建立稳定项目事实、状态、风险、验收和路线图，再进入任何代码优化。
+- [CONFIRMED] 后续每个代码优化必须映射到已确认需求、架构边界、任务和时间切片。
 
-## P0 Requirements
+## P0 需求
 
-| ID | Requirement | Acceptance | Status |
+| ID | 需求 | 验收 | 状态 |
 |---|---|---|---|
-| REQ-P0-001 | Preserve current working behavior while documenting optimization goals | `go test ./... -count=1` passes; no Go code changed in requirements phase | [CONFIRMED] |
-| REQ-P0-002 | Define current project facts and scope boundaries | `PROJECT_BRIEF.md` and `REQUIREMENTS.md` contain fact-labeled scope | [CONFIRMED] |
-| REQ-P0-003 | Keep auth/rbac out of implementation scope until explicitly confirmed | Requirements and backlog mark auth/rbac as deferred unless promoted | [CONFIRMED] |
-| REQ-P0-004 | Capture and track risks that affect architecture or execution | `RISK_REGISTER.md` contains blocking and non-blocking risks | [CONFIRMED] |
-| REQ-P0-005 | Define acceptance criteria before implementation | `ACCEPTANCE.md` contains project, requirements, and future implementation gates | [CONFIRMED] |
-| REQ-P0-006 | Prevent unbounded optimization and refactor drift | `BACKLOG.md` captures deferred ideas; `STATUS.md` identifies only the next legal phase | [CONFIRMED] |
+| REQ-OPT-P0-001 | 中文启动材料生成 | `docs/templates/*` 六个模板已中文化 | [CONFIRMED] |
+| REQ-OPT-P0-002 | 当前主线切换到项目治理与优化路线 | `STATUS.md`、`TASKS.md`、`TIME_SLICES.md` 不再指向插件扩展 | [CONFIRMED] |
+| REQ-OPT-P0-003 | 明确默认优化路线 | `DECISIONS.md` 记录治理优先和关键边界默认值 | [CONFIRMED] |
+| REQ-OPT-P0-004 | 生成路线图 | `ROADMAP.md` 存在并包含阶段目标、退出条件和验证要求 | [CONFIRMED] |
+| REQ-OPT-P0-005 | 保持代码行为不变 | 不修改 Go 代码；`go test ./... -count=1` 通过 | [CONFIRMED] |
 
-## P1 Requirements
+## P1 需求
 
-| ID | Requirement | Acceptance | Status |
+| ID | 需求 | 验收 | 状态 |
 |---|---|---|---|
-| REQ-P1-001 | Confirm architecture boundaries for `cmd`, `internal/app`, `internal/modules`, `internal/transport`, and `pkg` | Future `ARCHITECTURE.md` defines responsibilities and non-goals | [NEEDS_CONFIRMATION] |
-| REQ-P1-002 | Decide whether `pkg/*` is public API, internal support, or mixed policy | Future `DECISIONS.md` records compatibility policy | [NEEDS_CONFIRMATION] |
-| REQ-P1-003 | Confirm demo module role | Future `ARCHITECTURE.md` states whether demo is canonical, temporary, or removable | [NEEDS_CONFIRMATION] |
-| REQ-P1-004 | Confirm migration strategy | Future `ARCHITECTURE.md` defines `AutoMigrate`, `initdb`, and SQL script boundaries | [NEEDS_CONFIRMATION] |
-| REQ-P1-005 | Define minimum test matrix before code optimization | Future `TEST_REPORT.md` and task docs list unit/integration/smoke commands | [NEEDS_CONFIRMATION] |
+| REQ-OPT-P1-001 | 生成模块边界清单 | `MODULES.md` 梳理 `cmd`、`internal/*`、`pkg/*`、`types/*` 的职责、风险和优化方向 | [CONFIRMED] |
+| REQ-OPT-P1-002 | 生成测试矩阵 | `MODULES.md` 包含 app 启动、health/ready、demo CRUD、配置加载/重载、迁移策略测试矩阵草案 | [CONFIRMED] |
+| REQ-OPT-P1-003 | 生成设计边界收拢清单 | `MODULES.md` 明确迁移、配置、插件、包 API、demo、auth/JWT 的统一策略风险 | [CONFIRMED] |
+| REQ-OPT-P1-004 | 拆分优化任务和时间切片 | 每个 P1 优化项有允许文件范围、验证命令和退出条件 | [NOT_STARTED] |
+| REQ-OPT-P1-005 | 分阶段中文化历史内容 | 根文档优先，包 README 进入后续文档任务 | [NOT_STARTED] |
 
-## Plugin System Requirements
+## P2 延后需求
 
-| ID | Requirement | Acceptance | Status |
+| ID | 需求 | 延后原因 | 状态 |
 |---|---|---|---|
-| REQ-PLUGIN-001 | Implement plugin system as an independent `pkg/*` library | `pkg/plugin` has no `internal/*` imports and tests pass | [CONFIRMED] |
-| REQ-PLUGIN-002 | Provide unified package style matching other `pkg/*` packages | Package has `Config`, `Manager`, interfaces, constants, errors, README, and tests | [CONFIRMED] |
-| REQ-PLUGIN-003 | Support local plugins | `LocalFactory`, `NewLocal`, and manager local loading are tested | [CONFIRMED] |
-| REQ-PLUGIN-004 | Support HTTP plugins | HTTP adapter invokes JSON `Request`/`Response` endpoints and handles status errors | [CONFIRMED] |
-| REQ-PLUGIN-005 | Reserve future protocol boundaries | `rpc` and `ws` protocol constants exist but return unsupported until adapters are added | [CONFIRMED] |
-| REQ-PLUGIN-006 | Keep application layer untouched | No `internal/app` or business modules changed | [CONFIRMED] |
-| REQ-PLUGIN-007 | Accept v1 API before future expansion | User advances after API review and future protocols remain backlog items | [CONFIRMED] |
+| REQ-OPT-P2-001 | auth/rbac 实现 | 当前 README 明确暂不实现，需要单独需求确认 | [DEFERRED] |
+| REQ-OPT-P2-002 | 插件系统 rpc/ws/discovery 扩展 | 插件 v1 已完成，扩展需独立提升 | [DEFERRED] |
+| REQ-OPT-P2-003 | CI/CD 与部署 | 当前阶段聚焦项目治理和优化路线 | [DEFERRED] |
+| REQ-OPT-P2-004 | 性能基准测试 | 需先完成测试矩阵和功能边界收拢 | [DEFERRED] |
+| REQ-OPT-P2-005 | 脚手架生成器 | 需先确认框架化抽取路线 | [DEFERRED] |
 
-## P2 Requirements
+## 非需求
 
-| ID | Requirement | Acceptance | Status |
-|---|---|---|---|
-| REQ-P2-001 | Add auth/rbac after scope confirmation | Backlog item promoted by user decision | [DEFERRED] |
-| REQ-P2-002 | Add deployment or CI quality gates | Backlog item promoted by user decision | [DEFERRED] |
-| REQ-P2-003 | Add scaffold generator | Backlog item promoted by architecture decision | [DEFERRED] |
-| REQ-P2-004 | Add performance benchmark suite | Backlog item promoted after functional boundaries stabilize | [DEFERRED] |
+- [CONFIRMED] 当前不修改 Go API、配置结构、数据库结构或 HTTP 路由。
+- [CONFIRMED] 当前不执行部署、生产命令或不可逆迁移。
+- [CONFIRMED] 当前不删除插件系统历史记录。
 
-## Explicit Non-Requirements
+## 完成判断
 
-- [CONFIRMED] Do not implement Go code during requirements confirmation.
-- [CONFIRMED] Do not refactor existing packages during requirements confirmation.
-- [CONFIRMED] Do not introduce auth/rbac as implementation scope without user confirmation.
-- [CONFIRMED] Do not run production deployment, irreversible migrations, or secret-dependent commands.
-- [INFERRED] Do not treat package README examples as confirmed architecture until reconciled with code and root docs.
-
-## Functional Requirements For The Optimization Process
-
-| ID | Requirement | Priority | Status |
-|---|---|---|---|
-| F-001 | Maintain a single current legal task in `STATUS.md` | P0 | [CONFIRMED] |
-| F-002 | Use fact labels in project documents | P0 | [CONFIRMED] |
-| F-003 | Convert new ideas into backlog unless they block current acceptance | P0 | [CONFIRMED] |
-| F-004 | Require user confirmation before architecture or code-level changes | P0 | [CONFIRMED] |
-| F-005 | Record verification commands and results after each phase | P0 | [CONFIRMED] |
-
-## Non-Functional Requirements
-
-| Area | Requirement | Status |
-|---|---|---|
-| Maintainability | Each future task must name the module or boundary it affects | [CONFIRMED] |
-| Testability | Each future implementation task must include a test or verification command | [CONFIRMED] |
-| Recoverability | A new agent must be able to recover status from repository documents | [CONFIRMED] |
-| Safety | Secrets, production deployments, and irreversible migrations require explicit confirmation | [CONFIRMED] |
-| Scope Control | Unconfirmed optimizations must stay in `BACKLOG.md` | [CONFIRMED] |
-
-## Open Requirement Questions
-
-| ID | Question | Impact | Default | Status |
-|---|---|---|---|---|
-| Q-REQ-001 | Should Option A remain the official route? | Drives architecture and tasks | Yes, conservative governance first | [NEEDS_CONFIRMATION] |
-| Q-REQ-002 | Are `pkg/*` packages public APIs? | Drives compatibility policy | Mixed until confirmed | [NEEDS_CONFIRMATION] |
-| Q-REQ-003 | What is the demo module's long-term role? | Drives tests and examples | Canonical demo until confirmed | [NEEDS_CONFIRMATION] |
-| Q-REQ-004 | What migration strategy is authoritative? | Drives DB init architecture | Layered dev/prod policy until confirmed | [NEEDS_CONFIRMATION] |
-| Q-REQ-005 | Should JWT examples be removed, deferred, or promoted? | Resolves doc drift | Defer auth/JWT to backlog | [NEEDS_CONFIRMATION] |
-
-## Completion Decision
-
-- Requirements document generated: COMPLETED
-- Requirements phase overall: PENDING_USER_CONFIRMATION
-- Plugin system v1 implementation: COMPLETED
-- Plugin system v1 API review: COMPLETED
-- Next legal phase after user confirmation: Select next plugin/system direction
+- TASK-OPT-003：COMPLETED
+- 下一合法任务：TASK-OPT-004，生成正式测试矩阵和任务拆分草案。

@@ -1,76 +1,68 @@
 # STATUS.md
 
-## Project Status
+## 项目状态
 
-- Project: go-scaffold
-- Current Phase: Plugin System v1 Closeout
-- Overall Status: PENDING_USER_CONFIRMATION
-- Last Updated: 2026-05-25
-- Last Agent: Codex
-- Last Tool: Codex Desktop
+- 项目：go-scaffold
+- 当前阶段：测试矩阵与任务拆分
+- 总体状态：IN_PROGRESS
+- 最后更新：2026-05-25
+- 最近 Agent：Codex
+- 最近工具：Codex Desktop
 
-## Current Legal Work
+## 当前合法工作
 
-- Current Module: Plugin System
-- Current Task ID: TASK-PLUGIN-003
-- Current Time Slice ID: TS-PLUGIN-003
-- Current Status: PENDING_USER_CONFIRMATION
-- Why this is the only legal next task: [CONFIRMED] User advanced from plugin API review; v1 local/http package is accepted as the current boundary, and the next step must choose whether to extend protocols, add discovery, or return to broader project governance.
+- 当前模块：Project Governance
+- 当前任务 ID：TASK-OPT-004
+- 当前时间切片 ID：TS-OPT-004
+- 当前状态：NOT_STARTED
+- 为什么这是唯一合法下一步：[CONFIRMED] `MODULES.md` 已生成，模块职责、边界冲突、测试矩阵草案和 P1 优化候选项已记录；下一步必须生成正式测试矩阵和任务拆分草案，仍不能修改 Go 代码。
 
-## Phase Status
+## 阶段状态
 
-| Phase | Status | Evidence |
+| 阶段 | 状态 | 证据 |
 |---|---|---|
-| Project Intake | COMPLETED | `PROJECT_BRIEF.md` and `docs/templates/*` created |
-| Requirements | COMPLETED | Plugin system requirements added to `REQUIREMENTS.md` |
-| Architecture | COMPLETED | `ARCHITECTURE.md` records plugin system boundaries |
-| Agent Infrastructure | IN_PROGRESS | `TASKS.md`, `TIME_SLICES.md`, `CHANGELOG.md`, `TEST_REPORT.md`, and `AGENT_HANDOFF.md` exist |
-| Task Decomposition | COMPLETED | `TASKS.md` and `TIME_SLICES.md` include plugin system tasks |
-| Implementation | COMPLETED | `pkg/plugin` v1 local/http boundary accepted |
-| Verification | COMPLETED | `go test ./pkg/plugin -count=1` and `go test ./... -count=1` passed |
-| Handoff | COMPLETED | `AGENT_HANDOFF.md` updated |
+| 项目启动 | COMPLETED | `PROJECT_BRIEF.md` 和 `docs/templates/*` 已中文化并切回项目优化主线 |
+| 需求 | COMPLETED | `REQUIREMENTS.md` 已记录确认结果 |
+| 高层架构 | COMPLETED | `ARCHITECTURE.md` 已记录确认边界 |
+| 路线图 | COMPLETED | `ROADMAP.md` 已生成 |
+| 模块边界清单 | COMPLETED | `MODULES.md` 已生成 |
+| 测试矩阵与任务拆分 | NOT_STARTED | 当前合法任务为 TASK-OPT-004 |
+| 实现 | BLOCKED | [CONFIRMED] 正式测试矩阵和任务切片完成前不写 Go 代码 |
+| 验证 | COMPLETED | TASK-OPT-003 后已运行 `go test ./... -count=1`，结果 PASS |
+| 交接 | COMPLETED | `AGENT_HANDOFF.md` 已推进到 TASK-OPT-004 |
 
-## Blockers
+## 当前关键发现
 
-| ID | Description | Blocking What | Required Action | Owner |
-|---|---|---|---|---|
-| BLK-001 | [NEEDS_CONFIRMATION] Next plugin/system direction is not selected | Further plugin protocols, discovery, or governance work | User chooses next promoted task | User |
-| BLK-002 | [RISK] `docs/` is untracked until staged/committed | Durable project fact storage | Stage and commit docs after review | User/Agent |
+| ID | 发现 | 来源 | 状态 |
+|---|---|---|---|
+| FIND-001 | 关键应用路径多处无测试文件 | `go test ./... -count=1` 输出和 `rg --files -g '*_test.go'` | [RISK] |
+| FIND-002 | `.env.example` 与数据库环境变量前缀不一致 | `MODULES.md` BC-001 | [RISK] |
+| FIND-003 | `manager.copyConfig` 未完整复制配置字段 | `MODULES.md` BC-002 | [RISK] |
+| FIND-004 | demo schema 自动迁移触发点需收拢 | `MODULES.md` BC-003 | [RISK] |
+| FIND-005 | `cmd/server tests` 命令语义与行为不一致 | `MODULES.md` BC-004 | [RISK] |
 
-## Pending User Confirmations
+## 待验证
 
-| ID | Question | Impact | Options | Required By |
-|---|---|---|---|---|
-| Q-001 | Should the project follow conservative governance-first optimization? | Determines roadmap and task decomposition | A: governance first; B: modular refactor; C: public framework extraction | Architecture generation |
-| Q-002 | Are `pkg/*` packages public reusable APIs? | Determines compatibility and breaking-change policy | Public libraries; internal scaffold support; mixed policy | Architecture confirmation |
-| Q-003 | Is the demo module long-term canonical or temporary? | Determines module and test strategy | Keep as canonical example; replace later; remove after templates exist | Architecture confirmation |
-| Q-004 | What is the migration boundary? | Determines database initialization policy | AutoMigrate; SQL scripts; layered dev/prod strategy | Architecture confirmation |
-| Q-005 | Should JWT/auth examples stay out of scope? | Determines documentation cleanup and backlog | Remove/defer JWT examples; keep as future placeholder; promote auth to P1/P0 | Requirements generation |
-| Q-006 | Is `pkg/plugin` v1 API acceptable? | Determines whether rpc/ws/discovery can be planned | Accept v1; request API changes; add examples | [CONFIRMED] Accepted by `下一步` on 2026-05-25 |
-| Q-007 | What should be promoted next? | Determines next implementation scope | RPC adapter; WebSocket adapter; discovery; broader governance route | Plugin v1 closeout |
-
-## Pending Verification
-
-| ID | Task | What Needs Verification | Command/Method |
+| ID | 任务 | 需要验证内容 | 命令/方法 |
 |---|---|---|---|
 |  |  |  |  |
 
-## Rework Required
+## 需要返工
 
-| ID | Task | Reason | Next Action |
+| ID | 任务 | 原因 | 下一步 |
 |---|---|---|---|
 |  |  |  |  |
 
-## Last Execution
+## 最近执行
 
-- Summary: Accepted and closed `pkg/plugin` v1 local/http API boundary; left rpc/ws/discovery as explicit future choices.
-- Files Changed: `pkg/plugin/*`, `README.md`, `ARCHITECTURE.md`, `DECISIONS.md`, `TASKS.md`, `TIME_SLICES.md`, `REQUIREMENTS.md`, `ACCEPTANCE.md`, `BACKLOG.md`, `RISK_REGISTER.md`, `STATUS.md`, `TEST_REPORT.md`, `CHANGELOG.md`, `AGENT_HANDOFF.md`.
-- Commands Run: Inspected package style and status docs; ran `gofmt -w pkg/plugin`; ran `go test ./pkg/plugin -count=1`; ran `go test ./... -count=1`.
-- Test Result: PASS (`go test ./pkg/plugin -count=1`, `go test ./... -count=1`).
-- Completion Decision: Plugin system v1 implementation and API review are complete; next promoted task remains `PENDING_USER_CONFIRMATION`.
+- 摘要：生成 `MODULES.md`，完成模块职责清单、设计边界冲突清单、测试矩阵草案和 P1 优化候选项。
+- 变更文件：`MODULES.md`、`REQUIREMENTS.md`、`ACCEPTANCE.md`、`ROADMAP.md`、`BACKLOG.md`、`TASKS.md`、`TIME_SLICES.md`、`STATUS.md`、`TEST_REPORT.md`、`CHANGELOG.md`、`AGENT_HANDOFF.md`。
+- 执行命令：`go test ./... -count=1`。
+- 测试结果：PASS。
+- 完成判断：TASK-OPT-003 已完成；当前合法下一步为 TASK-OPT-004。
 
-## Next Step
+## 下一步
 
-- Legal next action: User selects the next promoted work item.
-- Entry conditions: User chooses RPC adapter, WebSocket adapter, plugin discovery, examples, docs commit/stage, or broader project governance.
-- Expected output: New task and time slice for the selected direction; no opportunistic protocol expansion.
+- 合法下一步：执行 TASK-OPT-004，生成正式测试矩阵和任务拆分草案。
+- 进入条件：TASK-OPT-003 验证和交接已完成。
+- 预期输出：`TEST_MATRIX.md`、P1 任务草案、P1 时间切片草案。

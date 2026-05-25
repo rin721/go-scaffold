@@ -1,72 +1,90 @@
-# Risk Confirmation Template
+# 风险确认模板
 
-## Risk Summary
+## 1. 风险摘要
 
-| Risk ID | Title | Type | Severity | Probability | Blocking | Status |
+| 风险 ID | 标题 | 类型 | 严重度 | 概率 | 是否阻塞 | 状态 |
 |---|---|---|---|---|---|---|
-| RISK-001 | Scope expansion into full rewrite | Scope | High | Medium | Yes | [RISK] |
-| RISK-002 | Documentation drift | Documentation | Medium | High | Yes | [RISK] |
-| RISK-003 | Test coverage gaps | Testing | High | Medium | No | [RISK] |
-| RISK-004 | Migration boundary ambiguity | Architecture | High | Medium | Yes | [RISK] |
-| RISK-005 | Public package compatibility ambiguity | Architecture | Medium | Medium | Yes | [RISK] |
-| RISK-006 | Agent execution ambiguity | Process | High | High | Yes | [RISK] |
+| RISK-OPT-001 | 范围膨胀成全量重写 | 范围 | 高 | 中 | 是 | [RISK] |
+| RISK-OPT-002 | 文档状态漂移 | 文档 | 高 | 高 | 是 | [RISK] |
+| RISK-OPT-003 | 迁移策略冲突 | 架构 | 高 | 中 | 是 | [RISK] |
+| RISK-OPT-004 | `pkg/*` API 兼容不明 | 架构 | 高 | 中 | 是 | [RISK] |
+| RISK-OPT-005 | 包 README 中英混杂 | 文档 | 中 | 高 | 否 | [RISK] |
+| RISK-OPT-006 | 插件系统历史主线干扰当前目标 | 流程 | 中 | 中 | 是 | [RISK] |
+| RISK-OPT-007 | JWT/auth 示例暗示未实现能力 | 范围/安全 | 中 | 中 | 否 | [RISK] |
+| RISK-OPT-008 | 测试覆盖不足 | 测试 | 高 | 中 | 否 | [RISK] |
+| RISK-OPT-009 | “下一步”继续指向插件系统 | 执行 | 高 | 中 | 是 | [RISK] |
 
-## Risk Details
+## 2. 高风险项
 
-### RISK-001: Scope Expansion Into Full Rewrite
+### RISK-OPT-001：范围膨胀成全量重写
 
-- Impact: Optimization work may become unbounded and difficult to verify.
-- Trigger: Starting code refactors before requirements and architecture confirmation.
-- Mitigation: Use Option A by default and require user confirmation for Option B/C/D.
-- Owner: User and Agent.
-- Required Confirmation: [NEEDS_CONFIRMATION] Confirm optimization route.
+- 影响：优化路线不可收敛，测试成本和回归风险上升。
+- 触发条件：未确认需求和架构边界就开始大规模重构。
+- 缓解：默认采用治理优先；未确认优化进入 Backlog。
+- 需要确认：[NEEDS_CONFIRMATION] 是否接受“治理优先”为正式路线。
 
-### RISK-002: Documentation Drift
+### RISK-OPT-002：文档状态漂移
 
-- Impact: Future agents and developers may rely on stale or conflicting facts.
-- Trigger: README, `.env.example`, package README files, and code disagree.
-- Mitigation: Promote confirmed facts into root project documents and keep docs updated per time slice.
-- Owner: Agent.
-- Required Confirmation: [NEEDS_CONFIRMATION] Confirm whether JWT/auth examples should be deferred or kept as placeholders.
+- 影响：后续 Agent 可能读取到插件系统收尾状态，而不是全项目优化主线。
+- 触发条件：`STATUS.md`、`TASKS.md`、`TIME_SLICES.md` 不更新。
+- 缓解：本轮将当前合法任务切换为项目优化启动确认。
+- 需要确认：[CONFIRMED] 本轮应更新状态文件。
 
-### RISK-003: Test Coverage Gaps
+### RISK-OPT-003：迁移策略冲突
 
-- Impact: Code optimization could regress app startup, routing, demo, or reload behavior without detection.
-- Trigger: Making code changes before integration tests exist.
-- Mitigation: Add test strategy during requirements and architecture phases.
-- Owner: Agent.
-- Required Confirmation: [NEEDS_CONFIRMATION] Confirm minimum test matrix for P0 optimizations.
+- 影响：开发态、测试态和生产态数据库初始化方式混乱。
+- 触发条件：demo `AutoMigrate`、`initdb` 命令、SQL 脚本同时存在但无职责边界。
+- 缓解：架构确认阶段明确迁移策略。
+- 需要确认：[NEEDS_CONFIRMATION] 选择 `AutoMigrate`、SQL 脚本或 dev-prod 分层策略。
 
-### RISK-004: Migration Boundary Ambiguity
+### RISK-OPT-004：`pkg/*` API 兼容不明
 
-- Impact: Dev and production database initialization paths may conflict.
-- Trigger: `AutoMigrate`, `initdb`, and SQL scripts being used without a single policy.
-- Mitigation: Confirm migration policy before database-related changes.
-- Owner: User.
-- Required Confirmation: [NEEDS_CONFIRMATION] Choose migration strategy.
+- 影响：包级重构可能破坏未来或外部使用者。
+- 触发条件：未确认 `pkg/*` 是公共复用库、内部支撑或混合策略。
+- 缓解：在架构确认阶段记录 API 兼容策略。
+- 需要确认：[NEEDS_CONFIRMATION] 决定 `pkg/*` 定位。
 
-### RISK-005: Public Package Compatibility Ambiguity
+## 3. 中风险项
 
-- Impact: Changes to `pkg/*` may accidentally break external or future consumers.
-- Trigger: Treating packages as both internal implementation details and reusable libraries.
-- Mitigation: Confirm API policy and document compatibility expectations.
-- Owner: User.
-- Required Confirmation: [NEEDS_CONFIRMATION] Decide public/internal/mixed policy.
+### RISK-OPT-005：包 README 中英混杂
 
-### RISK-006: Agent Execution Ambiguity
+- 影响：中文项目体验不一致，历史文档难以交接。
+- 缓解：先中文化根文档和模板，再按优先级处理包 README。
+- 需要确认：[NEEDS_CONFIRMATION] 确认中文化范围。
 
-- Impact: Future "next step" requests may be handled from chat memory rather than project state.
-- Trigger: Missing `TASKS.md`, `TIME_SLICES.md`, `AGENT_HANDOFF.md`, and related state files.
-- Mitigation: Build full agent infrastructure after requirements and architecture confirmation.
-- Owner: Agent.
-- Required Confirmation: [NEEDS_CONFIRMATION] Confirm startup documents, then generate formal agent state files.
+### RISK-OPT-006：插件系统历史主线干扰当前目标
 
-## Confirmation Checklist
+- 影响：后续“下一步”可能继续扩展 rpc/ws/discovery，而不是做全项目优化。
+- 缓解：插件系统 v1 保留为历史，扩展项留在 Backlog。
+- 需要确认：[CONFIRMED] 当前主线切回项目治理与优化路线。
 
-- [ ] Confirm optimization option.
-- [ ] Confirm `pkg/*` API policy.
-- [ ] Confirm demo module role.
-- [ ] Confirm migration policy.
-- [ ] Confirm auth/JWT scope.
-- [ ] Confirm whether to proceed to requirements generation.
+### RISK-OPT-007：JWT/auth 示例暗示未实现能力
 
+- 影响：用户可能误以为 auth/rbac 已经可用，带来安全和范围误解。
+- 缓解：后续确认是删除、保留占位还是提升为正式需求。
+- 需要确认：[NEEDS_CONFIRMATION] 确认 auth/JWT 范围。
+
+## 4. 测试风险
+
+### RISK-OPT-008：测试覆盖不足
+
+- 影响：后续代码优化可能回归 app 启动、路由、demo CRUD、配置重载或迁移路径。
+- 证据：当前多个包在 `go test ./... -count=1` 中显示 `[no test files]`。
+- 缓解：进入代码优化前补充测试矩阵和 smoke test。
+- 需要确认：[NEEDS_CONFIRMATION] 确认 P0 测试矩阵。
+
+## 5. 执行风险
+
+### RISK-OPT-009：“下一步”继续指向插件系统
+
+- 影响：执行流偏离用户本轮目标。
+- 触发条件：不更新 `STATUS.md`、`TASKS.md`、`TIME_SLICES.md`。
+- 缓解：本轮同步更新状态文件，把当前合法任务设为项目优化启动确认。
+- 需要确认：[CONFIRMED] 当前合法任务应切换。
+
+## 6. 默认处理
+
+- [CONFIRMED] 所有风险进入确认清单。
+- [CONFIRMED] 未确认前不做代码实现。
+- [CONFIRMED] 不删除插件系统历史，只把后续扩展留在 Backlog。
+- [CONFIRMED] 后续每个代码优化任务都必须有测试证据和状态更新。

@@ -1,77 +1,81 @@
-# Technical Options Template
+# 技术方案选项模板
 
-## Decision Context
+## 1. 决策背景
 
-- [CONFIRMED] The project already runs and tests pass.
-- [CONFIRMED] The requested direction is optimization planning and boundary consolidation, not immediate code implementation.
-- [RISK] A large refactor before documentation and requirements confirmation can create scope expansion and regressions.
+- [CONFIRMED] 项目已有可运行的 Go 服务和 demo CRUD。
+- [CONFIRMED] 本轮目标是项目分析、边界统一和优化路线制定，不是立即改代码。
+- [CONFIRMED] 当前全量测试命令为 `go test ./... -count=1`。
+- [RISK] 如果跳过文档和边界确认直接重构，容易进入范围膨胀、回归风险和不可交接状态。
 
-## Option A: Conservative Governance First
+## 2. 方案 A：治理优先
 
-- Status: Recommended default
-- Summary: Establish documents, boundaries, risks, and time slices first; fix confirmed inconsistencies afterward.
-- Pros:
-  - Low risk.
-  - Preserves working code.
-  - Matches `docs/ai/prompt.md` requirement to confirm before implementation.
-  - Creates a recoverable path for future agents.
-- Cons:
-  - Slower visible code progress.
-  - Requires user review before deeper optimization.
-- Best For:
-  - Current startup phase.
-  - Boundary consolidation.
-  - Existing project with passing tests.
+- 状态：推荐默认。
+- 摘要：先统一中文文档、事实标签、状态主线、风险、验收标准和任务切片，再按确认后的路线优化代码。
+- 优点：
+  - 风险最低，能保留当前可运行状态。
+  - 符合 `docs/ai/prompt.md` 的“先确认、后实现”规则。
+  - 适合让后续 Agent 通过文档恢复上下文。
+  - 便于逐步收拢设计边界。
+- 缺点：
+  - 短期内可见代码变化较少。
+  - 需要用户先确认关键策略。
+- 适用场景：
+  - 当前项目重新启动阶段。
+  - 需要先分析优缺点和统一边界时。
+  - 需要避免插件系统历史主线继续干扰当前目标时。
 
-## Option B: Modular Refactor First
+## 3. 方案 B：模块化重构优先
 
-- Status: Needs confirmation
-- Summary: Redesign module registration, migration, routing, and config wiring before broader planning.
-- Pros:
-  - Can produce a cleaner framework shape.
-  - May reduce long-term duplication.
-- Cons:
-  - Higher regression risk.
-  - Requires stronger tests first.
-  - Can expand beyond current intake scope.
-- Best For:
-  - After requirements and architecture are confirmed.
+- 状态：需要确认。
+- 摘要：在架构确认后，优先整理 app/config/router/migration/module 注册等核心边界。
+- 优点：
+  - 能较快改善代码组织和装配一致性。
+  - 有机会降低后续新增模块成本。
+- 缺点：
+  - 需要更强的集成测试兜底。
+  - 容易扩大范围，影响当前可运行链路。
+  - 如果 `pkg/*` API 策略未确认，可能产生兼容性争议。
+- 适用场景：
+  - 已确认 P0 需求和架构约束后。
+  - 已补充 app/router/demo/config reload 测试后。
 
-## Option C: Framework Extraction
+## 4. 方案 C：框架化抽取
 
-- Status: Needs confirmation
-- Summary: Treat `pkg/*` as stable reusable libraries and turn demo into a template/reference module.
-- Pros:
-  - Supports long-term reuse.
-  - Creates clearer public package contracts.
-- Cons:
-  - Highest documentation and compatibility cost.
-  - Requires versioning policy and API governance.
-- Best For:
-  - Productizing the scaffold beyond one project.
+- 状态：需要确认。
+- 摘要：把 `pkg/*` 视为稳定公共 API，把 demo 和模块结构沉淀为脚手架模板或框架能力。
+- 优点：
+  - 长期复用价值最高。
+  - 能形成更清晰的公共包契约和版本策略。
+- 缺点：
+  - 文档、测试、兼容性和版本治理成本最高。
+  - 需要明确哪些包能对外承诺稳定。
+  - 需要更完整的示例、生成器或迁移指南。
+- 适用场景：
+  - 项目准备从内部脚手架升级为可复用框架时。
 
-## Option D: Rewrite
+## 5. 方案 D：重写
 
-- Status: Not recommended
-- Summary: Replace existing structure with a new scaffold design.
-- Pros:
-  - Maximum freedom.
-- Cons:
-  - Discards existing working startup chain.
-  - Loses current test evidence.
-  - High cost and high regression risk.
-- Best For:
-  - Only if confirmed architecture goals are impossible in the current codebase.
+- 状态：不推荐。
+- 摘要：放弃现有结构，重新设计并实现脚手架。
+- 优点：
+  - 设计自由度最高。
+- 缺点：
+  - 丢失当前可运行链路和测试基线。
+  - 成本高，回归风险高，交付周期不可控。
+  - 不符合本轮“先分析、先收拢、后实现”的要求。
+- 适用场景：
+  - 只有在确认现有架构无法承载目标时才考虑。
 
-## Recommended Decision
+## 6. 推荐决策
 
-- [INFERRED] Choose Option A for the next phase.
-- [NEEDS_CONFIRMATION] User must confirm whether Option A is accepted or whether the project should move toward Option B or C.
+- [INFERRED] 默认采用方案 A：治理优先。
+- [NEEDS_CONFIRMATION] 用户需要确认是否继续采用方案 A，或改选方案 B/C。
+- [CONFIRMED] 方案 D 暂不进入当前路线。
 
-## Decision Record Placeholder
+## 7. 决策记录占位
 
-- Decision ID: DEC-INTAKE-001
-- Decision: [NEEDS_CONFIRMATION]
-- Alternatives: Option A, Option B, Option C, Option D
-- Consequences: [NEEDS_CONFIRMATION]
-
+- 决策 ID：DEC-OPT-001
+- 决策：[NEEDS_CONFIRMATION]
+- 候选：方案 A、方案 B、方案 C、方案 D
+- 默认：[INFERRED] 方案 A
+- 后果：[NEEDS_CONFIRMATION]
