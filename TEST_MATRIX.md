@@ -3,9 +3,9 @@
 ## 测试矩阵状态
 
 - 项目：go-scaffold
-- 任务：TASK-P1-009
-- 时间切片：TS-P1-009
-- 状态：NOT_STARTED
+- 任务：TASK-NEXT-SCOPE-007
+- 时间切片：TS-NEXT-SCOPE-007
+- 状态：PENDING_USER_CONFIRMATION
 - 最后更新：2026-05-25
 - 原则：本文定义后续优化的验证边界，不代表测试代码已经实现。
 
@@ -44,7 +44,12 @@
 | TM-P1-002 | `cmd/server` | `tests` 命令语义与实际行为一致 | `cmd/server/*_test.go`、`cmd/server/*.go` | `go test ./cmd/server -count=1` | [CONFIRMED] TASK-P1-006 已改为真实 Go test 入口并补测试 | BC-004 |
 | TM-P1-003 | `pkg/*` API 分类与后续测试缺口 | 先明确公共基础设施 API、公共工具 API、内部支撑工具包边界，再按后续任务补行为测试 | `ARCHITECTURE.md`、`MODULES.md`、`pkg/*/README.md`，后续测试任务再触碰 `pkg/*/*_test.go` | TASK-P1-007：`go test ./... -count=1`；后续行为测试按包执行 | [CONFIRMED] TASK-P1-007 已完成分类；行为测试补齐仍按后续任务或 Backlog 处理 | RISK-004、RISK-008、FIND-001 |
 | TM-P1-004 | `pkg/sqlgen` | 未实现能力显式返回 unsupported 或文档化 | `pkg/sqlgen/*`、包 README | `go test ./pkg/sqlgen -count=1` | TODO 能力不再暗示已支持；测试或文档覆盖 unsupported | BC-005 |
-| TM-P1-005 | `types/*` | `types/result`、错误码、跨层契约边界清晰 | `types/**/*_test.go`、`ARCHITECTURE.md` 或包 README | `go test ./types/... -count=1` | HTTP 契约与纯类型边界被标注 | BL-021 |
+| TM-P1-005 | `types/*` | `types/result`、错误码、跨层契约边界清晰 | `types/**/*_test.go`、`ARCHITECTURE.md` 或包 README | `go test ./types/... -count=1` | [CONFIRMED] TASK-P1-009 已标注 HTTP 契约与纯类型边界，并补最小测试 | BL-021 |
+| TM-P1-006 | `pkg/plugin` | 插件注册责任为被动 registry/runtime，不由 `pkg/plugin` 主动注册插件服务 | `pkg/plugin/*`、包 README、架构/决策文档 | `go test ./pkg/plugin -count=1` | [CONFIRMED] 插件服务或宿主装配层显式创建并 `Register` local/http 插件；manager 公共 API 不再暴露主动配置加载/服务注册入口 | BL-022、RISK-015 |
+| TM-P1-007 | 首批无外部依赖 `pkg/*` 行为测试 | 为 `pkg/cli`、`pkg/i18n`、`pkg/yaml2go` 补最小包级行为测试，优先覆盖稳定成功路径和明确错误路径 | `pkg/cli/**/*_test.go`、`pkg/i18n/**/*_test.go`、`pkg/yaml2go/**/*_test.go`；必要时限当前包实现文件 | `go test ./pkg/cli ./pkg/i18n ./pkg/yaml2go -count=1`；`go test ./... -count=1` | [CONFIRMED] `pkg/cli`、`pkg/i18n`、`pkg/yaml2go` 均已有确定性包级行为测试；不依赖外部服务或生产配置 | BL-020、RISK-008 |
+| TM-P1-008 | 第二批无外部服务 `pkg/*` 行为测试 | 为 `pkg/executor`、`pkg/httpserver`、`pkg/storage` 补最小包级行为测试，覆盖稳定成功路径和明确错误路径 | `pkg/executor/**/*_test.go`、`pkg/httpserver/**/*_test.go`、`pkg/storage/**/*_test.go`；必要时限当前三包实现文件 | `go test ./pkg/executor ./pkg/httpserver ./pkg/storage -count=1`；`go test ./... -count=1` | [CONFIRMED] 三包已有确定性包级行为测试；不依赖 Redis、数据库、第三方网络服务或生产配置 | BL-020、RISK-008 |
+| TM-P1-009 | 第三批 `pkg/cache` 隔离行为测试 | 为 `pkg/cache` 补最小包级行为测试，用进程内 Redis 覆盖成功路径和明确错误路径 | `pkg/cache/**/*_test.go`；必要时限当前包实现文件；测试依赖可修改 `go.mod`、`go.sum` | `go test ./pkg/cache -count=1`；`go test ./... -count=1` | [CONFIRMED] `pkg/cache` 已有确定性隔离行为测试；不依赖真实 Redis、数据库、第三方网络服务或生产配置 | BL-020、RISK-008 |
+| TM-P1-010 | `pkg/utils` 内部支撑测试 | 为 `pkg/utils` 补最小确定性行为测试，覆盖 Snowflake、地址校验、端口查找、设备 ID 和 i18n helper 委托 | `pkg/utils/**/*_test.go`；必要时限当前包实现文件 | `go test ./pkg/utils -count=1`；`go test ./... -count=1` | [CONFIRMED] `pkg/utils` 已有最小确定性行为测试；不依赖真实外部网络服务、固定生产端口、数据库或生产配置 | BL-023、RISK-008 |
 
 ## P1 优化任务草案
 
@@ -59,7 +64,12 @@
 | TASK-P1-006 | 收拢 `cmd/server tests` 命令语义 | P1 | CLI 小修+测试 | `cmd/server/*`、CLI 文档、状态文档 | `go test ./cmd/server -count=1`；`go test ./... -count=1` | 命令名、描述或行为与真实用途一致 | COMPLETED |
 | TASK-P1-007 | 完成 `pkg/*` 公共/内部分类 | P1 | 文档 | `ARCHITECTURE.md`、`MODULES.md`、包 README、状态文档 | `go test ./... -count=1` | [CONFIRMED] 每个 `pkg/*` 包定位已标注；破坏性重构仍需单独确认 | COMPLETED |
 | TASK-P1-008 | 标注 `pkg/sqlgen` 未实现能力 | P1 | 文档+测试或小修 | `pkg/sqlgen/*`、包 README、状态文档 | `go test ./pkg/sqlgen -count=1`；`go test ./... -count=1` | [CONFIRMED] TODO/unsupported 边界不再误导使用者 | COMPLETED |
-| TASK-P1-009 | 明确 `types/*` 契约边界 | P1 | 文档+测试或小修 | `types/**/*`、`ARCHITECTURE.md`、`MODULES.md`、`TEST_MATRIX.md`、`ACCEPTANCE.md`、`docs/specs/types_contract_boundary.md`、状态文档 | `go test ./types/... -count=1`；`go test ./... -count=1` | `types/result` HTTP 契约、错误码预留和跨层类型边界被标注 | NOT_STARTED |
+| TASK-P1-009 | 明确 `types/*` 契约边界 | P1 | 文档+测试或小修 | `types/**/*`、`ARCHITECTURE.md`、`MODULES.md`、`TEST_MATRIX.md`、`ACCEPTANCE.md`、`docs/specs/types_contract_boundary.md`、状态文档 | `go test ./types/... -count=1`；`go test ./... -count=1` | [CONFIRMED] `types/result` HTTP 契约、错误码预留和跨层类型边界已标注 | COMPLETED |
+| TASK-P1-010 | 收拢 `pkg/plugin` 被动注册边界 | P1 | API 小修+测试+文档 | `pkg/plugin/*`、包 README、架构/决策/状态文档 | `go test ./pkg/plugin -count=1`；`go test ./... -count=1` | [CONFIRMED] `pkg/plugin` 不主动注册插件服务，local/http 插件由插件服务显式注册 | COMPLETED |
+| TASK-P1-011 | 补首批无外部服务依赖 `pkg/*` 行为测试 | P1 | 测试 | `pkg/cli/**/*_test.go`、`pkg/i18n/**/*_test.go`、`pkg/yaml2go/**/*_test.go`、必要时限当前包实现文件、状态文档 | `go test ./pkg/cli ./pkg/i18n ./pkg/yaml2go -count=1`；`go test ./... -count=1` | [CONFIRMED] `pkg/cli`、`pkg/i18n`、`pkg/yaml2go` 均有最小行为测试且不依赖外部服务 | COMPLETED |
+| TASK-P1-012 | 补第二批 `pkg/*` 行为测试 | P1 | 测试 | `pkg/executor/**/*_test.go`、`pkg/httpserver/**/*_test.go`、`pkg/storage/**/*_test.go`、必要时限当前三包实现文件、状态文档 | `go test ./pkg/executor ./pkg/httpserver ./pkg/storage -count=1`；`go test ./... -count=1` | [CONFIRMED] `pkg/executor`、`pkg/httpserver`、`pkg/storage` 均有最小行为测试且不依赖外部服务 | COMPLETED |
+| TASK-P1-013 | 补第三批 `pkg/cache` 隔离行为测试 | P1 | 测试 | `pkg/cache/**/*_test.go`、必要时限当前包实现文件、测试依赖、状态文档 | `go test ./pkg/cache -count=1`；`go test ./... -count=1` | [CONFIRMED] `pkg/cache` 有最小隔离行为测试且不依赖真实 Redis | COMPLETED |
+| TASK-P1-014 | 补 `pkg/utils` 内部支撑工具最小行为测试 | P1 | 测试 | `pkg/utils/**/*_test.go`、必要时限当前包实现文件、状态文档 | `go test ./pkg/utils -count=1`；`go test ./... -count=1` | [CONFIRMED] `pkg/utils` 有最小确定性行为测试且不依赖真实外部服务 | COMPLETED |
 
 ## 推荐执行顺序
 
@@ -72,10 +82,14 @@
 7. TASK-P1-006：处理 CLI 语义不一致。
 8. TASK-P1-007：完成包 API 分类。
 9. TASK-P1-008：标注 `pkg/sqlgen` 未实现能力。
+10. TASK-P1-011：补首批无外部依赖 `pkg/*` 行为测试。
+11. TASK-P1-012：补第二批 `pkg/*` 行为测试。
+12. TASK-P1-013：补第三批 `pkg/cache` 隔离行为测试。
+13. TASK-P1-014：补 `pkg/utils` 内部支撑工具最小行为测试。
 
 当前合法下一项：
 
-- [CONFIRMED] 用户选择 A，当前合法下一项为 TASK-P1-009 / TS-P1-009：明确 `types/*` 契约边界。
+- [PENDING_USER_CONFIRMATION] TASK-NEXT-SCOPE-007 / TS-NEXT-SCOPE-007：确认进入 Phase 6 收尾、继续集成测试或结束本轮。
 
 ## 验收门禁
 

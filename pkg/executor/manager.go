@@ -57,7 +57,7 @@ type manager struct {
 func NewManager(configs []Config) (Manager, error) {
 	// 验证配置
 	if len(configs) == 0 {
-		return nil, fmt.Errorf(ErrMsgInvalidConfig, fmt.Errorf("no configs provided"))
+		return nil, fmt.Errorf("%w: no configs provided", ErrInvalidConfig)
 	}
 
 	// 创建池 map
@@ -69,7 +69,7 @@ func NewManager(configs []Config) (Manager, error) {
 		if _, exists := pools[cfg.Name]; exists {
 			// 清理已创建的池
 			releasePools(pools)
-			return nil, fmt.Errorf(ErrMsgInvalidConfig, fmt.Errorf("duplicate pool name: %s", cfg.Name))
+			return nil, fmt.Errorf("%w: duplicate pool name: %s", ErrInvalidConfig, cfg.Name)
 		}
 
 		// 创建池
@@ -117,14 +117,14 @@ func (m *manager) Execute(poolName PoolName, task func()) error {
 
 	// 检查池是否存在
 	if !exists {
-		return fmt.Errorf(ErrMsgPoolNotFound, poolName)
+		return fmt.Errorf(ErrMsgPoolNotFound, ErrPoolNotFound, poolName)
 	}
 
 	// 提交任务到池
 	if err := pool.Submit(task); err != nil {
 		// 如果是池过载错误,添加池名称信息
 		if err == ErrPoolOverload {
-			return fmt.Errorf(ErrMsgPoolOverload, poolName)
+			return fmt.Errorf(ErrMsgPoolOverload, ErrPoolOverload, poolName)
 		}
 		return err
 	}
@@ -168,7 +168,7 @@ func (m *manager) Reload(configs []Config) error {
 		// 检查重复名称
 		if _, exists := newPools[cfg.Name]; exists {
 			releasePools(newPools)
-			return fmt.Errorf(ErrMsgInvalidConfig, fmt.Errorf("duplicate pool name: %s", cfg.Name))
+			return fmt.Errorf("%w: duplicate pool name: %s", ErrInvalidConfig, cfg.Name)
 		}
 
 		// 创建新池

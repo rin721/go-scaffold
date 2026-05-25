@@ -98,8 +98,19 @@
   - TASK-P1-007 已完成：13 个 `pkg/*` 包已完成公共基础设施 API、公共工具 API、内部支撑工具包分类。
   - TASK-P1-008 已完成：`pkg/sqlgen` TODO/unsupported 能力已显式返回错误或文档化 partial 边界。
   - TASK-NEXT-SCOPE 已完成：用户选择 A，提升 `BL-021` / `TM-P1-005`。
+  - TASK-P1-009 已完成：`types/*` 契约边界已明确，并补充 `types/result` 与 `types/errors` 最小测试。
+  - TASK-NEXT-SCOPE-002 已完成：用户修正并选择提升 `pkg/plugin` 被动注册边界。
+  - TASK-P1-010 已完成：`pkg/plugin` 已收拢为被动 registry/runtime，local/http 插件由服务侧显式注册。
+  - TASK-NEXT-SCOPE-003 已完成：用户选择 A，提升 `BL-020` 首批 `pkg/*` 行为测试。
+  - TASK-P1-011 已完成：`pkg/cli`、`pkg/i18n`、`pkg/yaml2go` 已补最小行为测试。
+  - TASK-NEXT-SCOPE-004 已完成：用户确认继续第二批 `pkg/*` 行为测试。
+  - TASK-P1-012 已完成：`pkg/executor`、`pkg/httpserver`、`pkg/storage` 已补最小行为测试。
+  - TASK-NEXT-SCOPE-005 已完成：用户选择 A，提升第三批 `pkg/cache` 隔离行为测试。
+  - TASK-P1-013 已完成：`pkg/cache` 已补进程内 Redis 隔离行为测试。
+  - TASK-NEXT-SCOPE-006 已完成：用户选择 B，提升 `pkg/utils` 内部支撑测试。
+  - TASK-P1-014 已完成：`pkg/utils` 已补最小确定性行为测试。
 - 当前下一步：
-  - [CONFIRMED] TASK-P1-009：明确 `types/*` 契约边界。
+  - [NEEDS_CONFIRMATION] TASK-NEXT-SCOPE-007：选择进入 Phase 6 收尾、继续 app/router/middleware 等集成测试，或结束本轮。
 
 ## Phase 6：收尾与交接
 

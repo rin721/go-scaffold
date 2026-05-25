@@ -6,17 +6,16 @@ import (
 )
 
 var (
-	ErrInvalidConfig        = errors.New("invalid plugin config")
-	ErrInvalidDefinition    = errors.New("invalid plugin definition")
-	ErrInvalidRequest       = errors.New("invalid plugin request")
-	ErrInvalidResponse      = errors.New("invalid plugin response")
-	ErrUnsupportedProtocol  = errors.New("unsupported plugin protocol")
-	ErrPluginExists         = errors.New("plugin already exists")
-	ErrPluginNotFound       = errors.New("plugin not found")
-	ErrNilPlugin            = errors.New("plugin is nil")
-	ErrNilHandler           = errors.New("plugin handler is nil")
-	ErrLocalFactoryNotFound = errors.New("local plugin factory not found")
-	ErrHTTPStatus           = errors.New("unexpected plugin http status")
+	ErrInvalidConfig       = errors.New("invalid plugin config")
+	ErrInvalidDefinition   = errors.New("invalid plugin definition")
+	ErrInvalidRequest      = errors.New("invalid plugin request")
+	ErrInvalidResponse     = errors.New("invalid plugin response")
+	ErrUnsupportedProtocol = errors.New("unsupported plugin protocol")
+	ErrPluginExists        = errors.New("plugin already exists")
+	ErrPluginNotFound      = errors.New("plugin not found")
+	ErrNilPlugin           = errors.New("plugin is nil")
+	ErrNilHandler          = errors.New("plugin handler is nil")
+	ErrHTTPStatus          = errors.New("unexpected plugin http status")
 )
 
 // Error wraps plugin operations with plugin name and operation context.

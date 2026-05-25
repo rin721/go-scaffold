@@ -332,11 +332,9 @@ func (c *converter) generateStruct(f *jen.File, name string, fields []*FieldInfo
 
 		// 字段定义
 		fieldType := c.buildFieldType(field)
-		tagStr := buildTags(field.Tags, cfg.OmitEmpty)
-
 		fieldCode = fieldCode.Id(field.Name).Add(fieldType)
-		if tagStr != "" {
-			fieldCode = fieldCode.Tag(map[string]string{"": strings.Trim(tagStr, "`")})
+		if len(field.Tags) > 0 {
+			fieldCode = fieldCode.Tag(buildTagValues(field.Tags, cfg.OmitEmpty))
 		}
 
 		structFields = append(structFields, fieldCode)
@@ -372,11 +370,10 @@ func (c *converter) buildFieldType(field *FieldInfo) jen.Code {
 		structFields := []jen.Code{}
 		for _, child := range field.Children {
 			childType := c.buildFieldType(child)
-			tagStr := buildTags(child.Tags, cfg.OmitEmpty)
 
 			childCode := jen.Id(child.Name).Add(childType)
-			if tagStr != "" {
-				childCode = childCode.Tag(map[string]string{"": strings.Trim(tagStr, "`")})
+			if len(child.Tags) > 0 {
+				childCode = childCode.Tag(buildTagValues(child.Tags, cfg.OmitEmpty))
 			}
 			structFields = append(structFields, childCode)
 		}
@@ -416,11 +413,11 @@ func (c *converter) generateMainConfig(rootMap map[string]interface{}, cfg *Conf
 		// 创建字段
 		fieldCode := jen.Id(sanitizeFieldName(configName)).
 			Op("*").Id(structName).
-			Tag(map[string]string{"": buildTags(map[string]string{
+			Tag(buildTagValues(map[string]string{
 				"mapstructure": configName,
 				"json":         configName,
 				"yaml":         configName,
-			}, false)[1:]})
+			}, false))
 
 		structFields = append(structFields, fieldCode)
 	}
@@ -504,13 +501,11 @@ func (c *converter) generateSimpleConfig(configName string, configValue interfac
 
 	// 简单的值包装结构体
 	f.Type().Id(structName).Struct(
-		jen.Id("Value").Add(jen.Id(fieldType.String())).Tag(map[string]string{
-			"": buildTags(map[string]string{
-				"json":         "value",
-				"yaml":         "value",
-				"mapstructure": "value",
-			}, false)[1:],
-		}),
+		jen.Id("Value").Add(jen.Id(fieldType.String())).Tag(buildTagValues(map[string]string{
+			"json":         "value",
+			"yaml":         "value",
+			"mapstructure": "value",
+		}, false)),
 	)
 
 	buf := &bytes.Buffer{}
@@ -538,47 +533,17 @@ func (c *converter) generateSubConfigCode(structInfo *StructInfo, cfg *Config) (
 
 	// 生成结构体
 	c.generateStruct(f, structInfo.Name, structInfo.Fields, structInfo.Comment)
+	if cfg.GenerateMethods {
+		c.appendMethods(f, structInfo, cfg)
+	}
 
-	// 渲染结构体代码
+	// 渲染完整文件代码
 	buf := &bytes.Buffer{}
 	if err := f.Render(buf); err != nil {
 		return "", err
 	}
 
-	structCode := buf.String()
-
-	// 生成方法代码
-	if cfg.GenerateMethods {
-		methodsCode, err := c.generateMethods(structInfo, cfg)
-		if err != nil {
-			return "", fmt.Errorf("failed to generate methods: %w", err)
-		}
-
-		// 合并结构体代码和方法代码
-		// 从方法代码中提取函数部分（去掉 package 声明）
-		methodsLines := strings.Split(methodsCode, "\n")
-		var cleanMethodsLines []string
-		skipPackage := false
-		for _, line := range methodsLines {
-			if strings.HasPrefix(line, "package ") {
-				skipPackage = true
-				continue
-			}
-			if skipPackage && strings.TrimSpace(line) == "" {
-				skipPackage = false
-				continue
-			}
-			if !skipPackage {
-				cleanMethodsLines = append(cleanMethodsLines, line)
-			}
-		}
-
-		if len(cleanMethodsLines) > 0 {
-			structCode += "\n" + strings.Join(cleanMethodsLines, "\n")
-		}
-	}
-
-	return structCode, nil
+	return buf.String(), nil
 }
 
 // extractDefaultValues 从配置 map 中提取默认值

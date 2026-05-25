@@ -1,9 +1,9 @@
-// Package result 提供了 API 响应的通用结果类型
-// 这个包除了 Go 标准库外没有外部依赖
-// 设计目标:
-// - 统一 API 响应格式,保持前后端接口一致性
-// - 使用泛型支持任意数据类型,提高代码复用性
-// - 包含必要的元数据(错误码、追踪ID、服务器时间)
+// Package result 提供 HTTP API 响应契约。
+//
+// 边界说明:
+// - Result、Success、Error、ErrorWithTrace、Pagination 和 PageResult 是 JSON 响应结构契约。
+// - helpers.go 中的 OK、BadRequest、Unauthorized 等 helper 直接依赖 Gin,属于 HTTP/Gin 响应适配层。
+// - 本包不是纯领域类型包,不要在非 HTTP 层引入 Gin helper。
 package result
 
 import "time"

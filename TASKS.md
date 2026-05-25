@@ -2,10 +2,10 @@
 
 ## 当前合法任务
 
-- Task ID：TASK-P1-009
-- Status：NOT_STARTED
-- Time Slice：TS-P1-009
-- Summary：用户选择 A，`BL-021` / `TM-P1-005` 已提升；当前唯一合法任务是明确 `types/*` 契约边界。
+- Task ID：TASK-NEXT-SCOPE-007
+- Status：PENDING_USER_CONFIRMATION
+- Time Slice：TS-NEXT-SCOPE-007
+- Summary：TASK-P1-014 已完成，等待用户确认进入 Phase 6、继续集成测试或结束本轮。
 
 ## 任务列表
 
@@ -340,7 +340,7 @@
 
 ### TASK-P1-009：明确 `types/*` 契约边界
 
-- Status：NOT_STARTED
+- Status：COMPLETED
 - Matrix：TM-P1-005、TM-P0-006
 - Goal：明确 `types/constants`、`types/errors`、`types/result` 和根 `types` 聚合入口的公共契约定位，尤其标注 `types/result` 属于 HTTP/Gin 响应契约而非纯类型包。
 - Source：
@@ -372,6 +372,13 @@
   - [CONFIRMED] `types/constants` 和根 `types` 聚合入口的公共/跨层边界被标注。
   - [CONFIRMED] 如新增或修改行为测试，相关 `types` 包测试和全量回归通过。
   - [CONFIRMED] 状态、测试报告、变更日志、风险、Backlog 和交接文档已更新。
+- Completion Evidence：
+  - `types/result/result.go` 包注释已明确 `types/result` 是 HTTP API 响应契约，其中 Gin helper 属于 HTTP/Gin 适配层。
+  - `types/doc.go`、`types/constants/doc.go`、`types/errors/doc.go` 已标注根 `types`、常量和错误码契约边界。
+  - `docs/specs/types_contract_boundary.md` 已记录 `types/*` 包边界、依赖说明、auth/rbac 非目标和验收证据。
+  - `types/result/result_test.go` 已覆盖响应结构、分页总页数、Gin helper 的 HTTP 状态码和错误码映射、trace id 提取。
+  - `types/errors/error_test.go` 已覆盖 `BizError` 错误链和错误码分段。
+  - `go test ./types/... -count=1` 和 `go test ./... -count=1` 均通过。
 
 ### TASK-NEXT-SCOPE：确认下一阶段范围
 
@@ -386,6 +393,382 @@
   - [CONFIRMED] 用户选择 A：提升 `BL-021` / `TM-P1-005`。
   - [CONFIRMED] 新的任务 TASK-P1-009 和时间切片 TS-P1-009 已写入 `TASKS.md` 和 `TIME_SLICES.md`。
   - [CONFIRMED] 当前合法任务已推进为 TASK-P1-009。
+
+### TASK-NEXT-SCOPE-002：确认 `types/*` 契约边界后的后续范围
+
+- Status：COMPLETED
+- Matrix：BL-022、TM-P1-006
+- Goal：确认 TASK-P1-009 完成之后的下一步：提升 `BL-020` 补 `pkg/*` 行为测试、进入 Phase 6 收尾，或结束本轮。
+- Allowed Files：
+  - 项目状态文档
+- Verification：
+  - 无需 Go 测试，除非用户确认进入新的代码或测试切片。
+- Exit Conditions：
+  - [CONFIRMED] 用户提出架构修正：`pkg/plugin` 不应主动注册插件服务，应被动由插件服务注册。
+  - [CONFIRMED] 新的任务 TASK-P1-010 和时间切片 TS-P1-010 已写入 `TASKS.md` 和 `TIME_SLICES.md`。
+
+### TASK-P1-010：收拢 `pkg/plugin` 被动注册边界
+
+- Status：COMPLETED
+- Matrix：TM-P1-006
+- Goal：落实用户修正：`pkg/plugin` 只作为被动 registry/runtime，不主动从配置加载并注册插件服务；插件服务或宿主装配层显式构造插件并调用注册接口。
+- Source：
+  - 用户修正：`pkg/plugin不应该主动注册插件服务，而是被动由插件服务进行注册`。
+  - User Correction Review：ACCEPT_WITH_RISK。
+- Allowed Files：
+  - `pkg/plugin/**/*`
+  - `ARCHITECTURE.md`
+  - `MODULES.md`
+  - `TEST_MATRIX.md`
+  - `ACCEPTANCE.md`
+  - `DECISIONS.md`
+  - `BACKLOG.md`
+  - `RISK_REGISTER.md`
+  - `docs/reports/status_diagnostics/*`
+  - 项目状态文档
+- Forbidden Files：
+  - `cmd/**/*`
+  - `internal/**/*`
+  - `types/**/*`
+  - `go.mod`
+  - `go.sum`
+  - 数据库 schema、部署配置、真实密钥文件
+- Verification：
+  - `go test ./pkg/plugin -count=1`
+  - `go test ./... -count=1`
+  - `git diff --check`
+- Exit Conditions：
+  - [CONFIRMED] `Manager` 的公共 API 不再暴露主动配置加载/本地 factory 装配入口。
+  - [CONFIRMED] local/http 插件由插件服务或宿主装配层显式创建后调用 `Register` 注册。
+  - [CONFIRMED] README、架构、模块清单和决策记录已说明被动注册边界。
+  - [CONFIRMED] `pkg/plugin` 包测试和全量回归通过。
+- Completion Evidence：
+  - `Manager` 接口移除 `Load`、`RegisterLocalFactory` 和 manager option 主动装配公共面。
+  - 新增 `NewHTTP` 和 HTTP option，让远程插件可由插件服务构造后注册。
+  - local/http 测试已改为先构造插件实例，再调用 `mgr.Register`。
+  - `pkg/plugin` README 和 package doc 已说明被动注册边界。
+  - `go test ./pkg/plugin -count=1`、`go test ./... -count=1` 和 `git diff --check` 均通过。
+
+### TASK-NEXT-SCOPE-003：确认 `pkg/plugin` 被动注册边界后的后续范围
+
+- Status：COMPLETED
+- Matrix：BL-020、TM-P1-003、TM-P1-007
+- Goal：确认 TASK-P1-010 完成之后的下一步：提升 `BL-020` 补 `pkg/*` 行为测试、进入 Phase 6 收尾，或结束本轮。
+- Allowed Files：
+  - 项目状态文档
+- Verification：
+  - 无需 Go 测试，除非用户确认进入新的代码或测试切片。
+- Exit Conditions：
+  - [CONFIRMED] 用户明确选择 A：提升 `BL-020` 补 `pkg/*` 行为测试。
+  - [CONFIRMED] 首批任务 TASK-P1-011 和时间切片 TS-P1-011 已写入 `TASKS.md` 和 `TIME_SLICES.md`。
+  - [CONFIRMED] 当前合法下一步不再是待确认状态。
+
+### TASK-P1-011：补首批无外部服务依赖 `pkg/*` 行为测试
+
+- Status：COMPLETED
+- Matrix：TM-P1-003、TM-P1-007、TM-P0-006
+- Goal：为当前无包级测试且无外部服务依赖的公共 `pkg/*` 包补最小行为测试，首批覆盖 `pkg/cli`、`pkg/i18n`、`pkg/yaml2go`。
+- Source：
+  - 用户选择 A。
+  - `BL-020`：为无测试的公共 `pkg/*` 包补最小行为测试。
+  - `TM-P1-003`：`pkg/*` API 分类与后续测试缺口。
+- Priority：P1
+- Complexity：Medium
+- Conservative Estimate：1 个时间切片；若新增测试暴露实现缺陷，同一问题最多修复 3 轮。
+- Dependencies：
+  - TASK-P1-007：`pkg/*` API 分类已完成。
+  - TASK-P1-010：`pkg/plugin` 被动注册边界已完成。
+- Inputs：
+  - `ARCHITECTURE.md` 中 `pkg/*` API 分类。
+  - `MODULES.md` 中无测试包清单。
+  - `TEST_MATRIX.md` 的 `TM-P1-003` 和 `TM-P1-007`。
+- Outputs：
+  - `pkg/cli`、`pkg/i18n`、`pkg/yaml2go` 的最小行为测试。
+  - 状态、验收、测试报告、变更日志、问题记录和交接更新。
+- Allowed Files：
+  - `pkg/cli/**/*_test.go`
+  - `pkg/i18n/**/*_test.go`
+  - `pkg/yaml2go/**/*_test.go`
+  - 若测试暴露当前范围内的真实实现缺陷，可修改 `pkg/cli/*.go`、`pkg/i18n/*.go`、`pkg/yaml2go/*.go`，但必须记录修复原因和验证证据。
+  - 项目状态文档。
+- Forbidden Files：
+  - `cmd/**/*`
+  - `internal/**/*`
+  - `types/**/*`
+  - 其他 `pkg/*` 包。
+  - `go.mod`
+  - `go.sum`
+  - 数据库 schema、部署配置、真实密钥文件。
+- Steps：
+  1. 阅读 `pkg/cli`、`pkg/i18n`、`pkg/yaml2go` 当前公开 API 和 README 分类。
+  2. 为每个包选择最小、确定性、无外部服务依赖的行为路径。
+  3. 新增包级测试，不改变公共 API。
+  4. 运行相关包测试、全量回归和 diff 检查。
+  5. 更新状态、验收、测试报告、变更日志、问题记录和交接。
+- Test Commands：
+  - `gofmt -w pkg/cli/*_test.go pkg/i18n/*_test.go pkg/yaml2go/*_test.go`
+  - `go test ./pkg/cli ./pkg/i18n ./pkg/yaml2go -count=1`
+  - `go test ./... -count=1`
+  - `git diff --check`
+- Acceptance Criteria：
+  - [CONFIRMED] `pkg/cli` 至少覆盖命令/flag 或错误行为的稳定公共路径。
+  - [CONFIRMED] `pkg/i18n` 至少覆盖翻译加载、默认语言或错误路径中的稳定公共行为。
+  - [CONFIRMED] `pkg/yaml2go` 至少覆盖一个成功转换路径和一个错误路径。
+  - [CONFIRMED] 测试不依赖 Redis、数据库、真实 HTTP server、生产配置或外部网络。
+  - [CONFIRMED] 相关包测试和全量回归通过。
+- Completion Criteria：
+  - 测试文件已新增或更新。
+  - 修改范围符合本任务。
+  - 所有验证命令已执行并记录。
+  - 无新增未记录失败项。
+  - 状态文档、测试报告、变更记录和交接说明已更新。
+- Failure Handling：
+  - 同一失败最多修复 3 轮。
+  - 如果失败来自本切片新增测试覆盖的当前范围缺陷，在允许文件内修复并记录。
+  - 如果失败来自其他包或历史未确认缺陷，登记 `ISSUES.md` 和 `RISK_REGISTER.md`，不得扩大范围。
+- Evidence：
+  - 修改文件：`pkg/cli/app_test.go`、`pkg/i18n/i18n_test.go`、`pkg/yaml2go/converter_test.go`、`pkg/yaml2go/converter_impl.go`、`pkg/yaml2go/method_generator.go`、`pkg/yaml2go/utils.go`、项目状态文档。
+  - 命令：`gofmt -w pkg/cli/app_test.go pkg/i18n/i18n_test.go pkg/yaml2go/converter_test.go`；`go test ./pkg/cli ./pkg/i18n ./pkg/yaml2go -count=1`；`go test ./... -count=1`；`git diff --check`。
+  - 测试结果：PASS；`git diff --check` 仅有 Windows LF/CRLF 转换警告。
+  - 验证结论：`pkg/cli`、`pkg/i18n`、`pkg/yaml2go` 均已有最小行为测试；`pkg/yaml2go` 生成 tag 和方法 import 顺序缺陷已修复。
+- Next Task：
+  - TASK-NEXT-SCOPE-004：确认继续 `BL-020` 下一批、进入 Phase 6 收尾，或结束本轮。
+
+### TASK-NEXT-SCOPE-004：确认首批 `pkg/*` 行为测试完成后的后续范围
+
+- Status：COMPLETED
+- Matrix：BL-020、TM-P1-003、TM-P1-007
+- Goal：确认 TASK-P1-011 完成之后的下一步：继续 `BL-020` 后续 `pkg/*` 行为测试批次、进入 Phase 6 收尾，或结束本轮。
+- Allowed Files：
+  - 项目状态文档
+- Forbidden Files：
+  - Go 源码和测试文件，除非用户确认进入新的代码或测试切片。
+  - `go.mod`
+  - `go.sum`
+  - 数据库 schema、部署配置、真实密钥文件。
+- Verification：
+  - 无需 Go 测试，除非用户确认进入新的代码或测试切片。
+- Exit Conditions：
+  - [CONFIRMED] 用户发送“下一步”，按选项 A 继续 `BL-020` 下一批。
+  - [CONFIRMED] TASK-P1-012 和 TS-P1-012 已写入 `TASKS.md` 与 `TIME_SLICES.md`。
+  - [CONFIRMED] 当前合法下一步不再是待确认状态。
+
+### TASK-P1-012：补第二批 `pkg/*` 行为测试
+
+- Status：COMPLETED
+- Matrix：BL-020、TM-P1-003、TM-P1-008、TM-P0-006
+- Source：
+  - 用户发送“下一步”，确认继续 `BL-020`。
+  - `MODULES.md`：`pkg/executor`、`pkg/httpserver`、`pkg/storage` 仍无包级测试。
+- Priority：P1
+- Type：测试；若新增测试暴露当前三包内缺陷，可做最小修复。
+- Goal：为不依赖 Redis、数据库或外部网络服务的第二批公共 `pkg/*` 包补最小行为测试，覆盖稳定成功路径和明确错误路径。
+- Allowed Files：
+  - `pkg/executor/**/*_test.go`
+  - `pkg/httpserver/**/*_test.go`
+  - `pkg/storage/**/*_test.go`
+  - 必要时限当前三包实现文件：`pkg/executor/*.go`、`pkg/httpserver/*.go`、`pkg/storage/*.go`
+  - 项目状态文档：`STATUS.md`、`TASKS.md`、`TIME_SLICES.md`、`ACCEPTANCE.md`、`TEST_MATRIX.md`、`TEST_REPORT.md`、`CHANGELOG.md`、`ISSUES.md`、`RISK_REGISTER.md`、`BACKLOG.md`、`AGENT_HANDOFF.md`
+- Forbidden Files：
+  - `pkg/cache/**/*`
+  - `cmd/**/*`
+  - `internal/**/*`
+  - `types/**/*`
+  - 其他无关 `pkg/*`
+  - `go.mod`
+  - `go.sum`
+  - 数据库 schema、部署配置、真实密钥文件。
+- Non-Goals：
+  - 不接入真实 Redis、数据库、第三方网络服务或生产配置。
+  - 不补 `pkg/cache` Redis 行为测试。
+  - 不重构 HTTP 路由、业务 handler、storage 对外 API 或 executor 公共接口。
+  - 不实现 httpserver 文档中尚未落地的 executor 注入能力。
+- Execution Steps：
+  1. 阅读 `pkg/executor`、`pkg/httpserver`、`pkg/storage` 源码和 README，确认可测公共行为。
+  2. 新增最小包级测试：executor 覆盖配置校验、任务执行、缺失池、关闭和 panic handler；httpserver 覆盖 `New`、配置默认/校验、停止态 reload/shutdown；storage 覆盖内存文件系统读写、复制、MIME、Excel、图片和配置错误路径。
+  3. 若新增测试暴露当前三包内缺陷，只做最小修复。
+  4. 运行格式化、相关包测试、全量回归和 diff 检查。
+  5. 更新验收、测试报告、变更、问题、风险、Backlog 和交接文档。
+- Verification：
+  - `gofmt -w pkg/executor/executor_test.go pkg/httpserver/httpserver_test.go pkg/storage/storage_test.go`
+  - `go test ./pkg/executor ./pkg/httpserver ./pkg/storage -count=1`
+  - `go test ./... -count=1`
+  - `git diff --check`
+- Exit Conditions：
+  - [CONFIRMED] `pkg/executor` 有确定性最小行为测试。
+  - [CONFIRMED] `pkg/httpserver` 有确定性最小行为测试，且不依赖固定生产端口。
+  - [CONFIRMED] `pkg/storage` 有确定性最小行为测试，使用内存文件系统。
+  - [CONFIRMED] 本切片验证命令通过，失败已按修复上限记录并修复。
+  - [CONFIRMED] 状态、变更、测试报告、问题和交接文档已更新。
+  - [CONFIRMED] 下一合法任务明确。
+- Evidence：
+  - 修改文件：`pkg/executor/executor_test.go`、`pkg/httpserver/httpserver_test.go`、`pkg/storage/storage_test.go`、`pkg/executor/constants.go`、`pkg/executor/manager.go`、`pkg/executor/pool.go`、项目状态文档。
+  - 命令：`gofmt -w pkg/executor/executor_test.go pkg/httpserver/httpserver_test.go pkg/storage/storage_test.go`；`gofmt -w pkg/executor/constants.go pkg/executor/manager.go pkg/executor/pool.go pkg/executor/executor_test.go pkg/httpserver/httpserver_test.go pkg/storage/storage_test.go`；`go test ./pkg/executor ./pkg/httpserver ./pkg/storage -count=1`；`go test ./... -count=1`；`git diff --check`。
+  - 测试结果：PASS；`git diff --check` 仅有 Windows LF/CRLF 转换警告。
+  - 修复记录：首次相关包测试暴露 `pkg/executor` sentinel 错误包装和 panic handler 未调用缺陷；第一轮修复后仅测试存在任务完成等待竞态；第二轮修正测试等待后通过。
+- Next Task：
+  - TASK-NEXT-SCOPE-005：确认继续 `pkg/cache` 等剩余 `BL-020` 范围、进入 Phase 6 收尾，或结束本轮。
+
+### TASK-NEXT-SCOPE-005：确认第二批 `pkg/*` 行为测试完成后的后续范围
+
+- Status：COMPLETED
+- Matrix：BL-020、TM-P1-003、TM-P1-008
+- Goal：确认 TASK-P1-012 完成之后的下一步：继续 `BL-020` 剩余 `pkg/*` 行为测试、进入 Phase 6 收尾，或结束本轮。
+- Allowed Files：
+  - 项目状态文档
+- Forbidden Files：
+  - Go 源码和测试文件，除非用户确认进入新的代码或测试切片。
+  - `go.mod`
+  - `go.sum`
+  - 数据库 schema、部署配置、真实密钥文件。
+- Verification：
+  - 无需 Go 测试，除非用户确认进入新的代码或测试切片。
+- Exit Conditions：
+  - [CONFIRMED] 用户选择 A：继续 `BL-020` 剩余 `pkg/*` 行为测试。
+  - [CONFIRMED] 新任务 TASK-P1-013 和时间切片 TS-P1-013 已写入 `TASKS.md` 与 `TIME_SLICES.md`。
+  - [CONFIRMED] 当前合法下一步不再是待确认状态。
+
+### TASK-P1-013：补第三批 `pkg/cache` 隔离行为测试
+
+- Status：COMPLETED
+- Matrix：BL-020、TM-P1-003、TM-P1-009、TM-P0-006
+- Source：
+  - 用户选择 A，确认继续 `BL-020` 剩余范围。
+  - `ARCHITECTURE.md` 和 `MODULES.md`：`pkg/cache` 是公共基础设施 API，Redis 依赖路径缺少隔离测试。
+- Priority：P1
+- Type：测试；若新增测试暴露 `pkg/cache` 当前范围内缺陷，可做最小修复。
+- Goal：为 `pkg/cache` 补最小隔离行为测试，覆盖配置校验、Redis 基本操作、批量操作、计数器、缺失键、重载失败保持旧连接和重载成功切换连接。
+- Allowed Files：
+  - `pkg/cache/**/*_test.go`
+  - 必要时限当前包实现文件：`pkg/cache/*.go`
+  - 如隔离 Redis 需要纯测试依赖，可修改 `go.mod`、`go.sum`
+  - 项目状态文档：`STATUS.md`、`TASKS.md`、`TIME_SLICES.md`、`ACCEPTANCE.md`、`TEST_MATRIX.md`、`TEST_REPORT.md`、`CHANGELOG.md`、`ISSUES.md`、`RISK_REGISTER.md`、`BACKLOG.md`、`DECISIONS.md`、`ROADMAP.md`、`PROJECT_BRIEF.md`、`AGENT_HANDOFF.md`
+- Forbidden Files：
+  - `cmd/**/*`
+  - `internal/**/*`
+  - `types/**/*`
+  - 其他无关 `pkg/*`
+  - 数据库 schema、部署配置、真实密钥文件
+- Non-Goals：
+  - 不连接真实 Redis 服务。
+  - 不引入生产运行依赖或修改生产配置。
+  - 不重构 `Cache` 公共接口。
+  - 不实现 Memcached、本地缓存或分布式锁语义扩展。
+- Steps：
+  1. 阅读 `pkg/cache` 源码和 README，确认稳定公共行为。
+  2. 使用进程内隔离 Redis 测试服务或等价策略覆盖成功路径，不依赖外部 Redis。
+  3. 新增配置、输入错误和 Redis 行为测试；必要时做当前包内最小修复。
+  4. 运行格式化、`pkg/cache` 包测试、全量回归和 diff 检查。
+  5. 更新验收、测试报告、变更、问题、风险、Backlog、决策和交接文档。
+- Verification：
+  - `gofmt -w pkg/cache/*_test.go`
+  - `go test ./pkg/cache -count=1`
+  - `go test ./... -count=1`
+  - `git diff --check`
+- Exit Conditions：
+  - [CONFIRMED] `pkg/cache` 有确定性最小行为测试。
+  - [CONFIRMED] 测试不依赖真实 Redis、外部网络服务、生产配置或数据库。
+  - [CONFIRMED] 相关包测试和全量回归通过。
+  - [CONFIRMED] 状态、变更、测试报告、问题和交接文档已更新。
+  - [CONFIRMED] 下一合法任务明确。
+- Evidence：
+  - 修改文件：`pkg/cache/cache_test.go`、`go.mod`、`go.sum`、项目状态文档。
+  - 命令：`go get github.com/alicebob/miniredis/v2@latest`；`gofmt -w pkg/cache/cache_test.go`；`go test ./pkg/cache -count=1`；`go test ./... -count=1`；`git diff --check`。
+  - 测试结果：PASS；`git diff --check` 仅有 Windows LF/CRLF 转换警告。
+  - 修复记录：首次包测试为测试代码编译失败，原因是误读 `miniredis.Get` 返回值；修正测试断言后通过。
+- Next Task：
+  - TASK-NEXT-SCOPE-006：确认进入 Phase 6 收尾、提升 `pkg/utils` 等内部支撑测试，或结束本轮。
+
+### TASK-NEXT-SCOPE-006：确认 `pkg/cache` 行为测试完成后的后续范围
+
+- Status：COMPLETED
+- Matrix：BL-020、TM-P1-003、TM-P1-009
+- Goal：确认 TASK-P1-013 完成之后的下一步：进入 Phase 6 收尾、补 `pkg/utils` 等内部支撑测试，或结束本轮。
+- Allowed Files：
+  - 项目状态文档
+- Forbidden Files：
+  - Go 源码和测试文件，除非用户确认进入新的代码或测试切片。
+  - `go.mod`
+  - `go.sum`
+  - 数据库 schema、部署配置、真实密钥文件。
+- Verification：
+  - 无需 Go 测试，除非用户确认进入新的代码或测试切片。
+- Exit Conditions：
+  - [CONFIRMED] 用户选择 B：提升 `pkg/utils` 等内部支撑测试。
+  - [CONFIRMED] 新任务 TASK-P1-014 和时间切片 TS-P1-014 已写入 `TASKS.md` 与 `TIME_SLICES.md`。
+
+### TASK-P1-014：补 `pkg/utils` 内部支撑工具最小行为测试
+
+- Status：COMPLETED
+- Matrix：BL-023、TM-P1-010、TM-P0-006
+- Source：
+  - 用户选择 B，确认提升内部支撑测试。
+  - `BL-023`：为 `pkg/utils` 内部支撑工具补最小测试。
+  - `MODULES.md`：`pkg/utils` 被分类为内部支撑工具包，能力较杂，默认 Snowflake panic 策略需确认。
+- Priority：P1
+- Type：测试；若新增测试暴露 `pkg/utils` 当前范围内缺陷，可做最小修复。
+- Goal：为 `pkg/utils` 补最小确定性行为测试，覆盖 Snowflake、监听地址校验、端口查找、设备 ID 稳定性和 i18n helper 默认语言委托语义。
+- Allowed Files：
+  - `pkg/utils/**/*_test.go`
+  - 必要时限当前包实现文件：`pkg/utils/*.go`
+  - 项目状态文档：`STATUS.md`、`TASKS.md`、`TIME_SLICES.md`、`ACCEPTANCE.md`、`TEST_MATRIX.md`、`TEST_REPORT.md`、`CHANGELOG.md`、`ISSUES.md`、`RISK_REGISTER.md`、`BACKLOG.md`、`DECISIONS.md`、`ROADMAP.md`、`PROJECT_BRIEF.md`、`AGENT_HANDOFF.md`
+- Forbidden Files：
+  - `cmd/**/*`
+  - `internal/**/*`
+  - `types/**/*`
+  - 其他无关 `pkg/*`
+  - `go.mod`
+  - `go.sum`
+  - 数据库 schema、部署配置、真实密钥文件
+- Non-Goals：
+  - 不修改 `pkg/utils` 公共 API。
+  - 不改变默认 Snowflake panic 策略。
+  - 不依赖真实外部网络服务、固定端口、生产配置或机器专属断言。
+  - 不补 `internal/*`、middleware、router 或 app 集成测试。
+- Steps：
+  1. 阅读 `pkg/utils` 源码和 README，确认确定性可测行为。
+  2. 新增最小包级测试，优先覆盖无外部依赖和可隔离网络绑定路径。
+  3. 若新增测试暴露当前包缺陷，只做最小修复并记录。
+  4. 运行格式化、`pkg/utils` 包测试、全量回归和 diff 检查。
+  5. 更新验收、测试报告、变更、问题、风险、Backlog、决策和交接文档。
+- Verification：
+  - `gofmt -w pkg/utils/*_test.go`
+  - `go test ./pkg/utils -count=1`
+  - `go test ./... -count=1`
+  - `git diff --check`
+- Exit Conditions：
+  - [CONFIRMED] `pkg/utils` 有确定性最小行为测试。
+  - [CONFIRMED] 测试不依赖真实外部网络服务、固定生产端口、数据库或生产配置。
+  - [CONFIRMED] 相关包测试和全量回归通过。
+  - [CONFIRMED] 状态、变更、测试报告、问题和交接文档已更新。
+  - [CONFIRMED] 下一合法任务明确。
+- Evidence：
+  - 修改文件：`pkg/utils/utils_test.go`、项目状态文档。
+  - 覆盖内容：Snowflake 生成和非法 node、监听地址校验、端口范围和 exclude、设备 ID 稳定/盐值、i18n helper 默认语言转发。
+  - 命令：`gofmt -w pkg/utils/utils_test.go`；`go test ./pkg/utils -count=1`；`go test ./... -count=1`；`git diff --check`。
+  - 测试结果：PASS；`git diff --check` 仅有 Windows LF/CRLF 转换警告。
+  - 修复记录：初始测试中占用端口断言受 Windows/Go 绑定语义影响不稳定；改为确定性无效地址、端口范围和 exclude 断言后通过。
+- Next Task：
+  - TASK-NEXT-SCOPE-007：确认进入 Phase 6 收尾、提升 app/router/middleware 等集成测试，或结束本轮。
+
+### TASK-NEXT-SCOPE-007：确认 `pkg/utils` 内部支撑测试完成后的后续范围
+
+- Status：PENDING_USER_CONFIRMATION
+- Matrix：BL-023、TM-P1-010、TM-P0-006
+- Goal：确认 TASK-P1-014 完成之后的下一步：进入 Phase 6 收尾、继续补 app/router/middleware 等集成测试，或结束本轮。
+- Allowed Files：
+  - 项目状态文档
+- Forbidden Files：
+  - Go 源码和测试文件，除非用户确认进入新的代码或测试切片。
+  - `go.mod`
+  - `go.sum`
+  - 数据库 schema、部署配置、真实密钥文件。
+- Verification：
+  - 无需 Go 测试，除非用户确认进入新的代码或测试切片。
+- Exit Conditions：
+  - [PENDING] 用户选择后续范围。
+  - [PENDING] 新的唯一合法任务、切片或收尾状态已写入状态文件。
+
 
 ## 历史任务
 

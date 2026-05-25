@@ -8,9 +8,6 @@ import (
 // Handler handles local plugin invocations.
 type Handler func(ctx context.Context, req Request) (*Response, error)
 
-// LocalFactory creates a local plugin from a definition.
-type LocalFactory func(def Definition) (Plugin, error)
-
 type localPlugin struct {
 	metadata Metadata
 	handler  Handler

@@ -3,8 +3,8 @@
 ## 验收状态
 
 - Project：go-scaffold
-- Phase：types/* 契约边界准备
-- Status：IN_PROGRESS
+- Phase：pkg/utils 内部支撑测试完成，等待后续范围确认
+- Status：PENDING_USER_CONFIRMATION
 - Last Updated：2026-05-25
 
 ## 本轮启动验收
@@ -66,10 +66,16 @@
 - pkg/* API 分类：COMPLETED
 - pkg/sqlgen unsupported 边界标注：COMPLETED
 - 下一阶段范围确认：COMPLETED，用户选择 A，提升 `BL-021` / `TM-P1-005`
-- types/* 契约边界：NOT_STARTED
+- types/* 契约边界：COMPLETED
+- `pkg/plugin` 被动注册边界：COMPLETED
+- `pkg/plugin` 后续范围确认：COMPLETED，用户选择 A，提升 `BL-020` 首批行为测试
+- 首批 `pkg/*` 行为测试：COMPLETED，`pkg/cli`、`pkg/i18n`、`pkg/yaml2go` 已有最小行为测试
+- 第二批 `pkg/*` 行为测试：COMPLETED，`pkg/executor`、`pkg/httpserver`、`pkg/storage` 已有最小行为测试
+- 第三批 `pkg/*` 行为测试：COMPLETED，`pkg/cache` 已有基于进程内 Redis 的隔离行为测试
+- `pkg/utils` 内部支撑测试：COMPLETED，`pkg/utils/utils_test.go` 已覆盖最小确定性行为
 - Agent 基础设施补齐：COMPLETED
 - Agent 基础设施一致性修复：COMPLETED
-- 代码实现：IN_PROGRESS，当前合法下一步为 TASK-P1-009 / TS-P1-009
+- 代码实现：COMPLETED，TASK-P1-014 已完成并通过验证
 
 ## Prompt 全量产物验收
 
@@ -193,8 +199,96 @@
 
 | ID | 验收项 | 方法 | 必须 | 状态 |
 |---|---|---|---|---|
-| ACC-P1-038 | `types/result` HTTP/Gin 响应契约边界被标注 | 检查 `types/*` 文档或 `docs/specs/types_contract_boundary.md` | 是 | NOT_STARTED |
-| ACC-P1-039 | `types/errors` auth/rbac 预留错误码不暗示当前已实现 auth/rbac | 检查 `types/errors` 文档和契约说明 | 是 | NOT_STARTED |
-| ACC-P1-040 | `types/constants` 和根 `types` 聚合入口的跨层边界被标注 | 检查 `types/*` 文档或契约说明 | 是 | NOT_STARTED |
-| ACC-P1-041 | `types` 包测试通过 | `go test ./types/... -count=1` | 是 | NOT_STARTED |
-| ACC-P1-042 | 全量回归通过 | `go test ./... -count=1` | 是 | NOT_STARTED |
+| ACC-P1-038 | `types/result` HTTP/Gin 响应契约边界被标注 | 检查 `types/result/result.go` 和 `docs/specs/types_contract_boundary.md` | 是 | [CONFIRMED] |
+| ACC-P1-039 | `types/errors` auth/rbac 预留错误码不暗示当前已实现 auth/rbac | 检查 `types/errors/doc.go` 和 `docs/specs/types_contract_boundary.md` | 是 | [CONFIRMED] |
+| ACC-P1-040 | `types/constants` 和根 `types` 聚合入口的跨层边界被标注 | 检查 `types/constants/doc.go`、`types/doc.go` 和契约说明 | 是 | [CONFIRMED] |
+| ACC-P1-041 | `types` 包测试通过 | `go test ./types/... -count=1` | 是 | [CONFIRMED] |
+| ACC-P1-042 | 全量回归通过 | `go test ./... -count=1` | 是 | [CONFIRMED] |
+
+## TASK-P1-010 验收
+
+| ID | 验收项 | 方法 | 必须 | 状态 |
+|---|---|---|---|---|
+| ACC-P1-043 | `pkg/plugin` 公共 manager API 不主动从配置加载并注册插件服务 | 检查 `pkg/plugin/manager.go` 和测试 | 是 | [CONFIRMED] |
+| ACC-P1-044 | local 插件由插件服务或宿主装配层显式构造并 `Register` | `go test ./pkg/plugin -count=1` | 是 | [CONFIRMED] |
+| ACC-P1-045 | HTTP 插件可由插件服务或宿主装配层显式构造并 `Register` | `go test ./pkg/plugin -count=1` | 是 | [CONFIRMED] |
+| ACC-P1-046 | 被动注册边界已记录到 README、架构和决策文档 | 人工检查文档 | 是 | [CONFIRMED] |
+| ACC-P1-047 | 全量回归通过 | `go test ./... -count=1` | 是 | [CONFIRMED] |
+
+## TASK-NEXT-SCOPE-003 验收
+
+| ID | 验收项 | 方法 | 必须 | 状态 |
+|---|---|---|---|---|
+| ACC-NEXT-004 | 用户已明确选择 `pkg/plugin` 后续范围 | 用户回复 `A`，对应提升 `BL-020` | 是 | [CONFIRMED] |
+| ACC-NEXT-005 | `BL-020` 首批已提升为正式任务 | 检查 `TASKS.md`、`TIME_SLICES.md`、`TEST_MATRIX.md` | 是 | [CONFIRMED] |
+| ACC-NEXT-006 | 当前合法下一步不再是待确认状态 | 检查 `STATUS.md` 和 `AGENT_HANDOFF.md` | 是 | [CONFIRMED] |
+
+## TASK-P1-011 验收
+
+| ID | 验收项 | 方法 | 必须 | 状态 |
+|---|---|---|---|---|
+| ACC-P1-048 | `pkg/cli` 有最小包级行为测试 | `go test ./pkg/cli -count=1` | 是 | [CONFIRMED] |
+| ACC-P1-049 | `pkg/i18n` 有最小包级行为测试 | `go test ./pkg/i18n -count=1` | 是 | [CONFIRMED] |
+| ACC-P1-050 | `pkg/yaml2go` 有最小包级行为测试 | `go test ./pkg/yaml2go -count=1` | 是 | [CONFIRMED] |
+| ACC-P1-051 | 首批 `pkg/*` 测试不依赖外部服务、生产配置或网络 | 人工检查测试实现 | 是 | [CONFIRMED] |
+| ACC-P1-052 | 首批相关包测试通过 | `go test ./pkg/cli ./pkg/i18n ./pkg/yaml2go -count=1` | 是 | [CONFIRMED] |
+| ACC-P1-053 | 全量回归通过 | `go test ./... -count=1` | 是 | [CONFIRMED] |
+
+## TASK-NEXT-SCOPE-004 验收
+
+| ID | 验收项 | 方法 | 必须 | 状态 |
+|---|---|---|---|---|
+| ACC-NEXT-007 | 用户已选择首批 `pkg/*` 行为测试后的后续范围 | 用户发送“下一步”，按选项 A 继续下一批 | 是 | [CONFIRMED] |
+| ACC-NEXT-008 | 新的唯一合法任务或收尾状态已写入状态文件 | TASK-P1-012 / TS-P1-012 已写入 `STATUS.md`、`TASKS.md`、`TIME_SLICES.md` | 是 | [CONFIRMED] |
+
+## TASK-P1-012 验收
+
+| ID | 验收项 | 方法 | 必须 | 状态 |
+|---|---|---|---|---|
+| ACC-P1-054 | `pkg/executor` 有最小包级行为测试 | `go test ./pkg/executor -count=1` | 是 | [CONFIRMED] |
+| ACC-P1-055 | `pkg/httpserver` 有最小包级行为测试 | `go test ./pkg/httpserver -count=1` | 是 | [CONFIRMED] |
+| ACC-P1-056 | `pkg/storage` 有最小包级行为测试 | `go test ./pkg/storage -count=1` | 是 | [CONFIRMED] |
+| ACC-P1-057 | 第二批 `pkg/*` 测试不依赖 Redis、数据库、第三方网络服务或生产配置 | 人工检查测试实现 | 是 | [CONFIRMED] |
+| ACC-P1-058 | 第二批相关包测试通过 | `go test ./pkg/executor ./pkg/httpserver ./pkg/storage -count=1` | 是 | [CONFIRMED] |
+| ACC-P1-059 | 全量回归通过 | `go test ./... -count=1` | 是 | [CONFIRMED] |
+
+## TASK-NEXT-SCOPE-005 验收
+
+| ID | 验收项 | 方法 | 必须 | 状态 |
+|---|---|---|---|---|
+| ACC-NEXT-009 | 用户已选择第二批 `pkg/*` 行为测试后的后续范围 | 用户回复 `A` | 是 | [CONFIRMED] |
+| ACC-NEXT-010 | 新的唯一合法任务或收尾状态已写入状态文件 | TASK-P1-013 / TS-P1-013 已写入 `STATUS.md`、`TASKS.md`、`TIME_SLICES.md` | 是 | [CONFIRMED] |
+
+## TASK-P1-013 验收
+
+| ID | 验收项 | 方法 | 必须 | 状态 |
+|---|---|---|---|---|
+| ACC-P1-060 | `pkg/cache` 配置默认值和校验路径被固定 | `go test ./pkg/cache -count=1` | 是 | [CONFIRMED] |
+| ACC-P1-061 | `pkg/cache` Redis 基本读写、批量、计数器和过期语义被隔离测试覆盖 | `go test ./pkg/cache -count=1` | 是 | [CONFIRMED] |
+| ACC-P1-062 | `pkg/cache` reload 失败保持旧连接、成功切换新连接语义被覆盖 | `go test ./pkg/cache -count=1` | 是 | [CONFIRMED] |
+| ACC-P1-063 | 第三批 `pkg/*` 测试不依赖真实 Redis、数据库、第三方网络服务或生产配置 | 人工检查测试实现 | 是 | [CONFIRMED] |
+| ACC-P1-064 | 全量回归通过 | `go test ./... -count=1` | 是 | [CONFIRMED] |
+
+## TASK-NEXT-SCOPE-006 验收
+
+| ID | 验收项 | 方法 | 必须 | 状态 |
+|---|---|---|---|---|
+| ACC-NEXT-011 | 用户已选择 `pkg/cache` 行为测试后的后续范围 | 用户选择 B，提升 `pkg/utils` 内部支撑测试 | 是 | [CONFIRMED] |
+| ACC-NEXT-012 | 新的唯一合法任务或收尾状态已写入状态文件 | TASK-P1-014 / TS-P1-014 已写入 `STATUS.md`、`TASKS.md`、`TIME_SLICES.md` | 是 | [CONFIRMED] |
+
+## TASK-P1-014 验收
+
+| ID | 验收项 | 方法 | 必须 | 状态 |
+|---|---|---|---|---|
+| ACC-P1-065 | `pkg/utils` Snowflake ID 生成路径被最小测试覆盖 | `go test ./pkg/utils -count=1` | 是 | [CONFIRMED] |
+| ACC-P1-066 | `pkg/utils` 地址校验和端口查找路径被最小测试覆盖 | `go test ./pkg/utils -count=1` | 是 | [CONFIRMED] |
+| ACC-P1-067 | `pkg/utils` 设备 ID 稳定性和 i18n helper 委托语义被最小测试覆盖 | `go test ./pkg/utils -count=1` | 是 | [CONFIRMED] |
+| ACC-P1-068 | `pkg/utils` 测试不依赖真实外部网络服务、固定生产端口、数据库或生产配置 | 人工检查测试实现 | 是 | [CONFIRMED] |
+| ACC-P1-069 | 全量回归通过 | `go test ./... -count=1` | 是 | [CONFIRMED] |
+
+## TASK-NEXT-SCOPE-007 验收
+
+| ID | 验收项 | 方法 | 必须 | 状态 |
+|---|---|---|---|---|
+| ACC-NEXT-013 | 用户已选择 `pkg/utils` 内部支撑测试后的后续范围 | 用户回复确认选项 | 是 | [PENDING] |
+| ACC-NEXT-014 | 新的唯一合法任务或收尾状态已写入状态文件 | 检查 `STATUS.md`、`TASKS.md`、`TIME_SLICES.md` | 是 | [PENDING] |

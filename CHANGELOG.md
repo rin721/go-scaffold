@@ -2,6 +2,88 @@
 
 ## 最新变更
 
+### 2026-05-25 - TASK-P1-014 - TS-P1-014
+
+- 变更：用户选择 B，确认提升 `BL-023`，为 `pkg/utils` 内部支撑工具补最小确定性测试。
+- 变更：新增 `pkg/utils/utils_test.go`，覆盖 Snowflake 生成/非法 node、监听地址校验、端口范围与 exclude、设备 ID 稳定/盐值和 i18n helper 默认语言转发。
+- 修复：前两次包测试失败来自测试代码对端口占用语义的环境假设；改为确定性无效地址和 exclude/range 断言后通过。
+- 验证：
+  - `gofmt -w pkg/utils/utils_test.go`：PASS
+  - `go test ./pkg/utils -count=1`：PASS
+  - `go test ./... -count=1`：PASS
+  - `git diff --check`：PASS，仅有 Windows LF/CRLF 转换警告
+- 状态：TASK-P1-014 COMPLETED；TASK-NEXT-SCOPE-007 PENDING_USER_CONFIRMATION。
+
+### 2026-05-25 - TASK-P1-013 - TS-P1-013
+
+- 变更：用户选择 A，确认继续 `BL-020` 剩余范围，提升第三批 `pkg/cache` 隔离行为测试。
+- 变更：新增 `pkg/cache/cache_test.go`，使用进程内 Redis 测试服务覆盖配置默认值、配置校验、连接、读写、缺失键、过期、批量操作、计数器和 reload 语义。
+- 变更：新增纯测试依赖 `github.com/alicebob/miniredis/v2`，同步更新 `go.mod` 和 `go.sum`。
+- 修复：首次包测试为测试代码编译失败，原因是误读 `miniredis.Get` 返回值；修正断言后通过。
+- 验证：
+  - `go get github.com/alicebob/miniredis/v2@latest`：PASS
+  - `gofmt -w pkg/cache/cache_test.go`：PASS
+  - `go test ./pkg/cache -count=1`：PASS
+  - `go test ./... -count=1`：PASS
+  - `git diff --check`：PASS，仅有 Windows LF/CRLF 转换警告
+- 状态：TASK-P1-013 COMPLETED；TASK-NEXT-SCOPE-006 PENDING_USER_CONFIRMATION。
+
+### 2026-05-25 - TASK-P1-012 - TS-P1-012
+
+- 变更：用户发送“下一步”，确认继续 `BL-020` 第二批 `pkg/*` 行为测试。
+- 变更：新增 `pkg/executor/executor_test.go`，覆盖配置校验、任务执行、缺失池、过载、关闭、失败 reload 和 panic handler。
+- 变更：新增 `pkg/httpserver/httpserver_test.go`，覆盖构造、默认配置、配置错误、停止态 reload/shutdown 和已运行 start 拒绝路径。
+- 变更：新增 `pkg/storage/storage_test.go`，覆盖内存文件系统读写、复制、MIME、Excel、图片和配置错误路径。
+- 修复：`pkg/executor` 缺失池、过载和重复配置错误改为包装公开 sentinel，支持 `errors.Is` 判断。
+- 修复：`pkg/executor` panic 恢复路径现在会调用通过 `SetPanicHandler` 注册的 handler。
+- 验证：
+  - `gofmt -w pkg/executor/executor_test.go pkg/httpserver/httpserver_test.go pkg/storage/storage_test.go`：PASS
+  - `go test ./pkg/executor ./pkg/httpserver ./pkg/storage -count=1`：PASS
+  - `go test ./... -count=1`：PASS
+  - `git diff --check`：PASS，仅有 Windows LF/CRLF 转换警告
+- 状态：TASK-P1-012 COMPLETED；TASK-NEXT-SCOPE-005 PENDING_USER_CONFIRMATION。
+
+### 2026-05-25 - TASK-P1-011 - TS-P1-011
+
+- 变更：新增 `pkg/cli/app_test.go`，覆盖命令注册、flag/env/args 解析、help/version 输出、usage error 和 command error 包装。
+- 变更：新增 `pkg/i18n/i18n_test.go`，覆盖 JSON/YAML 消息加载、模板渲染、默认语言回退、缺失消息 fallback、`MustT` panic 和加载错误路径。
+- 变更：新增 `pkg/yaml2go/converter_test.go`，覆盖多文件生成、空输入、非法 YAML、配置校验，并用 Go parser 校验生成代码合法性。
+- 修复：`pkg/yaml2go` 使用 Jennifer tag map 生成合法 struct tag，避免输出 `:"..."` 形式的非法 tag。
+- 修复：`pkg/yaml2go` 将子配置 struct 与方法追加到同一个 Jennifer 文件，避免 import 块被拼接到声明之后。
+- 验证：
+  - `gofmt -w pkg/cli/app_test.go pkg/i18n/i18n_test.go pkg/yaml2go/converter_test.go`：PASS
+  - `go test ./pkg/cli ./pkg/i18n ./pkg/yaml2go -count=1`：PASS
+  - `go test ./... -count=1`：PASS
+  - `git diff --check`：PASS，仅有 Windows LF/CRLF 转换警告
+- 状态：TASK-P1-011 COMPLETED；TASK-NEXT-SCOPE-004 PENDING_USER_CONFIRMATION。
+
+### 2026-05-25 - TASK-NEXT-SCOPE-003 - TS-NEXT-SCOPE-003
+
+- 变更：用户选择 A，确认提升 `BL-020` 补 `pkg/*` 行为测试。
+- 变更：将 `BL-020` 首批拆为 TASK-P1-011 / TS-P1-011，覆盖 `pkg/cli`、`pkg/i18n`、`pkg/yaml2go` 最小行为测试。
+- 变更：新增状态诊断报告 `docs/reports/status_diagnostics/2026-05-25-task-p1-011-handoff-stale.md`，修复交接和测试报告滞后。
+- 变更：更新 `STATUS.md`、`TASKS.md`、`TIME_SLICES.md`、`TEST_MATRIX.md`、`ACCEPTANCE.md`、`BACKLOG.md`、`RISK_REGISTER.md`、`DECISIONS.md`、`TEST_REPORT.md`、`ISSUES.md` 和 `AGENT_HANDOFF.md`。
+- 测试：
+  - 状态一致性文本检查：PASS
+  - `git diff --check`：PASS，仅有 Windows LF/CRLF 转换警告
+  - Go 测试未运行：本切片仅修改项目文档，未改 Go 代码
+- 状态：TASK-NEXT-SCOPE-003 COMPLETED；TASK-P1-011 NOT_STARTED。
+
+### 2026-05-25 - TASK-P1-010 - TS-P1-010
+
+- 变更：接受用户修正，`pkg/plugin` 注册责任改为被动 registry/runtime。
+- 变更：新增状态诊断报告 `docs/reports/status_diagnostics/2026-05-25-agent-handoff-stale-after-types-boundary.md`，记录并修复交接文件滞后。
+- 变更：`Manager` 接口移除 `Load`、`RegisterLocalFactory` 和 manager option 主动装配公共面。
+- 变更：新增 `NewHTTP` 和 HTTP option，使 HTTP 插件可由插件服务或宿主装配层显式构造后 `Register`。
+- 变更：移除 local factory API 和相关错误，local 插件改为服务侧构造后注册。
+- 变更：更新 `pkg/plugin` README、package doc、架构、模块清单、测试矩阵、验收、风险、Backlog、状态和交接文档。
+- 测试：
+  - `gofmt -w pkg/plugin/manager.go pkg/plugin/http.go pkg/plugin/constants.go pkg/plugin/errors.go pkg/plugin/doc.go pkg/plugin/config.go pkg/plugin/local.go pkg/plugin/plugin_test.go`：PASS
+  - `go test ./pkg/plugin -count=1`：PASS
+  - `go test ./... -count=1`：PASS
+  - `git diff --check`：PASS，仅有 Windows LF/CRLF 转换警告
+- 状态：TASK-P1-010 COMPLETED；TASK-NEXT-SCOPE-003 PENDING_USER_CONFIRMATION。
+
 ### 2026-05-25 - TASK-NEXT-SCOPE - TS-NEXT-SCOPE
 
 - 变更：用户选择选项 A，确认提升 `BL-021` / `TM-P1-005`。

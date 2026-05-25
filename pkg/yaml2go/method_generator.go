@@ -15,7 +15,17 @@ func (c *converter) generateMethods(structInfo *StructInfo, cfg *Config) (string
 	}
 
 	f := jen.NewFile(structInfo.PackageName)
+	c.appendMethods(f, structInfo, cfg)
 
+	buf := &bytes.Buffer{}
+	if err := f.Render(buf); err != nil {
+		return "", err
+	}
+
+	return buf.String(), nil
+}
+
+func (c *converter) appendMethods(f *jen.File, structInfo *StructInfo, cfg *Config) {
 	// 需要导入的包
 	f.ImportName("os", "os")
 
@@ -30,14 +40,6 @@ func (c *converter) generateMethods(structInfo *StructInfo, cfg *Config) (string
 
 	// 4. 生成 OverrideConfig 方法
 	c.generateOverrideConfigMethod(f, structInfo, cfg)
-
-	// 渲染代码
-	buf := &bytes.Buffer{}
-	if err := f.Render(buf); err != nil {
-		return "", err
-	}
-
-	return buf.String(), nil
 }
 
 // generateValidateNameMethod 生成 ValidateName 方法

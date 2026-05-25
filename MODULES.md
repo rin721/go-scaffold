@@ -39,7 +39,7 @@ types/*
 | `internal/transport/http` | Gin router、health/ready、demo API 注册 | 传输层 | 有 health/ready smoke test | demo 路由缺少 integration 测试 |
 | `internal/modules/demo` | Todo 示例业务模块 | 标准示例模块 | service/repository CRUD 基线已补 | handler/router 集成仍需后续覆盖，示例与生产约束需分离 |
 | `pkg/*` | 可复用基础设施、公共工具和内部支撑工具 | 混合 API | 部分有测试 | [CONFIRMED] TASK-P1-007 已逐包分类；包 README 中英混杂仍待后续中文化 |
-| `types/*` | 公共常量、错误码、响应结构、类型别名 | 跨层契约 | `types/constants` 有测试 | auth 错误码存在但 auth/rbac 不在当前功能范围 |
+| `types/*` | 公共常量、错误码、HTTP 响应结构、类型别名 | 跨层契约和 HTTP/Gin 响应契约 | `types/constants`、`types/errors`、`types/result` 有测试 | auth 错误码仅为预留契约，auth/rbac 不在当前功能范围 |
 
 ## `cmd/server`
 
@@ -201,18 +201,18 @@ types/*
 
 | 包 | 当前定位 | README 分类 | 测试 | 主要风险 |
 |---|---|---|---|---|
-| `pkg/cache` | 公共基础设施 API | [CONFIRMED] 已写入 | 无 | Redis 依赖路径无测试 |
+| `pkg/cache` | 公共基础设施 API | [CONFIRMED] 已写入 | 有 | [CONFIRMED] TASK-P1-013 已覆盖配置、Redis 读写、批量、计数器、TTL/Expire、缺失键和 reload 语义 |
 | `pkg/cli` | 公共工具 API | [CONFIRMED] 已写入 | `cmd/server` 已覆盖命令使用；包自身无测试 | flag parser 和 help 输出无包级测试 |
 | `pkg/crypto` | 公共基础设施 API | [CONFIRMED] 已写入 | 有 | 当前稳定实现仅 bcrypt |
 | `pkg/database` | 公共基础设施 API | [CONFIRMED] 已写入 | 有 | Hook/Reload/多驱动路径覆盖不足 |
-| `pkg/executor` | 公共基础设施 API | [CONFIRMED] 已写入 | 无 | reload/shutdown/overload/panic handler 无包级测试 |
-| `pkg/httpserver` | 公共基础设施 API | [CONFIRMED] 已写入 | 无 | start/reload/shutdown 无包级测试 |
+| `pkg/executor` | 公共基础设施 API | [CONFIRMED] 已写入 | 有 | [CONFIRMED] TASK-P1-012 已覆盖配置校验、任务执行、缺失池、过载、关闭、失败 reload 和 panic handler |
+| `pkg/httpserver` | 公共基础设施 API | [CONFIRMED] 已写入 | 有 | [CONFIRMED] TASK-P1-012 已覆盖构造、默认配置、配置错误、停止态 reload/shutdown 和已运行 start 拒绝路径 |
 | `pkg/i18n` | 公共基础设施 API | [CONFIRMED] 已写入 | 无 | MustT panic 和加载错误路径需测试 |
 | `pkg/logger` | 公共基础设施 API | [CONFIRMED] 已写入 | 有 | 文件输出/轮转路径覆盖有限 |
-| `pkg/plugin` | 公共基础设施 API | [CONFIRMED] 已写入 | 有 | rpc/ws/discovery 明确延后 |
+| `pkg/plugin` | 公共基础设施 API | [CONFIRMED] 已写入 | 有 | [CONFIRMED] 被动注册边界已收拢；rpc/ws/discovery 明确延后 |
 | `pkg/sqlgen` | 公共工具 API | [CONFIRMED] 已写入 | 有 | [CONFIRMED] 高级查询、批量删除、DB reverse 和部分 rollback 边界已显式 unsupported / partial |
-| `pkg/storage` | 公共基础设施 API | [CONFIRMED] 已写入 | 无 | 文件监听、Excel、图片处理、复制边界无包级测试 |
-| `pkg/utils` | 内部支撑工具包 | [CONFIRMED] 已写入 | 无 | snowflake 默认实例 panic 策略需确认；新增工具需谨慎 |
+| `pkg/storage` | 公共基础设施 API | [CONFIRMED] 已写入 | 有 | [CONFIRMED] TASK-P1-012 已覆盖内存文件系统读写、复制、MIME、Excel、图片和配置错误路径 |
+| `pkg/utils` | 内部支撑工具包 | [CONFIRMED] 已写入 | 有 | [CONFIRMED] TASK-P1-014 已覆盖 Snowflake、地址校验、端口查找、设备 ID 和 i18n helper 最小行为；默认 Snowflake panic 策略保持不变 |
 | `pkg/yaml2go` | 公共工具 API | [CONFIRMED] 已写入 | 无 | 原 `cmd/server tests` 演示依赖已移除；包自身仍无测试 |
 
 ## `types/*` 边界
@@ -220,11 +220,18 @@ types/*
 | 包 | 当前职责 | 风险 |
 |---|---|---|
 | `types/constants` | 应用名、命令名、超时、executor 池名等常量 | 与 `pkg/executor` 有依赖，属于跨层公共常量 |
-| `types/errors` | 应用错误码，含认证/授权段 | auth/rbac 未实现，但错误码已预留 |
-| `types/result` | Gin 响应 helper、分页结构、trace id 错误响应 | 依赖 Gin，属于 HTTP 契约而不是纯类型包 |
-| `types` | `Crypto` 类型别名、`CacheInjectable` 接口 | 依赖 `pkg/cache`、`pkg/crypto`，需确认是否继续作为公共聚合入口 |
+| `types/errors` | 应用错误码和 `BizError` | auth/rbac 未实现，认证/授权错误码只是预留契约 |
+| `types/result` | JSON 响应结构、Gin 响应 helper、分页结构、trace id 错误响应 | 依赖 Gin，属于 HTTP API 响应契约而不是纯类型包 |
+| `types` | `Crypto` 类型别名、`CacheInjectable` 接口 | 依赖 `pkg/cache`、`pkg/crypto`，是有限聚合入口 |
 
-- [CONFIRMED] 用户选择 A，`types/*` 边界已提升为 TASK-P1-009 / TS-P1-009。
+- [CONFIRMED] TASK-P1-009 已完成 `types/*` 契约边界标注，详见 `docs/specs/types_contract_boundary.md`。
+
+## `pkg/plugin` 注册边界
+
+- [ACCEPT_WITH_RISK] 用户修正：`pkg/plugin` 不应主动注册插件服务，而应被动由插件服务进行注册。
+- [CONFIRMED] 目标边界：`pkg/plugin` 只提供插件接口、local/http 插件实现和被动 registry/runtime；插件服务或宿主装配层负责构造插件并调用 `Register`。
+- [CONFIRMED] 历史 v1 API 中的 `Manager.Load(config)` 和 local factory 装配公共面已在 TASK-P1-010 移除，避免误解为由 `pkg/plugin` 主动发现并注册服务。
+- [CONFIRMED] TASK-P1-010 已收拢该边界，rpc/ws/discovery 仍不进入当前范围。
 
 ## 设计边界冲突清单
 
@@ -248,7 +255,7 @@ types/*
 | TM-005 | config load/override | 验证 YAML、`${VAR:default}`、环境变量覆盖、无效配置报错 | P0 | [IN_PROGRESS] 环境覆盖已补测试 |
 | TM-006 | config update/copy | 验证 `Update` 后不丢失 InitDB/Executor/Storage/CORS 等字段 | P0 | [CONFIRMED] TASK-P1-001 已覆盖 |
 | TM-007 | migration boundary | 验证 server/initdb/reload 对 demo schema 的触发策略 | P1 | [CONFIRMED] TASK-P1-005 已覆盖 |
-| TM-008 | pkg API | 为无测试的公共包补最小行为测试 | P1 | [CONFIRMED] TASK-P1-007 已完成分类；测试补齐仍延后 |
+| TM-008 | pkg API | 为无测试的公共包补最小行为测试 | P1 | [CONFIRMED] `BL-020` 首批 TASK-P1-011、第二批 TASK-P1-012 和第三批 TASK-P1-013 已覆盖公共 `pkg/*` 行为测试；内部支撑测试另列 Backlog |
 
 ## P1 优化候选项
 
@@ -266,7 +273,9 @@ types/*
 
 - [CONFIRMED] 模块职责清单已生成。
 - [CONFIRMED] 设计边界冲突清单已生成。
+- [CONFIRMED] TASK-P1-014 已完成，`pkg/utils` 内部支撑工具有最小确定性行为测试。
 - [CONFIRMED] 测试矩阵草案已生成。
 - [CONFIRMED] P1 优化候选项已生成。
 - [CONFIRMED] 已按 P1 切片进行受控 Go 测试代码修改或文档分类：TASK-P1-001、TASK-P1-002、TASK-P1-003、TASK-P1-004、TASK-P1-005、TASK-P1-006、TASK-P1-007、TASK-P1-008 均已完成并验证通过。
-- [CONFIRMED] 下一阶段已选择提升 `types/*` 契约边界，当前合法下一步为 TASK-P1-009 / TS-P1-009。
+- [CONFIRMED] `types/*` 契约边界已完成。
+- [CONFIRMED] 用户已选择 A，`BL-020` 首批 `pkg/*` 行为测试已完成 TASK-P1-011 / TS-P1-011，第二批已完成 TASK-P1-012 / TS-P1-012，第三批 `pkg/cache` 已完成 TASK-P1-013 / TS-P1-013。

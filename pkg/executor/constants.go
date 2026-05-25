@@ -10,10 +10,10 @@ import (
 // 参考: pkg/logger/constants.go
 const (
 	// ErrMsgPoolNotFound 池不存在的错误消息模板
-	ErrMsgPoolNotFound = "pool not found: %s"
+	ErrMsgPoolNotFound = "%w: %s"
 
 	// ErrMsgPoolOverload 池过载的错误消息模板
-	ErrMsgPoolOverload = "pool overloaded: %s"
+	ErrMsgPoolOverload = "%w: %s"
 
 	// ErrMsgInvalidConfig 无效配置的错误消息模板
 	ErrMsgInvalidConfig = "invalid config: %w"

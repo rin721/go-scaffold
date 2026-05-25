@@ -9,99 +9,85 @@
 ## Project Snapshot
 
 - Project: go-scaffold
-- Phase: P1 后续范围已确认
+- Phase: pkg/utils 内部支撑测试完成，等待后续范围确认
 - Module: 项目优化路线
-- Current Task: TASK-P1-009
-- Current Time Slice: TS-P1-009
-- Overall Status: IN_PROGRESS
+- Current Task: TASK-NEXT-SCOPE-007
+- Current Time Slice: TS-NEXT-SCOPE-007
+- Overall Status: PENDING_USER_CONFIRMATION
 
 ## What Was Done Last
 
-- 用户回复 `a`，确认选择 A：提升 `BL-021` / `TM-P1-005`。
-- 完成 TASK-NEXT-SCOPE / TS-NEXT-SCOPE：关闭后续范围待确认状态。
-- 新增 TASK-P1-009 / TS-P1-009，作为当前唯一合法下一步。
-- TASK-P1-009 目标：明确 `types/*` 契约边界，尤其是 `types/result` 的 HTTP/Gin 响应契约、`types/errors` 的 auth/rbac 预留错误码、`types/constants` 与根 `types` 聚合入口。
-- 本次未修改 Go 业务代码。
+- Completed TASK-P1-014 / TS-P1-014.
+- Added `pkg/utils/utils_test.go`.
+- Covered Snowflake ID generation, invalid node ID, default generator, listen address validation, port range/exclude behavior, device ID stability/salt behavior, and i18n helper default-language delegation.
+- Kept `pkg/utils` public API and `DefaultSnowflake` panic strategy unchanged.
+- Updated status, tasks, time slices, test matrix, acceptance, backlog, risk, changelog, test report, issues, roadmap, project brief, module/architecture notes, and handoff.
 
 ## Files Changed Last
 
 | File | Change | Reason |
 |---|---|---|
-| `STATUS.md` | 当前合法任务推进到 TASK-P1-009 | 关闭待确认状态 |
-| `TASKS.md` | 新增 TASK-P1-009，TASK-NEXT-SCOPE 标记 COMPLETED | 提升 `BL-021` / `TM-P1-005` |
-| `TIME_SLICES.md` | 新增 TS-P1-009，TS-NEXT-SCOPE 标记 COMPLETED | 明确下一执行切片 |
-| `TEST_MATRIX.md` | 新增 TASK-P1-009 矩阵行 | 绑定 TM-P1-005 和验证命令 |
-| `ACCEPTANCE.md` | 新增 TASK-NEXT-SCOPE 和 TASK-P1-009 验收项 | 明确完成和下一步门禁 |
-| `BACKLOG.md` | 将 BL-021 标为已提升 | 防止重复提升 |
-| `RISK_REGISTER.md` | 新增 RISK-014 | 记录 `types/*` 契约边界风险 |
-| `ARCHITECTURE.md`、`MODULES.md`、`ROADMAP.md`、`DECISIONS.md` | 记录提升决策和下一步 | 保持架构/路线图一致 |
-| `CHANGELOG.md`、`TEST_REPORT.md`、`ISSUES.md`、`AGENT_HANDOFF.md` | 记录证据和交接 | 让下一 Agent 可恢复 |
+| `pkg/utils/utils_test.go` | Added tests | Cover deterministic internal support behavior without real external services |
+| Status docs | Updated | Mark TASK-P1-014 completed and move to TASK-NEXT-SCOPE-007 pending user confirmation |
 
 ## Commands Run Last
 
 | Command | Result |
 |---|---|
-| 状态一致性文本检查 | PASS |
-| `go test ./types/... -count=1` | PASS |
+| Required file reads | PASS |
+| `gofmt -w pkg/utils/utils_test.go` | PASS |
+| `go test ./pkg/utils -count=1` | FAIL, first two attempts used unstable occupied-port assumptions in test code |
+| `gofmt -w pkg/utils/utils_test.go` | PASS |
+| `go test ./pkg/utils -count=1` | PASS |
 | `go test ./... -count=1` | PASS |
-| `git diff --check` | PASS，仅有 Windows LF/CRLF 转换警告 |
+| `git diff --check` | PASS, only Windows LF/CRLF conversion warnings |
 
 ## Test Status
 
-- Last package test: `go test ./types/... -count=1`
-- Last full regression: `go test ./... -count=1`
-- Result: PASS
-- Known failures: none
+- TASK-P1-014 package tests: PASS.
+- Full regression: PASS.
+- Diff whitespace check: PASS, with LF/CRLF warnings only.
+- Pending verification: none for TASK-P1-014.
 
 ## Current Blockers
 
 - None.
 
-## Pending Verification
-
-- None.
-
 ## Important Decisions
 
-- [CONFIRMED] 用户选择 A，提升 `BL-021` / `TM-P1-005`。
-- [CONFIRMED] 当前合法下一步是 TASK-P1-009 / TS-P1-009。
-- [CONFIRMED] TASK-P1-009 不允许修改 `cmd/*`、`internal/*`、`pkg/*`、依赖、数据库 schema 或部署配置。
-- [CONFIRMED] `BL-020` 的 `pkg/*` 行为测试仍未提升，不能插队执行。
+- [CONFIRMED] User selected B after TASK-P1-013, promoting `BL-023` to TASK-P1-014.
+- [CONFIRMED] `pkg/utils` remains an internal support package.
+- [CONFIRMED] `DefaultSnowflake` panic behavior was not changed.
+- [CONFIRMED] Tests avoid real external network services, fixed production ports, databases, and production config.
 
 ## Risks
 
-- `types/result` 依赖 Gin，下一切片需明确它是 HTTP 响应契约而非纯类型包。
-- `types/errors` 包含 auth/rbac 预留错误码，下一切片需避免暗示 auth/rbac 已实现。
-- `pkg/*` 行为测试缺口仍存在，但 `BL-020` 未提升，不能在 TS-P1-009 中处理。
-
-## Backlog Notes
-
-- `pkg/*` 行为测试补齐可按测试矩阵或 Backlog 分包推进。
-- `types/result` 契约边界已从 `BL-021` 提升为 TASK-P1-009。
-- CI/CD remains deferred.
+- Some existing workspace changes predate this slice; do not revert unrelated user or prior-Agent changes.
+- App composition, middleware, handler/router integration, and broader end-to-end paths remain unpromoted scope and require user confirmation before implementation.
 
 ## Legal Next Step
 
-- Task ID: TASK-P1-009
-- Time Slice ID: TS-P1-009
-- Why this is next: 用户选择 A，`BL-021` / `TM-P1-005` 已提升；状态文件、任务清单和时间切片均指向该任务。
-- Entry conditions: 用户发送“下一步”，Agent 读取必读文件后执行 TS-P1-009。
-- Allowed files: `types/**/*`、`ARCHITECTURE.md`、`MODULES.md`、`TEST_MATRIX.md`、`ACCEPTANCE.md`、`docs/specs/types_contract_boundary.md`、项目状态文档。
-- Required verification: `go test ./types/... -count=1`、`go test ./... -count=1`、`git diff --check`。
+- Task ID: TASK-NEXT-SCOPE-007
+- Time Slice ID: TS-NEXT-SCOPE-007
+- Status: PENDING_USER_CONFIRMATION
+- Why this is next: TASK-P1-014 is complete, and the repo needs user direction before entering Phase 6, promoting integration tests, or ending this round.
+- Allowed files before user confirmation:
+  - project status documents only
+- User decision needed:
+  - A: enter Phase 6 closing and handoff work,
+  - B: promote app/router/middleware or handler integration tests,
+  - C: end this round.
 
 ## Do Not Do
 
-- Do not implement auth/rbac.
-- Do not modify HTTP router, middleware, demo handler, `pkg/*`, dependencies, database schema, deployment config, or production config during TS-P1-009.
-- Do not start `BL-020` / `pkg/*` behavior tests unless user confirms a separate task later.
-- Do not perform breaking `types/*` API refactors unless the current slice explicitly documents and verifies them.
-- Do not change deployment, database schema, dependencies, or production config.
+- Do not start app, middleware, router, handler integration tests, or other new code work without user confirmation.
+- Do not modify `cmd/**/*`, `internal/**/*`, `types/**/*`, unrelated `pkg/*`, `go.mod`, `go.sum`, schema, deployment config, or secrets without a new legal task.
+- Do not revert unrelated dirty workspace changes.
 
 ## Recovery Instructions
 
 1. Read `AGENTS.md`.
-2. Read `STATUS.md`.
-3. Read `TASKS.md`.
-4. Read `TIME_SLICES.md`.
-5. Confirm current legal task is TASK-P1-009 / TS-P1-009.
-6. Continue only within TS-P1-009 allowed files and verification commands.
+2. Read `STATUS.md`, `TASKS.md`, and `TIME_SLICES.md`.
+3. Confirm current legal task is TASK-NEXT-SCOPE-007 / TS-NEXT-SCOPE-007.
+4. Ask for or apply the user-confirmed next scope.
+5. Create/update the next task and slice before modifying code again.

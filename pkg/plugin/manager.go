@@ -3,109 +3,30 @@ package plugin
 import (
 	"context"
 	"fmt"
-	"net/http"
 	"sync"
-	"time"
 )
 
-// Manager manages plugin registration, loading, invocation, and shutdown.
+// Manager is a passive plugin registry and runtime.
+//
+// Plugin services or the host composition layer create plugin instances and
+// call Register. The manager does not discover, load, or create services.
 type Manager interface {
-	Load(config *Config) error
 	Register(plugin Plugin) error
-	RegisterLocalFactory(name string, factory LocalFactory)
 	Invoke(ctx context.Context, name string, req Request) (*Response, error)
 	Get(name string) (Plugin, bool)
 	List() []Metadata
 	Close(ctx context.Context) error
 }
 
-// Option configures a plugin manager.
-type Option func(*manager)
-
-// WithHTTPClient configures the HTTP client used by HTTP plugins.
-func WithHTTPClient(client *http.Client) Option {
-	return func(m *manager) {
-		if client != nil {
-			m.httpClient = client
-		}
-	}
-}
-
-// WithLocalFactory registers a local factory during manager creation.
-func WithLocalFactory(name string, factory LocalFactory) Option {
-	return func(m *manager) {
-		m.RegisterLocalFactory(name, factory)
-	}
-}
-
 type manager struct {
-	mu               sync.RWMutex
-	plugins          map[string]Plugin
-	localFactories   map[string]LocalFactory
-	httpClient       *http.Client
-	defaultTimeout   time.Duration
-	maxResponseBytes int64
+	mu      sync.RWMutex
+	plugins map[string]Plugin
 }
 
 // NewManager creates a plugin manager.
-func NewManager(opts ...Option) Manager {
-	m := &manager{
-		plugins:          make(map[string]Plugin),
-		localFactories:   make(map[string]LocalFactory),
-		httpClient:       http.DefaultClient,
-		defaultTimeout:   DefaultTimeout,
-		maxResponseBytes: DefaultMaxResponseBytes,
-	}
-	for _, opt := range opts {
-		opt(m)
-	}
-	return m
-}
-
-// Load creates and registers plugins from config.
-func (m *manager) Load(config *Config) error {
-	if config == nil {
-		config = DefaultConfig()
-	}
-	if config.DefaultTimeout > 0 {
-		m.defaultTimeout = config.DefaultTimeout
-	}
-	if config.MaxResponseBytes > 0 {
-		m.maxResponseBytes = config.MaxResponseBytes
-	}
-	if err := config.Validate(); err != nil {
-		return err
-	}
-	for _, def := range config.Plugins {
-		p, err := m.build(def)
-		if err != nil {
-			return err
-		}
-		if err := m.Register(p); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func (m *manager) build(def Definition) (Plugin, error) {
-	switch def.Protocol {
-	case ProtocolLocal:
-		key := def.Endpoint
-		if key == "" {
-			key = def.Name
-		}
-		m.mu.RLock()
-		factory, ok := m.localFactories[key]
-		m.mu.RUnlock()
-		if !ok {
-			return nil, &Error{Op: "load", Plugin: def.Name, Err: ErrLocalFactoryNotFound}
-		}
-		return factory(def)
-	case ProtocolHTTP:
-		return newHTTP(def, m.httpClient, m.defaultTimeout, m.maxResponseBytes)
-	default:
-		return nil, &Error{Op: "load", Plugin: def.Name, Err: fmt.Errorf("%w: %s", ErrUnsupportedProtocol, def.Protocol)}
+func NewManager() Manager {
+	return &manager{
+		plugins: make(map[string]Plugin),
 	}
 }
 
@@ -126,16 +47,6 @@ func (m *manager) Register(plugin Plugin) error {
 	}
 	m.plugins[metadata.Name] = plugin
 	return nil
-}
-
-// RegisterLocalFactory registers a factory for in-process plugins.
-func (m *manager) RegisterLocalFactory(name string, factory LocalFactory) {
-	if name == "" || factory == nil {
-		return
-	}
-	m.mu.Lock()
-	defer m.mu.Unlock()
-	m.localFactories[name] = factory
 }
 
 // Invoke calls a registered plugin.

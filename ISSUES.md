@@ -24,6 +24,15 @@
 - ISSUE-P1-007：无新增失败项。TASK-P1-007 完成 `pkg/*` API 分类后，全量回归通过。
 - ISSUE-P1-008：无新增失败项。TASK-P1-008 标注 `pkg/sqlgen` unsupported 边界后，包测试和全量回归均通过。
 - ISSUE-NEXT-001：无新增失败项。用户选择 A 后，TASK-NEXT-SCOPE 已将 `BL-021` / `TM-P1-005` 提升为 TASK-P1-009。
+- ISSUE-P1-010：无新增失败项。TASK-P1-010 收拢 `pkg/plugin` 被动注册边界后，包测试和全量回归均通过。
+- ISSUE-NEXT-003：无新增失败项。用户选择 A 后，TASK-NEXT-SCOPE-003 已将 `BL-020` 首批提升为 TASK-P1-011 / TS-P1-011。
+- ISSUE-P1-011：无未解决失败项。TASK-P1-011 中 `pkg/yaml2go` 新增测试暴露生成 tag 与方法 import 顺序缺陷，已在当前允许范围内修复并通过回归。
+- ISSUE-NEXT-004：无新增失败项。用户发送“下一步”后，TASK-NEXT-SCOPE-004 已将 `BL-020` 第二批提升为 TASK-P1-012 / TS-P1-012。
+- ISSUE-P1-012：无未解决失败项。TASK-P1-012 中 `pkg/executor` 新增测试暴露 sentinel 错误包装和 panic handler 未调用缺陷，已在当前允许范围内修复并通过回归；测试自身等待竞态已在第二轮修复。
+- ISSUE-NEXT-005：无新增失败项。用户选择 A 后，TASK-NEXT-SCOPE-005 已将 `BL-020` 第三批 `pkg/cache` 隔离行为测试提升为 TASK-P1-013 / TS-P1-013。
+- ISSUE-P1-013：无未解决失败项。TASK-P1-013 首次包测试为测试代码编译失败，原因是误读 `miniredis.Get` 返回值；修正测试断言后，`pkg/cache` 包测试和全量回归均通过。
+- ISSUE-NEXT-006：无新增失败项。用户选择 B 后，TASK-NEXT-SCOPE-006 已将 `BL-023` `pkg/utils` 内部支撑测试提升为 TASK-P1-014 / TS-P1-014。
+- ISSUE-P1-014：无未解决失败项。TASK-P1-014 前两次包测试失败来自测试代码对端口占用语义的环境假设；改为确定性无效地址、端口范围和 exclude 断言后，`pkg/utils` 包测试和全量回归均通过。
 
 ## 历史说明
 
@@ -35,5 +44,13 @@
 - 2026-05-25：记录 TASK-P1-007 无新增失败项，`pkg/*` API 分类后全量回归通过。
 - 2026-05-25：记录 TASK-P1-008 无新增失败项，`pkg/sqlgen` unsupported 行为测试和全量回归通过。
 - 2026-05-25：记录 TASK-NEXT-SCOPE 无新增失败项，`types/*` 契约边界已提升为下一合法任务。
+- 2026-05-25：记录 TASK-P1-010 无新增失败项，`pkg/plugin` 被动注册边界测试和全量回归通过。
+- 2026-05-25：记录 TASK-NEXT-SCOPE-003 无新增失败项，首批 `pkg/*` 行为测试已排期。
+- 2026-05-25：记录 TASK-NEXT-SCOPE-004 无新增失败项，第二批 `pkg/*` 行为测试已排期。
+- 2026-05-25：记录 TASK-P1-012 无未解决失败项，`pkg/executor` 暴露缺陷已修复，第二批包测试和全量回归通过。
+- 2026-05-25：记录 TASK-NEXT-SCOPE-005 无新增失败项，第三批 `pkg/cache` 行为测试已排期。
+- 2026-05-25：记录 TASK-P1-013 无未解决失败项，测试代码编译问题已修复，`pkg/cache` 包测试和全量回归通过。
+- 2026-05-25：记录 TASK-NEXT-SCOPE-006 无新增失败项，`pkg/utils` 内部支撑测试已排期。
+- 2026-05-25：记录 TASK-P1-014 无未解决失败项，测试环境假设已修正，`pkg/utils` 包测试和全量回归通过。
 - 2026-05-25：记录并关闭 `AGENTS.md` 缺失导致的 Agent 入口冲突。
 - 2026-05-25：创建 `ISSUES.md`，补齐 `docs/ai/prompt.md` 要求的项目问题记录入口。

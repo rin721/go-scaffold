@@ -3,37 +3,100 @@
 ## 最新验证
 
 - 日期：2026-05-25
-- 任务 ID：TASK-NEXT-SCOPE
-- 时间切片 ID：TS-NEXT-SCOPE
+- 任务 ID：TASK-P1-014
+- 时间切片 ID：TS-P1-014
 - 状态：COMPLETED
-- 范围：确认下一阶段范围并提升 `types/*` 契约边界任务
+- 范围：为 `pkg/utils` 补内部支撑工具最小确定性行为测试，覆盖 Snowflake、监听地址校验、端口查找、设备 ID 稳定性和 i18n helper 默认语言委托语义。
 
 ## 执行命令
 
 | 命令 | 结果 | 备注 |
 |---|---|---|
-| 状态一致性文本检查 | PASS | `STATUS.md`、`TASKS.md`、`TIME_SLICES.md`、`TEST_MATRIX.md` 均指向 TASK-P1-009 / TS-P1-009，且核心状态文件不再保留待确认状态 |
-| `go test ./types/... -count=1` | PASS | 当前 `types` 包基线通过；`types/result` 和 `types/errors` 仍无测试文件，已作为 TS-P1-009 后续范围 |
-| `go test ./... -count=1` | PASS | 全仓库回归通过 |
+| 必读文件读取 | PASS | 已读取 Agent 规则、状态、任务、切片、需求、架构、验收、问题、测试报告和交接文档 |
+| `gofmt -w pkg/utils/utils_test.go` | PASS | 新增测试文件格式化通过 |
+| `go test ./pkg/utils -count=1` | FAIL | 首次运行为占用端口断言不稳定：占用 `127.0.0.1` 不必然阻止 `0.0.0.0` 探测 |
+| `gofmt -w pkg/utils/utils_test.go` | PASS | 第一轮修正后格式化通过 |
+| `go test ./pkg/utils -count=1` | FAIL | 第二次运行为 wildcard 监听族不一致/重复绑定语义不稳定 |
+| `gofmt -w pkg/utils/utils_test.go` | PASS | 第二轮修正后格式化通过 |
+| `go test ./pkg/utils -count=1` | PASS | 改为确定性无效地址、端口范围和 exclude 断言后通过 |
+| `go test ./... -count=1` | PASS | 全量回归通过 |
 | `git diff --check` | PASS | 仅有 Windows LF/CRLF 转换警告 |
 
 ## 结果
 
-- [CONFIRMED] 用户选择 A，`BL-021` / `TM-P1-005` 已提升为 TASK-P1-009 / TS-P1-009。
-- [CONFIRMED] `TASK-NEXT-SCOPE` 不再处于待确认状态。
-- [CONFIRMED] 当前唯一合法下一步为 `types/*` 契约边界切片。
-- [CONFIRMED] `types` 包基线和全量回归通过。
+- [CONFIRMED] `pkg/utils` 已新增包级最小行为测试，覆盖 Snowflake ID 生成、非法 node 和默认生成器。
+- [CONFIRMED] 地址校验和端口查找已覆盖有效/无效地址、无效范围、单端口成功和 exclude 语义。
+- [CONFIRMED] 设备 ID 已覆盖同 salt 稳定性、不同 salt 差异和 hex 输出；i18n helper 已覆盖默认语言与模板参数转发。
+- [CONFIRMED] 测试不依赖真实外部网络服务、固定生产端口、数据库或生产配置。
+- [CONFIRMED] TASK-P1-014 满足验收；下一步为 TASK-NEXT-SCOPE-007，等待用户确认后续范围。
 
 ## 失败项
 
-- 无。
+- 已修复：前两次 `pkg/utils` 包测试失败均来自测试断言对端口占用的环境假设；改为确定性无效地址、端口范围和 exclude 断言后通过。
 
 ## 验证结论
 
-- TASK-NEXT-SCOPE 可以标记为 `COMPLETED`。
-- TASK-P1-009 / TS-P1-009 为当前 `NOT_STARTED` 的唯一合法下一步。
+- TASK-P1-014 可以标记为 `COMPLETED`。
+- 当前唯一合法下一步为 TASK-NEXT-SCOPE-007 / TS-NEXT-SCOPE-007，状态为 `PENDING_USER_CONFIRMATION`。
 
 ## 历史报告
+
+### 2026-05-25 TASK-P1-014 TS-P1-014
+
+- 新增 `pkg/utils/utils_test.go`。
+- 覆盖 Snowflake、监听地址校验、端口查找、设备 ID 稳定性和 i18n helper 默认语言委托语义。
+- `gofmt -w pkg/utils/utils_test.go`：PASS。
+- `go test ./pkg/utils -count=1`：PASS。
+- `go test ./... -count=1`：PASS。
+- `git diff --check`：PASS，仅有 Windows LF/CRLF 转换警告。
+
+### 2026-05-25 TASK-P1-013 TS-P1-013
+
+- 新增 `pkg/cache/cache_test.go`。
+- 新增纯测试依赖 `github.com/alicebob/miniredis/v2`。
+- `go get github.com/alicebob/miniredis/v2@latest`：PASS。
+- `gofmt -w pkg/cache/cache_test.go`：PASS。
+- `go test ./pkg/cache -count=1`：PASS。
+- `go test ./... -count=1`：PASS。
+- `git diff --check`：PASS，仅有 Windows LF/CRLF 转换警告。
+
+### 2026-05-25 TASK-P1-012 TS-P1-012
+
+- 新增 `pkg/executor/executor_test.go`、`pkg/httpserver/httpserver_test.go`、`pkg/storage/storage_test.go`。
+- 修复 `pkg/executor` 错误包装与 panic handler 调用缺陷。
+- `gofmt -w pkg/executor/executor_test.go pkg/httpserver/httpserver_test.go pkg/storage/storage_test.go`：PASS。
+- `go test ./pkg/executor ./pkg/httpserver ./pkg/storage -count=1`：PASS。
+- `go test ./... -count=1`：PASS。
+- `git diff --check`：PASS，仅有 Windows LF/CRLF 转换警告。
+
+### 2026-05-25 TASK-P1-011 TS-P1-011
+
+- 新增 `pkg/cli/app_test.go`、`pkg/i18n/i18n_test.go`、`pkg/yaml2go/converter_test.go`。
+- 修复 `pkg/yaml2go` 生成 tag 与方法 import 顺序缺陷。
+- `gofmt -w pkg/cli/app_test.go pkg/i18n/i18n_test.go pkg/yaml2go/converter_test.go`：PASS。
+- `go test ./pkg/cli ./pkg/i18n ./pkg/yaml2go -count=1`：PASS。
+- `go test ./... -count=1`：PASS。
+- `git diff --check`：PASS，仅有 Windows LF/CRLF 转换警告。
+
+### 2026-05-25 TASK-NEXT-SCOPE-003 TS-NEXT-SCOPE-003
+
+- 用户回复 `A`，确认提升 `BL-020` 补 `pkg/*` 行为测试。
+- 首批任务限定为无外部服务依赖的 `pkg/cli`、`pkg/i18n`、`pkg/yaml2go`。
+- 新增状态诊断报告 `docs/reports/status_diagnostics/2026-05-25-task-p1-011-handoff-stale.md`。
+- 新增 TASK-P1-011 / TS-P1-011。
+- 状态一致性文本检查：PASS。
+- `git diff --check`：PASS，仅有 Windows LF/CRLF 转换警告。
+- Go 测试未运行：该确认切片仅修改文档和状态文件，未修改 Go 代码。
+
+### 2026-05-25 TASK-P1-010 TS-P1-010
+
+- 用户修正 `pkg/plugin` 注册方向，审查结论为 `ACCEPT_WITH_RISK`。
+- `Manager` 接口移除 `Load`、`RegisterLocalFactory` 和 manager option 主动装配公共面。
+- 新增 `NewHTTP`，让 HTTP 插件可由插件服务构造后注册。
+- local/http 测试改为显式构造插件并调用 `Register`。
+- `go test ./pkg/plugin -count=1`：PASS。
+- `go test ./... -count=1`：PASS。
+- `git diff --check`：PASS，仅有 Windows LF/CRLF 转换警告。
 
 ### 2026-05-25 TASK-NEXT-SCOPE TS-NEXT-SCOPE
 
@@ -46,69 +109,51 @@
 
 ### 2026-05-25 TASK-P1-008 TS-P1-008
 
-- 用户发送“下一步”，按当前合法任务执行 `pkg/sqlgen` unsupported 边界标注。
-- 新增 `ErrCodeUnsupportedOperation` 和 `NewUnsupportedError`。
+- `pkg/sqlgen` unsupported 边界已显式标注。
 - `Or`、`Not`、`Group`、`Having`、`Distinct`、`Joins`、`DeleteInBatches` 和 `ReverseDB` 未实现路径已显式返回 unsupported。
-- `pkg/sqlgen/README.md` 已标注 unsupported / partial 能力边界。
 - `go test ./pkg/sqlgen -count=1`：PASS。
 - `go test ./... -count=1`：PASS。
 - `git diff --check`：PASS，仅有 Windows LF/CRLF 转换警告。
 
 ### 2026-05-25 TASK-P1-007 TS-P1-007
 
-- 用户发送“下一步”，按当前合法任务执行 `pkg/*` API 分类。
-- 为 13 个 `pkg/*/README.md` 新增 API 分类段。
-- `pkg/cache`、`pkg/crypto`、`pkg/database`、`pkg/executor`、`pkg/httpserver`、`pkg/i18n`、`pkg/logger`、`pkg/plugin`、`pkg/storage` 标注为公共基础设施 API。
-- `pkg/cli`、`pkg/sqlgen`、`pkg/yaml2go` 标注为公共工具 API。
-- `pkg/utils` 标注为内部支撑工具包。
+- 完成 13 个 `pkg/*` README API 分类。
+- `pkg/cli`、`pkg/sqlgen`、`pkg/yaml2go` 标注为公共工具 API；`pkg/utils` 标注为内部支撑工具包。
 - `go test ./... -count=1`：PASS。
 - `git diff --check`：PASS，仅有 Windows LF/CRLF 转换警告。
 
 ### 2026-05-25 TASK-P1-006 TS-P1-006
 
-- 用户发送“下一步”，按当前合法任务执行 CLI tests 命令语义收拢。
 - `cmd/server tests` 从 yaml2go 示例转换改为真实 Go test 入口。
-- 默认执行 `go test ./...`，支持 `--package/-p` 指定测试范围。
-- 新增 `cmd/server/tests_test.go`，覆盖命令元信息、默认包范围、指定包范围和失败返回。
-- 新增 `docs/specs/cli_tests_command_boundary.md`，记录 CLI tests 命令语义。
+- 新增 `cmd/server/tests_test.go` 和 `docs/specs/cli_tests_command_boundary.md`。
 - `go test ./cmd/server -count=1`：PASS。
 - `go test ./... -count=1`：PASS。
 - `git diff --check`：PASS，仅有 Windows CRLF 转换警告。
 
 ### 2026-05-25 TASK-P1-005 TS-P1-005
 
-- 用户发送“下一步”，按当前合法任务执行 demo 迁移边界收拢。
-- 新增 `DemoMigrationPolicyFor` 和 `MigrateDemoSchemaForTrigger`。
-- server-start/initdb 继续执行 demo `AutoMigrate`；reload 改为跳过 demo `AutoMigrate`。
-- 新增 `internal/app/initapp/demo_migration_test.go`，验证触发策略和迁移行为。
-- 新增 `docs/specs/demo_migration_boundary.md`，记录 dev/demo 与生产/bootstrap 迁移职责。
+- demo 迁移边界已收拢，reload 策略改为跳过 demo `AutoMigrate`。
+- 新增 `internal/app/initapp/demo_migration_test.go` 和 `docs/specs/demo_migration_boundary.md`。
 - `go test ./internal/app/... -count=1`：PASS。
 - `go test ./... -count=1`：PASS。
 - `git diff --check`：PASS，仅有 Windows CRLF 转换警告。
 
 ### 2026-05-25 TASK-P1-004 TS-P1-004
 
-- 用户发送“下一步”，按当前合法任务执行 demo CRUD 测试基线。
-- 新增 `internal/modules/demo/service/todo_test.go`。
-- 使用临时 SQLite 和真实 repository/service 覆盖 Todo Create/List/Get/Update/Delete。
-- 覆盖空标题校验、缺失资源 not found 和软删除后不可见语义。
+- 新增 `internal/modules/demo/service/todo_test.go`，覆盖 Todo Create/List/Get/Update/Delete。
 - `go test ./internal/modules/demo/... -count=1`：PASS。
 - `go test ./... -count=1`：PASS。
 - `git diff --check`：PASS，仅有 Windows CRLF 转换警告。
 
 ### 2026-05-25 TASK-P1-003 TS-P1-003
 
-- 用户发送“下一步”，按当前合法任务执行 HTTP health/ready smoke test。
-- 新增 `internal/transport/http/router_test.go`。
-- `/health` 覆盖 HTTP 200、成功响应语义。
-- `/ready` 覆盖数据库缺失、ping 失败、ping 成功三条路径。
+- 新增 `internal/transport/http/router_test.go`，覆盖 `/health` 和 `/ready` smoke test。
 - `go test ./internal/transport/http -count=1`：PASS。
 - `go test ./... -count=1`：PASS。
 - `git diff --check`：PASS，仅有 Windows CRLF 转换警告。
 
 ### 2026-05-25 TASK-P1-002 TS-P1-002
 
-- 用户发送“下一步”，按当前合法任务执行配置环境变量策略收拢。
 - 数据库 override 改为 `DB_*` 优先，`REI_APP_DB_*` 兼容 fallback。
 - `.env.example` 与实现对齐，并移除 JWT 示例。
 - `go test ./internal/config -count=1`：PASS。
@@ -116,52 +161,38 @@
 
 ### 2026-05-25 TASK-INFRA-002 TS-INFRA-002
 
-- 用户要求实施 Agent 基础设施一致性修复计划。
 - 新增缺失的 `AGENTS.md`，统一跨工具入口引用。
-- 扩充 14 个 canonical skills，新增 14 个 `.agents` adapters。
-- 标准化 `docs/templates/*`。
-- 新增状态诊断报告。
+- 扩充 canonical skills 和 `.agents` adapters，标准化 `docs/templates/*`。
 - Agent 基础设施文件存在性核对：PASS。
 - `quick_validate.py` 验证 28 个 skill 目录：PASS。
-- 跨工具入口引用一致性检查：PASS。
 - `go test ./... -count=1`：PASS。
 
 ### 2026-05-25 TASK-INFRA-001 TS-INFRA-001
 
-- 用户确认补齐 Prompt 全量 Agent 基础设施。
-- 新增 Agent 入口、规则、skills 索引、缺失模板、reports/specs、跨工具目录和 14 个项目 skills。
+- 补齐 Prompt 全量 Agent 基础设施。
 - Prompt 全量产物存在性核对：PASS。
 - `go test ./... -count=1`：PASS。
-- 当前合法下一步恢复为 TASK-P1-002。
 
 ### 2026-05-25 TASK-P1-001 TS-P1-001
 
-- 用户发送“下一步”，按推荐默认顺序确认 P1 执行顺序。
 - 修复 `internal/config/manager.go` 的 `copyConfig` 字段覆盖问题。
-- 新增 `internal/config/manager_test.go`，覆盖完整字段复制、slice 深拷贝和 `Update` 保留未修改字段。
+- 新增 `internal/config/manager_test.go`。
 - `go test ./internal/config -count=1`：PASS。
 - `go test ./... -count=1`：PASS。
 
 ### 2026-05-25 TASK-OPT-004 TS-OPT-004
 
-- 用户发送“下一步”，按当前合法任务生成正式测试矩阵和任务拆分草案。
-- 新增 `TEST_MATRIX.md` 和 `ISSUES.md`。
-- 更新 `REQUIREMENTS.md`、`ACCEPTANCE.md`、`ROADMAP.md`、`RISK_REGISTER.md`、`ARCHITECTURE.md`、`TASKS.md`、`TIME_SLICES.md`、`STATUS.md`。
+- 新增 `TEST_MATRIX.md` 和 `ISSUES.md`，生成正式测试矩阵和任务拆分草案。
 - `go test ./... -count=1`：PASS。
-- Go 文件差异：无。
 
 ### 2026-05-25 TASK-OPT-003 TS-OPT-003
 
-- 用户发送“下一步”，按当前合法任务生成模块边界清单和优化路线明细。
-- 新增 `MODULES.md`。
-- 更新 `REQUIREMENTS.md`、`ACCEPTANCE.md`、`ROADMAP.md`、`BACKLOG.md`、`TASKS.md`、`TIME_SLICES.md`、`STATUS.md`。
+- 新增 `MODULES.md`，生成模块边界清单和优化路线明细。
 - `go test ./... -count=1`：PASS。
 
 ### 2026-05-25 TASK-OPT-002 TS-OPT-002
 
-- 用户发送“下一步”，按推荐默认值确认优化路线和关键边界。
-- 新增 `ROADMAP.md`。
-- 更新 `REQUIREMENTS.md`、`ARCHITECTURE.md`、`DECISIONS.md`、`TASKS.md`、`TIME_SLICES.md`、`STATUS.md`。
+- 新增 `ROADMAP.md`，确认优化路线和关键边界。
 - `go test ./... -count=1`：PASS。
 
 ### 2026-05-25 TASK-OPT-001 TS-OPT-001

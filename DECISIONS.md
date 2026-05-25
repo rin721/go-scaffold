@@ -118,3 +118,58 @@
 - Reason：`types/result` 依赖 Gin，属于 HTTP 响应契约而非纯类型包；`types/errors` 也包含 auth/rbac 预留错误码，需要先标注边界以免后续复用和重构误判。
 - Consequences：下一次“下一步”只能执行 TS-P1-009，不得插队补 `pkg/*` 测试或进入收尾。
 - Related Tasks：TASK-NEXT-SCOPE、TASK-P1-009
+
+### DEC-012：`pkg/plugin` 采用被动注册边界
+
+- Date：2026-05-25
+- Status：ACCEPTED_WITH_RISK
+- Context：用户修正 `pkg/plugin` 的注册责任：`pkg/plugin` 不应主动注册插件服务，而应由插件服务或宿主装配层主动调用注册接口。
+- Decision：`pkg/plugin` 保持为被动 registry/runtime。它提供插件接口、local/http 插件实现、`Register`/`Invoke`/`Close` 等运行时能力，但不再通过 manager 公共 API 从配置主动加载并注册插件服务；插件服务负责构造插件实例并注册到 manager。
+- Alternatives：保留 `Manager.Load(config)` 主动创建并注册插件；继续使用 local factory 装配；推迟到 rpc/ws/discovery 阶段。
+- Reason：被动注册能避免基础设施包反向感知插件服务生命周期，也更符合 `cmd -> internal/app -> pkg` 的依赖方向。
+- Consequences：这是对历史 v1 API 的边界收窄，可能影响依赖 `Load` 或 local factory 的调用方；因此必须通过 TASK-P1-010 记录风险、更新 README 并跑 `pkg/plugin` 包测试和全量回归。
+- Related Tasks：TASK-NEXT-SCOPE-002、TASK-P1-010
+
+### DEC-013：提升 `BL-020` 首批 `pkg/*` 行为测试
+
+- Date：2026-05-25
+- Status：ACCEPTED
+- Context：TASK-P1-010 完成后，当前状态进入 `PENDING_USER_CONFIRMATION`，要求在提升 `BL-020`、进入 Phase 6 收尾或结束本轮之间选择。
+- Decision：用户选择 A，提升 `BL-020` 的首批测试工作为 TASK-P1-011 / TS-P1-011，优先覆盖无外部服务依赖且当前无包级测试的 `pkg/cli`、`pkg/i18n`、`pkg/yaml2go`。
+- Alternatives：一次性补齐所有无测试 `pkg/*` 包；进入 Phase 6 收尾；结束本轮。
+- Reason：`BL-020` 范围较大，首批选择轻依赖包可以降低测试实现和修复风险，避免一次性扩大到 Redis、HTTP server、storage 或 executor 生命周期测试。
+- Consequences：下一次“下一步”只能执行 TS-P1-011；`pkg/cache`、`pkg/executor`、`pkg/httpserver`、`pkg/storage` 等剩余测试缺口需要后续批次或收尾前再次确认。
+- Related Tasks：TASK-NEXT-SCOPE-003、TASK-P1-011
+
+### DEC-014：提升 `BL-020` 第二批 `pkg/*` 行为测试
+
+- Date：2026-05-25
+- Status：ACCEPTED
+- Context：TASK-P1-011 完成后，当前状态进入 `PENDING_USER_CONFIRMATION`，要求在继续 `BL-020` 后续包、进入 Phase 6 收尾或结束本轮之间选择。
+- Decision：用户发送“下一步”，按确认选项 A 提升 `BL-020` 第二批测试工作为 TASK-P1-012 / TS-P1-012，覆盖 `pkg/executor`、`pkg/httpserver`、`pkg/storage`。
+- Alternatives：直接进入 Phase 6 收尾；结束本轮；将 `pkg/cache` Redis 路径纳入同一批。
+- Reason：第二批三包可通过内存文件系统、停止态 HTTP server 和本地协程池测试完成，不需要 Redis、数据库或外部服务；`pkg/cache` 需要单独隔离策略。
+- Consequences：TASK-P1-012 完成后，`pkg/cache` 等剩余 `BL-020` 范围仍需用户再次确认才能继续。
+- Related Tasks：TASK-NEXT-SCOPE-004、TASK-P1-012
+
+### DEC-015：提升 `BL-020` 第三批 `pkg/cache` 隔离行为测试
+
+- Date：2026-05-25
+- Status：ACCEPTED
+- Context：TASK-P1-012 完成后，当前状态进入 `PENDING_USER_CONFIRMATION`，要求在继续 `BL-020` 剩余范围、进入 Phase 6 收尾或结束本轮之间选择。
+- Decision：用户回复 `A`，提升 `BL-020` 第三批测试工作为 TASK-P1-013 / TS-P1-013，限定覆盖 `pkg/cache`。
+- Alternatives：直接进入 Phase 6 收尾；结束本轮；把 `pkg/utils` 内部支撑测试并入同一批。
+- Reason：`pkg/cache` 是公共基础设施 API，Redis 依赖路径需要隔离测试；`pkg/utils` 已分类为内部支撑工具包，不属于公共包补测范围，若补测应单独确认。
+- Consequences：允许引入纯测试用进程内 Redis 依赖以避免真实 Redis 服务；TASK-P1-013 完成后，公共 `pkg/*` 行为测试覆盖告一段落。
+- Related Tasks：TASK-NEXT-SCOPE-005、TASK-P1-013
+
+### DEC-016：提升 `BL-023` `pkg/utils` 内部支撑测试
+
+- Date：2026-05-25
+- Status：ACCEPTED
+- Context：TASK-P1-013 完成后，当前状态进入 `PENDING_USER_CONFIRMATION`，要求在进入 Phase 6 收尾、提升内部支撑测试或结束本轮之间选择。
+- Decision：用户回复 `b`，提升 `BL-023` 为 TASK-P1-014 / TS-P1-014，限定覆盖 `pkg/utils` 内部支撑工具最小行为测试。
+- Alternatives：直接进入 Phase 6 收尾；结束本轮；扩大到 `internal/app`、middleware 或集成测试。
+- Reason：`pkg/utils` 已分类为内部支撑工具包，虽然不属于公共 `pkg/*` 补测范围，但其 ID、地址、端口、设备 ID 和 i18n helper 被多处支撑路径使用，补最小测试可以降低后续维护风险。
+- Consequences：本切片只允许修改 `pkg/utils` 测试和必要状态文档，不改变 `pkg/utils` 公共 API 或默认 Snowflake panic 策略。
+- Related Tasks：TASK-NEXT-SCOPE-006、TASK-P1-014

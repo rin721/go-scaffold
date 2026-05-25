@@ -10,22 +10,20 @@ import (
 )
 
 func TestLocalPluginInvoke(t *testing.T) {
-	mgr := NewManager(WithLocalFactory("echo", func(def Definition) (Plugin, error) {
-		return NewLocal(def.metadata(), func(ctx context.Context, req Request) (*Response, error) {
-			var input map[string]string
-			if err := req.DecodePayload(&input); err != nil {
-				return nil, err
-			}
-			input["operation"] = req.Operation
-			return NewResponse(input)
-		})
-	}))
-
-	err := mgr.Load(&Config{Plugins: []Definition{
-		{Name: "echo", Protocol: ProtocolLocal},
-	}})
+	mgr := NewManager()
+	echo, err := NewLocal(Metadata{Name: "echo", Protocol: ProtocolLocal}, func(ctx context.Context, req Request) (*Response, error) {
+		var input map[string]string
+		if err := req.DecodePayload(&input); err != nil {
+			return nil, err
+		}
+		input["operation"] = req.Operation
+		return NewResponse(input)
+	})
 	if err != nil {
-		t.Fatalf("Load() error = %v", err)
+		t.Fatalf("NewLocal() error = %v", err)
+	}
+	if err := mgr.Register(echo); err != nil {
+		t.Fatalf("Register() error = %v", err)
 	}
 
 	req := MustNewRequest("run", map[string]string{"hello": "world"})
@@ -63,16 +61,17 @@ func TestHTTPPluginInvoke(t *testing.T) {
 	defer server.Close()
 
 	mgr := NewManager()
-	err := mgr.Load(&Config{Plugins: []Definition{
-		{
-			Name:     "remote",
-			Protocol: ProtocolHTTP,
-			Endpoint: server.URL,
-			Headers:  map[string]string{"X-Plugin-Token": "secret"},
-		},
-	}})
+	remote, err := NewHTTP(Definition{
+		Name:     "remote",
+		Protocol: ProtocolHTTP,
+		Endpoint: server.URL,
+		Headers:  map[string]string{"X-Plugin-Token": "secret"},
+	})
 	if err != nil {
-		t.Fatalf("Load() error = %v", err)
+		t.Fatalf("NewHTTP() error = %v", err)
+	}
+	if err := mgr.Register(remote); err != nil {
+		t.Fatalf("Register() error = %v", err)
 	}
 
 	resp, err := mgr.Invoke(context.Background(), "remote", MustNewRequest("status", nil))
@@ -96,11 +95,12 @@ func TestHTTPPluginStatusError(t *testing.T) {
 	defer server.Close()
 
 	mgr := NewManager()
-	err := mgr.Load(&Config{Plugins: []Definition{
-		{Name: "remote", Protocol: ProtocolHTTP, Endpoint: server.URL},
-	}})
+	remote, err := NewHTTP(Definition{Name: "remote", Protocol: ProtocolHTTP, Endpoint: server.URL})
 	if err != nil {
-		t.Fatalf("Load() error = %v", err)
+		t.Fatalf("NewHTTP() error = %v", err)
+	}
+	if err := mgr.Register(remote); err != nil {
+		t.Fatalf("Register() error = %v", err)
 	}
 
 	_, err = mgr.Invoke(context.Background(), "remote", MustNewRequest("run", nil))
@@ -110,12 +110,9 @@ func TestHTTPPluginStatusError(t *testing.T) {
 }
 
 func TestManagerUnsupportedProtocol(t *testing.T) {
-	mgr := NewManager()
-	err := mgr.Load(&Config{Plugins: []Definition{
-		{Name: "future", Protocol: ProtocolWS, Endpoint: "ws://example.com"},
-	}})
+	_, err := NewHTTP(Definition{Name: "future", Protocol: ProtocolWS, Endpoint: "ws://example.com"})
 	if !errors.Is(err, ErrUnsupportedProtocol) {
-		t.Fatalf("Load() error = %v, want ErrUnsupportedProtocol", err)
+		t.Fatalf("NewHTTP() error = %v, want ErrUnsupportedProtocol", err)
 	}
 }
 

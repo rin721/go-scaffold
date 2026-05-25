@@ -3,8 +3,8 @@
 ## 项目状态
 
 - 项目：go-scaffold
-- 当前阶段：P1 后续范围已确认
-- 总体状态：IN_PROGRESS
+- 当前阶段：pkg/utils 内部支撑测试完成，等待后续范围确认
+- 总体状态：PENDING_USER_CONFIRMATION
 - 最后更新：2026-05-25
 - 最近 Agent：Codex
 - 最近工具：Codex Desktop
@@ -12,10 +12,10 @@
 ## 当前合法工作
 
 - 当前模块：项目优化路线
-- 当前任务 ID：TASK-P1-009
-- 当前时间切片 ID：TS-P1-009
-- 当前状态：NOT_STARTED
-- 为什么这是唯一合法下一步：[CONFIRMED] 用户选择选项 A，提升 `BL-021` / `TM-P1-005`，下一步只能执行 `types/*` 契约边界切片；`TASK-NEXT-SCOPE` 已完成范围确认。
+- 当前任务 ID：TASK-NEXT-SCOPE-007
+- 当前时间切片 ID：TS-NEXT-SCOPE-007
+- 当前状态：PENDING_USER_CONFIRMATION
+- 为什么这是唯一合法下一步：[CONFIRMED] TASK-P1-014 已完成并通过验证；继续进入 Phase 6、提升集成测试或结束本轮都需要用户确认。
 
 ## 阶段状态
 
@@ -38,9 +38,15 @@
 | pkg/sqlgen unsupported 边界标注 | COMPLETED | unsupported 链式查询、批量删除和 DB reverse 已显式返回 `ErrCodeUnsupportedOperation`，README 已标注部分能力边界 |
 | Agent 基础设施补齐 | COMPLETED | `AGENTS.md`、`AGENT_RULES.md`、`SKILLS.md`、项目 skills、reports/specs 和跨工具目录已补齐 |
 | Agent 基础设施一致性修复 | COMPLETED | TASK-INFRA-002 已补齐实际缺失的 `AGENTS.md`，规范化 skills、模板和 `.agents` 适配器 |
-| 实现 | IN_PROGRESS | 用户已选择提升 `BL-021` / `TM-P1-005`，当前合法下一步为 TASK-P1-009 |
-| 验证 | COMPLETED | TASK-P1-008 已运行 `go test ./pkg/sqlgen -count=1` 和 `go test ./... -count=1`，结果 PASS |
-| 交接 | COMPLETED | `AGENT_HANDOFF.md` 已记录 TASK-NEXT-SCOPE 范围确认和 TASK-P1-009 下一步 |
+| types/* 契约边界 | COMPLETED | TASK-P1-009 已补契约说明和最小测试，`go test ./types/... -count=1` 与全量回归通过 |
+| pkg/plugin 被动注册边界 | COMPLETED | TASK-P1-010 已移除 manager 主动配置加载/local factory 公共面，local/http 插件改为服务侧显式 `Register` |
+| pkg/* 行为测试首批 | COMPLETED | TASK-P1-011 已补 `pkg/cli`、`pkg/i18n`、`pkg/yaml2go` 最小行为测试，并修复新增测试暴露的 `pkg/yaml2go` 生成 tag/import 顺序缺陷 |
+| pkg/* 行为测试第二批 | COMPLETED | TASK-P1-012 已补 `pkg/executor`、`pkg/httpserver`、`pkg/storage` 最小行为测试，并修复新增测试暴露的 `pkg/executor` 错误包装与 panic handler 缺陷 |
+| pkg/cache 行为测试第三批 | COMPLETED | TASK-P1-013 已补 `pkg/cache` 隔离行为测试，使用进程内 Redis 测试服务覆盖配置、读写、批量、计数器、过期和 reload 语义 |
+| pkg/utils 内部支撑测试 | COMPLETED | TASK-P1-014 已新增 `pkg/utils/utils_test.go`，覆盖 Snowflake、地址校验、端口查找、设备 ID 和 i18n helper |
+| 实现 | COMPLETED | 当前实现切片 TASK-P1-014 已完成 |
+| 验证 | COMPLETED | `go test ./pkg/utils -count=1`、`go test ./... -count=1` 和 `git diff --check` 均通过 |
+| 交接 | COMPLETED | `AGENT_HANDOFF.md` 已更新到 TASK-NEXT-SCOPE-007 |
 
 ## 当前关键发现
 
@@ -53,7 +59,8 @@
 | FIND-005 | `cmd/server tests` 命令语义与行为不一致 | `MODULES.md` BC-004；TASK-P1-006 已改为真实 Go test 入口 | [CONFIRMED] 已处理 |
 | FIND-010 | `pkg/*` 公共/内部定位未逐包标记 | `ARCHITECTURE.md`、`MODULES.md`；TASK-P1-007 已完成分类 | [CONFIRMED] 已处理 |
 | FIND-011 | `pkg/sqlgen` TODO/unsupported 边界不清 | `pkg/sqlgen` README 和源码；TASK-P1-008 已显式返回 unsupported 或文档化 partial 能力 | [CONFIRMED] 已处理 |
-| FIND-012 | `types/result`、错误码和跨层类型边界待明确 | 用户选择 A，提升 `BL-021` / `TM-P1-005` | [CONFIRMED] 已提升为 TASK-P1-009 |
+| FIND-012 | `types/result`、错误码和跨层类型边界待明确 | TASK-P1-009 已补 `docs/specs/types_contract_boundary.md`、package doc 和最小测试 | [CONFIRMED] 已处理 |
+| FIND-013 | `pkg/plugin` 主动注册服务边界需收拢 | 用户修正；TASK-P1-010 已改为被动 registry/runtime | [CONFIRMED] 已处理 |
 | FIND-006 | P1 执行顺序尚未确认 | `TEST_MATRIX.md`、`RISK_REGISTER.md` RISK-009；用户再次发送“下一步” | [CONFIRMED] 已确认 |
 | FIND-007 | `AGENTS.md` 被状态文件声明已补齐但实际缺失 | `Test-Path AGENTS.md`、`docs/reports/status_diagnostics/2026-05-25-task-infra-002-agents-md-missing.md` | [CONFIRMED] 已修复 |
 | FIND-008 | `/health`、`/ready` 路由缺少 smoke test | `TEST_MATRIX.md` TM-P0-003；TASK-P1-003 已补测试 | [CONFIRMED] 已处理 |
@@ -64,6 +71,12 @@
 | ID | 问题 | 影响 | 选项 | Required By |
 |---|---|---|---|
 | CONFIRM-NEXT-001 | 选择 P1 后续范围或进入收尾 | 已确认：用户选择 A | A: 提升 `BL-021` / `TM-P1-005` 做 `types/*` 契约边界 | COMPLETED |
+| CONFIRM-NEXT-002 | 选择 `types/*` 契约边界完成后的后续范围 | 已确认：用户修正并选择收拢 `pkg/plugin` 被动注册边界 | 提升 `BL-022` / `TM-P1-006` | COMPLETED |
+| CONFIRM-NEXT-003 | 选择 `pkg/plugin` 被动注册边界完成后的后续范围 | 已确认：用户选择 A，提升 `BL-020` 补 `pkg/*` 行为测试 | A: 提升 `BL-020` 补 `pkg/*` 行为测试 | COMPLETED |
+| CONFIRM-NEXT-004 | 选择首批 `pkg/*` 行为测试完成后的后续范围 | 已确认：用户发送“下一步”，按选项 A 继续下一批 `pkg/*` 行为测试 | A: 继续下一批 `pkg/*` 行为测试；B: 进入 Phase 6 收尾；C: 结束本轮 | COMPLETED |
+| CONFIRM-NEXT-005 | 选择第二批 `pkg/*` 行为测试完成后的后续范围 | 已确认：用户选择 A，继续 `BL-020` 剩余包，第三批限定 `pkg/cache` | A: 继续剩余 `pkg/*` 行为测试；B: 进入 Phase 6 收尾；C: 结束本轮 | COMPLETED |
+| CONFIRM-NEXT-006 | 选择 `pkg/cache` 行为测试完成后的后续范围 | 已确认：用户选择 B，提升 `pkg/utils` 内部支撑测试 | A: 进入 Phase 6 收尾；B: 提升内部支撑测试；C: 结束本轮 | COMPLETED |
+| CONFIRM-NEXT-007 | 选择 `pkg/utils` 内部支撑测试完成后的后续范围 | 待确认 | A: 进入 Phase 6 收尾；B: 提升 app/router/middleware 等集成测试；C: 结束本轮 | TASK-NEXT-SCOPE-007 |
 
 ## 待验证
 
@@ -79,14 +92,14 @@
 
 ## 最近执行
 
-- 摘要：用户选择 A，完成 TASK-NEXT-SCOPE / TS-NEXT-SCOPE 的范围确认，并将 `BL-021` / `TM-P1-005` 提升为 TASK-P1-009 / TS-P1-009。
-- 变更文件：项目状态、任务、时间切片、测试矩阵、Backlog、风险、验收、变更记录和交接文档。
-- 执行命令：状态一致性文本检查；`go test ./types/... -count=1`；`go test ./... -count=1`；`git diff --check`。
+- 摘要：完成 TASK-P1-014 / TS-P1-014，为 `pkg/utils` 内部支撑工具补最小确定性测试。
+- 变更文件：`pkg/utils/utils_test.go` 与项目状态文档。
+- 执行命令：`gofmt -w pkg/utils/utils_test.go`；`go test ./pkg/utils -count=1`；`go test ./... -count=1`；`git diff --check`。
 - 测试结果：PASS；`git diff --check` 仅有 Windows LF/CRLF 转换警告。
-- 完成判断：TASK-NEXT-SCOPE 已完成；当前合法下一步为 TASK-P1-009。
+- 完成判断：TASK-P1-014 可标记为 COMPLETED；下一步进入 TASK-NEXT-SCOPE-007 等待用户确认。
 
 ## 下一步
 
-- 合法下一步：执行 TASK-P1-009 / TS-P1-009，明确 `types/*` 契约边界。
-- 进入条件：开发者发送“下一步”，Agent 读取状态文件后按 TS-P1-009 的允许范围执行。
-- 预期输出：`types/*` 契约边界文档化或测试化，运行 `go test ./types/... -count=1` 和 `go test ./... -count=1`，并更新状态文件。
+- 合法下一步：TASK-NEXT-SCOPE-007 / TS-NEXT-SCOPE-007，等待用户选择后续范围。
+- 进入条件：已满足，TASK-P1-014 已完成并通过验证。
+- 可选方向：A 进入 Phase 6 收尾；B 提升 app/router/middleware 等集成测试；C 结束本轮。

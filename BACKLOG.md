@@ -29,8 +29,10 @@
 | BL-017 | 统一配置环境变量命名策略 | `MODULES.md` BC-001 | P1 | 需要先生成测试矩阵和任务切片 | [DEFERRED] |
 | BL-018 | 修复 `manager.copyConfig` 字段覆盖 | `MODULES.md` BC-002 | P1 | 已提升为 TASK-P1-001 并完成 | [COMPLETED] |
 | BL-019 | 处理 `cmd/server tests` 命令语义 | `MODULES.md` BC-004 | P1 | 需要确认命令保留、重命名或改造 | [DEFERRED] |
-| BL-020 | 为无测试的公共 `pkg/*` 包补最小行为测试 | `MODULES.md` pkg 分类草案 | P1 | 需要测试矩阵确认 | [DEFERRED] |
-| BL-021 | 明确 `types/result` 是否属于 HTTP 契约 | `MODULES.md` types 边界 | P1 | 用户选择 A，已提升为 TASK-P1-009 / TS-P1-009 | [IN_PROGRESS] |
+| BL-020 | 为无测试的公共 `pkg/*` 包补最小行为测试 | `MODULES.md` pkg 分类草案 | P1 | 首批 TASK-P1-011、第二批 TASK-P1-012 和第三批 TASK-P1-013 已完成，公共 `pkg/*` 行为测试已覆盖 | [COMPLETED] |
+| BL-021 | 明确 `types/result` 是否属于 HTTP 契约 | `MODULES.md` types 边界 | P1 | 已提升为 TASK-P1-009 并完成 | [COMPLETED] |
+| BL-022 | 收拢 `pkg/plugin` 被动注册边界 | 用户架构修正 | P1 | 已提升为 TASK-P1-010 并完成 | [COMPLETED] |
+| BL-023 | 为 `pkg/utils` 内部支撑工具补最小测试 | `MODULES.md` pkg 分类草案 | P2 | 已提升为 TASK-P1-014 / TS-P1-014 并完成 | [COMPLETED] |
 
 ## 提升规则
 

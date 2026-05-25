@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-// Config contains plugin manager configuration.
+// Config contains plugin definition data that plugin services may consume.
 type Config struct {
 	Plugins          []Definition  `json:"plugins" yaml:"plugins" mapstructure:"plugins"`
 	DefaultTimeout   time.Duration `json:"defaultTimeout" yaml:"defaultTimeout" mapstructure:"defaultTimeout"`
@@ -26,7 +26,7 @@ type Definition struct {
 	Labels       map[string]string `json:"labels,omitempty" yaml:"labels,omitempty" mapstructure:"labels"`
 }
 
-// DefaultConfig returns a plugin manager configuration with safe defaults.
+// DefaultConfig returns plugin definition defaults.
 func DefaultConfig() *Config {
 	return &Config{
 		DefaultTimeout:   DefaultTimeout,

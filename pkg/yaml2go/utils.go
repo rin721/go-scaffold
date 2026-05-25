@@ -60,6 +60,22 @@ func buildTags(tags map[string]string, omitEmpty bool) string {
 	return "`" + strings.Join(parts, " ") + "`"
 }
 
+// buildTagValues builds Jennifer tag values while preserving tag options.
+func buildTagValues(tags map[string]string, omitEmpty bool) map[string]string {
+	if len(tags) == 0 {
+		return nil
+	}
+
+	values := make(map[string]string, len(tags))
+	for key, value := range tags {
+		if omitEmpty {
+			value += ",omitempty"
+		}
+		values[key] = value
+	}
+	return values
+}
+
 // contains 检查字符串切片是否包含指定元素
 func contains(slice []string, item string) bool {
 	for _, s := range slice {

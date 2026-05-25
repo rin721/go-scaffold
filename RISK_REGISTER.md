@@ -3,8 +3,8 @@
 ## 风险登记状态
 
 - Project：go-scaffold
-- Phase：types/* 契约边界准备
-- Status：IN_PROGRESS
+- Phase：pkg/utils 内部支撑测试完成，等待后续范围确认
+- Status：PENDING_USER_CONFIRMATION
 - Last Updated：2026-05-25
 
 ## 风险列表
@@ -100,9 +100,9 @@
 - Probability：Medium
 - Impact：后续代码优化可能回归 app 启动、路由、demo CRUD、配置热更新或迁移。
 - Trigger：多个关键路径当前没有测试文件。
-- Mitigation：`TEST_MATRIX.md` 已生成；TASK-P1-003 已补齐 `internal/transport/http` health/ready smoke test；TASK-P1-004 已补齐 demo Todo service/repository CRUD 测试基线；TASK-P1-005 已补齐 demo 迁移策略测试；TASK-P1-006 已补齐 `cmd/server` tests 命令语义测试；TASK-P1-007 已完成 `pkg/*` API 分类；TASK-P1-008 已补齐 `pkg/sqlgen` unsupported 行为测试；后续代码优化仍需按矩阵补 pkg 行为测试。
+- Mitigation：`TEST_MATRIX.md` 已生成；TASK-P1-003 已补齐 `internal/transport/http` health/ready smoke test；TASK-P1-004 已补齐 demo Todo service/repository CRUD 测试基线；TASK-P1-005 已补齐 demo 迁移策略测试；TASK-P1-006 已补齐 `cmd/server` tests 命令语义测试；TASK-P1-007 已完成 `pkg/*` API 分类；TASK-P1-008 已补齐 `pkg/sqlgen` unsupported 行为测试；TASK-P1-011 已补齐首批 `pkg/cli`、`pkg/i18n`、`pkg/yaml2go` 行为测试；TASK-P1-012 已补齐第二批 `pkg/executor`、`pkg/httpserver`、`pkg/storage` 行为测试；TASK-P1-013 已补齐 `pkg/cache` 隔离行为测试；TASK-P1-014 已补齐 `pkg/utils` 内部支撑测试。
 - Owner：Agent
-- Status：[RISK] 部分缓解，pkg 行为测试缺口仍存在
+- Status：[RISK] 已覆盖多批 `pkg/*` 行为测试和 `pkg/utils` 内部支撑测试；app 装配和中间件/handler 集成测试仍待后续确认
 - Blocking：No，但必须在代码优化前处理。
 
 ### RISK-009：P1 执行顺序未确认
@@ -172,9 +172,21 @@
 - Probability：Medium
 - Impact：`types/result` 依赖 Gin 且承担 HTTP 响应契约，若被误认为纯类型包，后续重构或复用会破坏跨层边界；auth/rbac 错误码预留也可能被误解为已实现能力。
 - Trigger：`types/*` 当前承载常量、错误码、响应结构和聚合类型，但公共契约与实现范围尚未完整标注。
-- Mitigation：用户选择 A，`BL-021` / `TM-P1-005` 已提升为 TASK-P1-009，下一切片将明确 `types/*` 契约边界并运行 `go test ./types/... -count=1` 与全量回归。
+- Mitigation：TASK-P1-009 已明确 `types/*` 契约边界，补充 `types/result` 和 `types/errors` 最小测试，并运行 `go test ./types/... -count=1` 与全量回归。
 - Owner：Agent
-- Status：[RISK] 已提升为当前下一任务
+- Status：[CONFIRMED] 已处理
+- Blocking：No。
+
+### RISK-015：`pkg/plugin` 注册责任反向
+
+- Type：Architecture/API
+- Severity：Medium
+- Probability：Medium
+- Impact：如果 `pkg/plugin` 主动从配置加载并注册插件服务，基础设施包会承担服务装配职责，后续接入真实插件服务时容易形成生命周期和依赖方向混乱。
+- Trigger：`Manager.Load(config)` 和 local factory 公共 API 让 manager 主动创建并注册插件实例。
+- Mitigation：TASK-P1-010 已收拢为被动注册边界：插件服务或宿主装配层显式创建插件并调用 `Register`；`pkg/plugin` 仅保留 registry/runtime 能力。
+- Owner：Agent
+- Status：[CONFIRMED] 已处理
 - Blocking：No。
 
 ## 决策状态
@@ -187,3 +199,4 @@
 | RD-004 | 确认迁移策略 | 已确认 dev-prod 分层 | [CONFIRMED] |
 | RD-005 | 确认中文化范围 | 已确认根文档和模板优先 | [CONFIRMED] |
 | RD-006 | 确认 auth/JWT 范围 | 已确认延后处理 | [CONFIRMED] |
+| RD-007 | 确认 `pkg/plugin` 注册责任 | 用户修正为被动注册边界 | [CONFIRMED] |

@@ -6,7 +6,7 @@ import "time"
 type Protocol string
 
 const (
-	// ProtocolLocal invokes an in-process plugin registered by factory.
+	// ProtocolLocal invokes an in-process plugin registered by a plugin service.
 	ProtocolLocal Protocol = "local"
 
 	// ProtocolHTTP invokes a remote plugin over HTTP.
