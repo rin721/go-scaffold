@@ -27,7 +27,7 @@
 | BL-015 | 增加插件发现机制 | 插件运行时增强 | P2 | 需要单独提升为任务 | [DEFERRED] |
 | BL-016 | 增加 local/http 插件示例 | 插件 v1 后续文档 | P2 | 当前主线已切回项目优化 | [DEFERRED] |
 | BL-017 | 统一配置环境变量命名策略 | `MODULES.md` BC-001 | P1 | 需要先生成测试矩阵和任务切片 | [DEFERRED] |
-| BL-018 | 修复 `manager.copyConfig` 字段覆盖 | `MODULES.md` BC-002 | P1 | 需要先补配置 update 测试 | [DEFERRED] |
+| BL-018 | 修复 `manager.copyConfig` 字段覆盖 | `MODULES.md` BC-002 | P1 | 已提升为 TASK-P1-001 并完成 | [COMPLETED] |
 | BL-019 | 处理 `cmd/server tests` 命令语义 | `MODULES.md` BC-004 | P1 | 需要确认命令保留、重命名或改造 | [DEFERRED] |
 | BL-020 | 为无测试的公共 `pkg/*` 包补最小行为测试 | `MODULES.md` pkg 分类草案 | P1 | 需要测试矩阵确认 | [DEFERRED] |
 | BL-021 | 明确 `types/result` 是否属于 HTTP 契约 | `MODULES.md` types 边界 | P1 | 需要公共契约整理 | [DEFERRED] |

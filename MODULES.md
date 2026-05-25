@@ -34,9 +34,9 @@ types/*
 |---|---|---|---|---|
 | `cmd/server` | CLI 入口、server/initdb/tests 命令、信号处理 | 进程入口 | [no test files] | `tests` 命令实际是 yaml2go 演示，语义易混淆 |
 | `internal/app` | 组合根、启动模式、生命周期、热重载 | 应用装配层 | [no test files] | demo 迁移、reload、副作用测试不足 |
-| `internal/config` | 配置结构、加载、环境变量覆盖、热重载 | 配置边界 | [no test files] | 环境变量前缀不一致、`copyConfig` 不完整 |
+| `internal/config` | 配置结构、加载、环境变量覆盖、热重载 | 配置边界 | 有测试 | TASK-P1-001 和 TASK-P1-002 已收拢 copy/update 与环境变量策略；reload 路径仍需后续覆盖 |
 | `internal/middleware` | Gin 中间件：i18n、CORS、logger、recovery、traceid | HTTP 横切层 | [no test files] | 中间件链路缺少路由级验证 |
-| `internal/transport/http` | Gin router、health/ready、demo API 注册 | 传输层 | [no test files] | health/ready 和 demo 路由缺少 smoke/integration 测试 |
+| `internal/transport/http` | Gin router、health/ready、demo API 注册 | 传输层 | 有 health/ready smoke test | demo 路由缺少 integration 测试 |
 | `internal/modules/demo` | Todo 示例业务模块 | 标准示例模块 | [no test files] | CRUD 关键路径缺少测试，示例与生产约束需分离 |
 | `pkg/*` | 可复用基础设施和工具库 | 混合 API | 部分有测试 | 公共/内部分类未逐包落地，README 中英混杂 |
 | `types/*` | 公共常量、错误码、响应结构、类型别名 | 跨层契约 | `types/constants` 有测试 | auth 错误码存在但 auth/rbac 不在当前功能范围 |
@@ -110,16 +110,16 @@ types/*
 
 ### 问题和风险
 
-- [RISK] `manager.copyConfig` 未完整复制当前 `Config` 的所有字段；已看到缺失 `InitDB`、`Executor`、`Storage`、`CORS`、`Server.Host`、`Server.IdleTimeout`、`I18n.MessagesDir` 等字段。
-- [RISK] 数据库环境变量覆盖使用 `REI_APP_DB_*` 前缀，但 `.env.example` 写的是 `DB_*`；server/logger/i18n 等又使用未加前缀的变量，环境变量策略不一致。
-- [RISK] `app_database.go` 同时存在方法版和函数版 `overrideDatabaseConfig`，职责重复。
-- [RISK] 配置 manager、reload、override 当前无测试文件。
+- [CONFIRMED] `manager.copyConfig` 字段覆盖问题已在 TASK-P1-001 修复并补测试。
+- [CONFIRMED] 数据库环境变量策略已在 TASK-P1-002 收拢为 `DB_*` 优先，旧 `REI_APP_DB_*` 作为兼容 fallback。
+- [CONFIRMED] `.env.example` 已移除未实现 JWT 示例，并与实际环境变量覆盖策略对齐。
+- [RISK] 配置 reload 路径仍缺少测试文件。
 
 ### 优化候选
 
-- [DEFERRED] 统一环境变量命名策略，并同步 `.env.example`。
-- [DEFERRED] 修复并测试 `copyConfig`，确保热更新不会丢字段。
-- [DEFERRED] 清理重复 override 函数。
+- [CONFIRMED] 统一环境变量命名策略，并同步 `.env.example`。
+- [CONFIRMED] 修复并测试 `copyConfig`，确保热更新不会丢字段。
+- [CONFIRMED] 清理重复 database override 行为，共用同一覆盖实现。
 - [DEFERRED] 增加配置加载、环境覆盖、无效变更回滚测试。
 
 ## `internal/middleware`
@@ -160,13 +160,13 @@ types/*
 
 ### 问题和风险
 
-- [RISK] health/ready 没有 HTTP smoke test。
-- [RISK] ready 在数据库缺失时返回 `result.Success` 包裹 `not_ready`，HTTP 状态为 503；响应语义需在验收标准中明确。
+- [CONFIRMED] health/ready HTTP smoke test 已在 TASK-P1-003 补齐。
+- [CONFIRMED] ready 在数据库缺失时返回 `result.Success` 包裹 `not_ready`，HTTP 状态为 503；该响应语义已被测试固定。
 - [RISK] demo 路由注册和中间件链路没有集成测试。
 
 ### 优化候选
 
-- [DEFERRED] 增加 `/health`、`/ready` smoke test。
+- [CONFIRMED] 增加 `/health`、`/ready` smoke test。
 - [DEFERRED] 增加 demo router 注册测试。
 
 ## `internal/modules/demo`
@@ -227,8 +227,8 @@ types/*
 
 | ID | 冲突 | 影响 | 建议 |
 |---|---|---|---|
-| BC-001 | `.env.example` 使用 `DB_*`，数据库 override 使用 `REI_APP_DB_*` | 环境变量文档与实现不一致 | P1 修正文档或统一代码策略 |
-| BC-002 | `copyConfig` 未覆盖完整配置字段 | 配置 Update/热更新可能丢字段 | P1 修复并补测试 |
+| BC-001 | `.env.example` 使用 `DB_*`，数据库 override 使用 `REI_APP_DB_*` | 环境变量文档与实现不一致 | [CONFIRMED] TASK-P1-002 已统一为 `DB_*` 优先，旧前缀兼容 |
+| BC-002 | `copyConfig` 未覆盖完整配置字段 | 配置 Update/热更新可能丢字段 | [CONFIRMED] TASK-P1-001 已修复并补测试 |
 | BC-003 | demo schema 在 server/initdb/reload 路径自动迁移 | dev/prod 迁移职责混乱 | P1 明确迁移开关和职责 |
 | BC-004 | `cmd/server tests` 不运行测试 | CLI 语义误导 | P1 重命名或改为真实测试入口 |
 | BC-005 | `pkg/sqlgen` README/代码存在未实现能力 | 公共工具 API 期望不稳定 | P1 显式 unsupported 或拆 Backlog |
@@ -240,10 +240,10 @@ types/*
 |---|---|---|---|---|
 | TM-001 | 全仓库 | `go test ./... -count=1` | P0 | [CONFIRMED] 当前通过 |
 | TM-002 | app 启动 | 使用测试配置构建 `app.New`，验证 core/infra/modules/transport 非空 | P0 | [NOT_STARTED] |
-| TM-003 | health/ready | 使用 `httptest` 验证 `/health`、数据库正常/缺失时 `/ready` | P0 | [NOT_STARTED] |
+| TM-003 | health/ready | 使用 `httptest` 验证 `/health`、数据库正常/缺失/失败时 `/ready` | P0 | [CONFIRMED] TASK-P1-003 已覆盖 |
 | TM-004 | demo CRUD | 使用 SQLite 临时库跑 Create/List/Get/Update/Delete | P0 | [NOT_STARTED] |
-| TM-005 | config load/override | 验证 YAML、`${VAR:default}`、环境变量覆盖、无效配置报错 | P0 | [NOT_STARTED] |
-| TM-006 | config update/copy | 验证 `Update` 后不丢失 InitDB/Executor/Storage/CORS 等字段 | P0 | [NOT_STARTED] |
+| TM-005 | config load/override | 验证 YAML、`${VAR:default}`、环境变量覆盖、无效配置报错 | P0 | [IN_PROGRESS] 环境覆盖已补测试 |
+| TM-006 | config update/copy | 验证 `Update` 后不丢失 InitDB/Executor/Storage/CORS 等字段 | P0 | [CONFIRMED] TASK-P1-001 已覆盖 |
 | TM-007 | migration boundary | 验证 server/initdb/reload 对 demo schema 的触发策略 | P1 | [NOT_STARTED] |
 | TM-008 | pkg API | 为无测试的公共包补最小行为测试 | P1 | [NOT_STARTED] |
 
@@ -252,8 +252,8 @@ types/*
 | ID | 标题 | 依据 | 建议下一步 |
 |---|---|---|---|
 | OPT-P1-001 | 建立 app/router/demo/config 测试矩阵 | 多个关键路径无测试 | 生成测试任务和时间切片 |
-| OPT-P1-002 | 统一配置环境变量策略 | `.env.example` 与实现不一致 | 先做文档/测试，再改实现 |
-| OPT-P1-003 | 修复 `copyConfig` 字段覆盖 | 热更新可能丢配置 | 添加测试后修复 |
+| OPT-P1-002 | 统一配置环境变量策略 | `.env.example` 与实现不一致 | [CONFIRMED] 已完成 |
+| OPT-P1-003 | 修复 `copyConfig` 字段覆盖 | 热更新可能丢配置 | [CONFIRMED] 已完成 |
 | OPT-P1-004 | 明确迁移策略 | `AutoMigrate`、`initdb`、SQL 脚本职责冲突 | 编写迁移边界文档和测试 |
 | OPT-P1-005 | 处理 `cmd/server tests` 命令语义 | 命令名与行为不符 | 重命名或改造为真实测试入口 |
 | OPT-P1-006 | 为 `pkg/*` 完成公共/内部分类 | 混合 API 策略需要落地 | 更新包级文档和 Backlog |
@@ -265,4 +265,4 @@ types/*
 - [CONFIRMED] 设计边界冲突清单已生成。
 - [CONFIRMED] 测试矩阵草案已生成。
 - [CONFIRMED] P1 优化候选项已生成。
-- [CONFIRMED] 尚未进行任何 Go 代码修改。
+- [CONFIRMED] 已按 P1 切片进行受控 Go 测试代码修改：TASK-P1-001、TASK-P1-002、TASK-P1-003 均已完成并验证通过。

@@ -1,0 +1,10 @@
+---
+description: 工程级 Agent 项目驱动规则
+alwaysApply: true
+---
+
+本仓库的跨工具主入口是 `AGENTS.md`，长版规则是 `docs/ai/prompt.md`。
+
+执行任何任务前必须读取 `AGENTS.md`、`AGENT_RULES.md`、`STATUS.md`、`TASKS.md`、`TIME_SLICES.md`、`REQUIREMENTS.md`、`ARCHITECTURE.md`、`ACCEPTANCE.md`、`ISSUES.md`、`TEST_REPORT.md`、`AGENT_HANDOFF.md`。
+
+只执行当前唯一合法任务，不依赖聊天上下文，不跳过测试、状态更新和交接说明。Project Rules 只放稳定约束，临时任务状态必须写入根目录状态文件。

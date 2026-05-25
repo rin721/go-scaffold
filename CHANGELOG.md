@@ -2,6 +2,77 @@
 
 ## 最新变更
 
+### 2026-05-25 - TASK-P1-003 - TS-P1-003
+
+- 变更：新增 `internal/transport/http/router_test.go`，用 `httptest` 固定 `/health` 和 `/ready` 行为。
+- 变更：`/health` 覆盖 HTTP 200、`code=0`、`message=success`、`data.status=ok`。
+- 变更：`/ready` 覆盖数据库缺失、ping 失败、ping 成功三条路径，断言 HTTP 状态码、`data.status` 和 `data.checks.database`。
+- 变更：将当前合法下一步推进为 TASK-P1-004。
+- 测试：
+  - `go test ./internal/transport/http -count=1`：PASS
+  - `go test ./... -count=1`：PASS
+- 状态：TASK-P1-003 COMPLETED；TASK-P1-004 NOT_STARTED。
+
+### 2026-05-25 - TASK-P1-002 - TS-P1-002
+
+- 变更：数据库环境变量覆盖改为优先读取 `DB_*`，旧 `REI_APP_DB_*` 保留为兼容 fallback。
+- 变更：`.env.example` 对齐实际环境变量策略，补齐 Storage/CORS 示例，移除未实现的 JWT 示例。
+- 变更：新增配置测试，覆盖 `DB_*` 主策略、旧前缀 fallback、Redis/Server/Logger/I18n 环境变量覆盖。
+- 变更：将当前合法下一步推进为 TASK-P1-003。
+- 测试：
+  - `go test ./internal/config -count=1`：PASS
+  - `go test ./... -count=1`：PASS
+- 状态：TASK-P1-002 COMPLETED；TASK-P1-003 NOT_STARTED。
+
+### 2026-05-25 - TASK-INFRA-002 - TS-INFRA-002
+
+- 变更：新增实际缺失的 `AGENTS.md`，修复状态文档与文件系统事实冲突。
+- 变更：统一 `CLAUDE.md`、`AGENT_RULES.md`、Cursor、Kiro、Codex 配置对 `AGENTS.md` 和 `docs/ai/prompt.md` 的引用。
+- 变更：扩充 14 个 canonical `skills/*/SKILL.md`，补齐 YAML frontmatter 和完整执行结构。
+- 变更：新增 14 个 `.agents/skills/*/SKILL.md` 轻量适配器。
+- 变更：将 `docs/templates/*` 标准化为可复用模板，项目事实继续保留在根目录项目文档。
+- 变更：新增状态诊断报告 `docs/reports/status_diagnostics/2026-05-25-task-infra-002-agents-md-missing.md`。
+- 测试：
+  - Agent 基础设施文件存在性核对：PASS
+  - `quick_validate.py` 验证 28 个 skill 目录：PASS
+  - 跨工具入口引用一致性检查：PASS
+  - `go test ./... -count=1`：PASS
+- 状态：TASK-INFRA-002 COMPLETED；TASK-P1-002 NOT_STARTED。
+
+### 2026-05-25 - TASK-INFRA-001 - TS-INFRA-001
+
+- 变更：补齐 `docs/ai/prompt.md` 要求的跨 Agent 入口、规则和 skills 索引。
+- 变更：新增任务拆分模板、时间切片模板、reports/specs 目录入口和跨工具目录入口。
+- 变更：新增 14 个项目专用 `skills/*/SKILL.md`。
+- 变更：记录 TASK-INFRA-001 完成，并恢复当前合法下一步为 TASK-P1-002。
+- 测试：
+  - Prompt 全量产物存在性核对：PASS
+  - `go test ./... -count=1`：PASS
+- 状态：TASK-INFRA-001 COMPLETED；TASK-P1-002 NOT_STARTED。
+
+## 历史变更
+
+### 2026-05-25 - TASK-P1-001 - TS-P1-001
+
+- 变更：用户再次发送“下一步”，按推荐默认顺序确认 P1 执行顺序。
+- 变更：修复 `internal/config/manager.go` 的 `copyConfig`，改为完整结构体复制并深拷贝 slice。
+- 变更：新增 `internal/config/manager_test.go`，覆盖字段完整复制、slice 深拷贝和 `Update` 保留未修改字段。
+- 变更：将当前合法下一步推进为 TASK-P1-002。
+- 测试：
+  - `go test ./internal/config -count=1`：PASS
+  - `go test ./... -count=1`：PASS
+- 状态：TASK-OPT-005 COMPLETED；TASK-P1-001 COMPLETED；TASK-P1-002 NOT_STARTED。
+
+### 2026-05-25 - TASK-OPT-004 - TS-OPT-004
+
+- 变更：新增 `TEST_MATRIX.md`，正式记录 P0/P1 测试矩阵、验证命令、退出条件和推荐执行顺序。
+- 变更：新增 `ISSUES.md`，补齐项目问题记录入口。
+- 变更：在 `TASKS.md` 和 `TIME_SLICES.md` 中写入 TASK-P1-001 至 TASK-P1-008、TS-P1-001 至 TS-P1-008 草案。
+- 变更：将当前合法下一步推进为 TASK-OPT-005，等待确认 P1 执行顺序。
+- 测试：
+  - `go test ./... -count=1`：PASS
+- 状态：TASK-OPT-004 COMPLETED；TASK-OPT-005 PENDING_USER_CONFIRMATION。
+
 ### 2026-05-25 - TASK-OPT-003 - TS-OPT-003
 
 - 变更：新增 `MODULES.md`，记录模块职责、依赖方向、边界冲突、测试矩阵草案和 P1 优化候选项。
@@ -10,8 +81,6 @@
 - 测试：
   - `go test ./... -count=1`：PASS
 - 状态：TASK-OPT-003 COMPLETED；TASK-OPT-004 NOT_STARTED。
-
-## 历史变更
 
 ### 2026-05-25 - TASK-OPT-002 - TS-OPT-002
 

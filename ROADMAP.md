@@ -28,6 +28,17 @@
   - 中文化先覆盖根文档和模板。
   - auth/JWT 暂不进入实现。
 
+## Phase 1.5：Agent 基础设施
+
+- 目标：补齐 `docs/ai/prompt.md` 要求的 Agent 入口、规则、skills、模板、reports/specs 和跨工具目录。
+- 状态：COMPLETED
+- 输出：
+  - `AGENTS.md`、`CLAUDE.md`、`AGENT_RULES.md`、`SKILLS.md` 已补齐并一致引用。
+  - `docs/templates/*` 已标准化为可复用模板。
+  - reports/specs、跨工具目录、14 个 canonical skills 和 14 个 `.agents` adapters 已新增或修复。
+  - `docs/reports/status_diagnostics/2026-05-25-task-infra-002-agents-md-missing.md` 已记录并关闭入口缺失冲突。
+  - 当前合法下一步已恢复到 TASK-P1-002。
+
 ## Phase 2：模块边界清单
 
 - 目标：逐模块分析当前优缺点、边界风险和优化方向。
@@ -50,35 +61,37 @@
 ## Phase 3：测试矩阵与验收门禁
 
 - 目标：为后续代码优化建立可验证基线。
-- 状态：NOT_STARTED
+- 状态：COMPLETED
 - 输出：
-  - app 启动 smoke test。
-  - `/health`、`/ready` smoke test。
-  - demo CRUD 集成测试。
-  - 配置加载/环境覆盖/热更新测试。
-  - 迁移策略验证。
+  - `TEST_MATRIX.md` 已生成。
+  - app 启动、health/ready、demo CRUD、配置加载/环境覆盖/热更新、迁移策略均有矩阵项。
+  - 每个矩阵项已包含建议文件范围、验证命令和退出条件。
 
 ## Phase 4：任务拆分与时间切片
 
 - 目标：把确认后的优化项拆成可执行、可验证、可恢复的最小切片。
-- 状态：NOT_STARTED
+- 状态：COMPLETED
 - 输出：
-  - `TASKS.md` 的 P1/P2 任务清单。
-  - `TIME_SLICES.md` 的唯一合法执行顺序。
-  - 每个切片的允许文件范围、测试命令和退出条件。
+  - `TASKS.md` 已新增 P1 任务草案。
+  - `TIME_SLICES.md` 已新增 P1 时间切片草案。
+  - 推荐执行顺序已确认。
 
 ## Phase 5：代码优化
 
 - 目标：按唯一合法时间切片逐步优化项目。
-- 状态：BLOCKED
+- 状态：IN_PROGRESS
 - 进入条件：
   - Phase 2 模块边界清单完成。
   - Phase 3 测试矩阵确认。
-  - Phase 4 时间切片确认。
+  - Phase 4 时间切片执行顺序确认。
 - 禁止：
   - 不做未授权重构。
   - 不实现 Backlog 项。
   - 不绕过测试和状态更新。
+- 当前进展：
+  - TASK-P1-001 已完成：`copyConfig` 字段覆盖修复并补配置 copy/update 测试。
+  - TASK-P1-002 已完成：配置环境变量策略收拢，`.env.example` 与实现对齐。
+  - TASK-P1-003 已完成：`/health`、`/ready` router smoke test 已补齐并通过回归。
 
 ## Phase 6：收尾与交接
 

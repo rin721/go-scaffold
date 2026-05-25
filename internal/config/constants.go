@@ -6,14 +6,15 @@ import "fmt"
 // 定义所有支持的环境变量名称,避免魔法字符串
 // 命名规范: <模块>_<字段名>,全大写,单词间用下划线分隔
 
-// EnvPrefixJoin 拼接环境变量名称
+// EnvPrefixJoin 拼接旧版带前缀的环境变量名称
 func EnvPrefixJoin(field string) string {
 	return fmt.Sprintf("%s_%s", EnvPrefix, field)
 }
 
 // 数据库相关环境变量
 const (
-	//EnvPrefix 数据库前缀
+	// EnvPrefix 旧版数据库环境变量前缀
+	// 新配置统一使用未加前缀的 DB_*，旧版 REI_APP_DB_* 仅作为兼容 fallback。
 	EnvPrefix = "REI_APP"
 	// EnvDBDriver 数据库驱动类型
 	// 可选值: postgres, mysql, sqlite

@@ -424,50 +424,14 @@ func (m *manager) Update(fn func(*Config)) error {
 //
 //	*Config: 配置副本
 func (m *manager) copyConfig(src *Config) *Config {
-	dst := &Config{
-		Server: ServerConfig{
-			Port:         src.Server.Port,
-			Mode:         src.Server.Mode,
-			ReadTimeout:  src.Server.ReadTimeout,
-			WriteTimeout: src.Server.WriteTimeout,
-		},
-		Database: DatabaseConfig{
-			Driver:       src.Database.Driver,
-			Host:         src.Database.Host,
-			Port:         src.Database.Port,
-			User:         src.Database.User,
-			Password:     src.Database.Password,
-			DBName:       src.Database.DBName,
-			MaxOpenConns: src.Database.MaxOpenConns,
-			MaxIdleConns: src.Database.MaxIdleConns,
-		},
-		Redis: RedisConfig{
-			Enabled:  src.Redis.Enabled,
-			Host:     src.Redis.Host,
-			Port:     src.Redis.Port,
-			Password: src.Redis.Password,
-			DB:       src.Redis.DB,
-			PoolSize: src.Redis.PoolSize,
-		},
-		Logger: LoggerConfig{
-			Level:         src.Logger.Level,
-			Format:        src.Logger.Format,
-			ConsoleFormat: src.Logger.ConsoleFormat,
-			FileFormat:    src.Logger.FileFormat,
-			Output:        src.Logger.Output,
-			FilePath:      src.Logger.FilePath,
-			MaxSize:       src.Logger.MaxSize,
-			MaxBackups:    src.Logger.MaxBackups,
-			MaxAge:        src.Logger.MaxAge,
-		},
-		I18n: I18nConfig{
-			Default:   src.I18n.Default,
-			Supported: make([]string, len(src.I18n.Supported)),
-		},
-	}
-	// 拷贝 slice
-	copy(dst.I18n.Supported, src.I18n.Supported)
-	return dst
+	dst := *src
+	dst.I18n.Supported = append([]string(nil), src.I18n.Supported...)
+	dst.Executor.Pools = append([]ExecutorPoolConfig(nil), src.Executor.Pools...)
+	dst.CORS.AllowOrigins = append([]string(nil), src.CORS.AllowOrigins...)
+	dst.CORS.AllowMethods = append([]string(nil), src.CORS.AllowMethods...)
+	dst.CORS.AllowHeaders = append([]string(nil), src.CORS.AllowHeaders...)
+	dst.CORS.ExposeHeaders = append([]string(nil), src.CORS.ExposeHeaders...)
+	return &dst
 }
 
 // RegisterHook 注册配置变更钩子

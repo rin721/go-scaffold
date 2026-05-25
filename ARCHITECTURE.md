@@ -55,9 +55,9 @@ types/*
 ## 代码变更门禁
 
 - [CONFIRMED] 未完成模块边界清单前，不进入代码优化。
-- [CONFIRMED] 未完成测试矩阵前，不修改 app/router/demo/config/migration 核心路径。
+- [CONFIRMED] 未确认 P1 执行顺序前，不修改 app/router/demo/config/migration 核心路径。
 - [CONFIRMED] 未确认包 API 分类前，不做 `pkg/*` 破坏性重构。
 
 ## 下一架构任务
 
-- [CONFIRMED] TASK-OPT-003：生成模块边界清单和优化路线明细。
+- [NEEDS_CONFIRMATION] TASK-OPT-005：确认正式测试矩阵和 P1 执行顺序。

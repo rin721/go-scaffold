@@ -3,7 +3,7 @@
 ## 风险登记状态
 
 - Project：go-scaffold
-- Phase：模块边界清单
+- Phase：HTTP health/ready smoke test
 - Status：IN_PROGRESS
 - Last Updated：2026-05-25
 
@@ -28,7 +28,7 @@
 - Probability：High
 - Impact：后续 Agent 可能继续执行插件系统扩展，而不是项目优化主线。
 - Trigger：`STATUS.md`、`TASKS.md`、`TIME_SLICES.md` 未更新。
-- Mitigation：当前合法任务已切换到模块边界清单，后续仍需持续更新状态文件。
+- Mitigation：当前合法任务已随每个切片更新；后续仍需持续同步 `STATUS.md`、`TASKS.md`、`TIME_SLICES.md`、`TEST_REPORT.md` 和 `AGENT_HANDOFF.md`。
 - Owner：Agent
 - Status：[RISK]
 - Blocking：Yes，阻塞“下一步”稳定执行。
@@ -88,10 +88,10 @@
 - Probability：Medium
 - Impact：用户可能误认为 auth/rbac 已支持，带来安全误解。
 - Trigger：`.env.example` 包含 JWT 示例，而 README 说暂不实现 auth/rbac。
-- Mitigation：后续确认删除、保留占位或提升为正式需求。
+- Mitigation：TASK-P1-002 已从 `.env.example` 移除 JWT 示例；auth/rbac 继续作为延后需求处理。
 - Owner：User/Agent
-- Status：[RISK]
-- Blocking：No，但阻塞 auth 相关文档或实现。
+- Status：[CONFIRMED] 示例风险已修复；auth/rbac 仍延后
+- Blocking：No。
 
 ### RISK-008：测试覆盖不足
 
@@ -100,10 +100,46 @@
 - Probability：Medium
 - Impact：后续代码优化可能回归 app 启动、路由、demo CRUD、配置热更新或迁移。
 - Trigger：多个关键路径当前没有测试文件。
-- Mitigation：代码优化前确认 P0 测试矩阵。
+- Mitigation：`TEST_MATRIX.md` 已生成；TASK-P1-003 已补齐 `internal/transport/http` health/ready smoke test；后续代码优化仍需按矩阵补 app、demo、CLI、pkg 等测试。
 - Owner：Agent
-- Status：[RISK]
+- Status：[RISK] 部分缓解
 - Blocking：No，但必须在代码优化前处理。
+
+### RISK-009：P1 执行顺序未确认
+
+- Type：Process
+- Severity：Medium
+- Probability：Medium
+- Impact：如果直接进入代码优化，可能出现先修复后补测试、或任务顺序与用户预期不一致。
+- Trigger：生成测试矩阵和任务切片后未确认执行顺序。
+- Mitigation：用户再次发送“下一步”后已按推荐默认顺序确认，并已完成 TASK-P1-001。
+- Owner：User/Agent
+- Status：[CONFIRMED]
+- Blocking：No。
+
+### RISK-010：Agent 入口状态与文件系统事实不一致
+
+- Type：Process/Documentation
+- Severity：High
+- Probability：Medium
+- Impact：新 Agent 读取 `CLAUDE.md`、Cursor、Kiro 或 Codex 配置时会引用缺失的 `AGENTS.md`，导致上下文恢复失败。
+- Trigger：`TASK-INFRA-001` 记录 `AGENTS.md` 已补齐，但实际文件缺失。
+- Mitigation：TASK-INFRA-002 已新增 `AGENTS.md`，统一跨工具引用，补齐 skills frontmatter 和 `.agents` adapters，并生成状态诊断报告。
+- Owner：Agent
+- Status：[CONFIRMED] 已修复
+- Blocking：No。
+
+### RISK-011：配置环境变量命名策略不一致
+
+- Type：Configuration/Documentation
+- Severity：Medium
+- Probability：High
+- Impact：使用 `.env.example` 的开发者设置 `DB_*` 后数据库配置不生效，造成本地和部署配置漂移。
+- Trigger：数据库 override 曾读取 `REI_APP_DB_*`，而 `.env.example` 和其他模块使用未加前缀变量。
+- Mitigation：TASK-P1-002 已统一为 `DB_*` 优先，旧 `REI_APP_DB_*` 兼容 fallback；`.env.example` 已同步；配置测试已覆盖。
+- Owner：Agent
+- Status：[CONFIRMED] 已修复
+- Blocking：No。
 
 ## 决策状态
 

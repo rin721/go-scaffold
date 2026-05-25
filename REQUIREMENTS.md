@@ -40,7 +40,7 @@
 | REQ-OPT-P1-001 | 生成模块边界清单 | `MODULES.md` 梳理 `cmd`、`internal/*`、`pkg/*`、`types/*` 的职责、风险和优化方向 | [CONFIRMED] |
 | REQ-OPT-P1-002 | 生成测试矩阵 | `MODULES.md` 包含 app 启动、health/ready、demo CRUD、配置加载/重载、迁移策略测试矩阵草案 | [CONFIRMED] |
 | REQ-OPT-P1-003 | 生成设计边界收拢清单 | `MODULES.md` 明确迁移、配置、插件、包 API、demo、auth/JWT 的统一策略风险 | [CONFIRMED] |
-| REQ-OPT-P1-004 | 拆分优化任务和时间切片 | 每个 P1 优化项有允许文件范围、验证命令和退出条件 | [NOT_STARTED] |
+| REQ-OPT-P1-004 | 拆分优化任务和时间切片 | 每个 P1 优化项有允许文件范围、验证命令和退出条件 | [CONFIRMED] |
 | REQ-OPT-P1-005 | 分阶段中文化历史内容 | 根文档优先，包 README 进入后续文档任务 | [NOT_STARTED] |
 
 ## P2 延后需求
@@ -61,5 +61,5 @@
 
 ## 完成判断
 
-- TASK-OPT-003：COMPLETED
-- 下一合法任务：TASK-OPT-004，生成正式测试矩阵和任务拆分草案。
+- TASK-OPT-004：COMPLETED
+- 下一合法任务：TASK-OPT-005，确认正式测试矩阵和 P1 执行顺序。

@@ -112,100 +112,66 @@ func (c *DatabaseConfig) Validate() error {
 
 // overrideDatabaseConfig 使用环境变量覆盖数据库配置
 func (cfg *DatabaseConfig) overrideDatabaseConfig() {
+	applyDatabaseEnvOverrides(cfg)
+}
+
+// overrideDatabaseConfig 使用环境变量覆盖数据库配置
+func overrideDatabaseConfig(cfg *DatabaseConfig) {
+	applyDatabaseEnvOverrides(cfg)
+}
+
+func applyDatabaseEnvOverrides(cfg *DatabaseConfig) {
 	// Driver
-	if val := os.Getenv(EnvPrefixJoin(EnvDBDriver)); val != "" {
+	if val := getDatabaseEnv(EnvDBDriver); val != "" {
 		cfg.Driver = val
 	}
 
 	// Host
-	if val := os.Getenv(EnvPrefixJoin(EnvDBHost)); val != "" {
+	if val := getDatabaseEnv(EnvDBHost); val != "" {
 		cfg.Host = val
 	}
 
 	// Port
-	if val := os.Getenv(EnvPrefixJoin(EnvDBPort)); val != "" {
+	if val := getDatabaseEnv(EnvDBPort); val != "" {
 		if port, err := strconv.Atoi(val); err == nil {
 			cfg.Port = port
 		}
 	}
 
 	// User
-	if val := os.Getenv(EnvPrefixJoin(EnvDBUser)); val != "" {
+	if val := getDatabaseEnv(EnvDBUser); val != "" {
 		cfg.User = val
 	}
 
 	// Password
 	// 密码应该优先使用环境变量
-	if val := os.Getenv(EnvPrefixJoin(EnvDBPassword)); val != "" {
+	if val := getDatabaseEnv(EnvDBPassword); val != "" {
 		cfg.Password = val
 	}
 
 	// DBName
-	if val := os.Getenv(EnvPrefixJoin(EnvDBName)); val != "" {
+	if val := getDatabaseEnv(EnvDBName); val != "" {
 		cfg.DBName = val
 	}
 
 	// MaxOpenConns
-	if val := os.Getenv(EnvPrefixJoin(EnvDBMaxOpenConns)); val != "" {
+	if val := getDatabaseEnv(EnvDBMaxOpenConns); val != "" {
 		if conns, err := strconv.Atoi(val); err == nil {
 			cfg.MaxOpenConns = conns
 		}
 	}
 
 	// MaxIdleConns
-	if val := os.Getenv(EnvPrefixJoin(EnvDBMaxIdleConns)); val != "" {
+	if val := getDatabaseEnv(EnvDBMaxIdleConns); val != "" {
 		if conns, err := strconv.Atoi(val); err == nil {
 			cfg.MaxIdleConns = conns
 		}
 	}
 }
 
-// overrideDatabaseConfig 使用环境变量覆盖数据库配置
-func overrideDatabaseConfig(cfg *DatabaseConfig) {
-	// Driver
-	if val := os.Getenv(EnvPrefixJoin(EnvDBDriver)); val != "" {
-		cfg.Driver = val
+func getDatabaseEnv(key string) string {
+	if val := os.Getenv(key); val != "" {
+		return val
 	}
-
-	// Host
-	if val := os.Getenv(EnvPrefixJoin(EnvDBHost)); val != "" {
-		cfg.Host = val
-	}
-
-	// Port
-	if val := os.Getenv(EnvPrefixJoin(EnvDBPort)); val != "" {
-		if port, err := strconv.Atoi(val); err == nil {
-			cfg.Port = port
-		}
-	}
-
-	// User
-	if val := os.Getenv(EnvPrefixJoin(EnvDBUser)); val != "" {
-		cfg.User = val
-	}
-
-	// Password
-	// 密码应该优先使用环境变量
-	if val := os.Getenv(EnvPrefixJoin(EnvDBPassword)); val != "" {
-		cfg.Password = val
-	}
-
-	// DBName
-	if val := os.Getenv(EnvPrefixJoin(EnvDBName)); val != "" {
-		cfg.DBName = val
-	}
-
-	// MaxOpenConns
-	if val := os.Getenv(EnvPrefixJoin(EnvDBMaxOpenConns)); val != "" {
-		if conns, err := strconv.Atoi(val); err == nil {
-			cfg.MaxOpenConns = conns
-		}
-	}
-
-	// MaxIdleConns
-	if val := os.Getenv(EnvPrefixJoin(EnvDBMaxIdleConns)); val != "" {
-		if conns, err := strconv.Atoi(val); err == nil {
-			cfg.MaxIdleConns = conns
-		}
-	}
+	return os.Getenv(EnvPrefixJoin(key))
 }
