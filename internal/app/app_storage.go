@@ -46,12 +46,6 @@ func initStorage(app *App) error {
 		return fmt.Errorf("failed to create storage: %w", err)
 	}
 
-	// 注入依赖 - Storage 不需要 Executor 依赖
-	// 如果 Storage 实现了 ExecutorInjectable 接口,可以在这里注入
-	// if injector, ok := storageService.(types.ExecutorInjectable); ok {
-	// 	injector.SetExecutor(app.Executor)
-	// }
-
 	app.Storage = storageService
 	app.Logger.Info("Storage initialized successfully",
 		"fs_type", cfg.FSType,

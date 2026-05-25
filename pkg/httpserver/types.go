@@ -4,8 +4,6 @@ import (
 	"context"
 	"net/http"
 	"time"
-
-	"github.com/rei0721/go-scaffold/pkg/executor"
 )
 
 // HTTPServer HTTP 服务器接口
@@ -37,14 +35,6 @@ type HTTPServer interface {
 	// 返回:
 	//   error: 重载失败时的错误
 	Reload(ctx context.Context, cfg *Config) error
-
-	// SetExecutor 设置协程池管理器（延迟注入）
-	// 用于异步处理HTTP相关任务
-	// 参数:
-	//   exec: 协程池管理器实例，为nil时禁用executor功能
-	// 线程安全:
-	//   使用原子操作保证并发安全
-	SetExecutor(exec executor.Manager)
 }
 
 // Config HTTP 服务器配置

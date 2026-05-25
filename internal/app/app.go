@@ -10,20 +10,15 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/rei0721/go-scaffold/pkg/cache"
-	"github.com/rei0721/go-scaffold/pkg/dbtx"
 	"github.com/rei0721/go-scaffold/pkg/executor"
 	"github.com/rei0721/go-scaffold/pkg/httpserver"
 	"github.com/rei0721/go-scaffold/pkg/i18n"
-	"github.com/rei0721/go-scaffold/pkg/jwt"
-	"github.com/rei0721/go-scaffold/pkg/rbac"
-	"github.com/rei0721/go-scaffold/pkg/sqlgen"
 	"github.com/rei0721/go-scaffold/pkg/storage"
 	"github.com/rei0721/go-scaffold/pkg/utils"
 
 	"github.com/rei0721/go-scaffold/internal/config"
 	"github.com/rei0721/go-scaffold/pkg/database"
 	"github.com/rei0721/go-scaffold/pkg/logger"
-	"github.com/rei0721/go-scaffold/types"
 )
 
 // App 是主应用程序容器,持有所有组件并管理它们的生命周期
@@ -43,14 +38,6 @@ type App struct {
 	// DB 数据库连接抽象层
 	// 使用接口而非具体实现,便于切换数据库
 	DB database.Database
-
-	// DBTx 数据库事务管理器
-	// 使用接口而非具体实现,便于切换数据库
-	DBTx dbtx.Manager
-
-	// Sqlgen SQL 生成器
-	// 用于生成数据库建表语句
-	Sqlgen *sqlgen.Generator
 
 	// I18n 国际化
 	I18n      i18n.I18n
@@ -82,21 +69,9 @@ type App struct {
 	// 使用 pkg/httpserver 接口，支持配置热更新
 	HTTPServer httpserver.HTTPServer
 
-	// JWT JWT认证管理器
-	// 用于生成和验证访问令牌
-	JWT jwt.JWT
-
-	// RBAC 角色访问控制
-	// 管理用户权限和角色
-	RBAC rbac.RBAC
-
 	// Storage 文件服务
 	// 提供统一的文件操作API,支持文件监听、复制、Excel和图片处理
 	Storage storage.Storage
-
-	// Crypto 密码加密器
-	// 用于安全地加密和验证密码
-	Crypto types.Crypto
 
 	// Options 应用选项
 	Options Options
@@ -203,15 +178,7 @@ func (a *App) Start(ctx context.Context) error {
 //
 //	error: 启动失败时的错误
 func (a *App) Run() error {
-	// 启动所有守护进程
-	if err := a.Start(context.Background()); err != nil {
-		return err
-	}
-
-	// 阻塞,直到 Shutdown() 被调用
-	// 这里使用一个简单的 select {}
-	// 实际应用中通常会监听信号来控制关闭
-	select {}
+	return a.Start(context.Background())
 }
 
 // Shutdown 优雅地关闭应用程序
@@ -252,12 +219,6 @@ func (a *App) Shutdown(ctx context.Context) error {
 		} else {
 			a.Logger.Info("HTTP server stopped")
 		}
-	}
-
-	// 关闭 RBAC
-	if a.RBAC != nil {
-		a.RBAC.Close()
-		a.Logger.Info("rbac stopped")
 	}
 
 	// 关闭 Storage

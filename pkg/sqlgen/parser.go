@@ -57,8 +57,8 @@ func (p *Parser) ParseSingle(sql string) (*Schema, error) {
 
 // 正则表达式
 var (
-	// 匹配 CREATE TABLE 语句
-	createTableRegex = regexp.MustCompile(`(?i)CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?[` + "`" + `"'\[]?(\w+)[` + "`" + `"'\]]?\s*\(([\s\S]+?)\)`)
+	// 匹配 CREATE TABLE 语句头。列定义主体使用括号深度扫描解析，避免被 varchar(64) 之类的类型截断。
+	createTableStartRegex = regexp.MustCompile(`(?i)CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?[` + "`" + `"'\[]?(\w+)[` + "`" + `"'\]]?\s*\(`)
 
 	// 匹配列定义
 	columnDefRegex = regexp.MustCompile(`(?i)^[` + "`" + `"'\[]?(\w+)[` + "`" + `"'\]]?\s+(\w+(?:\([^)]+\))?(?:\s+\w+)*)\s*(.*)$`)
@@ -78,22 +78,52 @@ var (
 
 func (p *Parser) findCreateTableStatements() []string {
 	var results []string
-	matches := createTableRegex.FindAllString(p.input, -1)
-	results = append(results, matches...)
+
+	offset := 0
+	for offset < len(p.input) {
+		loc := createTableStartRegex.FindStringIndex(p.input[offset:])
+		if loc == nil {
+			break
+		}
+
+		start := offset + loc[0]
+		openParen := offset + loc[1] - 1
+		closeParen := findMatchingParen(p.input, openParen)
+		if closeParen < 0 {
+			break
+		}
+
+		end := closeParen + 1
+		for end < len(p.input) && p.input[end] != ';' {
+			end++
+		}
+		if end < len(p.input) && p.input[end] == ';' {
+			end++
+		}
+
+		results = append(results, p.input[start:end])
+		offset = end
+	}
+
 	return results
 }
 
 func (p *Parser) parseCreateTable(sql string) (*Schema, error) {
-	matches := createTableRegex.FindStringSubmatch(sql)
-	if len(matches) < 3 {
+	matches := createTableStartRegex.FindStringSubmatchIndex(sql)
+	if len(matches) < 4 {
 		return nil, ErrParseFailed
 	}
 
-	tableName := matches[1]
-	columnsBody := matches[2]
+	tableName := sql[matches[2]:matches[3]]
+	openParen := matches[1] - 1
+	closeParen := findMatchingParen(sql, openParen)
+	if closeParen < 0 {
+		return nil, ErrParseFailed
+	}
+	columnsBody := sql[openParen+1 : closeParen]
 
 	schema := &Schema{
-		Name:      toPascalCase(tableName),
+		Name:      toPascalCase(singularizeTableName(tableName)),
 		TableName: tableName,
 	}
 
@@ -153,6 +183,56 @@ func (p *Parser) parseCreateTable(sql string) (*Schema, error) {
 	p.analyzeImports(schema)
 
 	return schema, nil
+}
+
+func findMatchingParen(input string, openIndex int) int {
+	if openIndex < 0 || openIndex >= len(input) || input[openIndex] != '(' {
+		return -1
+	}
+
+	depth := 0
+	inQuote := rune(0)
+	escaped := false
+	for i, ch := range input[openIndex:] {
+		idx := openIndex + i
+		if inQuote != 0 {
+			if escaped {
+				escaped = false
+				continue
+			}
+			if ch == '\\' {
+				escaped = true
+				continue
+			}
+			if ch == inQuote {
+				inQuote = 0
+			}
+			continue
+		}
+
+		switch ch {
+		case '\'', '"':
+			inQuote = ch
+		case '(':
+			depth++
+		case ')':
+			depth--
+			if depth == 0 {
+				return idx
+			}
+		}
+	}
+	return -1
+}
+
+func singularizeTableName(name string) string {
+	if strings.HasSuffix(name, "ies") && len(name) > 3 {
+		return strings.TrimSuffix(name, "ies") + "y"
+	}
+	if strings.HasSuffix(name, "s") && !strings.HasSuffix(name, "ss") && len(name) > 1 {
+		return strings.TrimSuffix(name, "s")
+	}
+	return name
 }
 
 // splitColumns 分割列定义 (处理嵌套括号)

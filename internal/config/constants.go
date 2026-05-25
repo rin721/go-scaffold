@@ -148,22 +148,6 @@ const (
 	EnvI18nSupported = "I18N_SUPPORTED"
 )
 
-// JWT 相关环境变量
-const (
-	// EnvJWTSecret JWT 签名密钥
-	// 重要: 生产环境必须设置,至少32个字符
-	// 示例: export JWT_SECRET=your-secret-key-at-least-32-characters-long
-	EnvJWTSecret = "JWT_SECRET"
-
-	// EnvJWTExpiresIn JWT 令牌有效期（秒）
-	// 示例: export JWT_EXPIRES_IN=3600
-	EnvJWTExpiresIn = "JWT_EXPIRES_IN"
-
-	// EnvJWTIssuer JWT 签发者
-	// 示例: export JWT_ISSUER=go-scaffold
-	EnvJWTIssuer = "JWT_ISSUER"
-)
-
 // CORS 相关环境变量
 const (
 	// EnvCORSEnabled CORS 是否启用
@@ -223,9 +207,7 @@ const (
 	AppLoggerName   = "logger"
 	AppI18nName     = "i18n"
 	AppExecutorName = "executor"
-	AppJWTName      = "jwt"
 	AppInitDBName   = "initdb"
-	AppRBACName     = "rbac"
 	AppStorageName  = "storage"
 	AppCORSName     = "cors"
 )

@@ -25,11 +25,6 @@ type httpServer struct {
 	// logger 日志记录器
 	logger logger.Logger
 
-	// executor 协程池管理器（可选）
-	// 使用 atomic.Value 实现无锁读取
-	// 用于异步处理HTTP请求相关任务
-	executor atomic.Value // 存储 executor.Manager
-
 	// mu 保护并发访问（热重载使用）
 	mu sync.RWMutex
 
@@ -52,9 +47,6 @@ type httpServer struct {
 //	HTTPServer: 服务器实例
 //	error: 创建失败时的错误
 //
-// 注意:
-//
-//	Executor需要通过SetExecutor方法延迟注入
 func New(handler Handler, cfg *Config, log logger.Logger) (HTTPServer, error) {
 	if handler == nil {
 		return nil, &ServerError{

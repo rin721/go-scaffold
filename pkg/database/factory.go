@@ -1,8 +1,12 @@
 package database
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
 	"sync"
 	"time"
 
@@ -79,14 +83,17 @@ func (d *database) Close() error {
 // 返回:
 //
 //	error: 如果连接失败或超时
-func (d *database) Ping() error {
+func (d *database) Ping(ctx context.Context) error {
 	d.mu.RLock()
 	defer d.mu.RUnlock()
 
 	if d.sqlDB != nil {
 		// 执行 ping 操作
 		// 会建立一个测试连接并立即关闭
-		return d.sqlDB.Ping()
+		if ctx == nil {
+			ctx = context.Background()
+		}
+		return d.sqlDB.PingContext(ctx)
 	}
 	return nil
 }
@@ -124,7 +131,7 @@ func (d *database) Reload(cfg *Config) error {
 
 	// 2. 验证新连接是否可用
 	// 执行 Ping 测试,确保新连接确实可用
-	if err := newDB.Ping(); err != nil {
+	if err := newDB.Ping(context.Background()); err != nil {
 		// 新连接不可用,关闭它并返回错误
 		_ = newDB.Close()
 		return fmt.Errorf("new database connection ping failed: %w", err)
@@ -223,6 +230,9 @@ func NewWithHooks(cfg *Config, hooks ...Hook) (Database, error) {
 		// SQLite 嵌入式数据库
 		// SQLite 只需要文件路径,不需要复杂的连接字符串
 		// cfg.DBName 此时是数据库文件路径(如 ./data/app.db)
+		if err := ensureSQLiteDir(cfg.DBName); err != nil {
+			return nil, err
+		}
 		dialector = sqlite.Open(cfg.DBName)
 
 	default:
@@ -279,6 +289,20 @@ func NewWithHooks(cfg *Config, hooks ...Hook) (Database, error) {
 		db:    db,    // GORM 实例
 		sqlDB: sqlDB, // 标准库 sql.DB
 	}, nil
+}
+
+func ensureSQLiteDir(dbName string) error {
+	if dbName == "" || dbName == ":memory:" || strings.HasPrefix(dbName, "file:") {
+		return nil
+	}
+	dir := filepath.Dir(dbName)
+	if dir == "." || dir == "" {
+		return nil
+	}
+	if err := os.MkdirAll(dir, 0755); err != nil {
+		return fmt.Errorf("failed to create sqlite database directory: %w", err)
+	}
+	return nil
 }
 
 // buildPostgresDSN 构建 PostgreSQL 连接字符串

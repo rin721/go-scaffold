@@ -58,13 +58,6 @@ type Config struct {
 	// 管理异步任务的协程池
 	Executor ExecutorConfig `mapstructure:"executor"`
 
-	// JWT JWT认证配置
-	// 管理token的生成和验证
-	JWT JWTConfig `mapstructure:"jwt"`
-
-	// RBAC RBAC配置
-	RBAC RBACConfig `mapstructure:"rbac"`
-
 	// Storage 文件服务配置
 	// 提供统一的文件操作API
 	Storage StorageConfig `mapstructure:"storage"`
@@ -96,7 +89,6 @@ func (c *Config) Validate() error {
 		&c.I18n,
 		&c.InitDB,
 		&c.Executor,
-		&c.JWT,
 		&c.Storage,
 		&c.CORS,
 	}
@@ -146,11 +138,6 @@ func (c *Config) ValidateOld() error {
 	// 验证执行器配置
 	if err := c.Executor.Validate(); err != nil {
 		return fmt.Errorf("executor config: %w", err)
-	}
-
-	// 验证 JWT 配置
-	if err := c.JWT.Validate(); err != nil {
-		return fmt.Errorf("jwt config: %w", err)
 	}
 
 	return nil

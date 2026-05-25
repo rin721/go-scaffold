@@ -7,6 +7,8 @@
 package database
 
 import (
+	"context"
+	"database/sql"
 	"time"
 
 	"gorm.io/gorm"
@@ -154,11 +156,28 @@ type Database interface {
 	// - 定期检查连接状态
 	// 返回:
 	//   error: 如果连接失败或不可用
-	Ping() error
+	Ping(ctx context.Context) error
+
+	// WithTx 使用默认事务选项执行函数。
+	WithTx(ctx context.Context, fn TxFunc) error
+
+	// WithTxOptions 使用自定义事务选项执行函数。
+	WithTxOptions(ctx context.Context, opts *TxOptions, fn TxFunc) error
 
 	// Reloader 嵌入重载接口
 	// 支持数据库配置的热更新
 	Reloader
+}
+
+// TxFunc 是事务回调函数签名。
+type TxFunc func(ctx context.Context, tx *gorm.DB) error
+
+// TxOptions 保存事务执行选项。
+type TxOptions struct {
+	Isolation                sql.IsolationLevel
+	ReadOnly                 bool
+	Timeout                  time.Duration
+	DisableNestedTransaction bool
 }
 
 // Hook 定义数据库操作的回调接口

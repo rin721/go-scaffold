@@ -45,6 +45,7 @@ configs/config.local.yaml
 
 # Temporary files
 /tmp/
+/data/
 *.tmp
 
 # ide
