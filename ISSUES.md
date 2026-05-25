@@ -3,7 +3,7 @@
 ## Issue 状态
 
 - 项目：go-scaffold
-- 最后更新：2026-05-25
+- 最后更新：2026-05-26
 - 规则：失败、返工和阻塞问题记录在本文；风险项仍记录在 `RISK_REGISTER.md`。
 
 ## Open Issues
@@ -33,6 +33,10 @@
 - ISSUE-P1-013：无未解决失败项。TASK-P1-013 首次包测试为测试代码编译失败，原因是误读 `miniredis.Get` 返回值；修正测试断言后，`pkg/cache` 包测试和全量回归均通过。
 - ISSUE-NEXT-006：无新增失败项。用户选择 B 后，TASK-NEXT-SCOPE-006 已将 `BL-023` `pkg/utils` 内部支撑测试提升为 TASK-P1-014 / TS-P1-014。
 - ISSUE-P1-014：无未解决失败项。TASK-P1-014 前两次包测试失败来自测试代码对端口占用语义的环境假设；改为确定性无效地址、端口范围和 exclude 断言后，`pkg/utils` 包测试和全量回归均通过。
+- ISSUE-NEXT-007：无新增失败项。用户选择 B 后，TASK-NEXT-SCOPE-007 已将 `BL-002` router/middleware/demo HTTP 集成测试提升为 TASK-P1-015 / TS-P1-015。
+- ISSUE-P1-015：无未解决失败项。TASK-P1-015 前两次相关包测试失败来自测试构造问题：`httptest.NewRequest` 默认 Host 与 Origin 同源导致 CORS 中间件跳过；固定测试 Host 为 `api.local` 后，相关包测试和全量回归均通过。
+- ISSUE-NEXT-008：无新增失败项。用户选择 A 后，TASK-NEXT-SCOPE-008 已关闭并进入 TASK-PHASE6-001 / TS-PHASE6-001。
+- ISSUE-PHASE6-001：无未解决失败项。Phase 6 收尾仅更新项目状态文档，最终 `go test ./... -count=1` 与 `git diff --check` 均通过。
 
 ## 历史说明
 
@@ -52,5 +56,8 @@
 - 2026-05-25：记录 TASK-P1-013 无未解决失败项，测试代码编译问题已修复，`pkg/cache` 包测试和全量回归通过。
 - 2026-05-25：记录 TASK-NEXT-SCOPE-006 无新增失败项，`pkg/utils` 内部支撑测试已排期。
 - 2026-05-25：记录 TASK-P1-014 无未解决失败项，测试环境假设已修正，`pkg/utils` 包测试和全量回归通过。
+- 2026-05-26：记录 TASK-NEXT-SCOPE-007 无新增失败项，router/middleware/demo HTTP 集成测试已排期。
+- 2026-05-26：记录 TASK-P1-015 无未解决失败项，CORS 测试构造问题已修正，相关包测试和全量回归通过。
+- 2026-05-26：记录 TASK-NEXT-SCOPE-008 与 TASK-PHASE6-001 无新增失败项，Phase 6 收尾完成。
 - 2026-05-25：记录并关闭 `AGENTS.md` 缺失导致的 Agent 入口冲突。
 - 2026-05-25：创建 `ISSUES.md`，补齐 `docs/ai/prompt.md` 要求的项目问题记录入口。

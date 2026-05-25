@@ -2,10 +2,10 @@
 
 ## 当前合法任务
 
-- Task ID：TASK-NEXT-SCOPE-007
-- Status：PENDING_USER_CONFIRMATION
-- Time Slice：TS-NEXT-SCOPE-007
-- Summary：TASK-P1-014 已完成，等待用户确认进入 Phase 6、继续集成测试或结束本轮。
+- Task ID：NONE
+- Status：COMPLETED
+- Time Slice：NONE
+- Summary：TASK-PHASE6-001 已完成，本轮项目优化收尾结束；后续新工作必须由用户重新确认并提升为任务/时间切片。
 
 ## 任务列表
 
@@ -753,7 +753,7 @@
 
 ### TASK-NEXT-SCOPE-007：确认 `pkg/utils` 内部支撑测试完成后的后续范围
 
-- Status：PENDING_USER_CONFIRMATION
+- Status：COMPLETED
 - Matrix：BL-023、TM-P1-010、TM-P0-006
 - Goal：确认 TASK-P1-014 完成之后的下一步：进入 Phase 6 收尾、继续补 app/router/middleware 等集成测试，或结束本轮。
 - Allowed Files：
@@ -766,8 +766,126 @@
 - Verification：
   - 无需 Go 测试，除非用户确认进入新的代码或测试切片。
 - Exit Conditions：
-  - [PENDING] 用户选择后续范围。
-  - [PENDING] 新的唯一合法任务、切片或收尾状态已写入状态文件。
+  - [CONFIRMED] 用户回复 `b`，选择 B：提升 app/router/middleware 等集成测试。
+  - [CONFIRMED] 新的唯一合法任务 TASK-P1-015 和时间切片 TS-P1-015 已写入状态文件。
+
+### TASK-P1-015：补 app/router/middleware 最小集成测试
+
+- Status：COMPLETED
+- Matrix：BL-002、TM-P0-005、TM-P0-006
+- Source：
+  - 用户回复 `b`，确认提升 app/router/middleware 等集成测试。
+  - `BL-002`：增加 app/router/demo 集成测试。
+  - `MODULES.md`：`internal/middleware` 中间件链路无测试，`internal/transport/http` demo 路由缺少 integration 测试，`internal/modules/demo` handler/router 集成仍未覆盖。
+- Priority：P1
+- Type：测试；若新增测试暴露当前 router/middleware/demo handler 范围内缺陷，可做最小修复。
+- Goal：用 `httptest` 固定 demo Todo 路由注册、handler/service/repository HTTP 关键路径，以及 TraceID、CORS、Recovery 等中间件链路，不启动真实 HTTP server。
+- Allowed Files：
+  - `internal/transport/http/**/*_test.go`
+  - `internal/middleware/**/*_test.go`
+  - `internal/modules/demo/**/*_test.go`
+  - 必要时限当前范围实现文件：`internal/transport/http/*.go`、`internal/middleware/*.go`、`internal/modules/demo/handler/*.go`
+  - 项目状态文档：`STATUS.md`、`TASKS.md`、`TIME_SLICES.md`、`ACCEPTANCE.md`、`TEST_MATRIX.md`、`TEST_REPORT.md`、`CHANGELOG.md`、`ISSUES.md`、`RISK_REGISTER.md`、`BACKLOG.md`、`DECISIONS.md`、`ROADMAP.md`、`PROJECT_BRIEF.md`、`MODULES.md`、`ARCHITECTURE.md`、`AGENT_HANDOFF.md`
+- Forbidden Files：
+  - `cmd/**/*`
+  - `pkg/**/*`，除既有接口只读使用外不得修改
+  - `types/**/*`
+  - `go.mod`
+  - `go.sum`
+  - 数据库 schema、部署配置、真实密钥文件
+- Non-Goals：
+  - 不启动真实 HTTP server 或占用固定端口。
+  - 不接入真实外部数据库、Redis、第三方服务或生产配置。
+  - 不重构 app 装配、router、middleware、demo handler 或 service API。
+  - 不实现 auth/rbac、生产迁移框架、CI/CD 或 Phase 6 收尾。
+- Steps：
+  1. 阅读 router、middleware、demo handler/service/repository 源码，确认最小可测链路。
+  2. 新增或扩展 `internal/transport/http` 集成测试，使用临时 SQLite 和真实 demo repository/service/handler。
+  3. 覆盖 demo route create/list/get/update/delete 或最小关键路径，并断言 trace id、CORS 和 recovery 响应语义。
+  4. 若测试暴露当前范围缺陷，只做最小修复并记录。
+  5. 运行格式化、相关包测试、全量回归和 diff 检查。
+  6. 更新验收、测试报告、变更、问题、风险、Backlog、决策和交接文档。
+- Verification：
+  - `gofmt -w internal/transport/http/*_test.go internal/middleware/*_test.go internal/modules/demo/**/*_test.go`
+  - `go test ./internal/transport/http ./internal/middleware ./internal/modules/demo/... -count=1`
+  - `go test ./... -count=1`
+  - `git diff --check`
+- Exit Conditions：
+  - [CONFIRMED] demo Todo router/handler/service/repository HTTP 集成路径被 `httptest` 覆盖。
+  - [CONFIRMED] TraceID、CORS 和 Recovery 中间件链路有最小路由级断言。
+  - [CONFIRMED] 测试不依赖真实 HTTP server、固定生产端口、外部数据库、Redis 或生产配置。
+  - [CONFIRMED] 相关包测试、全量回归和 diff 检查通过。
+  - [CONFIRMED] 状态、变更、测试报告、问题和交接文档已更新。
+- Evidence：
+  - 修改文件：`internal/transport/http/router_integration_test.go`、项目状态文档。
+  - 覆盖内容：demo Todo HTTP Create/List/Get/Update/Delete、删除后 404、CORS preflight/actual origin header、TraceID header round-trip、Recovery 500 响应 traceId 和 logger 调用。
+  - 命令：`gofmt -w internal/transport/http/router_integration_test.go`；`go test ./internal/transport/http ./internal/middleware ./internal/modules/demo/... -count=1`；`go test ./... -count=1`；`git diff --check`。
+  - 测试结果：PASS；`git diff --check` 仅有 Windows LF/CRLF 转换警告。
+  - 修复记录：前两次相关包测试失败来自测试构造问题：`httptest.NewRequest` 默认 Host 与 Origin 同源，导致 CORS 中间件跳过；固定测试 Host 为 `api.local` 后通过。
+- Next Task：
+  - TASK-NEXT-SCOPE-008：确认进入 Phase 6 收尾、继续 app 装配/reload/config 等剩余集成测试，或结束本轮。
+
+### TASK-NEXT-SCOPE-008：确认 app/router/middleware 集成测试后的后续范围
+
+- Status：COMPLETED
+- Matrix：BL-002、TM-P0-004、TM-P0-006
+- Goal：确认 TASK-P1-015 完成之后的下一步：进入 Phase 6 收尾、继续补 app 装配/reload/config 等剩余集成测试，或结束本轮。
+- Allowed Files：
+  - 项目状态文档
+- Forbidden Files：
+  - Go 源码和测试文件，除非用户确认进入新的代码或测试切片。
+  - `go.mod`
+  - `go.sum`
+  - 数据库 schema、部署配置、真实密钥文件。
+- Verification：
+  - 无需 Go 测试，除非用户确认进入新的代码或测试切片。
+- Exit Conditions：
+  - [CONFIRMED] 用户选择 A：进入 Phase 6 收尾。
+  - [CONFIRMED] 新的唯一合法任务和切片 TASK-PHASE6-001 / TS-PHASE6-001 已写入状态文件。
+
+### TASK-PHASE6-001：Phase 6 收尾与交接
+
+- Status：COMPLETED
+- Matrix：TM-P0-006
+- Source：
+  - 用户最新回复 `a`，确认 TASK-NEXT-SCOPE-008 选项 A。
+  - TASK-P1-015 已完成并通过验证。
+- Priority：P0
+- Type：收尾、验证、交接。
+- Goal：冻结本轮项目优化成果，更新状态、验收、测试报告、变更记录、风险/Backlog 和交接说明，并运行最终验证命令。
+- Allowed Files：
+  - `STATUS.md`
+  - `TASKS.md`
+  - `TIME_SLICES.md`
+  - `ACCEPTANCE.md`
+  - `TEST_MATRIX.md`
+  - `TEST_REPORT.md`
+  - `CHANGELOG.md`
+  - `ISSUES.md`
+  - `RISK_REGISTER.md`
+  - `BACKLOG.md`
+  - `DECISIONS.md`
+  - `ROADMAP.md`
+  - `PROJECT_BRIEF.md`
+  - `MODULES.md`
+  - `ARCHITECTURE.md`
+  - `AGENT_HANDOFF.md`
+- Forbidden Files：
+  - Go 源码和测试文件。
+  - `go.mod`
+  - `go.sum`
+  - 数据库 schema、部署配置、真实密钥文件。
+- Verification：
+  - `go test ./... -count=1`
+  - `git diff --check`
+- Exit Conditions：
+  - [CONFIRMED] Phase 6 收尾状态写入项目状态文档。
+  - [CONFIRMED] 最终验证命令已执行并记录：`go test ./... -count=1` 与 `git diff --check` 均通过。
+  - [CONFIRMED] `AGENT_HANDOFF.md` 明确无自动下一实现任务；后续工作需要用户重新确认。
+- Evidence：
+  - 修改文件：项目状态文档、验收、测试报告、变更记录、风险/Backlog、决策记录和交接说明。
+  - 验证：`go test ./... -count=1` PASS；`git diff --check` PASS，仅有 Windows LF/CRLF 转换警告。
+  - 结论：Phase 6 收尾完成；app 装配、reload/config 等剩余集成路径保留为后续确认范围。
 
 
 ## 历史任务

@@ -3,9 +3,9 @@
 ## 项目身份
 
 - Project：go-scaffold
-- Current Phase：pkg/utils 内部支撑测试完成
-- Overall Status：PENDING_USER_CONFIRMATION
-- Last Updated：2026-05-25
+- Current Phase：Phase 6 收尾完成
+- Overall Status：COMPLETED
+- Last Updated：2026-05-26
 - Source Rule：`docs/ai/prompt.md`
 
 ## 摘要
@@ -63,7 +63,9 @@
 - [CONFIRMED] 已基于确认结果生成正式需求、架构、路线图、任务和时间切片。
 - [CONFIRMED] 模块边界清单、测试矩阵、P1 切片、`types/*` 契约边界和 `pkg/plugin` 被动注册边界已完成。
 - [CONFIRMED] TASK-P1-014 已完成，`pkg/utils` 已有最小确定性行为测试。
-- [NEEDS_CONFIRMATION] 下一步等待用户选择进入 Phase 6 收尾、补 app/router/middleware 等集成测试或结束本轮。
+- [CONFIRMED] TASK-P1-015 已完成，demo Todo HTTP 集成和 TraceID/CORS/Recovery 链路已有最小路由级测试。
+- [CONFIRMED] 用户选择 A，Phase 6 收尾已完成；当前无自动下一实现任务。
+- [DEFERRED] app 装配、reload/config 等剩余集成测试保留为后续确认范围。
 
 ### P2
 

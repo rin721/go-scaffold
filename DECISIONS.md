@@ -173,3 +173,25 @@
 - Reason：`pkg/utils` 已分类为内部支撑工具包，虽然不属于公共 `pkg/*` 补测范围，但其 ID、地址、端口、设备 ID 和 i18n helper 被多处支撑路径使用，补最小测试可以降低后续维护风险。
 - Consequences：本切片只允许修改 `pkg/utils` 测试和必要状态文档，不改变 `pkg/utils` 公共 API 或默认 Snowflake panic 策略。
 - Related Tasks：TASK-NEXT-SCOPE-006、TASK-P1-014
+
+### DEC-017：提升 `BL-002` router/middleware/demo HTTP 集成测试
+
+- Date：2026-05-26
+- Status：ACCEPTED
+- Context：TASK-P1-014 完成后，当前状态进入 `PENDING_USER_CONFIRMATION`，要求在进入 Phase 6 收尾、提升 app/router/middleware 等集成测试或结束本轮之间选择。
+- Decision：用户回复 `b`，提升 `BL-002` 的 router/middleware/demo HTTP 集成部分为 TASK-P1-015 / TS-P1-015，限定用 `httptest` 覆盖 demo Todo HTTP 路由、handler/service/repository 集成，以及 TraceID、CORS、Recovery 中间件链路。
+- Alternatives：直接进入 Phase 6 收尾；结束本轮；一次性扩大到完整 app 装配、reload/config 集成测试。
+- Reason：router/middleware/demo HTTP 链路是现有可隔离验证的高价值缺口，能在不启动真实 HTTP server、不引入生产配置和外部服务的前提下降低后续改动风险。
+- Consequences：`BL-002` 进入部分完成状态；app 装配、reload/config 等剩余集成路径仍需后续用户确认后才能提升为新任务。
+- Related Tasks：TASK-NEXT-SCOPE-007、TASK-P1-015
+
+### DEC-018：进入 Phase 6 收尾
+
+- Date：2026-05-26
+- Status：ACCEPTED
+- Context：TASK-P1-015 完成后，当前状态进入 `PENDING_USER_CONFIRMATION`，要求在进入 Phase 6 收尾、继续 app 装配/reload/config 等剩余集成测试或结束本轮之间选择；用户最新回复 `a`。
+- Decision：接受用户选择 A，进入 Phase 6 收尾与交接，限定为项目状态文档、验证记录、变更记录、风险/Backlog 和交接说明更新。
+- Alternatives：继续 app 装配、reload/config 等剩余集成测试；结束本轮但不做 Phase 6 收尾。
+- Reason：当前 P1 已完成多轮受控补测与边界收拢，选择 A 符合当前确认项，能先冻结本轮成果并留下可恢复交接。
+- Consequences：本收尾切片不新增 Go 代码或测试；app 装配、reload/config 等剩余集成路径继续保留为 Backlog/风险，后续必须重新确认后才能提升。
+- Related Tasks：TASK-NEXT-SCOPE-008、TASK-PHASE6-001

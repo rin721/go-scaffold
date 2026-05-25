@@ -3,9 +3,9 @@
 ## 验收状态
 
 - Project：go-scaffold
-- Phase：pkg/utils 内部支撑测试完成，等待后续范围确认
-- Status：PENDING_USER_CONFIRMATION
-- Last Updated：2026-05-25
+- Phase：Phase 6 收尾完成
+- Status：COMPLETED
+- Last Updated：2026-05-26
 
 ## 本轮启动验收
 
@@ -73,9 +73,12 @@
 - 第二批 `pkg/*` 行为测试：COMPLETED，`pkg/executor`、`pkg/httpserver`、`pkg/storage` 已有最小行为测试
 - 第三批 `pkg/*` 行为测试：COMPLETED，`pkg/cache` 已有基于进程内 Redis 的隔离行为测试
 - `pkg/utils` 内部支撑测试：COMPLETED，`pkg/utils/utils_test.go` 已覆盖最小确定性行为
+- app/router/middleware 集成测试：COMPLETED，`internal/transport/http/router_integration_test.go` 已覆盖 demo Todo HTTP 集成和 TraceID/CORS/Recovery 链路
+- TASK-NEXT-SCOPE-008：COMPLETED，用户选择 A 进入 Phase 6 收尾
+- Phase 6 收尾与交接：COMPLETED，最终回归、变更记录、验收、问题记录和交接说明已更新
 - Agent 基础设施补齐：COMPLETED
 - Agent 基础设施一致性修复：COMPLETED
-- 代码实现：COMPLETED，TASK-P1-014 已完成并通过验证
+- 代码实现：COMPLETED，TASK-P1-015 已完成并通过验证
 
 ## Prompt 全量产物验收
 
@@ -290,5 +293,32 @@
 
 | ID | 验收项 | 方法 | 必须 | 状态 |
 |---|---|---|---|---|
-| ACC-NEXT-013 | 用户已选择 `pkg/utils` 内部支撑测试后的后续范围 | 用户回复确认选项 | 是 | [PENDING] |
-| ACC-NEXT-014 | 新的唯一合法任务或收尾状态已写入状态文件 | 检查 `STATUS.md`、`TASKS.md`、`TIME_SLICES.md` | 是 | [PENDING] |
+| ACC-NEXT-013 | 用户已选择 `pkg/utils` 内部支撑测试后的后续范围 | 用户回复 `b`，对应选项 B | 是 | [CONFIRMED] |
+| ACC-NEXT-014 | 新的唯一合法任务或收尾状态已写入状态文件 | TASK-P1-015 / TS-P1-015 已写入 `STATUS.md`、`TASKS.md`、`TIME_SLICES.md` | 是 | [CONFIRMED] |
+
+## TASK-P1-015 验收
+
+| ID | 验收项 | 方法 | 必须 | 状态 |
+|---|---|---|---|---|
+| ACC-P1-070 | demo Todo HTTP Create/List/Get/Update/Delete 集成路径被覆盖 | `go test ./internal/transport/http -count=1` | 是 | [CONFIRMED] |
+| ACC-P1-071 | TraceID、CORS 和 Recovery 中间件链路有路由级断言 | `go test ./internal/transport/http -count=1` | 是 | [CONFIRMED] |
+| ACC-P1-072 | 集成测试不启动真实 HTTP server，不依赖外部数据库、Redis 或生产配置 | 人工检查 `internal/transport/http/router_integration_test.go` | 是 | [CONFIRMED] |
+| ACC-P1-073 | 相关包测试通过 | `go test ./internal/transport/http ./internal/middleware ./internal/modules/demo/... -count=1` | 是 | [CONFIRMED] |
+| ACC-P1-074 | 全量回归通过 | `go test ./... -count=1` | 是 | [CONFIRMED] |
+
+## TASK-NEXT-SCOPE-008 验收
+
+| ID | 验收项 | 方法 | 必须 | 状态 |
+|---|---|---|---|---|
+| ACC-NEXT-015 | 用户已选择 app/router/middleware 集成测试后的后续范围 | 用户回复 `a`，选择 A 进入 Phase 6 收尾 | 是 | [CONFIRMED] |
+| ACC-NEXT-016 | 新的唯一合法任务或收尾状态已写入状态文件 | 检查 `STATUS.md`、`TASKS.md`、`TIME_SLICES.md` | 是 | [CONFIRMED] |
+
+## TASK-PHASE6-001 验收
+
+| ID | 验收项 | 方法 | 必须 | 状态 |
+|---|---|---|---|---|
+| ACC-PHASE6-001 | 用户选择 A 已记录为进入 Phase 6 收尾 | 检查 `DECISIONS.md`、`STATUS.md` | 是 | [CONFIRMED] |
+| ACC-PHASE6-002 | 收尾文档已更新到本轮完成状态 | 检查 `STATUS.md`、`TASKS.md`、`TIME_SLICES.md`、`CHANGELOG.md`、`AGENT_HANDOFF.md` | 是 | [CONFIRMED] |
+| ACC-PHASE6-003 | 最终全量回归通过 | `go test ./... -count=1` | 是 | [CONFIRMED] |
+| ACC-PHASE6-004 | diff 空白检查通过 | `git diff --check` | 是 | [CONFIRMED] |
+| ACC-PHASE6-005 | 后续工作不会自动开始，必须重新确认 | 检查 `AGENT_HANDOFF.md` 和 `STATUS.md` | 是 | [CONFIRMED] |

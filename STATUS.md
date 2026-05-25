@@ -3,19 +3,19 @@
 ## 项目状态
 
 - 项目：go-scaffold
-- 当前阶段：pkg/utils 内部支撑测试完成，等待后续范围确认
-- 总体状态：PENDING_USER_CONFIRMATION
-- 最后更新：2026-05-25
+- 当前阶段：Phase 6 收尾完成
+- 总体状态：COMPLETED
+- 最后更新：2026-05-26
 - 最近 Agent：Codex
 - 最近工具：Codex Desktop
 
 ## 当前合法工作
 
 - 当前模块：项目优化路线
-- 当前任务 ID：TASK-NEXT-SCOPE-007
-- 当前时间切片 ID：TS-NEXT-SCOPE-007
-- 当前状态：PENDING_USER_CONFIRMATION
-- 为什么这是唯一合法下一步：[CONFIRMED] TASK-P1-014 已完成并通过验证；继续进入 Phase 6、提升集成测试或结束本轮都需要用户确认。
+- 当前任务 ID：NONE
+- 当前时间切片 ID：NONE
+- 当前状态：COMPLETED
+- 为什么这是当前唯一合法状态：[CONFIRMED] TASK-PHASE6-001 已完成；当前没有自动推进的实现任务，后续任何新工作都需要用户重新确认。
 
 ## 阶段状态
 
@@ -44,9 +44,11 @@
 | pkg/* 行为测试第二批 | COMPLETED | TASK-P1-012 已补 `pkg/executor`、`pkg/httpserver`、`pkg/storage` 最小行为测试，并修复新增测试暴露的 `pkg/executor` 错误包装与 panic handler 缺陷 |
 | pkg/cache 行为测试第三批 | COMPLETED | TASK-P1-013 已补 `pkg/cache` 隔离行为测试，使用进程内 Redis 测试服务覆盖配置、读写、批量、计数器、过期和 reload 语义 |
 | pkg/utils 内部支撑测试 | COMPLETED | TASK-P1-014 已新增 `pkg/utils/utils_test.go`，覆盖 Snowflake、地址校验、端口查找、设备 ID 和 i18n helper |
-| 实现 | COMPLETED | 当前实现切片 TASK-P1-014 已完成 |
-| 验证 | COMPLETED | `go test ./pkg/utils -count=1`、`go test ./... -count=1` 和 `git diff --check` 均通过 |
-| 交接 | COMPLETED | `AGENT_HANDOFF.md` 已更新到 TASK-NEXT-SCOPE-007 |
+| app/router/middleware 集成测试 | COMPLETED | TASK-P1-015 已新增 `internal/transport/http/router_integration_test.go`，覆盖 demo Todo HTTP CRUD、TraceID、CORS 和 Recovery 链路 |
+| 实现 | COMPLETED | 当前实现切片 TASK-P1-015 已完成 |
+| 验证 | COMPLETED | `go test ./internal/transport/http ./internal/middleware ./internal/modules/demo/... -count=1`、`go test ./... -count=1` 和 `git diff --check` 均通过 |
+| 交接 | COMPLETED | `AGENT_HANDOFF.md` 已更新到 Phase 6 收尾完成状态 |
+| Phase 6 收尾 | COMPLETED | 用户选择 A 后已完成 TASK-PHASE6-001；最终回归和交接文档已更新 |
 
 ## 当前关键发现
 
@@ -76,7 +78,8 @@
 | CONFIRM-NEXT-004 | 选择首批 `pkg/*` 行为测试完成后的后续范围 | 已确认：用户发送“下一步”，按选项 A 继续下一批 `pkg/*` 行为测试 | A: 继续下一批 `pkg/*` 行为测试；B: 进入 Phase 6 收尾；C: 结束本轮 | COMPLETED |
 | CONFIRM-NEXT-005 | 选择第二批 `pkg/*` 行为测试完成后的后续范围 | 已确认：用户选择 A，继续 `BL-020` 剩余包，第三批限定 `pkg/cache` | A: 继续剩余 `pkg/*` 行为测试；B: 进入 Phase 6 收尾；C: 结束本轮 | COMPLETED |
 | CONFIRM-NEXT-006 | 选择 `pkg/cache` 行为测试完成后的后续范围 | 已确认：用户选择 B，提升 `pkg/utils` 内部支撑测试 | A: 进入 Phase 6 收尾；B: 提升内部支撑测试；C: 结束本轮 | COMPLETED |
-| CONFIRM-NEXT-007 | 选择 `pkg/utils` 内部支撑测试完成后的后续范围 | 待确认 | A: 进入 Phase 6 收尾；B: 提升 app/router/middleware 等集成测试；C: 结束本轮 | TASK-NEXT-SCOPE-007 |
+| CONFIRM-NEXT-007 | 选择 `pkg/utils` 内部支撑测试完成后的后续范围 | 已确认：用户回复 `b`，选择 B | A: 进入 Phase 6 收尾；B: 提升 app/router/middleware 等集成测试；C: 结束本轮 | COMPLETED |
+| CONFIRM-NEXT-008 | 选择 app/router/middleware 集成测试完成后的后续范围 | 已确认：用户选择 A，进入 Phase 6 收尾 | A: 进入 Phase 6 收尾；B: 继续 app 装配/reload/config 等剩余集成测试；C: 结束本轮 | COMPLETED |
 
 ## 待验证
 
@@ -92,14 +95,14 @@
 
 ## 最近执行
 
-- 摘要：完成 TASK-P1-014 / TS-P1-014，为 `pkg/utils` 内部支撑工具补最小确定性测试。
-- 变更文件：`pkg/utils/utils_test.go` 与项目状态文档。
-- 执行命令：`gofmt -w pkg/utils/utils_test.go`；`go test ./pkg/utils -count=1`；`go test ./... -count=1`；`git diff --check`。
+- 摘要：用户最新回复 `a`，已接受 TASK-NEXT-SCOPE-008 的选项 A，进入 Phase 6 收尾与交接。
+- 变更文件：本切片仅更新项目状态文档、决策记录、验收、测试报告、变更记录和交接说明。
+- 执行命令：`go test ./... -count=1`；`git diff --check`。
 - 测试结果：PASS；`git diff --check` 仅有 Windows LF/CRLF 转换警告。
-- 完成判断：TASK-P1-014 可标记为 COMPLETED；下一步进入 TASK-NEXT-SCOPE-007 等待用户确认。
+- 完成判断：TASK-PHASE6-001 可标记为 COMPLETED；当前本轮项目优化收尾完成。
 
 ## 下一步
 
-- 合法下一步：TASK-NEXT-SCOPE-007 / TS-NEXT-SCOPE-007，等待用户选择后续范围。
-- 进入条件：已满足，TASK-P1-014 已完成并通过验证。
-- 可选方向：A 进入 Phase 6 收尾；B 提升 app/router/middleware 等集成测试；C 结束本轮。
+- 合法下一步：无自动下一实现任务。
+- 进入条件：后续如需继续 app 装配/reload/config 集成测试、包 README 中文化、auth/rbac、生产迁移框架或其他优化，必须由用户重新确认并提升为新的任务/时间切片。
+- 完成后状态：本轮 Phase 6 收尾完成，交接可恢复。

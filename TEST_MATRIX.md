@@ -3,10 +3,10 @@
 ## 测试矩阵状态
 
 - 项目：go-scaffold
-- 任务：TASK-NEXT-SCOPE-007
-- 时间切片：TS-NEXT-SCOPE-007
-- 状态：PENDING_USER_CONFIRMATION
-- 最后更新：2026-05-25
+- 任务：NONE
+- 时间切片：NONE
+- 状态：COMPLETED
+- 最后更新：2026-05-26
 - 原则：本文定义后续优化的验证边界，不代表测试代码已经实现。
 
 ## 验证分层
@@ -22,7 +22,7 @@
 
 | ID | 范围 | 当前证据 | 命令 | 状态 |
 |---|---|---|---|---|
-| TM-BASE-001 | 全仓库 Go 测试 | 当前通过；`internal/transport/http` 和 `internal/modules/demo/service` 已新增测试，部分关键路径仍为 `[no test files]` | `go test ./... -count=1` | [CONFIRMED] |
+| TM-BASE-001 | 全仓库 Go 测试 | 当前通过；`internal/transport/http` 已覆盖 health/ready 与 demo Todo HTTP 集成，`internal/modules/demo/service` 已覆盖 service/repository CRUD，部分 app/reload 路径仍为 `[no test files]` | `go test ./... -count=1` | [CONFIRMED] |
 | TM-BASE-002 | 已有包级测试 | `pkg/crypto`、`pkg/database`、`pkg/logger`、`pkg/plugin`、`pkg/sqlgen`、`types/constants` 当前通过 | `go test ./pkg/crypto ./pkg/database ./pkg/logger ./pkg/plugin ./pkg/sqlgen ./types/constants -count=1` | [CONFIRMED] |
 
 ## P0 正式测试矩阵
@@ -33,7 +33,7 @@
 | TM-P0-002 | `internal/config.Manager` | `Update`/copy 后不丢 `InitDB`、`Executor`、`Storage`、`CORS`、`Server.Host` 等字段 | `internal/config/*_test.go`、`internal/config/*.go` | `go test ./internal/config -count=1` | 测试能证明字段完整复制；必要修复已完成 | BC-002 |
 | TM-P0-003 | `internal/transport/http` | `/health`、`/ready` 在数据库正常/缺失/失败时的 HTTP 状态和响应语义 | `internal/transport/http/*_test.go` | `go test ./internal/transport/http -count=1` | [CONFIRMED] TASK-P1-003 已用 `httptest` 覆盖；不启动真实 server | BC-006 |
 | TM-P0-004 | `internal/app` | `app.New` 在 server/initdb 模式的最小装配链路 | `internal/app/**/*_test.go` | `go test ./internal/app/... -count=1` | 使用临时配置；不依赖真实外部服务；资源可关闭 | BC-003、BC-006 |
-| TM-P0-005 | `internal/modules/demo` | demo Todo Create/List/Get/Update/Delete 关键路径 | `internal/modules/demo/**/*_test.go` | `go test ./internal/modules/demo/... -count=1` | [CONFIRMED] TASK-P1-004 已使用临时 SQLite 覆盖 service/repository 关键行为 | BC-003、BC-006 |
+| TM-P0-005 | `internal/modules/demo` | demo Todo Create/List/Get/Update/Delete 关键路径 | `internal/modules/demo/**/*_test.go`、`internal/transport/http/*_test.go` | `go test ./internal/modules/demo/... ./internal/transport/http -count=1` | [CONFIRMED] TASK-P1-004 已使用临时 SQLite 覆盖 service/repository 关键行为；TASK-P1-015 已覆盖 handler/router HTTP 集成路径 | BC-003、BC-006 |
 | TM-P0-006 | 全仓库回归 | 每个代码切片完成后确认无全局回归 | 不限制，只读验证 | `go test ./... -count=1` | 全量测试 PASS；新增失败进入修复流程 | FIND-001 |
 
 ## P1 正式测试矩阵
@@ -50,6 +50,7 @@
 | TM-P1-008 | 第二批无外部服务 `pkg/*` 行为测试 | 为 `pkg/executor`、`pkg/httpserver`、`pkg/storage` 补最小包级行为测试，覆盖稳定成功路径和明确错误路径 | `pkg/executor/**/*_test.go`、`pkg/httpserver/**/*_test.go`、`pkg/storage/**/*_test.go`；必要时限当前三包实现文件 | `go test ./pkg/executor ./pkg/httpserver ./pkg/storage -count=1`；`go test ./... -count=1` | [CONFIRMED] 三包已有确定性包级行为测试；不依赖 Redis、数据库、第三方网络服务或生产配置 | BL-020、RISK-008 |
 | TM-P1-009 | 第三批 `pkg/cache` 隔离行为测试 | 为 `pkg/cache` 补最小包级行为测试，用进程内 Redis 覆盖成功路径和明确错误路径 | `pkg/cache/**/*_test.go`；必要时限当前包实现文件；测试依赖可修改 `go.mod`、`go.sum` | `go test ./pkg/cache -count=1`；`go test ./... -count=1` | [CONFIRMED] `pkg/cache` 已有确定性隔离行为测试；不依赖真实 Redis、数据库、第三方网络服务或生产配置 | BL-020、RISK-008 |
 | TM-P1-010 | `pkg/utils` 内部支撑测试 | 为 `pkg/utils` 补最小确定性行为测试，覆盖 Snowflake、地址校验、端口查找、设备 ID 和 i18n helper 委托 | `pkg/utils/**/*_test.go`；必要时限当前包实现文件 | `go test ./pkg/utils -count=1`；`go test ./... -count=1` | [CONFIRMED] `pkg/utils` 已有最小确定性行为测试；不依赖真实外部网络服务、固定生产端口、数据库或生产配置 | BL-023、RISK-008 |
+| TM-P1-011 | router/middleware/demo HTTP 集成测试 | 用 `httptest` 覆盖 demo Todo HTTP 路由、handler/service/repository 集成，以及 TraceID、CORS、Recovery 中间件链路 | `internal/transport/http/**/*_test.go`、必要时 `internal/middleware/**/*_test.go` 或 `internal/modules/demo/**/*_test.go` | `go test ./internal/transport/http ./internal/middleware ./internal/modules/demo/... -count=1`；`go test ./... -count=1` | [CONFIRMED] TASK-P1-015 已覆盖 demo Todo HTTP CRUD、CORS preflight/actual、TraceID round-trip 和 Recovery trace 响应；不启动真实 HTTP server | BL-002、RISK-008 |
 
 ## P1 优化任务草案
 
@@ -70,6 +71,7 @@
 | TASK-P1-012 | 补第二批 `pkg/*` 行为测试 | P1 | 测试 | `pkg/executor/**/*_test.go`、`pkg/httpserver/**/*_test.go`、`pkg/storage/**/*_test.go`、必要时限当前三包实现文件、状态文档 | `go test ./pkg/executor ./pkg/httpserver ./pkg/storage -count=1`；`go test ./... -count=1` | [CONFIRMED] `pkg/executor`、`pkg/httpserver`、`pkg/storage` 均有最小行为测试且不依赖外部服务 | COMPLETED |
 | TASK-P1-013 | 补第三批 `pkg/cache` 隔离行为测试 | P1 | 测试 | `pkg/cache/**/*_test.go`、必要时限当前包实现文件、测试依赖、状态文档 | `go test ./pkg/cache -count=1`；`go test ./... -count=1` | [CONFIRMED] `pkg/cache` 有最小隔离行为测试且不依赖真实 Redis | COMPLETED |
 | TASK-P1-014 | 补 `pkg/utils` 内部支撑工具最小行为测试 | P1 | 测试 | `pkg/utils/**/*_test.go`、必要时限当前包实现文件、状态文档 | `go test ./pkg/utils -count=1`；`go test ./... -count=1` | [CONFIRMED] `pkg/utils` 有最小确定性行为测试且不依赖真实外部服务 | COMPLETED |
+| TASK-P1-015 | 补 app/router/middleware 最小集成测试 | P1 | 测试 | `internal/transport/http/**/*_test.go`、必要时 `internal/middleware/**/*_test.go`、`internal/modules/demo/**/*_test.go`、状态文档 | `go test ./internal/transport/http ./internal/middleware ./internal/modules/demo/... -count=1`；`go test ./... -count=1` | [CONFIRMED] demo Todo HTTP 集成和 TraceID/CORS/Recovery 链路有最小测试覆盖 | COMPLETED |
 
 ## 推荐执行顺序
 
@@ -86,10 +88,12 @@
 11. TASK-P1-012：补第二批 `pkg/*` 行为测试。
 12. TASK-P1-013：补第三批 `pkg/cache` 隔离行为测试。
 13. TASK-P1-014：补 `pkg/utils` 内部支撑工具最小行为测试。
+14. TASK-P1-015：补 router/middleware/demo HTTP 集成测试。
 
 当前合法下一项：
 
-- [PENDING_USER_CONFIRMATION] TASK-NEXT-SCOPE-007 / TS-NEXT-SCOPE-007：确认进入 Phase 6 收尾、继续集成测试或结束本轮。
+- [COMPLETED] 本轮测试矩阵执行与 Phase 6 收尾完成；当前无自动下一实现任务。
+- [DEFERRED] app 装配、reload/config 等剩余集成测试仍可后续提升，但必须由用户重新确认并拆成新的任务/时间切片。
 
 ## 验收门禁
 

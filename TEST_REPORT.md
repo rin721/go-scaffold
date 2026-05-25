@@ -2,44 +2,56 @@
 
 ## 最新验证
 
-- 日期：2026-05-25
-- 任务 ID：TASK-P1-014
-- 时间切片 ID：TS-P1-014
+- 日期：2026-05-26
+- 任务 ID：TASK-PHASE6-001
+- 时间切片 ID：TS-PHASE6-001
 - 状态：COMPLETED
-- 范围：为 `pkg/utils` 补内部支撑工具最小确定性行为测试，覆盖 Snowflake、监听地址校验、端口查找、设备 ID 稳定性和 i18n helper 默认语言委托语义。
+- 范围：Phase 6 收尾与交接，仅更新项目状态文档、最终验证记录、变更记录、问题记录、风险/Backlog 和交接说明；不新增 Go 代码或测试。
 
 ## 执行命令
 
 | 命令 | 结果 | 备注 |
 |---|---|---|
-| 必读文件读取 | PASS | 已读取 Agent 规则、状态、任务、切片、需求、架构、验收、问题、测试报告和交接文档 |
-| `gofmt -w pkg/utils/utils_test.go` | PASS | 新增测试文件格式化通过 |
-| `go test ./pkg/utils -count=1` | FAIL | 首次运行为占用端口断言不稳定：占用 `127.0.0.1` 不必然阻止 `0.0.0.0` 探测 |
-| `gofmt -w pkg/utils/utils_test.go` | PASS | 第一轮修正后格式化通过 |
-| `go test ./pkg/utils -count=1` | FAIL | 第二次运行为 wildcard 监听族不一致/重复绑定语义不稳定 |
-| `gofmt -w pkg/utils/utils_test.go` | PASS | 第二轮修正后格式化通过 |
-| `go test ./pkg/utils -count=1` | PASS | 改为确定性无效地址、端口范围和 exclude 断言后通过 |
+| 必读文件读取 | PASS | 已读取 `AGENTS.md`、Agent 规则、状态、任务、切片、需求、架构、验收、问题、测试报告和交接文档 |
+| 用户修正审查 | PASS | 用户选择 A，与当前 TASK-NEXT-SCOPE-008 待确认范围一致；结论 ACCEPT |
 | `go test ./... -count=1` | PASS | 全量回归通过 |
 | `git diff --check` | PASS | 仅有 Windows LF/CRLF 转换警告 |
 
 ## 结果
 
-- [CONFIRMED] `pkg/utils` 已新增包级最小行为测试，覆盖 Snowflake ID 生成、非法 node 和默认生成器。
-- [CONFIRMED] 地址校验和端口查找已覆盖有效/无效地址、无效范围、单端口成功和 exclude 语义。
-- [CONFIRMED] 设备 ID 已覆盖同 salt 稳定性、不同 salt 差异和 hex 输出；i18n helper 已覆盖默认语言与模板参数转发。
-- [CONFIRMED] 测试不依赖真实外部网络服务、固定生产端口、数据库或生产配置。
-- [CONFIRMED] TASK-P1-014 满足验收；下一步为 TASK-NEXT-SCOPE-007，等待用户确认后续范围。
+- [CONFIRMED] 用户选择 A 已记录，TASK-NEXT-SCOPE-008 已关闭。
+- [CONFIRMED] TASK-PHASE6-001 / TS-PHASE6-001 已完成，项目状态文档已同步到 Phase 6 收尾完成。
+- [CONFIRMED] 本切片未新增或修改 Go 源码、测试文件、依赖、数据库 schema、部署配置或密钥。
+- [CONFIRMED] app 装配、reload/config 等剩余集成路径未在本切片继续实现，保留为后续用户确认范围。
+- [CONFIRMED] 当前无自动下一实现任务。
 
 ## 失败项
 
-- 已修复：前两次 `pkg/utils` 包测试失败均来自测试断言对端口占用的环境假设；改为确定性无效地址、端口范围和 exclude 断言后通过。
+- 无新增失败项。
 
 ## 验证结论
 
-- TASK-P1-014 可以标记为 `COMPLETED`。
-- 当前唯一合法下一步为 TASK-NEXT-SCOPE-007 / TS-NEXT-SCOPE-007，状态为 `PENDING_USER_CONFIRMATION`。
+- TASK-PHASE6-001 可以标记为 `COMPLETED`。
+- 当前无自动下一实现任务；后续任何工作需要用户重新确认并建立新的任务/时间切片。
 
 ## 历史报告
+
+### 2026-05-26 TASK-PHASE6-001 TS-PHASE6-001
+
+- 用户选择 A，进入 Phase 6 收尾与交接。
+- 更新项目状态、任务、时间切片、验收、测试矩阵、路线图、项目简介、风险、Backlog、决策、问题记录、测试报告、变更记录和交接说明。
+- `go test ./... -count=1`：PASS。
+- `git diff --check`：PASS，仅有 Windows LF/CRLF 转换警告。
+- 结论：Phase 6 收尾完成；当前无自动下一实现任务。
+
+### 2026-05-26 TASK-P1-015 TS-P1-015
+
+- 新增 `internal/transport/http/router_integration_test.go`。
+- 覆盖 demo Todo HTTP CRUD、删除后 404、CORS preflight/actual origin header、TraceID header round-trip 和 Recovery trace 响应。
+- `gofmt -w internal/transport/http/router_integration_test.go`：PASS。
+- `go test ./internal/transport/http ./internal/middleware ./internal/modules/demo/... -count=1`：PASS。
+- `go test ./... -count=1`：PASS。
+- `git diff --check`：PASS，仅有 Windows LF/CRLF 转换警告。
 
 ### 2026-05-25 TASK-P1-014 TS-P1-014
 

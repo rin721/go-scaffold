@@ -6,7 +6,7 @@
 - 任务：TASK-OPT-003
 - 时间切片：TS-OPT-003
 - 状态：COMPLETED
-- 最后更新：2026-05-25
+- 最后更新：2026-05-26
 - 原则：本文只记录事实、风险和优化候选项，不授权 Go 代码修改。
 
 ## 总体依赖方向
@@ -35,9 +35,9 @@ types/*
 | `cmd/server` | CLI 入口、server/initdb/tests 命令、信号处理 | 进程入口 | tests 命令语义测试已补 | `runApp` 内部 `os.Exit` 仍需后续隔离才能测试启动失败路径 |
 | `internal/app` | 组合根、启动模式、生命周期、热重载 | 应用装配层 | demo 迁移策略测试已补 | reload 其他副作用测试不足 |
 | `internal/config` | 配置结构、加载、环境变量覆盖、热重载 | 配置边界 | 有测试 | TASK-P1-001 和 TASK-P1-002 已收拢 copy/update 与环境变量策略；reload 路径仍需后续覆盖 |
-| `internal/middleware` | Gin 中间件：i18n、CORS、logger、recovery、traceid | HTTP 横切层 | [no test files] | 中间件链路缺少路由级验证 |
-| `internal/transport/http` | Gin router、health/ready、demo API 注册 | 传输层 | 有 health/ready smoke test | demo 路由缺少 integration 测试 |
-| `internal/modules/demo` | Todo 示例业务模块 | 标准示例模块 | service/repository CRUD 基线已补 | handler/router 集成仍需后续覆盖，示例与生产约束需分离 |
+| `internal/middleware` | Gin 中间件：i18n、CORS、logger、recovery、traceid | HTTP 横切层 | router 级 TraceID/CORS/Recovery 集成测试已补 | i18n/logger 细粒度行为仍可后续增强 |
+| `internal/transport/http` | Gin router、health/ready、demo API 注册 | 传输层 | health/ready smoke test 和 demo HTTP 集成测试已补 | app 装配级启动链路仍需后续覆盖 |
+| `internal/modules/demo` | Todo 示例业务模块 | 标准示例模块 | service/repository CRUD 基线和 handler/router HTTP 集成已补 | 示例与生产约束需继续保持分离 |
 | `pkg/*` | 可复用基础设施、公共工具和内部支撑工具 | 混合 API | 部分有测试 | [CONFIRMED] TASK-P1-007 已逐包分类；包 README 中英混杂仍待后续中文化 |
 | `types/*` | 公共常量、错误码、HTTP 响应结构、类型别名 | 跨层契约和 HTTP/Gin 响应契约 | `types/constants`、`types/errors`、`types/result` 有测试 | auth 错误码仅为预留契约，auth/rbac 不在当前功能范围 |
 
@@ -136,12 +136,12 @@ types/*
 
 ### 问题和风险
 
-- [RISK] 中间件链路没有路由级测试，无法确认 trace id、错误响应和 CORS 配置是否符合预期。
+- [CONFIRMED] TASK-P1-015 已补路由级 TraceID、CORS 和 Recovery 链路测试。
 - [RISK] trace id 初始化失败时存在 panic 路径，后续需要确认是否符合服务可用性要求。
 
 ### 优化候选
 
-- [DEFERRED] 增加 router middleware smoke test。
+- [CONFIRMED] 增加 router middleware smoke test，覆盖 TraceID、CORS 和 Recovery 最小语义。
 - [DEFERRED] 明确 trace id 初始化失败策略。
 
 ## `internal/transport/http`
@@ -162,12 +162,12 @@ types/*
 
 - [CONFIRMED] health/ready HTTP smoke test 已在 TASK-P1-003 补齐。
 - [CONFIRMED] ready 在数据库缺失时返回 `result.Success` 包裹 `not_ready`，HTTP 状态为 503；该响应语义已被测试固定。
-- [RISK] demo 路由注册和中间件链路没有集成测试。
+- [CONFIRMED] TASK-P1-015 已补 demo Todo HTTP CRUD、CORS、TraceID 和 Recovery 集成测试。
 
 ### 优化候选
 
 - [CONFIRMED] 增加 `/health`、`/ready` smoke test。
-- [DEFERRED] 增加 demo router 注册测试。
+- [CONFIRMED] 增加 demo router 注册和 HTTP CRUD 集成测试。
 
 ## `internal/modules/demo`
 
@@ -187,14 +187,14 @@ types/*
 ### 问题和风险
 
 - [CONFIRMED] demo service/repository CRUD 基线已在 TASK-P1-004 补齐。
-- [RISK] demo handler/router 集成测试仍未覆盖。
+- [CONFIRMED] TASK-P1-015 已补 demo handler/router HTTP 集成测试。
 - [CONFIRMED] demo 自动迁移与生产迁移触发边界已在 TASK-P1-005 隔离。
 - [RISK] demo 作为长期标准示例，需要补齐测试和文档，否则示例质量会影响后续模块。
 
 ### 优化候选
 
 - [CONFIRMED] 增加 demo service/repository CRUD 基线测试。
-- [DEFERRED] 增加 demo CRUD 集成测试。
+- [CONFIRMED] 增加 demo CRUD HTTP 集成测试。
 - [DEFERRED] 为新模块建立基于 demo 的模板规范。
 
 ## `pkg/*` API 分类
@@ -251,7 +251,7 @@ types/*
 | TM-001 | 全仓库 | `go test ./... -count=1` | P0 | [CONFIRMED] 当前通过 |
 | TM-002 | app 启动 | 使用测试配置构建 `app.New`，验证 core/infra/modules/transport 非空 | P0 | [NOT_STARTED] |
 | TM-003 | health/ready | 使用 `httptest` 验证 `/health`、数据库正常/缺失/失败时 `/ready` | P0 | [CONFIRMED] TASK-P1-003 已覆盖 |
-| TM-004 | demo CRUD | 使用 SQLite 临时库跑 Create/List/Get/Update/Delete | P0 | [CONFIRMED] TASK-P1-004 已覆盖 service/repository 基线 |
+| TM-004 | demo CRUD | 使用 SQLite 临时库跑 Create/List/Get/Update/Delete | P0 | [CONFIRMED] TASK-P1-004 已覆盖 service/repository 基线；TASK-P1-015 已覆盖 HTTP handler/router 集成 |
 | TM-005 | config load/override | 验证 YAML、`${VAR:default}`、环境变量覆盖、无效配置报错 | P0 | [IN_PROGRESS] 环境覆盖已补测试 |
 | TM-006 | config update/copy | 验证 `Update` 后不丢失 InitDB/Executor/Storage/CORS 等字段 | P0 | [CONFIRMED] TASK-P1-001 已覆盖 |
 | TM-007 | migration boundary | 验证 server/initdb/reload 对 demo schema 的触发策略 | P1 | [CONFIRMED] TASK-P1-005 已覆盖 |
@@ -274,6 +274,8 @@ types/*
 - [CONFIRMED] 模块职责清单已生成。
 - [CONFIRMED] 设计边界冲突清单已生成。
 - [CONFIRMED] TASK-P1-014 已完成，`pkg/utils` 内部支撑工具有最小确定性行为测试。
+- [CONFIRMED] TASK-P1-015 已完成，router/middleware/demo HTTP 集成路径有最小测试覆盖。
+- [CONFIRMED] TASK-PHASE6-001 已完成，Phase 6 收尾与交接已完成。
 - [CONFIRMED] 测试矩阵草案已生成。
 - [CONFIRMED] P1 优化候选项已生成。
 - [CONFIRMED] 已按 P1 切片进行受控 Go 测试代码修改或文档分类：TASK-P1-001、TASK-P1-002、TASK-P1-003、TASK-P1-004、TASK-P1-005、TASK-P1-006、TASK-P1-007、TASK-P1-008 均已完成并验证通过。

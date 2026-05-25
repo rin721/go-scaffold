@@ -5,7 +5,7 @@
 - 项目：go-scaffold
 - 当前焦点：项目治理与优化路线 v1
 - 状态：COMPLETED
-- 最后更新：2026-05-25
+- 最后更新：2026-05-26
 
 ## 已确认架构原则
 
@@ -34,7 +34,7 @@ types/*
 |---|---|---|---|
 | `cmd/server` | 进程入口、CLI 命令、信号处理 | 检查是否有业务逻辑外溢 | [CONFIRMED] |
 | `internal/app` | 组合根、生命周期、跨层装配 | 生成装配链路清单 | [CONFIRMED] |
-| `internal/transport/http` | HTTP router、middleware、health/ready、API 注册 | 补充 smoke/integration 测试计划 | [CONFIRMED] |
+| `internal/transport/http` | HTTP router、middleware、health/ready、API 注册 | [CONFIRMED] health/ready 与 demo Todo HTTP 集成测试已补；Phase 6 已收尾，app 装配级路径后续需重新确认 | [CONFIRMED] |
 | `internal/modules/demo` | 长期标准示例 | 生成 demo 分层验收和测试路线 | [CONFIRMED] |
 | `pkg/*` | 混合策略 | [CONFIRMED] TASK-P1-007 已逐包分类为公共基础设施 API、公共工具 API 或内部支撑工具包 | [CONFIRMED] |
 | 数据库迁移 | dev-prod 分层 | [CONFIRMED] TASK-P1-005 已明确 demo `AutoMigrate`、`initdb`、reload 职责；生产迁移框架仍延后 | [CONFIRMED] |
@@ -47,7 +47,7 @@ types/*
 |---|---|---|
 | `internal/app` | 装配、reload、mode、lifecycle 边界需形成清单 | TASK-OPT-003 |
 | `internal/config` | 环境覆盖、热更新和默认值职责需统一说明 | TASK-OPT-003 |
-| `internal/transport/http` | health/ready 和 demo 路由缺少集成测试 | TASK-OPT-003 |
+| `internal/transport/http` | health/ready 和 demo 路由测试已补；app 装配级 HTTP server 路径仍待确认 | 后续重新确认 |
 | `internal/modules/demo` | 示例职责与生产约束需分离 | TASK-OPT-003 |
 | `pkg/*` | 公共/内部定位已在 TASK-P1-007 标记，`pkg/sqlgen` unsupported 边界已在 TASK-P1-008 标记 | 后续破坏性重构或新能力实现仍需单独确认 |
 | `types/*` | 跨层公共契约、HTTP/Gin 响应契约和有限聚合入口 | [CONFIRMED] TASK-P1-009 已明确 `types/result`、`types/errors`、`types/constants` 和根 `types` 边界 |
@@ -94,4 +94,6 @@ types/*
 - [CONFIRMED] TASK-P1-010 已收拢 `pkg/plugin` 被动注册边界。
 - [CONFIRMED] 用户选择 A，`BL-020` 首批 `pkg/*` 行为测试已完成 TASK-P1-011，第二批已完成 TASK-P1-012，第三批 `pkg/cache` 已完成 TASK-P1-013。
 - [CONFIRMED] 用户选择 B，`BL-023` `pkg/utils` 内部支撑测试已完成 TASK-P1-014。
+- [CONFIRMED] 用户选择 B，`BL-002` router/middleware/demo HTTP 集成测试已完成 TASK-P1-015。
+- [CONFIRMED] 用户随后选择 A，Phase 6 收尾已完成；app 装配、reload/config 等剩余集成路径保留为后续重新确认范围。
 - [DEFERRED] 生产迁移框架需要单独需求和架构确认，不属于当前切片。

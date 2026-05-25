@@ -3,7 +3,7 @@
 ## Backlog 状态
 
 - Project：go-scaffold
-- Last Updated：2026-05-25
+- Last Updated：2026-05-26
 - Rule：未被用户确认并拆成任务/时间切片的事项，不属于当前实现范围。
 
 ## Backlog 项
@@ -11,7 +11,7 @@
 | ID | 标题 | 来源 | 优先级 | 延后原因 | 状态 |
 |---|---|---|---|---|---|
 | BL-001 | 处理 JWT/auth 示例与 README 范围不一致 | `.env.example`、README | P1 | 需要确认 auth/JWT 范围 | [DEFERRED] |
-| BL-002 | 增加 app/router/demo 集成测试 | 测试风险分析 | P1 | 需要确认 P0 测试矩阵 | [DEFERRED] |
+| BL-002 | 增加 app/router/demo 集成测试 | 测试风险分析 | P1 | router/middleware/demo HTTP 集成已在 TASK-P1-015 覆盖；用户选择 A 完成 Phase 6 收尾，app 装配/reload/config 剩余范围后续仍需单独确认 | [PARTIAL] |
 | BL-003 | 定义 `pkg/*` API 兼容策略 | 包边界风险 | P1 | 需要架构决策 | [DEFERRED] |
 | BL-004 | 统一 AutoMigrate、initdb、SQL 脚本迁移策略 | 迁移边界风险 | P1 | 需要架构决策 | [DEFERRED] |
 | BL-005 | 明确 `pkg/sqlgen` 未实现能力的边界 | TODO/unsupported 风险 | P1 | 已提升为 TASK-P1-008 并完成 | [COMPLETED] |

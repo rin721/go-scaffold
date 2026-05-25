@@ -3,9 +3,9 @@
 ## 风险登记状态
 
 - Project：go-scaffold
-- Phase：pkg/utils 内部支撑测试完成，等待后续范围确认
-- Status：PENDING_USER_CONFIRMATION
-- Last Updated：2026-05-25
+- Phase：Phase 6 收尾完成
+- Status：COMPLETED
+- Last Updated：2026-05-26
 
 ## 风险列表
 
@@ -100,9 +100,9 @@
 - Probability：Medium
 - Impact：后续代码优化可能回归 app 启动、路由、demo CRUD、配置热更新或迁移。
 - Trigger：多个关键路径当前没有测试文件。
-- Mitigation：`TEST_MATRIX.md` 已生成；TASK-P1-003 已补齐 `internal/transport/http` health/ready smoke test；TASK-P1-004 已补齐 demo Todo service/repository CRUD 测试基线；TASK-P1-005 已补齐 demo 迁移策略测试；TASK-P1-006 已补齐 `cmd/server` tests 命令语义测试；TASK-P1-007 已完成 `pkg/*` API 分类；TASK-P1-008 已补齐 `pkg/sqlgen` unsupported 行为测试；TASK-P1-011 已补齐首批 `pkg/cli`、`pkg/i18n`、`pkg/yaml2go` 行为测试；TASK-P1-012 已补齐第二批 `pkg/executor`、`pkg/httpserver`、`pkg/storage` 行为测试；TASK-P1-013 已补齐 `pkg/cache` 隔离行为测试；TASK-P1-014 已补齐 `pkg/utils` 内部支撑测试。
+- Mitigation：`TEST_MATRIX.md` 已生成；TASK-P1-003 已补齐 `internal/transport/http` health/ready smoke test；TASK-P1-004 已补齐 demo Todo service/repository CRUD 测试基线；TASK-P1-005 已补齐 demo 迁移策略测试；TASK-P1-006 已补齐 `cmd/server` tests 命令语义测试；TASK-P1-007 已完成 `pkg/*` API 分类；TASK-P1-008 已补齐 `pkg/sqlgen` unsupported 行为测试；TASK-P1-011 已补齐首批 `pkg/cli`、`pkg/i18n`、`pkg/yaml2go` 行为测试；TASK-P1-012 已补齐第二批 `pkg/executor`、`pkg/httpserver`、`pkg/storage` 行为测试；TASK-P1-013 已补齐 `pkg/cache` 隔离行为测试；TASK-P1-014 已补齐 `pkg/utils` 内部支撑测试；TASK-P1-015 已补齐 router/middleware/demo HTTP 集成测试。
 - Owner：Agent
-- Status：[RISK] 已覆盖多批 `pkg/*` 行为测试和 `pkg/utils` 内部支撑测试；app 装配和中间件/handler 集成测试仍待后续确认
+- Status：[RISK] 已覆盖多批 `pkg/*` 行为测试、`pkg/utils` 内部支撑测试和 router/middleware/demo HTTP 集成测试；Phase 6 已收尾，app 装配、reload 和配置加载剩余集成路径留待后续重新确认
 - Blocking：No，但必须在代码优化前处理。
 
 ### RISK-009：P1 执行顺序未确认

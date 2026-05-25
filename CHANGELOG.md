@@ -2,6 +2,30 @@
 
 ## 最新变更
 
+### 2026-05-26 - TASK-PHASE6-001 - TS-PHASE6-001
+
+- 变更：用户选择 A，确认进入 Phase 6 收尾与交接。
+- 变更：关闭 TASK-NEXT-SCOPE-008，记录 TASK-PHASE6-001 / TS-PHASE6-001 完成。
+- 变更：更新状态、任务、时间切片、验收、测试矩阵、路线图、项目简介、风险、Backlog、决策、问题记录、测试报告和交接说明。
+- 范围：未新增或修改 Go 源码、测试文件、依赖、数据库 schema、部署配置或密钥。
+- 验证：
+  - `go test ./... -count=1`：PASS
+  - `git diff --check`：PASS，仅有 Windows LF/CRLF 转换警告
+- 状态：Phase 6 收尾完成；当前无自动下一实现任务，后续工作需要用户重新确认。
+
+### 2026-05-26 - TASK-P1-015 - TS-P1-015
+
+- 变更：用户选择 B，确认提升 `BL-002` 的 router/middleware/demo HTTP 集成测试部分。
+- 变更：新增 `internal/transport/http/router_integration_test.go`，使用临时 SQLite 和真实 demo repository/service/handler 注入 `NewRouter`。
+- 变更：覆盖 demo Todo HTTP Create/List/Get/Update/Delete、删除后 404、CORS preflight/actual origin header、TraceID header round-trip，以及 Recovery 500 响应 traceId 和 logger 调用。
+- 修复：前两次相关包测试失败来自测试构造问题：`httptest.NewRequest` 默认 Host 与 Origin 同源，导致 CORS 中间件跳过；固定测试 Host 为 `api.local` 后通过。
+- 验证：
+  - `gofmt -w internal/transport/http/router_integration_test.go`：PASS
+  - `go test ./internal/transport/http ./internal/middleware ./internal/modules/demo/... -count=1`：PASS
+  - `go test ./... -count=1`：PASS
+  - `git diff --check`：PASS，仅有 Windows LF/CRLF 转换警告
+- 状态：TASK-P1-015 COMPLETED；TASK-NEXT-SCOPE-008 PENDING_USER_CONFIRMATION。
+
 ### 2026-05-25 - TASK-P1-014 - TS-P1-014
 
 - 变更：用户选择 B，确认提升 `BL-023`，为 `pkg/utils` 内部支撑工具补最小确定性测试。

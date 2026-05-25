@@ -3,8 +3,8 @@
 ## 路线图状态
 
 - 项目：go-scaffold
-- 状态：ACTIVE
-- 最后更新：2026-05-25
+- 状态：COMPLETED
+- 最后更新：2026-05-26
 - 路线：治理优先
 
 ## Phase 0：项目重新启动
@@ -79,7 +79,7 @@
 ## Phase 5：代码优化
 
 - 目标：按唯一合法时间切片逐步优化项目。
-- 状态：IN_PROGRESS
+- 状态：COMPLETED
 - 进入条件：
   - Phase 2 模块边界清单完成。
   - Phase 3 测试矩阵确认。
@@ -109,15 +109,18 @@
   - TASK-P1-013 已完成：`pkg/cache` 已补进程内 Redis 隔离行为测试。
   - TASK-NEXT-SCOPE-006 已完成：用户选择 B，提升 `pkg/utils` 内部支撑测试。
   - TASK-P1-014 已完成：`pkg/utils` 已补最小确定性行为测试。
-- 当前下一步：
-  - [NEEDS_CONFIRMATION] TASK-NEXT-SCOPE-007：选择进入 Phase 6 收尾、继续 app/router/middleware 等集成测试，或结束本轮。
+  - TASK-NEXT-SCOPE-007 已完成：用户选择 B，提升 app/router/middleware 等集成测试。
+  - TASK-P1-015 已完成：`internal/transport/http/router_integration_test.go` 已覆盖 demo Todo HTTP 集成和 TraceID/CORS/Recovery 链路。
+- 收尾决策：
+  - [CONFIRMED] 用户选择 A，进入 Phase 6 收尾。
+  - [DEFERRED] app 装配、reload/config 等剩余集成测试未继续实现，后续必须重新确认后提升。
 
 ## Phase 6：收尾与交接
 
 - 目标：完成文档、测试、变更、风险和交接更新。
-- 状态：NOT_STARTED
+- 状态：COMPLETED
 - 输出：
-  - `TEST_REPORT.md`
-  - `CHANGELOG.md`
-  - `AGENT_HANDOFF.md`
-  - 下一合法任务说明
+  - `TEST_REPORT.md` 已记录最终回归。
+  - `CHANGELOG.md` 已记录 TASK-PHASE6-001。
+  - `AGENT_HANDOFF.md` 已说明当前无自动下一实现任务。
+  - 下一状态：本轮项目优化收尾完成；后续工作需要用户重新确认。

@@ -2,10 +2,10 @@
 
 ## 当前合法时间切片
 
-- Time Slice ID：TS-NEXT-SCOPE-007
-- Task ID：TASK-NEXT-SCOPE-007
-- Status：PENDING_USER_CONFIRMATION
-- Summary：TASK-P1-014 已完成，等待用户确认下一范围。
+- Time Slice ID：NONE
+- Task ID：NONE
+- Status：COMPLETED
+- Summary：TS-PHASE6-001 已完成，本轮项目优化收尾结束；后续新工作必须由用户重新确认并提升为新的时间切片。
 
 ## 时间切片列表
 
@@ -875,7 +875,7 @@
 
 ### TS-NEXT-SCOPE-007：确认 `pkg/utils` 内部支撑测试后的后续范围
 
-- Status：PENDING_USER_CONFIRMATION
+- Status：COMPLETED
 - Task ID：TASK-NEXT-SCOPE-007
 - Matrix：BL-023、TM-P1-010、TM-P0-006
 - Allowed Files：
@@ -888,8 +888,116 @@
 - Verification：
   - 无需 Go 测试，除非用户确认进入新的代码或测试切片。
 - Exit Conditions：
-  - [PENDING] 用户选择后续范围。
-  - [PENDING] 状态文档记录新的唯一合法任务或收尾状态。
+  - [CONFIRMED] 用户回复 `b`，选择 B：提升 app/router/middleware 等集成测试。
+  - [CONFIRMED] 状态文档记录新的唯一合法任务 TASK-P1-015 / TS-P1-015。
+
+### TS-P1-015：app/router/middleware 最小集成测试
+
+- Status：COMPLETED
+- Task ID：TASK-P1-015
+- Matrix：BL-002、TM-P0-005、TM-P0-006
+- Purpose：用 `httptest` 验证 demo Todo HTTP 路由注册和 handler/service/repository 集成路径，并固定 TraceID、CORS、Recovery 中间件链路的最小语义。
+- Inputs：
+  - 用户回复 `b`
+  - `BL-002`
+  - `MODULES.md` 中的 `internal/middleware`、`internal/transport/http`、`internal/modules/demo` 测试缺口
+  - `internal/transport/http`、`internal/middleware`、`internal/modules/demo` 源码和既有测试
+- Allowed Files：
+  - `internal/transport/http/**/*_test.go`
+  - `internal/middleware/**/*_test.go`
+  - `internal/modules/demo/**/*_test.go`
+  - 必要时限当前范围实现文件：`internal/transport/http/*.go`、`internal/middleware/*.go`、`internal/modules/demo/handler/*.go`
+  - 项目状态文档
+- Forbidden Files：
+  - `cmd/**/*`
+  - `pkg/**/*`
+  - `types/**/*`
+  - `go.mod`
+  - `go.sum`
+  - 数据库 schema、部署配置、真实密钥文件
+- Strict Non-Goals：
+  - 不启动真实 HTTP server，不绑定固定端口。
+  - 不依赖真实外部数据库、Redis、第三方网络服务或生产配置。
+  - 不重构 router/middleware/demo 分层或公共 API。
+  - 不进入 Phase 6 收尾。
+- Execution Steps：
+  1. 阅读当前允许范围源码和既有测试。
+  2. 使用临时 SQLite 构建真实 demo repository/service/handler，并注入 `NewRouter`。
+  3. 新增最小集成测试覆盖 demo Todo HTTP 成功路径、错误路径或路由注册，以及 TraceID/CORS/Recovery 链路。
+  4. 运行格式化和验证命令。
+  5. 更新状态、验收、测试报告、变更、风险、问题和交接文档。
+- Verification Commands：
+  - `gofmt -w internal/transport/http/*_test.go internal/middleware/*_test.go internal/modules/demo/**/*_test.go`
+  - `go test ./internal/transport/http ./internal/middleware ./internal/modules/demo/... -count=1`
+  - `go test ./... -count=1`
+  - `git diff --check`
+- Acceptance：
+  - [CONFIRMED] demo Todo router/handler/service/repository HTTP 集成路径被覆盖。
+  - [CONFIRMED] TraceID、CORS、Recovery 至少有路由级链路断言。
+  - [CONFIRMED] 测试隔离且不依赖生产配置或外部服务。
+- Failure Handling：
+  - 同一问题最多修复 3 轮，每轮记录失败现象、原因假设、修改内容、验证命令和结果。
+- Exit Conditions：
+  - [CONFIRMED] 集成测试存在并通过。
+  - [CONFIRMED] 全量回归和 diff 检查通过。
+  - [CONFIRMED] 状态文档、测试报告和交接文档已更新。
+  - [CONFIRMED] 下一合法任务明确。
+- Evidence：
+  - 修改文件：`internal/transport/http/router_integration_test.go`、项目状态文档。
+  - 命令：`gofmt -w internal/transport/http/router_integration_test.go`；`go test ./internal/transport/http ./internal/middleware ./internal/modules/demo/... -count=1`；`go test ./... -count=1`；`git diff --check`。
+  - 测试结果：PASS；`git diff --check` 仅有 Windows LF/CRLF 转换警告。
+  - 验证结论：demo Todo router/handler/service/repository HTTP 集成和 TraceID/CORS/Recovery 链路已有最小测试覆盖。
+  - 修复记录：前两次相关包测试失败来自测试构造问题，固定 `httptest` Host 后通过。
+- Next Slice Entry Conditions：
+  - 用户确认进入 Phase 6 收尾、继续 app 装配/reload/config 等剩余集成测试，或结束本轮。
+
+### TS-NEXT-SCOPE-008：确认 app/router/middleware 集成测试后的后续范围
+
+- Status：COMPLETED
+- Task ID：TASK-NEXT-SCOPE-008
+- Matrix：BL-002、TM-P0-004、TM-P0-006
+- Allowed Files：
+  - 项目状态文档
+- Forbidden Files：
+  - Go 源码和测试文件，除非用户确认进入新的代码或测试切片。
+  - `go.mod`
+  - `go.sum`
+  - 数据库 schema、部署配置、真实密钥文件。
+- Verification：
+  - 无需 Go 测试，除非用户确认进入新的代码或测试切片。
+- Exit Conditions：
+  - [CONFIRMED] 用户选择 A：进入 Phase 6 收尾。
+  - [CONFIRMED] 状态文档记录新的唯一合法任务和切片 TASK-PHASE6-001 / TS-PHASE6-001。
+
+### TS-PHASE6-001：Phase 6 收尾与交接
+
+- Status：COMPLETED
+- Task ID：TASK-PHASE6-001
+- Matrix：TM-P0-006
+- Purpose：冻结本轮项目优化成果，完成最终状态、验收、测试报告、变更记录、风险/Backlog 和交接更新。
+- Inputs：
+  - 用户最新回复 `a`
+  - TASK-P1-015 完成证据
+  - 当前项目状态文档
+- Allowed Files：
+  - 根目录项目状态文档
+  - `AGENT_HANDOFF.md`
+- Forbidden Files：
+  - Go 源码和测试文件。
+  - `go.mod`
+  - `go.sum`
+  - 数据库 schema、部署配置、真实密钥文件。
+- Verification Commands：
+  - `go test ./... -count=1`
+  - `git diff --check`
+- Exit Conditions：
+  - [CONFIRMED] Phase 6 收尾文档更新完成。
+  - [CONFIRMED] 最终验证命令已执行并记录：`go test ./... -count=1` 与 `git diff --check` 均通过。
+  - [CONFIRMED] 无自动下一实现任务，后续工作需要用户重新确认。
+- Evidence：
+  - 本切片未修改 Go 源码或测试文件。
+  - 项目状态、验收、变更、测试报告、问题和交接文档已同步到收尾完成状态。
+  - app 装配、reload/config 等剩余集成测试未在本切片继续实现，保留为后续确认范围。
 
 ## 历史时间切片
 
