@@ -250,3 +250,25 @@
 - Reason：手动 staging workflow 能落地远程部署路径，同时避免自动生产发布、真实密钥入库和镜像发布范围膨胀。
 - Consequences：允许提交 workflow 和部署说明；不在本会话触发 workflow、不连接远程服务器、不推送镜像、不写真实密钥。Dockerfile、镜像发布、production 和生产迁移框架仍需单独确认。
 - Related Tasks：TASK-P2-003
+
+### DEC-024：提升 Linux Docker production 部署制品
+
+- Date：2026-05-26
+- Status：ACCEPTED_WITH_RISK
+- Context：TASK-P2-003 完成后，用户明确要求“开始，linux、docker、production -> 部署”。
+- Decision：将 `BL-024` 中 production Docker 远程部署剩余范围提升为 TASK-P2-004 / TS-P2-004；新增 Dockerfile、production Compose 示例、production 配置样例，并把远程部署 workflow 扩展为手动 staging/production 环境选择。
+- Alternatives：保持 production defer；只补 Dockerfile 不开放 production workflow；直接执行真实 production 部署。
+- Reason：用户已确认 production 部署方向，但真实生产运行涉及远程服务器、密钥、镜像标签和回滚风险，因此本切片只实现可提交制品和受控手动闸门。
+- Consequences：production workflow 必须仍为 `workflow_dispatch`，并要求 `deploy-production` 确认词和 GitHub Environment `production`；本会话不触发 workflow、不连接服务器、不推送镜像、不执行生产迁移。
+- Related Tasks：TASK-P2-004
+
+### DEC-025：远程 Linux 部署脚本动态生成 `.env.deploy`
+
+- Date：2026-05-26
+- Status：ACCEPTED_WITH_RISK
+- Context：用户修正“环境变量在部署脚本上动态配置”，并强调 Windows 本机不应直接执行 Linux Docker 部署，而应通过远程 Linux 主机部署。
+- Decision：在 TASK-P2-004 范围内新增 `deploy/remote-linux-deploy.sh`，由远程 Linux 主机按参数或环境变量动态生成 `DEPLOY_PATH/.env.deploy`，再执行 Docker build 或 pull、Compose up 和 health/ready 检查。
+- Alternatives：继续要求用户手动维护远程 `.env.deploy`；只依赖 GitHub Actions workflow；在 Windows 本机运行 Docker 部署命令。
+- Reason：动态生成部署运行变量可以减少 Windows 本机配置负担，并保持真实 `.env.deploy` 不进入 Git；通过 SSH 到 Linux 执行也更符合目标运行环境。
+- Consequences：脚本只写入非密钥部署变量，真实数据库密码、Redis 密码、SSH key、registry token 和生产迁移仍不由脚本生成或打印；本会话不执行脚本、不连接远程服务器。
+- Related Tasks：TASK-P2-004

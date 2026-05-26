@@ -2,7 +2,7 @@
 
 ## 范围
 
-本文记录当前项目的最小发布前检查和手动部署边界。当前切片只补 CI 质量门禁和部署说明，不执行真实部署、不推送镜像、不连接服务器、不处理生产密钥。
+本文记录当前项目的最小发布前检查、Linux Docker 制品和手动远程部署边界。当前仓库提供 CI 质量门禁、Dockerfile、production Compose 示例和手动远程部署 workflow；本地会话不执行真实部署、不推送镜像、不连接服务器、不处理生产密钥。
 
 ## 发布前检查
 
@@ -15,6 +15,36 @@ git diff --check
 ```
 
 CI 中会报告 Go 格式漂移，并强制执行全量测试、server 构建和空白检查。当前仓库存在历史 gofmt 漂移，硬门禁需要单独任务收敛。
+
+## Docker 镜像
+
+仓库根目录提供 `Dockerfile`。镜像用于 Linux 运行环境，构建 server 二进制并以非 root 用户运行。
+
+```bash
+docker build -t go-scaffold:local .
+```
+
+当前会话环境未安装 Docker CLI，因此上述镜像构建命令尚未在本机完成验证；需在安装 Docker 的 Linux 或 Docker Desktop 环境补跑。
+
+镜像内置 `deploy/config.production.example.yaml` 作为默认 `/app/configs/config.yaml`，其中 server 绑定 `0.0.0.0:9999`。真实 production 应在远程主机用只读挂载覆盖 `/app/configs/config.yaml`，不要把真实数据库密码、Redis 密码或 token 写入镜像。
+
+## Docker Compose production 示例
+
+production Compose 示例位于 `deploy/docker-compose.production.example.yml`。推荐在远程主机的 `DEPLOY_PATH` 下准备以下目录：
+
+```bash
+mkdir -p configs data logs
+cp deploy/config.production.example.yaml configs/config.yaml
+cp deploy/docker-compose.production.example.yml docker-compose.yml
+```
+
+然后按实际环境修改 `configs/config.yaml` 和 `.env.deploy`。如果使用绑定目录，确保容器用户 `10001:10001` 可以写入 `data` 和 `logs`：
+
+```bash
+sudo chown -R 10001:10001 data logs
+```
+
+Compose 示例通过 `.env.deploy` 读取 `DEPLOY_IMAGE`、`APP_PORT` 和 `DEPLOY_CONTAINER_NAME`，并对 `/health` 配置容器内 healthcheck。
 
 ## 配置边界
 
@@ -37,19 +67,51 @@ CI 中会报告 Go 格式漂移，并强制执行全量测试、server 构建和
 
 - 镜像仓库：GHCR。
 - 触发方式：手动触发。
-- 发布环境：`staging`。
+- 发布环境：`staging` 或显式选择的 `production`。
 - 远程方式：SSH 到 Linux 服务器。
 - 运行方式：Docker Compose 拉取镜像并重启服务。
 
 后续若新增自动部署 workflow，只能读取变量名和 GitHub Secrets，不能把真实值写入仓库。
 
+## Windows 到远程 Linux 直接部署
+
+如果从 Windows 开发环境部署到远程 Linux 主机，推荐先通过 SSH 登录目标主机执行仓库内脚本，而不是在 Windows 本机运行 Linux Docker 命令。`deploy/remote-linux-deploy.sh` 会在远程 Linux 上按最终参数动态生成 `DEPLOY_PATH/.env.deploy`，因此不需要在仓库中保存真实 `.env.deploy`。
+
+远程主机需提前具备 Git 工作区或已上传的源码目录、Docker、`docker compose` 插件或 `docker-compose`。真实业务配置仍位于远程 `DEPLOY_PATH/configs/config.yaml`，数据库密码、Redis 密码和其他敏感值不应写进 `.env.deploy`。
+
+从 Windows PowerShell 触发远程主机本地构建并启动：
+
+```powershell
+ssh deploy@YOUR_HOST "cd ~/go-scaffold && DEPLOY_ENV=production DEPLOY_IMAGE=go-scaffold:local APP_PORT=9999 DEPLOY_PATH=/opt/go-scaffold bash deploy/remote-linux-deploy.sh"
+```
+
+如果镜像已经由其他流水线发布到镜像仓库，可让远程主机拉取指定镜像：
+
+```powershell
+ssh deploy@YOUR_HOST "cd ~/go-scaffold && DEPLOY_ENV=production DEPLOY_IMAGE=ghcr.io/OWNER/go-scaffold:TAG DEPLOY_PATH=/opt/go-scaffold bash deploy/remote-linux-deploy.sh --pull"
+```
+
+脚本支持通过环境变量或参数配置部署值，例如：
+
+```bash
+bash deploy/remote-linux-deploy.sh \
+  --env production \
+  --image go-scaffold:local \
+  --path /opt/go-scaffold \
+  --port 9999
+```
+
+脚本会创建 `configs`、`data`、`logs` 目录，复制 production Compose 示例，按最终变量写入 `DEPLOY_PATH/.env.deploy`，并执行 Docker build 或 pull、Compose up、health/ready 检查。脚本不会生成 SSH key、registry token、数据库密码、Redis 密码，也不会执行数据库迁移。
+
 ## 远程部署 workflow
 
-`.github/workflows/deploy-remote.yml` 提供手动触发的 staging 远程部署 workflow。它不会在 push 或 pull request 时自动运行，也不会在仓库中保存真实 `.env.deploy`、SSH 私钥或 token。
+`.github/workflows/deploy-remote.yml` 提供手动触发的远程部署 workflow。它不会在 push 或 pull request 时自动运行，也不会在仓库中保存真实 `.env.deploy`、SSH 私钥或 token。
+
+workflow 支持 `staging` 和 `production` 两个环境。production 必须在 GitHub Environments 中配置 `production` 环境，并建议启用 required reviewers、分支限制和最小权限 Secrets。
 
 ### GitHub Secrets
 
-在 GitHub 仓库或 `staging` Environment 中配置：
+在 GitHub 仓库、`staging` Environment 或 `production` Environment 中配置：
 
 | Secret | 必须 | 说明 |
 |---|---|---|
@@ -59,27 +121,31 @@ CI 中会报告 Go 格式漂移，并强制执行全量测试、server 构建和
 | `GHCR_USERNAME` | 否 | 私有 GHCR 镜像需要；公开镜像可不填 |
 | `GHCR_TOKEN` | 否 | 私有 GHCR 镜像需要；只授予拉取镜像所需权限 |
 
-`DEPLOY_ENV_FILE` 中的 `DEPLOY_ENV` 当前必须为 `staging`。生产部署仍需单独确认和新的时间切片。
+`DEPLOY_ENV_FILE` 中的 `DEPLOY_ENV` 必须和手动触发时选择的 `deploy_env` 一致。production 建议只在 `production` Environment 中配置独立 Secrets，不复用 staging 的远程主机或密钥。
 
 ### 远程主机前置条件
 
 - Linux 主机允许 `DEPLOY_USER` 通过 SSH 登录。
 - 远程主机已安装 Docker，并安装 `docker compose` 插件或 `docker-compose`。
 - `DEPLOY_PATH` 可由 `DEPLOY_USER` 创建或写入。
-- `DEPLOY_PATH` 下存在 `DEPLOY_COMPOSE_FILE` 指向的 Compose 文件。
+- `DEPLOY_PATH` 下存在 `DEPLOY_COMPOSE_FILE` 指向的 Compose 文件；可由 `deploy/docker-compose.production.example.yml` 复制为 `docker-compose.yml`。
+- `DEPLOY_PATH/configs/config.yaml` 已准备好真实运行配置；可从 `deploy/config.production.example.yaml` 复制后修改。
+- `DEPLOY_PATH/data` 和 `DEPLOY_PATH/logs` 对容器用户 `10001:10001` 可写。
 - Compose 文件中的服务名与 `DEPLOY_SERVICE` 一致，并能使用 `.env.deploy` 中的 `DEPLOY_IMAGE`。
 - `DEPLOY_HEALTH_URL` 和 `DEPLOY_READY_URL` 应能从远程主机访问，常见写法是 `http://127.0.0.1:<port>/health` 和 `/ready`。
 
-workflow 不构建或推送镜像；远程主机会按 `DEPLOY_IMAGE` 拉取已存在的镜像。镜像发布需要单独任务确认。
+workflow 不构建或推送镜像；远程主机会按 `DEPLOY_IMAGE` 拉取已存在的镜像。镜像发布流水线仍需单独任务确认。
 
 ### 手动触发
 
 1. 打开 GitHub Actions。
 2. 选择 `Remote Deploy`。
 3. 点击 `Run workflow`。
-4. `deploy_env` 选择 `staging`。
-5. `confirm` 输入 `deploy`。
+4. `deploy_env` 选择 `staging` 或 `production`。
+5. `confirm` 输入与环境一致的确认词：`deploy-staging` 或 `deploy-production`。
 6. 运行后查看 SSH、Docker Compose 和 health/ready 检查结果。
+
+production 运行前必须确认 GitHub Environment 审批已生效、`DEPLOY_ENV_FILE` 指向 production 主机、`DEPLOY_IMAGE` 是要发布的不可变镜像标签，并且远程主机已有可回滚的上一版本。
 
 失败时不要在日志中粘贴真实密钥或 `.env.deploy` 内容。优先检查 GitHub Secrets、远程 Compose 文件、镜像是否存在、远程 Docker 权限和 health/ready 地址。
 
@@ -121,10 +187,19 @@ go run ./cmd/server initdb --config=configs/config.yaml
 6. 检查 `/health` 和 `/ready`。
 7. 保留上一版本二进制和配置以便回滚。
 
+## production 回滚边界
+
+当前 workflow 不自动执行数据库迁移，也不自动回滚。production 回滚建议固定为镜像标签级回滚：
+
+1. 将 GitHub Environment 中的 `DEPLOY_ENV_FILE` 改回上一版本 `DEPLOY_IMAGE`。
+2. 手动运行 `Remote Deploy`，选择 `production`，输入 `deploy-production`。
+3. 检查 `/health` 和 `/ready`。
+4. 如涉及数据库 schema 变更，必须使用单独确认的生产迁移流程，不要依赖当前 workflow 自动处理。
+
 ## 尚未实现
 
-- 自动生产 CD。
-- Dockerfile 或镜像发布。
+- 自动 production CD。
+- 镜像发布 workflow。
 - Kubernetes、systemd、云平台部署模板。
 - 生产数据库迁移框架。
 - 密钥管理集成。

@@ -1,0 +1,74 @@
+server:
+  host: 0.0.0.0
+  port: 9999
+  mode: release
+  read_timeout: 10
+  write_timeout: 10
+  idle_timeout: 30
+
+database:
+  # Replace with mysql or postgres for real production data.
+  # Keep credentials outside Git and inject them through the runtime environment.
+  driver: sqlite
+  dbname: ./data/app.db
+  max_open_conns: 5
+  max_idle_conns: 2
+
+redis:
+  enabled: false
+  host: 127.0.0.1
+  port: 6379
+  db: 0
+
+logger:
+  level: info
+  format: console
+  output: stdout
+
+i18n:
+  default: zh-CN
+  supported:
+    - zh-CN
+    - en-US
+  messages_dir: ./configs/locales
+
+initdb:
+  script_dir: ./scripts/initdb
+  lock_file: .initialized
+  script_file_prefix: initdb
+
+executor:
+  enabled: true
+  pools:
+    - name: background
+      size: 8
+      expiry: 30
+      non_blocking: true
+
+storage:
+  enabled: false
+  fs_type: os
+  base_path: ./data
+  enable_watch: false
+  watch_buffer_size: 100
+
+cors:
+  enabled: true
+  allow_origins:
+    - "*"
+  allow_methods:
+    - GET
+    - POST
+    - PUT
+    - DELETE
+    - PATCH
+    - OPTIONS
+  allow_headers:
+    - Origin
+    - Content-Type
+    - Authorization
+    - X-Request-ID
+  expose_headers:
+    - X-Request-ID
+  allow_credentials: false
+  max_age: 3600

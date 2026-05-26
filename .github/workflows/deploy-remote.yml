@@ -4,14 +4,15 @@ on:
   workflow_dispatch:
     inputs:
       deploy_env:
-        description: Deployment environment. Production is intentionally not enabled in this workflow.
+        description: Deployment environment. Production requires GitHub Environment approval.
         required: true
         type: choice
         options:
           - staging
+          - production
         default: staging
       confirm:
-        description: Type "deploy" to confirm this remote deployment run.
+        description: Type "deploy-staging" or "deploy-production" to confirm this run.
         required: true
         type: string
 
@@ -46,8 +47,9 @@ jobs:
           CONFIRM_INPUT: ${{ inputs.confirm }}
         run: |
           set -euo pipefail
-          if [ "${CONFIRM_INPUT}" != "deploy" ]; then
-            echo "::error::Type deploy in the confirm input to run this workflow."
+          expected_confirm="deploy-${SELECTED_DEPLOY_ENV}"
+          if [ "${CONFIRM_INPUT}" != "${expected_confirm}" ]; then
+            echo "::error::Type ${expected_confirm} in the confirm input to run this workflow."
             exit 1
           fi
 
@@ -67,7 +69,7 @@ jobs:
       - name: Parse deployment env
         run: |
           set -euo pipefail
-          allowed_keys=' DEPLOY_ENV DEPLOY_HOST DEPLOY_PORT DEPLOY_USER DEPLOY_PATH DEPLOY_COMPOSE_FILE DEPLOY_SERVICE DEPLOY_CONFIG_PATH DEPLOY_IMAGE DEPLOY_HEALTH_URL DEPLOY_READY_URL '
+          allowed_keys=' DEPLOY_ENV DEPLOY_HOST DEPLOY_PORT DEPLOY_USER DEPLOY_PATH DEPLOY_COMPOSE_FILE DEPLOY_SERVICE DEPLOY_CONFIG_PATH DEPLOY_IMAGE DEPLOY_HEALTH_URL DEPLOY_READY_URL APP_PORT DEPLOY_CONTAINER_NAME '
 
           line=""
           while IFS= read -r line || [ -n "${line}" ]; do
@@ -124,10 +126,14 @@ jobs:
             exit 1
           fi
 
-          if [ "${DEPLOY_ENV}" != "staging" ]; then
-            echo "::error::This workflow only supports staging until production deployment is confirmed separately."
-            exit 1
-          fi
+          case "${DEPLOY_ENV}" in
+            staging|production)
+              ;;
+            *)
+              echo "::error::DEPLOY_ENV must be staging or production."
+              exit 1
+              ;;
+          esac
 
           if [ "${DEPLOY_HOST}" = "example.com" ] || [[ "${DEPLOY_IMAGE}" == *"/OWNER/"* ]]; then
             echo "::error::Replace placeholder DEPLOY_HOST and DEPLOY_IMAGE before deployment."

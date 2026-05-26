@@ -3,8 +3,8 @@
 ## 验收状态
 
 - Project：go-scaffold
-- Phase：P2 远程部署 workflow 完成
-- Status：COMPLETED
+- Phase：P2 Linux Docker production 部署制品待验证
+- Status：PENDING_VERIFICATION
 - Last Updated：2026-05-26
 
 ## 本轮启动验收
@@ -83,6 +83,7 @@
 - TASK-NEXT-SCOPE-010 真实 CD 范围确认：COMPLETED，用户已确认使用远程部署和 `.env` 风格配置
 - TASK-P2-002 远程部署 env 模板：COMPLETED，`.env.deploy.example` 已新增，真实 `.env.deploy` 已忽略
 - TASK-P2-003 手动远程部署 workflow：COMPLETED，staging/manual/Secrets/SSH/Docker Compose 路径已新增，本会话未执行真实部署
+- TASK-P2-004 Linux Docker production 部署制品：PENDING_VERIFICATION，Dockerfile、production Compose 示例、远程 Linux 动态 env 部署脚本和手动 production 闸门已补齐；Docker build 待具备 Docker 的环境补跑
 - Agent 基础设施补齐：COMPLETED
 - Agent 基础设施一致性修复：COMPLETED
 - 代码实现：COMPLETED，TASK-P1-016 已完成并通过验证
@@ -397,3 +398,18 @@
 | ACC-P2-023 | workflow YAML 可解析且 actionlint 通过 | 临时 Go YAML 解析；actionlint | 是 | [CONFIRMED] |
 | ACC-P2-024 | diff 空白检查通过 | `git diff --check` | 是 | [CONFIRMED] |
 | ACC-P2-025 | 本会话未执行真实部署、未连接服务器、未推送镜像、未写入密钥 | 核对变更范围和执行命令 | 是 | [CONFIRMED] |
+
+## TASK-P2-004 验收
+
+| ID | 验收项 | 方法 | 必须 | 状态 |
+|---|---|---|---|---|
+| ACC-P2-026 | Dockerfile 存在且可构建 Linux server 镜像 | `docker build -t go-scaffold:local .` | 是 | [PENDING_VERIFICATION] Docker CLI 缺失，待补跑 |
+| ACC-P2-027 | production Compose 示例存在并使用外置配置、数据和日志挂载 | 检查 `deploy/docker-compose.production.example.yml` | 是 | [CONFIRMED] |
+| ACC-P2-028 | production 配置样例绑定 `0.0.0.0:9999` 且不含真实密钥 | 检查 `deploy/config.production.example.yaml` | 是 | [CONFIRMED] |
+| ACC-P2-029 | 远程部署 workflow 支持 staging/production 手动选择并要求环境绑定确认词 | 检查 `.github/workflows/deploy-remote.yml` | 是 | [CONFIRMED] |
+| ACC-P2-030 | 部署文档记录 GitHub Environment、production Secrets、目录权限和回滚边界 | 检查 `docs/deployment.md` | 是 | [CONFIRMED] |
+| ACC-P2-031 | workflow YAML 与 actionlint 通过 | 临时 Go YAML 解析；`actionlint` | 是 | [CONFIRMED] |
+| ACC-P2-032 | 全量 Go 回归通过 | `go test ./... -count=1` | 是 | [CONFIRMED] |
+| ACC-P2-033 | diff 空白检查通过 | `git diff --check` | 是 | [CONFIRMED] |
+| ACC-P2-034 | 本会话未触发 workflow、未连接服务器、未推送镜像、未执行真实 production | 核对执行命令 | 是 | [CONFIRMED] |
+| ACC-P2-035 | 远程 Linux 部署脚本动态生成 `.env.deploy` 且不写入密钥 | 检查 `deploy/remote-linux-deploy.sh`；`shfmt` Bash 语法解析 | 是 | [CONFIRMED] |

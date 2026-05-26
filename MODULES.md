@@ -277,6 +277,7 @@ types/*
 - [CONFIRMED] TASK-P1-015 已完成，router/middleware/demo HTTP 集成路径有最小测试覆盖。
 - [CONFIRMED] TASK-PHASE6-001 已完成，Phase 6 收尾与交接已完成。
 - [CONFIRMED] TASK-P1-016 已完成，app 装配、配置变更 hook 与 reload/config 剩余集成路径有最小测试覆盖。
+- [PENDING_VERIFICATION] TASK-P2-004 已补齐 Dockerfile、production Compose 示例、production 配置样例、远程 Linux 动态 env 部署脚本和手动 production workflow 闸门；Docker build 待具备 Docker 的环境补跑。
 - [CONFIRMED] 测试矩阵草案已生成。
 - [CONFIRMED] P1 优化候选项已生成。
 - [CONFIRMED] 已按 P1 切片进行受控 Go 测试代码修改或文档分类：TASK-P1-001、TASK-P1-002、TASK-P1-003、TASK-P1-004、TASK-P1-005、TASK-P1-006、TASK-P1-007、TASK-P1-008 均已完成并验证通过。

@@ -1,0 +1,22 @@
+services:
+  go-scaffold:
+    image: ${DEPLOY_IMAGE:?set DEPLOY_IMAGE}
+    container_name: ${DEPLOY_CONTAINER_NAME:-go-scaffold}
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-9999}:9999"
+    environment:
+      REI_CONFIG_PATH: /app/configs/config.yaml
+    volumes:
+      - ./configs/config.yaml:/app/configs/config.yaml:ro
+      - ./data:/app/data
+      - ./logs:/app/logs
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:9999/health >/dev/null"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    security_opt:
+      - no-new-privileges:true
+    read_only: false

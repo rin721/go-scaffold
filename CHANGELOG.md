@@ -2,6 +2,28 @@
 
 ## 最新变更
 
+### 2026-05-26 - TASK-P2-004 - TS-P2-004
+
+- 变更：用户要求“开始，linux、docker、production -> 部署”，并修正“环境变量在部署脚本上动态配置”，接受为 production Docker 远程部署制品、远程 Linux 动态 env 脚本和手动闸门切片。
+- 变更：新增 `Dockerfile`，构建 Linux server 镜像并以非 root 用户运行。
+- 变更：新增 `.dockerignore`，避免 Git、真实 env、缓存、日志和非运行制品进入构建上下文。
+- 变更：新增 `deploy/docker-compose.production.example.yml` 和 `deploy/config.production.example.yaml`，提供 production Compose 示例和无密钥配置样例。
+- 变更：新增 `deploy/remote-linux-deploy.sh`，用于在远程 Linux 主机按参数/环境变量动态生成 `DEPLOY_PATH/.env.deploy` 并执行 Docker Compose 部署路径。
+- 变更：扩展 `.github/workflows/deploy-remote.yml`，支持 `staging` / `production` 手动选择，确认词改为 `deploy-staging` 或 `deploy-production`。
+- 变更：更新 `.env.deploy.example`、`docs/deployment.md` 和 README，补充 `APP_PORT`、`DEPLOY_CONTAINER_NAME`、Linux Docker、Windows 到远程 Linux 直接部署、GitHub Environment、production Secrets、目录权限和回滚边界说明。
+- 范围：未修改 Go 代码、测试文件、导出业务 API、配置 schema、HTTP 路由、数据库 schema、`go.mod`、`go.sum`、真实 `.env`、真实服务器地址、部署凭据或密钥；未执行真实部署、未连接远程服务器、未推送镜像、未触发 workflow。
+- 验证：
+  - `docker version`：FAIL_ENV，当前环境未安装 Docker CLI
+  - `podman` / `nerdctl` / `docker.exe`：NOT_AVAILABLE
+  - `bash -n deploy/remote-linux-deploy.sh`：FAIL_ENV，本机无可用 bash，WSL 未安装 Linux 发行版
+  - `go run mvdan.cc/sh/v3/cmd/shfmt@latest -ln bash -tojson`：PASS
+  - 临时 Go YAML 解析：PASS
+  - `go run github.com/rhysd/actionlint/cmd/actionlint@latest .github/workflows/ci.yml .github/workflows/deploy-remote.yml`：PASS
+  - `go test ./... -count=1`：PASS
+  - `go build -o <temp> ./cmd/server`：PASS
+  - `git diff --check`：PASS，仅有 Windows LF/CRLF 转换警告
+- 状态：TASK-P2-004 PENDING_VERIFICATION；Docker build 待具备 Docker 的环境补跑。
+
 ### 2026-05-26 - TASK-P2-003 - TS-P2-003
 
 - 变更：用户明确确认实现远程部署 workflow。
