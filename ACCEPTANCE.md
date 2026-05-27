@@ -3,8 +3,8 @@
 ## 验收状态
 
 - Project：go-scaffold
-- Phase：P2 Linux Docker production 部署制品验证阻塞
-- Status：BLOCKED
+- Phase：P2 Linux Docker production 部署制品完成
+- Status：COMPLETED
 - Last Updated：2026-05-27
 
 ## 本轮启动验收
@@ -83,7 +83,7 @@
 - TASK-NEXT-SCOPE-010 真实 CD 范围确认：COMPLETED，用户已确认使用远程部署和 `.env` 风格配置
 - TASK-P2-002 显式参数部署入口：COMPLETED，`deploy.sh` 和 `script/install.sh` 已新增，旧本地部署 env 文件依赖已删除
 - TASK-P2-003 手动远程部署 workflow：COMPLETED，staging/manual/Secrets/SSH/Docker Compose 路径已新增，本会话未执行真实部署
-- TASK-P2-004 Linux Docker production 部署制品：BLOCKED，Dockerfile、production Compose 示例、统一 `deploy.sh` 部署入口和手动 production 闸门已补齐；2026-05-27 用户远端补跑 Docker build 时 `go mod download` 因 Go 代理网络超时失败，本轮已补 Dockerfile 代理 build arg 和缓存，Docker build 待具备 Docker 的环境重跑
+- TASK-P2-004 Linux Docker production 部署制品：COMPLETED，Dockerfile、production Compose 示例、统一 `deploy.sh` 部署入口和手动 production 闸门已补齐；用户已在 Linux Docker 环境执行带 `GOPROXY` 的 Docker build 并通过
 - TASK-P2-005 至 TASK-P2-010 插件钩子运行时与 IAM 公共接口：COMPLETED，`pkg/plugin/hooks`、hook-aware manager、HTTP 远程插件服务端、`RemoteHook`、`pkg/iam` memory、配置/app/reload/lifecycle 接入均已完成并通过验证
 - Agent 基础设施补齐：COMPLETED
 - Agent 基础设施一致性修复：COMPLETED
@@ -404,7 +404,7 @@
 
 | ID | 验收项 | 方法 | 必须 | 状态 |
 |---|---|---|---|---|
-| ACC-P2-026 | Dockerfile 存在且可构建 Linux server 镜像 | `docker build -t go-scaffold:local .` | 是 | [BLOCKED] 本机缺少 Docker 兼容 CLI；用户远端补跑时 `go mod download` 因 Go 代理网络超时失败。本轮已补 `GOPROXY` / `GOSUMDB` build arg 和 BuildKit 缓存，待具备 Docker 的环境重跑 |
+| ACC-P2-026 | Dockerfile 存在且可构建 Linux server 镜像 | `docker build --build-arg GOPROXY=https://goproxy.cn,direct -t go-scaffold:local .` | 是 | [CONFIRMED] 用户已在 Linux Docker 环境补跑通过，BuildKit 输出 `23/23 FINISHED`，镜像标记为 `docker.io/library/go-scaffold:local` |
 | ACC-P2-027 | production Compose 示例存在并使用外置配置、数据和日志挂载 | 检查 `deploy/docker-compose.production.example.yml` | 是 | [CONFIRMED] |
 | ACC-P2-028 | production 配置样例绑定 `0.0.0.0:9999` 且不含真实密钥 | 检查 `deploy/config.production.example.yaml` | 是 | [CONFIRMED] |
 | ACC-P2-029 | 远程部署 workflow 支持 staging/production 手动选择并要求环境绑定确认词 | 检查 `.github/workflows/deploy-remote.yml` | 是 | [CONFIRMED] |

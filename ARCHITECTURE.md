@@ -40,7 +40,7 @@ types/*
 | 数据库迁移 | dev-prod 分层 | [CONFIRMED] TASK-P1-005 已明确 demo `AutoMigrate`、`initdb`、reload 职责；生产迁移框架仍延后 | [CONFIRMED] |
 | 插件系统 | v1 local/http 保留；注册责任已收拢为被动 registry/runtime；TASK-P2-005 至 TASK-P2-007 已增加 hooks、HTTP server helper 和 `RemoteHook` | [CONFIRMED] rpc/ws/discovery、插件发现和 Go `.so` 插件仍留在 Backlog | [CONFIRMED] |
 | IAM/auth/JWT | `pkg/iam` 公共接口与 memory 实现已完成；JWT 中间件和业务 RBAC 仍不实现 | 后续如需业务登录、HTTP 中间件或数据库版权限，必须单独提升任务 | [CONFIRMED] |
-| CI/CD 与部署 | 先建立非生产质量门禁、手动部署说明、远程部署显式参数契约、手动远程部署 workflow、Docker production 制品和远程 Linux 统一 `deploy.sh` 入口；真实生产运行仍需单独确认 | [CONFIRMED] TASK-P2-001 已新增 CI workflow 和部署说明；TASK-P2-002 已新增 `deploy.sh` / `script/install.sh` 显式参数契约；TASK-P2-003 已新增手动 staging 远程部署 workflow；TASK-P2-004 已补 Dockerfile、production Compose 示例、统一 `deploy.sh` 部署入口和手动 production 闸门，但 Docker build 待具备 Docker 的环境验证；镜像发布和真实 production 运行仍需单独确认 | [CONFIRMED] |
+| CI/CD 与部署 | 先建立非生产质量门禁、手动部署说明、远程部署显式参数契约、手动远程部署 workflow、Docker production 制品和远程 Linux 统一 `deploy.sh` 入口；真实生产运行仍需单独确认 | [CONFIRMED] TASK-P2-001 已新增 CI workflow 和部署说明；TASK-P2-002 已新增 `deploy.sh` / `script/install.sh` 显式参数契约；TASK-P2-003 已新增手动 staging 远程部署 workflow；TASK-P2-004 已补 Dockerfile、production Compose 示例、统一 `deploy.sh` 部署入口、手动 production 闸门并完成 Docker build 验证；镜像发布和真实 production 运行仍需单独确认 | [CONFIRMED] |
 
 ## 需要详细分析的模块
 

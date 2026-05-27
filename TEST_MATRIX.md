@@ -3,8 +3,8 @@
 ## 测试矩阵状态
 
 - 项目：go-scaffold
-- 任务：TASK-P2-005 至 TASK-P2-010
-- 时间切片：TS-P2-005 至 TS-P2-010
+- 任务：TASK-P2-004 至 TASK-P2-010
+- 时间切片：TS-P2-004 至 TS-P2-010
 - 状态：COMPLETED
 - 最后更新：2026-05-27
 - 原则：本文定义后续优化的验证边界，不代表测试代码已经实现。
@@ -62,7 +62,7 @@
 | TM-P2-002 | 真实 CD 范围确认 | 确认镜像发布、远程部署、环境、触发策略和 secrets 边界 | 项目状态文档 | `git diff --check` | [CONFIRMED] 用户已选择 C、确认使用远程部署和 `.env` 风格配置，并明确确认实现远程部署 workflow | BL-024、RISK-016、RISK-017 |
 | TM-P2-003 | 显式参数部署入口 | 提供可提交的远程部署显式参数契约，并删除旧本地部署 env 文件依赖 | `deploy.sh`、`script/install.sh`、`docs/deployment.md`、`README.md`、状态文档 | `git diff --check` | [CONFIRMED] 部署入口不包含真实密钥、服务器地址或远程部署动作 | BL-024、RISK-017 |
 | TM-P2-004 | 手动远程部署 workflow | 新增手动 staging/production 远程部署 workflow，通过 SSH 执行 `script/install.sh` 并传入 `deploy.sh` 显式参数 | `.github/workflows/deploy-remote.yml`、`deploy.sh`、`script/install.sh`、`docs/deployment.md`、`README.md`、状态文档 | 临时 Go YAML 解析；`go run github.com/rhysd/actionlint/cmd/actionlint@latest .github/workflows/ci.yml .github/workflows/deploy-remote.yml`；`git diff --check` | [CONFIRMED] workflow 改为显式参数入口；本会话不执行真实部署、不连接远程服务器、不写入真实密钥 | BL-024、RISK-016、RISK-017 |
-| TM-P2-005 | Linux Docker production 部署制品 | 新增 Dockerfile、production Compose 示例、统一 `deploy.sh` 部署入口和手动 production workflow 闸门，确保 production 需要显式环境选择与确认词 | `Dockerfile`、`.dockerignore`、`deploy/*`、`.github/workflows/deploy-remote.yml`、`deploy.sh` / `script/install.sh` 显式参数契约、`docs/deployment.md`、`README.md`、状态文档 | `docker build -t go-scaffold:local .`；`bash -n deploy.sh` 或 `shfmt` Bash 语法解析；临时 Go YAML 解析；`go run github.com/rhysd/actionlint/cmd/actionlint@latest .github/workflows/ci.yml .github/workflows/deploy-remote.yml`；`go test ./... -count=1`；`git diff --check` | [BLOCKED] 制品、统一 `deploy.sh` 入口和静态验证已完成；2026-05-27 复验 Docker 兼容 CLI 仍不可用，镜像构建待具备 Docker 的环境补跑；不触发 workflow、不连接服务器、不推送镜像、不执行真实 production | BL-024、RISK-016、RISK-017、RISK-018 |
+| TM-P2-005 | Linux Docker production 部署制品 | 新增 Dockerfile、production Compose 示例、统一 `deploy.sh` 部署入口和手动 production workflow 闸门，确保 production 需要显式环境选择与确认词 | `Dockerfile`、`.dockerignore`、`deploy/*`、`.github/workflows/deploy-remote.yml`、`deploy.sh` / `script/install.sh` 显式参数契约、`docs/deployment.md`、`README.md`、状态文档 | `docker build --build-arg GOPROXY=https://goproxy.cn,direct -t go-scaffold:local .`；`bash -n deploy.sh` 或 `shfmt` Bash 语法解析；临时 Go YAML 解析；`go run github.com/rhysd/actionlint/cmd/actionlint@latest .github/workflows/ci.yml .github/workflows/deploy-remote.yml`；`go test ./... -count=1`；`git diff --check` | [CONFIRMED] 制品、统一 `deploy.sh` 入口、静态验证和用户 Linux Docker build 均已完成；不触发 workflow、不连接服务器、不推送镜像、不执行真实 production | BL-024、RISK-016、RISK-017、RISK-018 |
 | TM-P2-006 | `pkg/plugin/hooks` | 独立钩子引擎提供优先级、复制快照、context 取消、停止语义、nil handler 拒绝和服务查找能力 | `pkg/plugin/hooks/**/*` | `go test ./pkg/plugin/... -count=1` | [CONFIRMED] TASK-P2-005 已完成 | RISK-020 |
 | TM-P2-007 | `pkg/plugin.Manager` 钩子化 | Manager 支持 `Hooks()`、`RegisterHook`、`WithHooks` 和标准钩子点，保持被动注册边界 | `pkg/plugin/**/*` | `go test ./pkg/plugin/... -count=1` | [CONFIRMED] TASK-P2-006 已完成；`pkg/plugin` 不导入 IAM/config/logger/internal | RISK-015、RISK-020 |
 | TM-P2-008 | HTTP 远程插件与 `RemoteHook` | HTTP 服务端 helper、`hooks.execute` 和远程钩子 round trip 可验证 | `pkg/plugin/**/*` | `go test ./pkg/plugin/... -count=1` | [CONFIRMED] TASK-P2-007 已完成 | RISK-020 |
@@ -96,7 +96,7 @@
 | TASK-NEXT-SCOPE-010 | 确认真实 CD / 镜像发布 / 远程部署自动化边界 | P2 | 确认 | 项目状态文档 | `git diff --check` | [CONFIRMED] 用户确认远程部署并使用 `.env` 风格配置 | COMPLETED |
 | TASK-P2-002 | 补显式参数部署入口 | P2 | 发布配置文档 | `deploy.sh`、`script/install.sh`、`docs/deployment.md`、`README.md`、状态文档 | `git diff --check` | [CONFIRMED] 旧本地部署 env 文件依赖已删除，不实现真实部署 | COMPLETED |
 | TASK-P2-003 | 实现手动远程部署 workflow | P2 | CI/CD 配置+文档 | `.github/workflows/deploy-remote.yml`、`deploy.sh`、`script/install.sh`、`docs/deployment.md`、`README.md`、状态文档 | 临时 Go YAML 解析；actionlint；`git diff --check` | [CONFIRMED] workflow 手动触发、Secrets/Variables 注入显式参数、SSH 执行部署入口和文档说明均已完成 | COMPLETED |
-| TASK-P2-004 | 补 Linux Docker production 部署制品 | P2 | 发布工程配置+文档 | `Dockerfile`、`.dockerignore`、`deploy/*`、`.github/workflows/deploy-remote.yml`、`deploy.sh` / `script/install.sh` 显式参数契约、`docs/deployment.md`、`README.md`、状态文档 | `docker build -t go-scaffold:local .`；`bash -n deploy.sh` 或 `shfmt` Bash 语法解析；临时 Go YAML 解析；actionlint；`go test ./... -count=1`；`git diff --check` | [BLOCKED] Dockerfile、production Compose 示例、远程 Linux 统一 `deploy.sh` 入口和手动 production 闸门已补齐；Docker build 待具备 Docker 的环境补跑 | BLOCKED |
+| TASK-P2-004 | 补 Linux Docker production 部署制品 | P2 | 发布工程配置+文档 | `Dockerfile`、`.dockerignore`、`deploy/*`、`.github/workflows/deploy-remote.yml`、`deploy.sh` / `script/install.sh` 显式参数契约、`docs/deployment.md`、`README.md`、状态文档 | `docker build --build-arg GOPROXY=https://goproxy.cn,direct -t go-scaffold:local .`；`bash -n deploy.sh` 或 `shfmt` Bash 语法解析；临时 Go YAML 解析；actionlint；`go test ./... -count=1`；`git diff --check` | [CONFIRMED] Dockerfile、production Compose 示例、远程 Linux 统一 `deploy.sh` 入口、手动 production 闸门和 Docker build 验证均完成 | COMPLETED |
 | TASK-P2-005 | 实现 `pkg/plugin/hooks` | P2 | 公共 API+测试 | `pkg/plugin/hooks/**/*`、状态文档 | `go test ./pkg/plugin/... -count=1` | [CONFIRMED] 独立钩子引擎完成 | COMPLETED |
 | TASK-P2-006 | 让 `pkg/plugin.Manager` 支持钩子 | P2 | 公共 API+测试 | `pkg/plugin/**/*`、状态文档 | `go test ./pkg/plugin/... -count=1` | [CONFIRMED] Manager hook 语义完成且保持解耦 | COMPLETED |
 | TASK-P2-007 | 实现 HTTP 远程插件服务端和 `RemoteHook` | P2 | 公共 API+测试 | `pkg/plugin/**/*`、状态文档 | `go test ./pkg/plugin/... -count=1` | [CONFIRMED] HTTP server helper 与远程钩子完成 | COMPLETED |
@@ -129,8 +129,7 @@
 
 当前合法下一项：
 
-- [CONFIRMED] TASK-P2-005 至 TASK-P2-010 已完成；当前无自动下一实现任务。
-- [BLOCKED] TASK-P2-004 制品和静态验证已完成；当前唯一阻塞项是 Docker 镜像构建，需具备 Docker CLI/daemon 后补跑。
+- [CONFIRMED] TASK-P2-004 至 TASK-P2-010 已完成；当前无自动下一实现任务。
 - [CONFIRMED] 后续镜像发布流水线、真实 production 运行、生产迁移、auth/rbac 或插件扩展仍必须由用户重新确认并拆成新的任务/时间切片。
 
 ## 验收门禁

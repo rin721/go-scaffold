@@ -3,7 +3,7 @@
 ## 风险登记状态
 
 - Project：go-scaffold
-- Phase：P2 插件钩子运行时与 IAM 公共接口
+- Phase：P2 Linux Docker production 部署制品完成
 - Status：COMPLETED
 - Last Updated：2026-05-27
 
@@ -196,7 +196,7 @@
 - Probability：Medium
 - Impact：如果 CI/CD workflow 自动连接生产环境、推送镜像或执行部署，可能造成未授权发布、密钥暴露或生产变更。
 - Trigger：在未确认密钥、环境、权限和回滚策略前实现自动 CD。
-- Mitigation：TASK-P2-001 已新增只读 CI 质量门禁和手动部署说明；TASK-P2-003 已新增手动 staging 远程部署 workflow；TASK-P2-004 已补 production Docker 制品、手动 production 闸门和统一 `deploy.sh` 部署入口，Docker build 因当前环境缺少 Docker 兼容 CLI 受阻，待具备 Docker 的环境补跑。workflow 和脚本均不在本会话触发远程连接、不推送镜像、不写真实 secrets。
+- Mitigation：TASK-P2-001 已新增只读 CI 质量门禁和手动部署说明；TASK-P2-003 已新增手动 staging 远程部署 workflow；TASK-P2-004 已补 production Docker 制品、手动 production 闸门和统一 `deploy.sh` 部署入口，Docker build 已由用户在 Linux Docker 环境验证通过。workflow 和脚本均不在本会话触发远程连接、不推送镜像、不写真实 secrets。
 - Owner：User/Agent
 - Status：[CONFIRMED] 非生产 CI、手动 staging workflow 和 production 手动闸门均按受控方向推进
 - Blocking：No；会阻塞 production 自动化，直到用户单独确认。
@@ -229,7 +229,7 @@
 - Mitigation：脚本和文档明确提示风险；脚本不打印 password/token/secret 类参数值；GitHub workflow 依赖 Secrets masking；真实生产建议使用受控 shell、CI secret masking 或主机密钥管理器。
 - Status：[CONFIRMED] 已记录并在部署文档、脚本帮助文本中提示
 - Owner：User/Agent
-- Status：[RISK] 制品已补齐，Docker build 受环境缺失阻塞；不得宣称真实 production 已上线
+- Status：[RISK] 制品和 Docker build 验证已完成；不得宣称真实 production 已上线
 - Blocking：No；但阻塞把本切片结果宣称为真实 production 已上线。
 
 ### RISK-020：插件钩子成为隐式控制平面
@@ -271,4 +271,4 @@
 | RD-009 | 确认 CI/CD 与部署首切片 | 仅新增 CI 质量门禁和部署说明，不做真实 CD | [CONFIRMED] |
 | RD-010 | 确认真实 CD / 镜像发布 / 远程部署自动化边界 | 用户选择 C 并确认远程部署；env 模板和手动 staging workflow 已完成，production 与镜像发布仍需确认 | [CONFIRMED] |
 | RD-011 | 确认 Linux Docker production 部署制品 | 用户确认 production 部署方向；本切片只补制品和手动闸门，不执行真实 production | [CONFIRMED] |
-| RD-012 | 确认插件钩子运行时与 IAM 公共接口主线 | 用户确认 `dev.tmp/new-plugin.md` 设计；TASK-P2-005 至 TASK-P2-010 已实现并验证，Docker build 阻塞仍保留在 TASK-P2-004 | [CONFIRMED] |
+| RD-012 | 确认插件钩子运行时与 IAM 公共接口主线 | 用户确认 `dev.tmp/new-plugin.md` 设计；TASK-P2-005 至 TASK-P2-010 已实现并验证，TASK-P2-004 Docker build 阻塞已解除 | [CONFIRMED] |

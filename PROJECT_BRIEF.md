@@ -3,7 +3,7 @@
 ## 项目身份
 
 - Project：go-scaffold
-- Current Phase：P2 Linux Docker production 部署制品与远程 Linux 脚本待验证
+- Current Phase：P2 Linux Docker production 部署制品完成
 - Overall Status：COMPLETED
 - Last Updated：2026-05-26
 - Source Rule：`docs/ai/prompt.md`
@@ -74,7 +74,7 @@
 ### P2
 
 - [DEFERRED] auth/rbac、部署流水线、性能测试、多租户、脚手架生成器、插件系统 rpc/ws/discovery 扩展。
-- [CONFIRMED] 用户已选择真实 CD、镜像发布和远程部署自动化方向，并确认使用远程部署；TASK-P2-002 已补 `deploy.sh` / `script/install.sh` 显式参数契约 变量模板，TASK-P2-003 已补手动 staging 远程部署 workflow，TASK-P2-004 已补 Dockerfile、production Compose 示例、统一 `deploy.sh` 部署入口和手动 production 闸门。Docker build 待具备 Docker 的环境验证；镜像发布和真实 production 运行仍需单独确认。
+- [CONFIRMED] 用户已选择真实 CD、镜像发布和远程部署自动化方向，并确认使用远程部署；TASK-P2-002 已补 `deploy.sh` / `script/install.sh` 显式参数契约 变量模板，TASK-P2-003 已补手动 staging 远程部署 workflow，TASK-P2-004 已补 Dockerfile、production Compose 示例、统一 `deploy.sh` 部署入口、手动 production 闸门并完成 Docker build 验证；镜像发布和真实 production 运行仍需单独确认。
 
 ## 非目标
 

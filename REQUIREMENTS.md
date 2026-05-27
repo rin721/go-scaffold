@@ -49,7 +49,7 @@
 |---|---|---|---|
 | REQ-OPT-P2-001 | auth/rbac 实现 | 当前 README 明确暂不实现，需要单独需求确认 | [DEFERRED] |
 | REQ-OPT-P2-002 | 插件系统 rpc/ws/discovery 扩展 | 插件 v1 已完成，扩展需独立提升 | [DEFERRED] |
-| REQ-OPT-P2-003 | CI/CD 与部署 | 首切片已完成 CI 质量门禁和部署说明；显式参数部署入口、手动 staging/production 远程部署 workflow 闸门、Dockerfile、production Compose 示例和统一 `deploy.sh` 部署入口已补齐；Docker build 待具备 Docker 的环境验证，镜像发布和真实 production 运行仍需单独确认 | [CONFIRMED] |
+| REQ-OPT-P2-003 | CI/CD 与部署 | 首切片已完成 CI 质量门禁和部署说明；显式参数部署入口、手动 staging/production 远程部署 workflow 闸门、Dockerfile、production Compose 示例、统一 `deploy.sh` 部署入口和 Docker build 验证已完成；镜像发布和真实 production 运行仍需单独确认 | [CONFIRMED] |
 | REQ-OPT-P2-004 | 性能基准测试 | 需先完成测试矩阵和功能边界收拢 | [DEFERRED] |
 | REQ-OPT-P2-005 | 脚手架生成器 | 需先确认框架化抽取路线 | [DEFERRED] |
 | REQ-OPT-P2-006 | 插件钩子运行时、HTTP 远程插件传输和 IAM 公共接口 | 用户确认 `dev.tmp/new-plugin.md` 设计；本轮仅实现公共基础设施接口、内存 IAM 和 app 组合层接入，不实现完整业务登录/RBAC | [CONFIRMED] |

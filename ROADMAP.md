@@ -142,7 +142,7 @@
 ## Phase 8：真实 CD 范围确认
 
 - 目标：确认真实 CD、镜像发布和远程部署自动化的目标平台、安全边界与实现输入；用户已确认使用远程部署。
-- 状态：PENDING_VERIFICATION
+- 状态：COMPLETED
 - 当前切片：
   - TASK-NEXT-SCOPE-010 / TS-NEXT-SCOPE-010。
   - TASK-P2-002 / TS-P2-002。
@@ -151,7 +151,6 @@
 - 待确认：
   - 镜像仓库、发布环境、触发方式和审批策略。
   - GitHub Secrets 名称和权限边界。
-  - Docker build 在具备 Docker 的环境中补跑验证。
   - 镜像发布流水线、真实 production 运行和生产迁移框架是否开始实现。
 - 已完成：
   - `deploy.sh` / `script/install.sh` 显式参数契约 远程部署显式参数契约。
@@ -159,7 +158,7 @@
   - 部署说明中的远程变量边界。
   - 手动 staging 远程部署 workflow。
   - Dockerfile、production Compose 示例、production 配置样例、统一 `deploy.sh` 部署入口和手动 production workflow 闸门。
+  - 用户在 Linux Docker 环境完成 `docker build --build-arg GOPROXY=https://goproxy.cn,direct -t go-scaffold:local .` 验证。
 - 约束：
   - 本会话未执行远程部署、不推送镜像、不连接远程环境、不读取真实 secrets；远程 Linux 脚本仅按参数生成非密钥 显式部署参数。
-  - 当前本机缺少 Docker CLI，`docker build -t go-scaffold:local .` 待补跑。
   - 镜像发布、真实 production 运行、生产迁移框架仍需单独确认。

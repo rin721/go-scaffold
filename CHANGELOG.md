@@ -2,6 +2,13 @@
 
 ## 最新变更
 
+### 2026-05-27 - TASK-P2-004 - Docker build verification completed
+
+- 变更：记录用户在 Linux Docker 环境补跑 `docker build --build-arg GOPROXY=https://goproxy.cn,direct -t go-scaffold:local .` 成功，解除 TASK-P2-004 / TS-P2-004 的唯一阻塞项。
+- 验证：Docker BuildKit 输出 `23/23 FINISHED`，镜像写入 `sha256:4df5520bcf1c45a922be8db2e6c5e58ae8fc025f34bea5f1d4bf33f0b2301785`，并标记为 `docker.io/library/go-scaffold:local`。
+- 范围：本轮仅更新状态、验收、测试报告、问题记录、变更记录和交接说明；未修改 Go 代码，未触发 workflow，未连接远程服务器，未推送镜像，未执行真实 production。
+- 状态：TASK-P2-004 / TS-P2-004 转为 `COMPLETED`，`ISSUE-P2-005` 关闭；当前无自动下一实现任务。
+
 ### 2026-05-27 - TASK-P2-004 - Docker build proxy args
 
 - 变更：诊断用户远端 Docker build 慢/超时问题，确认旧 `Dockerfile` 未声明 `GOPROXY` build arg，导致 `--build-arg GOPROXY=...` 未生效。

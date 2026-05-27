@@ -2,10 +2,10 @@
 
 ## 当前合法任务
 
-- Task ID：TASK-P2-004
-- Status：BLOCKED
-- Time Slice：TS-P2-004
-- Summary：`dev.tmp/new-plugin.md` 设计已完成。当前唯一未关闭事项是 TASK-P2-004 的 Docker build 验证；2026-05-27 用户在 Docker 环境补跑时 `go mod download` 因 Go 代理网络超时失败，旧 Dockerfile 又未声明 `GOPROXY` build arg。本轮已补 Dockerfile 代理参数和 BuildKit 缓存，但镜像构建仍待 Docker 环境重跑通过，`ISSUE-P2-005` 保持打开。
+- Task ID：NONE
+- Status：COMPLETED
+- Time Slice：NONE
+- Summary：`dev.tmp/new-plugin.md` 设计已完成，TASK-P2-004 的 Docker build 验证也已解除阻塞。用户已在 Linux Docker 环境运行 `docker build --build-arg GOPROXY=https://goproxy.cn,direct -t go-scaffold:local .` 并得到 BuildKit `23/23 FINISHED`。当前无自动下一实现任务；镜像发布流水线、真实 production 运行、生产迁移和 auth/rbac 等仍需重新确认。
 
 ## 任务列表
 
@@ -1189,7 +1189,7 @@
 
 ### TASK-P2-004：补 Linux Docker production 部署制品
 
-- Status：BLOCKED
+- Status：COMPLETED
 - Time Slice：TS-P2-004
 - Matrix：BL-024、TM-P2-005、RISK-016、RISK-017、RISK-018
 - Source：用户要求“开始，linux、docker、production -> 部署”。
@@ -1220,7 +1220,7 @@
   - 不新增业务功能或修改 Go API。
   - 不引入 Kubernetes、systemd 或云平台模板。
 - Verification：
-  - `docker build -t go-scaffold:local .`：BLOCKED，当前本机未安装 Docker CLI；2026-05-27 用户在 Docker 环境补跑时 `go mod download` 因访问 Go 代理超时失败。本轮已补 Dockerfile 的 `GOPROXY` / `GOSUMDB` build arg 和 BuildKit 缓存，待 Docker 环境重跑 `docker build --build-arg GOPROXY=https://goproxy.cn,direct -t go-scaffold:local .`。
+  - `docker build --build-arg GOPROXY=https://goproxy.cn,direct -t go-scaffold:local .`：PASS_REMOTE，用户在 Linux Docker 环境补跑通过，BuildKit 输出 `23/23 FINISHED`，镜像标记为 `docker.io/library/go-scaffold:local`。
   - 临时 Go YAML 解析：PASS。
   - `go run github.com/rhysd/actionlint/cmd/actionlint@latest .github/workflows/ci.yml .github/workflows/deploy-remote.yml`：PASS。
   - `bash -n deploy.sh`：FAIL_ENV，本机无可用 bash，WSL 未安装 Linux 发行版。
@@ -1229,19 +1229,19 @@
   - `go build -o <temp> ./cmd/server`：PASS。
   - `git diff --check`：PASS，仅有 Windows LF/CRLF 转换警告。
 - Exit Conditions：
-  - [BLOCKED] Dockerfile 镜像构建待具备 Docker 的环境用更新后的 Dockerfile 重跑验证。
+  - [CONFIRMED] Dockerfile 镜像构建已在 Linux Docker 环境验证通过。
   - [CONFIRMED] production Compose 示例使用 `DEPLOY_IMAGE`、只挂载示例路径，并包含 healthcheck。
   - [CONFIRMED] production 配置样例绑定 `0.0.0.0:9999`，不包含真实密钥。
   - [CONFIRMED] 远程 Linux 部署脚本会按参数/环境变量动态生成 `运行期显式部署参数`，不要求提交真实 显式部署参数。
   - [CONFIRMED] workflow 仍只支持 `workflow_dispatch`，staging/production 均需要环境绑定确认词。
   - [CONFIRMED] production 发布依赖 GitHub Environment `production` 和 Secrets，不保存真实值。
   - [CONFIRMED] 部署说明记录 Linux 主机、Docker Compose、目录权限、production 手动触发和回滚边界。
-  - [CONFIRMED] 除 Docker build 与本机 `bash -n` 外的验证命令已通过；Docker build 和 `bash -n` 不可执行原因已记录，脚本已通过 Bash 语法解析。
+  - [CONFIRMED] 除本机 `bash -n` 因环境缺失不可执行外，Docker build、脚本 Bash 语法解析、YAML 解析、actionlint、Go 回归、server build 和 diff 检查均已通过或已有等价验证记录。
 - Evidence：
   - 修改文件：`Dockerfile`、`.dockerignore`、`deploy/docker-compose.production.example.yml`、`deploy/config.production.example.yaml`、`deploy.sh`、`.github/workflows/deploy-remote.yml`、`deploy.sh` / `script/install.sh` 显式参数契约、README、部署说明和项目状态文档。
-  - Docker build：本机未执行，原因是当前环境 `docker`、`podman`、`nerdctl`、`docker.exe` 均不可用；用户远端补跑曾在 `go mod download` 阶段因 Go 代理超时失败，Dockerfile 已补代理参数后待重跑。
+  - Docker build：用户在 Linux Docker 环境执行 `docker build --build-arg GOPROXY=https://goproxy.cn,direct -t go-scaffold:local .`，构建 214.8s 完成，BuildKit 输出 `23/23 FINISHED`，镜像 sha256 为 `4df5520bcf1c45a922be8db2e6c5e58ae8fc025f34bea5f1d4bf33f0b2301785`。
   - 其他验证：脚本 Bash 语法解析 PASS；YAML 解析 PASS；actionlint PASS；`go test ./... -count=1` PASS；server build PASS；`git diff --check` PASS。
-  - Next Task：受环境阻塞；切换到具备 Docker CLI/daemon 的环境后补跑 Docker build。真实 production 运行、镜像发布流水线和生产迁移框架仍需单独确认。
+  - Next Task：当前无自动下一实现任务。真实 production 运行、镜像发布流水线和生产迁移框架仍需单独确认。
 
 ### TASK-P2-005：实现 `pkg/plugin/hooks` 独立钩子引擎
 
