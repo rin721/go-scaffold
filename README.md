@@ -49,7 +49,7 @@ go test ./... -count=1
 - CI 质量门禁见 `.github/workflows/ci.yml`。
 - Linux Docker 镜像构建见 `Dockerfile`。
 - production Compose 示例见 `deploy/docker-compose.production.example.yml`，production 配置样例见 `deploy/config.production.example.yaml`。
+- 统一部署入口见 `deploy.sh`，支持 clone 后执行 `bash deploy.sh --docker y --confirm ...`。
+- 直接下载安装入口见 `script/install.sh`，可通过 `curl -fsSL -o deploy.sh <raw-url>` 后执行。
 - 手动远程部署 workflow 见 `.github/workflows/deploy-remote.yml`，支持 `staging` / `production` 手动环境选择。
-- Windows 到远程 Linux 的直接部署脚本见 `deploy/remote-linux-deploy.sh`，脚本会在远程主机动态生成 `.env.deploy`。
 - 部署边界、Secrets 配置和发布前检查见 `docs/deployment.md`。
-- 远程部署变量模板见 `.env.deploy.example`；真实 `.env.deploy` 不应提交。

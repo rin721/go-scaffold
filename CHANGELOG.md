@@ -1,21 +1,28 @@
 # CHANGELOG.md
 
 ## 最新变更
+### 2026-05-27 - TASK-P2-004 - TS-P2-004 rework
+
+- 变更：删除已跟踪的旧部署 env 示例和旧远程 Linux 动态 env 脚本；本地旧部署 env 文件已删除且未读取内容。
+- 变更：新增根 `deploy.sh` 和 `script/install.sh`，支持 clone 后执行和 direct curl 执行两种流程，部署与应用配置均通过显式参数传入。
+- 变更：重构 `.github/workflows/deploy-remote.yml`，改为 GitHub Variables/Secrets 组装显式参数，通过 SSH 在远端执行 `script/install.sh` / `deploy.sh`。
+- 变更：Compose production 示例改为读取显式导出的 DB、Redis、Server、Logger、I18n、Storage、CORS 环境变量，不再依赖旧部署 env 文件。
+- 验证：shfmt Bash parser、workflow YAML 解析、actionlint、旧引用 `rg` 检查、`go test ./... -count=1`、server build、`git diff --check` 均通过；Docker CLI 不存在，`docker build -t go-scaffold:local .` 保持 `PENDING_VERIFICATION`。
 
 ### 2026-05-26 - TASK-P2-004 - TS-P2-004
 
-- 变更：用户要求“开始，linux、docker、production -> 部署”，并修正“环境变量在部署脚本上动态配置”，接受为 production Docker 远程部署制品、远程 Linux 动态 env 脚本和手动闸门切片。
+- 变更：用户要求“开始，linux、docker、production -> 部署”，并修正“环境变量在部署脚本上动态配置”，接受为 production Docker 远程部署制品、远程 Linux 统一 `deploy.sh` 入口和手动闸门切片。
 - 变更：新增 `Dockerfile`，构建 Linux server 镜像并以非 root 用户运行。
 - 变更：新增 `.dockerignore`，避免 Git、真实 env、缓存、日志和非运行制品进入构建上下文。
 - 变更：新增 `deploy/docker-compose.production.example.yml` 和 `deploy/config.production.example.yaml`，提供 production Compose 示例和无密钥配置样例。
-- 变更：新增 `deploy/remote-linux-deploy.sh`，用于在远程 Linux 主机按参数/环境变量动态生成 `DEPLOY_PATH/.env.deploy` 并执行 Docker Compose 部署路径。
+- 变更：新增 `deploy.sh`，用于在远程 Linux 主机按参数/环境变量动态生成 `运行期显式部署参数` 并执行 Docker Compose 部署路径。
 - 变更：扩展 `.github/workflows/deploy-remote.yml`，支持 `staging` / `production` 手动选择，确认词改为 `deploy-staging` 或 `deploy-production`。
-- 变更：更新 `.env.deploy.example`、`docs/deployment.md` 和 README，补充 `APP_PORT`、`DEPLOY_CONTAINER_NAME`、Linux Docker、Windows 到远程 Linux 直接部署、GitHub Environment、production Secrets、目录权限和回滚边界说明。
+- 变更：更新 `deploy.sh` / `script/install.sh` 显式参数契约、`docs/deployment.md` 和 README，补充 `APP_PORT`、`DEPLOY_CONTAINER_NAME`、Linux Docker、Windows 到远程 Linux 直接部署、GitHub Environment、production Secrets、目录权限和回滚边界说明。
 - 范围：未修改 Go 代码、测试文件、导出业务 API、配置 schema、HTTP 路由、数据库 schema、`go.mod`、`go.sum`、真实 `.env`、真实服务器地址、部署凭据或密钥；未执行真实部署、未连接远程服务器、未推送镜像、未触发 workflow。
 - 验证：
   - `docker version`：FAIL_ENV，当前环境未安装 Docker CLI
   - `podman` / `nerdctl` / `docker.exe`：NOT_AVAILABLE
-  - `bash -n deploy/remote-linux-deploy.sh`：FAIL_ENV，本机无可用 bash，WSL 未安装 Linux 发行版
+  - `bash -n deploy.sh`：FAIL_ENV，本机无可用 bash，WSL 未安装 Linux 发行版
   - `go run mvdan.cc/sh/v3/cmd/shfmt@latest -ln bash -tojson`：PASS
   - 临时 Go YAML 解析：PASS
   - `go run github.com/rhysd/actionlint/cmd/actionlint@latest .github/workflows/ci.yml .github/workflows/deploy-remote.yml`：PASS
@@ -28,9 +35,9 @@
 
 - 变更：用户明确确认实现远程部署 workflow。
 - 变更：新增 `.github/workflows/deploy-remote.yml`，提供手动触发的 staging 远程部署 workflow。
-- 变更：workflow 使用 `DEPLOY_ENV_FILE`、`DEPLOY_SSH_KEY`、可选 `DEPLOY_SSH_KNOWN_HOSTS`、可选 `GHCR_USERNAME` / `GHCR_TOKEN` 等 GitHub Secrets。
-- 变更：workflow 校验 `.env.deploy` 必需变量，要求 `confirm=deploy`，通过 SSH/SCP 上传 `.env.deploy`，并在远程执行 Docker Compose pull/up 和 health/ready 检查。
-- 变更：`.env.deploy.example`、`docs/deployment.md` 和 README 已补 workflow、Secrets、远程主机前置条件和手动触发说明。
+- 变更：workflow 使用 显式部署参数、`DEPLOY_SSH_KEY`、可选 `DEPLOY_SSH_KNOWN_HOSTS`、可选 `GHCR_USERNAME` / `GHCR_TOKEN` 等 GitHub Secrets。
+- 变更：workflow 校验远程 SSH 输入，要求环境绑定确认词，通过 SSH 执行 `script/install.sh` 并把 GitHub Variables/Secrets 映射为 `deploy.sh` 显式参数。
+- 变更：`deploy.sh` / `script/install.sh` 显式参数契约、`docs/deployment.md` 和 README 已补 workflow、Secrets、远程主机前置条件和手动触发说明。
 - 范围：未修改 Go 代码、依赖、配置 schema、HTTP 路由、数据库 schema、真实 `.env`、真实服务器地址、部署凭据或密钥；未执行真实部署、未连接远程服务器、未推送镜像。
 - 验证：
   - 临时 Go YAML 解析：PASS
@@ -41,8 +48,8 @@
 ### 2026-05-26 - TASK-P2-002 - TS-P2-002
 
 - 变更：用户要求远程部署使用 `.env` 风格文件配置。
-- 变更：新增 `.env.deploy.example`，提供远程部署目标、Docker Compose、镜像和健康检查变量占位。
-- 变更：`.gitignore` 新增 `.env.deploy`，避免真实远程部署配置进入 Git。
+- 变更：新增 `deploy.sh` / `script/install.sh` 显式参数契约，提供远程部署目标、Docker Compose、镜像和健康检查变量占位。
+- 变更：删除旧本地部署 env 文件依赖，部署配置改由显式参数传入。
 - 变更：`docs/deployment.md` 增加远程部署变量说明，README 增加模板入口。
 - 变更：同步需求、架构、测试矩阵、验收、Backlog、风险、决策、状态、测试报告和交接文档。
 - 范围：未修改 `.github/workflows/*`，未实现真实部署、未连接服务器、未推送镜像、未写入真实密钥。
@@ -59,7 +66,7 @@
 - 范围：仅更新项目状态文档；未修改 `.github/workflows/*`、Go 代码、依赖、配置 schema、数据库 schema、真实配置或密钥。
 - 验证：
   - `git diff --check`：PASS，仅有 Windows LF/CRLF 转换警告
-- 状态：COMPLETED；后续由 TASK-P2-002 完成远程部署 env 模板。
+- 状态：COMPLETED；后续由 TASK-P2-002 完成显式参数部署入口。
 
 ### 2026-05-26 - TASK-P2-001 - TS-P2-001
 

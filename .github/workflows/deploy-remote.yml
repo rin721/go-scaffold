@@ -32,11 +32,64 @@ jobs:
 
     env:
       SELECTED_DEPLOY_ENV: ${{ inputs.deploy_env }}
-      DEPLOY_ENV_FILE_CONTENT: ${{ secrets.DEPLOY_ENV_FILE }}
+
+      DEPLOY_HOST: ${{ vars.DEPLOY_HOST }}
+      DEPLOY_PORT: ${{ vars.DEPLOY_PORT }}
+      DEPLOY_USER: ${{ vars.DEPLOY_USER }}
+      DEPLOY_PATH: ${{ vars.DEPLOY_PATH }}
+      DEPLOY_REPO: ${{ vars.DEPLOY_REPO }}
+      DEPLOY_REF: ${{ vars.DEPLOY_REF }}
+      DEPLOY_IMAGE: ${{ vars.DEPLOY_IMAGE }}
+      DEPLOY_BUILD: ${{ vars.DEPLOY_BUILD }}
+      DEPLOY_PULL: ${{ vars.DEPLOY_PULL }}
+      APP_PORT: ${{ vars.APP_PORT }}
+      DEPLOY_CONTAINER_NAME: ${{ vars.DEPLOY_CONTAINER_NAME }}
+      REGISTRY_HOST: ${{ vars.REGISTRY_HOST }}
+
+      DB_DRIVER: ${{ vars.DB_DRIVER }}
+      DB_HOST: ${{ vars.DB_HOST }}
+      DB_PORT: ${{ vars.DB_PORT }}
+      DB_USER: ${{ vars.DB_USER }}
+      DB_NAME: ${{ vars.DB_NAME }}
+      DB_MAX_OPEN_CONNS: ${{ vars.DB_MAX_OPEN_CONNS }}
+      DB_MAX_IDLE_CONNS: ${{ vars.DB_MAX_IDLE_CONNS }}
+      REDIS_ENABLED: ${{ vars.REDIS_ENABLED }}
+      REDIS_HOST: ${{ vars.REDIS_HOST }}
+      REDIS_PORT: ${{ vars.REDIS_PORT }}
+      REDIS_DB: ${{ vars.REDIS_DB }}
+      REDIS_POOL_SIZE: ${{ vars.REDIS_POOL_SIZE }}
+      REDIS_MIN_IDLE_CONNS: ${{ vars.REDIS_MIN_IDLE_CONNS }}
+      REDIS_MAX_RETRIES: ${{ vars.REDIS_MAX_RETRIES }}
+      REDIS_DIAL_TIMEOUT: ${{ vars.REDIS_DIAL_TIMEOUT }}
+      REDIS_READ_TIMEOUT: ${{ vars.REDIS_READ_TIMEOUT }}
+      REDIS_WRITE_TIMEOUT: ${{ vars.REDIS_WRITE_TIMEOUT }}
+      SERVER_MODE: ${{ vars.SERVER_MODE }}
+      SERVER_READ_TIMEOUT: ${{ vars.SERVER_READ_TIMEOUT }}
+      SERVER_WRITE_TIMEOUT: ${{ vars.SERVER_WRITE_TIMEOUT }}
+      LOG_LEVEL: ${{ vars.LOG_LEVEL }}
+      LOG_FORMAT: ${{ vars.LOG_FORMAT }}
+      LOG_OUTPUT: ${{ vars.LOG_OUTPUT }}
+      I18N_DEFAULT: ${{ vars.I18N_DEFAULT }}
+      I18N_SUPPORTED: ${{ vars.I18N_SUPPORTED }}
+      STORAGE_ENABLED: ${{ vars.STORAGE_ENABLED }}
+      STORAGE_FS_TYPE: ${{ vars.STORAGE_FS_TYPE }}
+      STORAGE_BASE_PATH: ${{ vars.STORAGE_BASE_PATH }}
+      STORAGE_ENABLE_WATCH: ${{ vars.STORAGE_ENABLE_WATCH }}
+      STORAGE_WATCH_BUFFER_SIZE: ${{ vars.STORAGE_WATCH_BUFFER_SIZE }}
+      CORS_ENABLED: ${{ vars.CORS_ENABLED }}
+      CORS_ALLOW_ORIGINS: ${{ vars.CORS_ALLOW_ORIGINS }}
+      CORS_ALLOW_METHODS: ${{ vars.CORS_ALLOW_METHODS }}
+      CORS_ALLOW_HEADERS: ${{ vars.CORS_ALLOW_HEADERS }}
+      CORS_EXPOSE_HEADERS: ${{ vars.CORS_EXPOSE_HEADERS }}
+      CORS_ALLOW_CREDENTIALS: ${{ vars.CORS_ALLOW_CREDENTIALS }}
+      CORS_MAX_AGE: ${{ vars.CORS_MAX_AGE }}
+
       DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
       DEPLOY_SSH_KNOWN_HOSTS: ${{ secrets.DEPLOY_SSH_KNOWN_HOSTS }}
       GHCR_USERNAME: ${{ secrets.GHCR_USERNAME }}
       GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
 
     steps:
       - name: Checkout
@@ -53,107 +106,83 @@ jobs:
             exit 1
           fi
 
-      - name: Write deployment env file
-        run: |
-          set -euo pipefail
-          if [ -z "${DEPLOY_ENV_FILE_CONTENT}" ]; then
-            echo "::error::Missing DEPLOY_ENV_FILE secret."
-            exit 1
-          fi
-
-          deploy_env_file="${RUNNER_TEMP}/.env.deploy"
-          printf '%s\n' "${DEPLOY_ENV_FILE_CONTENT}" > "${deploy_env_file}"
-          chmod 600 "${deploy_env_file}"
-          echo "DEPLOY_ENV_FILE_PATH=${deploy_env_file}" >> "${GITHUB_ENV}"
-
-      - name: Parse deployment env
-        run: |
-          set -euo pipefail
-          allowed_keys=' DEPLOY_ENV DEPLOY_HOST DEPLOY_PORT DEPLOY_USER DEPLOY_PATH DEPLOY_COMPOSE_FILE DEPLOY_SERVICE DEPLOY_CONFIG_PATH DEPLOY_IMAGE DEPLOY_HEALTH_URL DEPLOY_READY_URL APP_PORT DEPLOY_CONTAINER_NAME '
-
-          line=""
-          while IFS= read -r line || [ -n "${line}" ]; do
-            line="${line%$'\r'}"
-            if [[ -z "${line//[[:space:]]/}" || "${line}" =~ ^[[:space:]]*# ]]; then
-              continue
-            fi
-
-            if [[ ! "${line}" =~ ^([A-Z0-9_]+)=(.*)$ ]]; then
-              echo "::error::Invalid .env.deploy line. Use KEY=value syntax."
-              exit 1
-            fi
-
-            key="${BASH_REMATCH[1]}"
-            value="${BASH_REMATCH[2]}"
-            if [[ "${allowed_keys}" != *" ${key} "* ]]; then
-              echo "::warning::Ignoring unsupported deploy env key ${key}."
-              continue
-            fi
-
-            printf '::add-mask::%s\n' "${value}"
-            {
-              printf '%s<<__DEPLOY_ENV__\n' "${key}"
-              printf '%s\n' "${value}"
-              printf '__DEPLOY_ENV__\n'
-            } >> "${GITHUB_ENV}"
-          done < "${DEPLOY_ENV_FILE_PATH}"
-
       - name: Validate deployment inputs
         run: |
           set -euo pipefail
-          required_vars=(
-            DEPLOY_ENV
-            DEPLOY_HOST
-            DEPLOY_PORT
-            DEPLOY_USER
-            DEPLOY_PATH
-            DEPLOY_COMPOSE_FILE
-            DEPLOY_SERVICE
-            DEPLOY_IMAGE
-            DEPLOY_HEALTH_URL
-            DEPLOY_READY_URL
-          )
 
-          for key in "${required_vars[@]}"; do
-            if [ -z "${!key:-}" ]; then
-              echo "::error::Missing required deploy env key ${key}."
+          normalize_yn() {
+            local key="${1}"
+            local value="${2}"
+            case "${value}" in
+              y|n) ;;
+              yes|true|1) value="y" ;;
+              no|false|0) value="n" ;;
+              *)
+                echo "::error::${key} must be y or n."
+                exit 1
+                ;;
+            esac
+            printf '%s' "${value}"
+          }
+
+          require_value() {
+            local key="${1}"
+            local value="${2:-}"
+            if [ -z "${value}" ]; then
+              echo "::error::Missing required ${key}."
               exit 1
             fi
-          done
+          }
 
-          if [ "${DEPLOY_ENV}" != "${SELECTED_DEPLOY_ENV}" ]; then
-            echo "::error::DEPLOY_ENV must match the selected workflow environment."
+          reject_newline() {
+            local key="${1}"
+            local value="${2:-}"
+            if [[ "${value}" == *$'\n'* || "${value}" == *$'\r'* ]]; then
+              echo "::error::${key} cannot contain newlines."
+              exit 1
+            fi
+          }
+
+          require_value DEPLOY_HOST "${DEPLOY_HOST}"
+          require_value DEPLOY_USER "${DEPLOY_USER}"
+          require_value DEPLOY_SSH_KEY "${DEPLOY_SSH_KEY}"
+
+          deploy_port="${DEPLOY_PORT:-22}"
+          deploy_path="${DEPLOY_PATH:-/opt/go-scaffold}"
+          deploy_build="$(normalize_yn DEPLOY_BUILD "${DEPLOY_BUILD:-y}")"
+          deploy_pull="$(normalize_yn DEPLOY_PULL "${DEPLOY_PULL:-n}")"
+          app_port="${APP_PORT:-9999}"
+
+          if [ "${deploy_build}" = "y" ] && [ "${deploy_pull}" = "y" ]; then
+            echo "::error::DEPLOY_BUILD and DEPLOY_PULL cannot both be y."
             exit 1
           fi
 
-          case "${DEPLOY_ENV}" in
-            staging|production)
-              ;;
+          case "${SELECTED_DEPLOY_ENV}" in
+            staging|production) ;;
             *)
-              echo "::error::DEPLOY_ENV must be staging or production."
+              echo "::error::deploy_env must be staging or production."
               exit 1
               ;;
           esac
 
-          if [ "${DEPLOY_HOST}" = "example.com" ] || [[ "${DEPLOY_IMAGE}" == *"/OWNER/"* ]]; then
-            echo "::error::Replace placeholder DEPLOY_HOST and DEPLOY_IMAGE before deployment."
-            exit 1
-          fi
-
           [[ "${DEPLOY_HOST}" =~ ^[A-Za-z0-9._-]+$ ]] || { echo "::error::Invalid DEPLOY_HOST."; exit 1; }
-          [[ "${DEPLOY_PORT}" =~ ^[0-9]+$ ]] || { echo "::error::Invalid DEPLOY_PORT."; exit 1; }
+          [[ "${deploy_port}" =~ ^[0-9]+$ ]] || { echo "::error::Invalid DEPLOY_PORT."; exit 1; }
           [[ "${DEPLOY_USER}" =~ ^[A-Za-z0-9._-]+$ ]] || { echo "::error::Invalid DEPLOY_USER."; exit 1; }
-          [[ "${DEPLOY_PATH}" =~ ^/[A-Za-z0-9._/-]+$ ]] || { echo "::error::Invalid DEPLOY_PATH."; exit 1; }
-          [[ "${DEPLOY_COMPOSE_FILE}" =~ ^[A-Za-z0-9._/-]+$ ]] || { echo "::error::Invalid DEPLOY_COMPOSE_FILE."; exit 1; }
-          [[ "${DEPLOY_SERVICE}" =~ ^[A-Za-z0-9._-]+$ ]] || { echo "::error::Invalid DEPLOY_SERVICE."; exit 1; }
-          [[ "${DEPLOY_IMAGE}" =~ ^[^[:space:]]+$ ]] || { echo "::error::Invalid DEPLOY_IMAGE."; exit 1; }
-          [[ "${DEPLOY_HEALTH_URL}" =~ ^https?://[^[:space:]]+$ ]] || { echo "::error::Invalid DEPLOY_HEALTH_URL."; exit 1; }
-          [[ "${DEPLOY_READY_URL}" =~ ^https?://[^[:space:]]+$ ]] || { echo "::error::Invalid DEPLOY_READY_URL."; exit 1; }
+          [[ "${deploy_path}" =~ ^/[A-Za-z0-9._/-]+$ ]] || { echo "::error::Invalid DEPLOY_PATH."; exit 1; }
+          [[ "${app_port}" =~ ^[0-9]+$ ]] || { echo "::error::Invalid APP_PORT."; exit 1; }
 
-          if [ -z "${DEPLOY_SSH_KEY}" ]; then
-            echo "::error::Missing DEPLOY_SSH_KEY secret."
-            exit 1
-          fi
+          for key in \
+            DEPLOY_REPO DEPLOY_REF DEPLOY_IMAGE DEPLOY_CONTAINER_NAME REGISTRY_HOST \
+            DB_DRIVER DB_HOST DB_PORT DB_USER DB_PASSWORD DB_NAME DB_MAX_OPEN_CONNS DB_MAX_IDLE_CONNS \
+            REDIS_ENABLED REDIS_HOST REDIS_PORT REDIS_PASSWORD REDIS_DB REDIS_POOL_SIZE REDIS_MIN_IDLE_CONNS REDIS_MAX_RETRIES \
+            REDIS_DIAL_TIMEOUT REDIS_READ_TIMEOUT REDIS_WRITE_TIMEOUT SERVER_MODE SERVER_READ_TIMEOUT SERVER_WRITE_TIMEOUT \
+            LOG_LEVEL LOG_FORMAT LOG_OUTPUT I18N_DEFAULT I18N_SUPPORTED STORAGE_ENABLED STORAGE_FS_TYPE STORAGE_BASE_PATH \
+            STORAGE_ENABLE_WATCH STORAGE_WATCH_BUFFER_SIZE CORS_ENABLED CORS_ALLOW_ORIGINS CORS_ALLOW_METHODS \
+            CORS_ALLOW_HEADERS CORS_EXPOSE_HEADERS CORS_ALLOW_CREDENTIALS CORS_MAX_AGE GHCR_USERNAME GHCR_TOKEN
+          do
+            reject_newline "${key}" "${!key:-}"
+          done
 
       - name: Configure SSH
         run: |
@@ -162,82 +191,132 @@ jobs:
           printf '%s\n' "${DEPLOY_SSH_KEY}" > "${HOME}/.ssh/deploy_key"
           chmod 600 "${HOME}/.ssh/deploy_key"
 
+          deploy_port="${DEPLOY_PORT:-22}"
           if [ -n "${DEPLOY_SSH_KNOWN_HOSTS}" ]; then
             printf '%s\n' "${DEPLOY_SSH_KNOWN_HOSTS}" > "${HOME}/.ssh/known_hosts"
           else
-            ssh-keyscan -p "${DEPLOY_PORT}" "${DEPLOY_HOST}" > "${HOME}/.ssh/known_hosts" 2>/dev/null
+            ssh-keyscan -p "${deploy_port}" "${DEPLOY_HOST}" > "${HOME}/.ssh/known_hosts" 2>/dev/null
           fi
           chmod 600 "${HOME}/.ssh/known_hosts"
           echo "DEPLOY_SSH_KEY_PATH=${HOME}/.ssh/deploy_key" >> "${GITHUB_ENV}"
 
-      - name: Upload deployment env
+      - name: Deploy with explicit flags
         run: |
           set -euo pipefail
-          ssh_opts=(-i "${DEPLOY_SSH_KEY_PATH}" -p "${DEPLOY_PORT}" -o BatchMode=yes -o StrictHostKeyChecking=yes)
-          target="${DEPLOY_USER}@${DEPLOY_HOST}"
 
-          ssh "${ssh_opts[@]}" "${target}" "mkdir -p -- '${DEPLOY_PATH}'"
-          scp -i "${DEPLOY_SSH_KEY_PATH}" -P "${DEPLOY_PORT}" -o BatchMode=yes -o StrictHostKeyChecking=yes \
-            "${DEPLOY_ENV_FILE_PATH}" "${target}:${DEPLOY_PATH}/.env.deploy.tmp"
-          ssh "${ssh_opts[@]}" "${target}" "chmod 600 '${DEPLOY_PATH}/.env.deploy.tmp' && mv '${DEPLOY_PATH}/.env.deploy.tmp' '${DEPLOY_PATH}/.env.deploy'"
+          mask_secret() {
+            local value="${1:-}"
+            if [ -n "${value}" ]; then
+              printf '::add-mask::%s\n' "${value}"
+            fi
+          }
 
-      - name: Deploy with Docker Compose
-        run: |
-          set -euo pipefail
+          normalize_yn() {
+            local value="${1}"
+            case "${value}" in
+              y|n) ;;
+              yes|true|1) value="y" ;;
+              no|false|0) value="n" ;;
+              *)
+                echo "::error::expected y or n."
+                exit 1
+                ;;
+            esac
+            printf '%s' "${value}"
+          }
+
+          add_arg() {
+            local flag="${1}"
+            local value="${2:-}"
+            if [ -n "${value}" ]; then
+              args+=("${flag}" "${value}")
+            fi
+          }
 
           sq() {
             local value="${1}"
-            printf "'%s'" "${value//\'/\'\\\'\'}"
+            value=${value//\'/\'\\\'\'}
+            printf "'%s'" "${value}"
           }
 
-          ssh_opts=(-i "${DEPLOY_SSH_KEY_PATH}" -p "${DEPLOY_PORT}" -o BatchMode=yes -o StrictHostKeyChecking=yes)
+          mask_secret "${GHCR_TOKEN:-}"
+          mask_secret "${DB_PASSWORD:-}"
+          mask_secret "${REDIS_PASSWORD:-}"
+
+          deploy_port="${DEPLOY_PORT:-22}"
+          deploy_repo="${DEPLOY_REPO:-https://github.com/rin721/go-scaffold.git}"
+          deploy_ref="${DEPLOY_REF:-${GITHUB_SHA}}"
+          deploy_path="${DEPLOY_PATH:-/opt/go-scaffold}"
+          deploy_image="${DEPLOY_IMAGE:-go-scaffold:local}"
+          deploy_build="$(normalize_yn "${DEPLOY_BUILD:-y}")"
+          deploy_pull="$(normalize_yn "${DEPLOY_PULL:-n}")"
+          app_port="${APP_PORT:-9999}"
+          deploy_container_name="${DEPLOY_CONTAINER_NAME:-go-scaffold}"
+          registry_host="${REGISTRY_HOST:-ghcr.io}"
+
+          args=(
+            --docker y
+            --env "${SELECTED_DEPLOY_ENV}"
+            --repo "${deploy_repo}"
+            --ref "${deploy_ref}"
+            --path "${deploy_path}"
+            --image "${deploy_image}"
+            --build "${deploy_build}"
+            --pull "${deploy_pull}"
+            --port "${app_port}"
+            --container-name "${deploy_container_name}"
+            --registry-host "${registry_host}"
+            --confirm
+          )
+
+          add_arg --registry-username "${GHCR_USERNAME:-}"
+          add_arg --registry-token "${GHCR_TOKEN:-}"
+          add_arg --db-driver "${DB_DRIVER:-}"
+          add_arg --db-host "${DB_HOST:-}"
+          add_arg --db-port "${DB_PORT:-}"
+          add_arg --db-user "${DB_USER:-}"
+          add_arg --db-password "${DB_PASSWORD:-}"
+          add_arg --db-name "${DB_NAME:-}"
+          add_arg --db-max-open-conns "${DB_MAX_OPEN_CONNS:-}"
+          add_arg --db-max-idle-conns "${DB_MAX_IDLE_CONNS:-}"
+          add_arg --redis-enabled "${REDIS_ENABLED:-}"
+          add_arg --redis-host "${REDIS_HOST:-}"
+          add_arg --redis-port "${REDIS_PORT:-}"
+          add_arg --redis-password "${REDIS_PASSWORD:-}"
+          add_arg --redis-db "${REDIS_DB:-}"
+          add_arg --redis-pool-size "${REDIS_POOL_SIZE:-}"
+          add_arg --redis-min-idle-conns "${REDIS_MIN_IDLE_CONNS:-}"
+          add_arg --redis-max-retries "${REDIS_MAX_RETRIES:-}"
+          add_arg --redis-dial-timeout "${REDIS_DIAL_TIMEOUT:-}"
+          add_arg --redis-read-timeout "${REDIS_READ_TIMEOUT:-}"
+          add_arg --redis-write-timeout "${REDIS_WRITE_TIMEOUT:-}"
+          add_arg --server-mode "${SERVER_MODE:-}"
+          add_arg --server-read-timeout "${SERVER_READ_TIMEOUT:-}"
+          add_arg --server-write-timeout "${SERVER_WRITE_TIMEOUT:-}"
+          add_arg --log-level "${LOG_LEVEL:-}"
+          add_arg --log-format "${LOG_FORMAT:-}"
+          add_arg --log-output "${LOG_OUTPUT:-}"
+          add_arg --i18n-default "${I18N_DEFAULT:-}"
+          add_arg --i18n-supported "${I18N_SUPPORTED:-}"
+          add_arg --storage-enabled "${STORAGE_ENABLED:-}"
+          add_arg --storage-fs-type "${STORAGE_FS_TYPE:-}"
+          add_arg --storage-base-path "${STORAGE_BASE_PATH:-}"
+          add_arg --storage-enable-watch "${STORAGE_ENABLE_WATCH:-}"
+          add_arg --storage-watch-buffer-size "${STORAGE_WATCH_BUFFER_SIZE:-}"
+          add_arg --cors-enabled "${CORS_ENABLED:-}"
+          add_arg --cors-allow-origins "${CORS_ALLOW_ORIGINS:-}"
+          add_arg --cors-allow-methods "${CORS_ALLOW_METHODS:-}"
+          add_arg --cors-allow-headers "${CORS_ALLOW_HEADERS:-}"
+          add_arg --cors-expose-headers "${CORS_EXPOSE_HEADERS:-}"
+          add_arg --cors-allow-credentials "${CORS_ALLOW_CREDENTIALS:-}"
+          add_arg --cors-max-age "${CORS_MAX_AGE:-}"
+
+          remote_command="bash -s --"
+          for arg in "${args[@]}"; do
+            remote_command="${remote_command} $(sq "${arg}")"
+          done
+
+          ssh_opts=(-i "${DEPLOY_SSH_KEY_PATH}" -p "${deploy_port}" -o BatchMode=yes -o StrictHostKeyChecking=yes)
           target="${DEPLOY_USER}@${DEPLOY_HOST}"
-          remote_env="DEPLOY_PATH=$(sq "${DEPLOY_PATH}")"
-          remote_env="${remote_env} DEPLOY_COMPOSE_FILE=$(sq "${DEPLOY_COMPOSE_FILE}")"
-          remote_env="${remote_env} DEPLOY_SERVICE=$(sq "${DEPLOY_SERVICE}")"
-          remote_env="${remote_env} DEPLOY_IMAGE=$(sq "${DEPLOY_IMAGE}")"
-          remote_env="${remote_env} DEPLOY_HEALTH_URL=$(sq "${DEPLOY_HEALTH_URL}")"
-          remote_env="${remote_env} DEPLOY_READY_URL=$(sq "${DEPLOY_READY_URL}")"
-          remote_env="${remote_env} GHCR_USERNAME=$(sq "${GHCR_USERNAME:-}")"
-          remote_env="${remote_env} GHCR_TOKEN=$(sq "${GHCR_TOKEN:-}")"
 
-          ssh "${ssh_opts[@]}" "${target}" "${remote_env} bash -se" <<'REMOTE'
-          set -euo pipefail
-          cd "${DEPLOY_PATH}"
-
-          if docker compose version >/dev/null 2>&1; then
-            compose=(docker compose)
-          elif command -v docker-compose >/dev/null 2>&1; then
-            compose=(docker-compose)
-          else
-            echo "docker compose or docker-compose is required on the remote host." >&2
-            exit 1
-          fi
-
-          if [ -n "${GHCR_USERNAME}" ] && [ -n "${GHCR_TOKEN}" ]; then
-            printf '%s' "${GHCR_TOKEN}" | docker login ghcr.io -u "${GHCR_USERNAME}" --password-stdin >/dev/null
-          fi
-
-          docker pull "${DEPLOY_IMAGE}"
-          "${compose[@]}" --env-file .env.deploy -f "${DEPLOY_COMPOSE_FILE}" pull "${DEPLOY_SERVICE}"
-          "${compose[@]}" --env-file .env.deploy -f "${DEPLOY_COMPOSE_FILE}" up -d "${DEPLOY_SERVICE}"
-
-          check_url() {
-            local name="${1}"
-            local url="${2}"
-
-            for attempt in $(seq 1 30); do
-              if curl -fsS --max-time 5 "${url}" >/dev/null; then
-                echo "${name} check passed."
-                return 0
-              fi
-              sleep 2
-            done
-
-            echo "${name} check failed." >&2
-            return 1
-          }
-
-          check_url health "${DEPLOY_HEALTH_URL}"
-          check_url ready "${DEPLOY_READY_URL}"
-          REMOTE
+          ssh "${ssh_opts[@]}" "${target}" "${remote_command}" < script/install.sh

@@ -237,7 +237,7 @@
 - Decision：不直接实现真实 CD；先完成安全的远程部署 `.env` 风格模板 TASK-P2-002 / TS-P2-002。真实 workflow、镜像发布和远程连接仍需后续单独确认。
 - Alternatives：继续保持 `BL-024` defer；只实现 staging/manual dry-run；直接实现生产部署 workflow。
 - Reason：真实 CD 涉及远程环境、密钥、镜像仓库和发布权限，缺少这些输入时实现 workflow 会造成错误发布或凭据暴露风险。
-- Consequences：允许提交 `.env.deploy.example` 和忽略真实 `.env.deploy`；在 TASK-P2-003 确认前不得提交真实服务器值、密钥或自动部署 workflow。后续用户已确认并完成手动 staging workflow。
+- Consequences：提交 `deploy.sh` / `script/install.sh` 显式参数契约，并删除旧本地部署 env 文件依赖；在 TASK-P2-003 确认前不得提交真实服务器值、密钥或自动部署 workflow。后续用户已确认并完成手动 staging workflow。
 - Related Tasks：TASK-NEXT-SCOPE-010、TASK-P2-002
 
 ### DEC-023：实现手动 staging 远程部署 workflow
@@ -245,7 +245,7 @@
 - Date：2026-05-26
 - Status：ACCEPTED_WITH_RISK
 - Context：TASK-P2-002 完成后，用户明确回复“确认实现远程部署 workflow”。
-- Decision：实现 TASK-P2-003 / TS-P2-003，新增 `.github/workflows/deploy-remote.yml`，采用 `workflow_dispatch` 手动触发、`confirm=deploy` 确认词、staging-only 环境、GitHub Secrets 注入 `.env.deploy` 和 SSH key，并在远程主机执行 Docker Compose pull/up 与 health/ready 检查。
+- Decision：实现 TASK-P2-003 / TS-P2-003，新增 `.github/workflows/deploy-remote.yml`，采用 `workflow_dispatch` 手动触发、`confirm=deploy` 确认词、staging-only 环境、GitHub Secrets 注入 显式部署参数 和 SSH key，并在远程主机执行 Docker Compose pull/up 与 health/ready 检查。
 - Alternatives：继续保持 workflow defer；直接实现 production workflow；同时实现 Dockerfile 和镜像发布。
 - Reason：手动 staging workflow 能落地远程部署路径，同时避免自动生产发布、真实密钥入库和镜像发布范围膨胀。
 - Consequences：允许提交 workflow 和部署说明；不在本会话触发 workflow、不连接远程服务器、不推送镜像、不写真实密钥。Dockerfile、镜像发布、production 和生产迁移框架仍需单独确认。
@@ -262,13 +262,13 @@
 - Consequences：production workflow 必须仍为 `workflow_dispatch`，并要求 `deploy-production` 确认词和 GitHub Environment `production`；本会话不触发 workflow、不连接服务器、不推送镜像、不执行生产迁移。
 - Related Tasks：TASK-P2-004
 
-### DEC-025：远程 Linux 部署脚本动态生成 `.env.deploy`
+### DEC-025：统一 `deploy.sh` 显式参数部署入口
 
 - Date：2026-05-26
 - Status：ACCEPTED_WITH_RISK
 - Context：用户修正“环境变量在部署脚本上动态配置”，并强调 Windows 本机不应直接执行 Linux Docker 部署，而应通过远程 Linux 主机部署。
-- Decision：在 TASK-P2-004 范围内新增 `deploy/remote-linux-deploy.sh`，由远程 Linux 主机按参数或环境变量动态生成 `DEPLOY_PATH/.env.deploy`，再执行 Docker build 或 pull、Compose up 和 health/ready 检查。
-- Alternatives：继续要求用户手动维护远程 `.env.deploy`；只依赖 GitHub Actions workflow；在 Windows 本机运行 Docker 部署命令。
-- Reason：动态生成部署运行变量可以减少 Windows 本机配置负担，并保持真实 `.env.deploy` 不进入 Git；通过 SSH 到 Linux 执行也更符合目标运行环境。
+- Decision：在 TASK-P2-004 范围内新增根 `deploy.sh` 和 `script/install.sh`，由远程 Linux 主机按显式参数注入运行环境，再执行 Docker build 或 pull、Compose up 和 health/ready 检查。
+- Alternatives：继续要求用户手动维护本地部署 env 文件；只依赖 GitHub Actions workflow；在 Windows 本机运行 Docker 部署命令。
+- Reason：显式参数入口可以统一 clone 后执行和直接下载执行两种流程，删除旧本地部署 env 文件依赖；通过 SSH 到 Linux 执行也更符合目标运行环境。
 - Consequences：脚本只写入非密钥部署变量，真实数据库密码、Redis 密码、SSH key、registry token 和生产迁移仍不由脚本生成或打印；本会话不执行脚本、不连接远程服务器。
 - Related Tasks：TASK-P2-004

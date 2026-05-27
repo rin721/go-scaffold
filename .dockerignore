@@ -13,7 +13,6 @@ coverage.out
 .env
 .env.*
 !.env.example
-!.env.deploy.example
 
 docs/reports
 docs/templates

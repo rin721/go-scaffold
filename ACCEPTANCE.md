@@ -5,7 +5,7 @@
 - Project：go-scaffold
 - Phase：P2 Linux Docker production 部署制品待验证
 - Status：PENDING_VERIFICATION
-- Last Updated：2026-05-26
+- Last Updated：2026-05-27
 
 ## 本轮启动验收
 
@@ -81,9 +81,9 @@
 - TASK-INFRA-003 状态一致性修复：COMPLETED，背景文档中的 TASK-P1-016 前旧待办表述已修复
 - TASK-P2-001 CI 质量门禁与部署说明：COMPLETED，CI workflow 和手动部署说明已新增
 - TASK-NEXT-SCOPE-010 真实 CD 范围确认：COMPLETED，用户已确认使用远程部署和 `.env` 风格配置
-- TASK-P2-002 远程部署 env 模板：COMPLETED，`.env.deploy.example` 已新增，真实 `.env.deploy` 已忽略
+- TASK-P2-002 显式参数部署入口：COMPLETED，`deploy.sh` 和 `script/install.sh` 已新增，旧本地部署 env 文件依赖已删除
 - TASK-P2-003 手动远程部署 workflow：COMPLETED，staging/manual/Secrets/SSH/Docker Compose 路径已新增，本会话未执行真实部署
-- TASK-P2-004 Linux Docker production 部署制品：PENDING_VERIFICATION，Dockerfile、production Compose 示例、远程 Linux 动态 env 部署脚本和手动 production 闸门已补齐；Docker build 待具备 Docker 的环境补跑
+- TASK-P2-004 Linux Docker production 部署制品：PENDING_VERIFICATION，Dockerfile、production Compose 示例、统一 `deploy.sh` 部署入口和手动 production 闸门已补齐；Docker build 待具备 Docker 的环境补跑
 - Agent 基础设施补齐：COMPLETED
 - Agent 基础设施一致性修复：COMPLETED
 - 代码实现：COMPLETED，TASK-P1-016 已完成并通过验证
@@ -381,8 +381,8 @@
 
 | ID | 验收项 | 方法 | 必须 | 状态 |
 |---|---|---|---|---|
-| ACC-P2-014 | `.env.deploy.example` 存在且仅包含占位值 | 检查文件 | 是 | [CONFIRMED] |
-| ACC-P2-015 | 真实 `.env.deploy` 被 Git 忽略 | 检查 `.gitignore` | 是 | [CONFIRMED] |
+| ACC-P2-014 | `deploy.sh` 和 `script/install.sh` 存在，示例只使用占位值 | 检查文件 | 是 | [CONFIRMED] |
+| ACC-P2-015 | 旧本地部署 env 文件已删除且不再作为部署入口 | 检查 git 状态和部署文档 | 是 | [CONFIRMED] |
 | ACC-P2-016 | 部署说明记录远程部署变量边界 | 检查 `docs/deployment.md` | 是 | [CONFIRMED] |
 | ACC-P2-017 | 未实现真实部署 workflow、未连接服务器、未写入密钥 | 核对变更范围 | 是 | [CONFIRMED] |
 
@@ -392,8 +392,8 @@
 |---|---|---|---|---|
 | ACC-P2-018 | 远程部署 workflow 仅手动触发并要求确认词 | 检查 `.github/workflows/deploy-remote.yml` | 是 | [CONFIRMED] |
 | ACC-P2-019 | workflow 当前只支持 staging，不自动生产发布 | 检查 workflow inputs 和校验步骤 | 是 | [CONFIRMED] |
-| ACC-P2-020 | workflow 使用 `DEPLOY_ENV_FILE`、`DEPLOY_SSH_KEY` 等 GitHub Secrets，不写真实值 | 检查 workflow 和 `.env.deploy.example` | 是 | [CONFIRMED] |
-| ACC-P2-021 | workflow 校验 `.env.deploy` 必需变量并执行 SSH/Docker Compose 部署路径 | 检查 workflow | 是 | [CONFIRMED] |
+| ACC-P2-020 | workflow 使用 GitHub Variables/Secrets 组装显式参数，不写真实值 | 检查 workflow 和部署脚本 | 是 | [CONFIRMED] |
+| ACC-P2-021 | workflow 校验远程 SSH 输入并通过 SSH 执行 `script/install.sh` / `deploy.sh` 部署路径 | 检查 workflow | 是 | [CONFIRMED] |
 | ACC-P2-022 | 部署说明包含 Secrets、远程主机前置条件和手动触发步骤 | 检查 `docs/deployment.md` | 是 | [CONFIRMED] |
 | ACC-P2-023 | workflow YAML 可解析且 actionlint 通过 | 临时 Go YAML 解析；actionlint | 是 | [CONFIRMED] |
 | ACC-P2-024 | diff 空白检查通过 | `git diff --check` | 是 | [CONFIRMED] |
@@ -412,4 +412,4 @@
 | ACC-P2-032 | 全量 Go 回归通过 | `go test ./... -count=1` | 是 | [CONFIRMED] |
 | ACC-P2-033 | diff 空白检查通过 | `git diff --check` | 是 | [CONFIRMED] |
 | ACC-P2-034 | 本会话未触发 workflow、未连接服务器、未推送镜像、未执行真实 production | 核对执行命令 | 是 | [CONFIRMED] |
-| ACC-P2-035 | 远程 Linux 部署脚本动态生成 `.env.deploy` 且不写入密钥 | 检查 `deploy/remote-linux-deploy.sh`；`shfmt` Bash 语法解析 | 是 | [CONFIRMED] |
+| ACC-P2-035 | 远程 Linux 部署脚本按显式参数注入运行环境且不打印密钥值 | 检查 `deploy.sh`；`shfmt` Bash 语法解析 | 是 | [CONFIRMED] |

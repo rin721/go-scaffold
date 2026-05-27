@@ -16,7 +16,7 @@
 | P0 基线 | 保证当前可运行链路不被破坏 | 是 | 每个后续代码切片至少运行相关包测试和 `go test ./... -count=1` |
 | P0 新增测试 | 覆盖 app、router、demo、config 关键路径 | 是 | 优先服务边界收拢，不追求一次性全覆盖 |
 | P1 边界测试 | 覆盖迁移、CLI、公共包 API | 否 | 按后续任务逐项补齐 |
-| P2 质量工程 | CI、性能、发布前验证 | 否 | CI 质量门禁、部署说明、远程部署 env 模板、手动远程部署 workflow、production Docker 制品和远程 Linux 动态 env 脚本已完成；性能、镜像发布和真实 production 运行仍按后续任务处理 |
+| P2 质量工程 | CI、性能、发布前验证 | 否 | CI 质量门禁、部署说明、显式参数部署入口、手动远程部署 workflow、production Docker 制品和远程 Linux 统一 `deploy.sh` 入口已完成；性能、镜像发布和真实 production 运行仍按后续任务处理 |
 
 ## 当前基线
 
@@ -60,9 +60,9 @@
 |---|---|---|---|---|---|---|
 | TM-P2-001 | CI 质量门禁与部署说明 | 为仓库建立非生产 CI 门禁，并记录手动部署边界、配置入口和发布前检查 | `.github/workflows/ci.yml`、`docs/deployment.md`、`README.md`、状态文档 | gofmt 漂移报告（非阻塞）；`go test ./... -count=1`；`go build -o <temp> ./cmd/server`；`git diff --check` | [CONFIRMED] TASK-P2-001 已新增 CI workflow 和部署说明；不使用 secrets、不推送镜像、不执行真实部署；历史 gofmt 漂移记录到 BL-025 | BL-007、BL-008、RISK-016 |
 | TM-P2-002 | 真实 CD 范围确认 | 确认镜像发布、远程部署、环境、触发策略和 secrets 边界 | 项目状态文档 | `git diff --check` | [CONFIRMED] 用户已选择 C、确认使用远程部署和 `.env` 风格配置，并明确确认实现远程部署 workflow | BL-024、RISK-016、RISK-017 |
-| TM-P2-003 | 远程部署 env 模板 | 提供可提交的远程部署变量模板，并忽略真实 `.env.deploy` | `.env.deploy.example`、`.gitignore`、`docs/deployment.md`、`README.md`、状态文档 | `git diff --check` | [CONFIRMED] TASK-P2-002 已新增模板；不包含真实密钥、服务器地址或远程部署动作 | BL-024、RISK-017 |
-| TM-P2-004 | 手动远程部署 workflow | 新增手动 staging 远程部署 workflow，校验 `.env.deploy` 形状，通过 SSH/Docker Compose 执行远程拉取、重启和 health/ready 检查 | `.github/workflows/deploy-remote.yml`、`.env.deploy.example`、`docs/deployment.md`、`README.md`、状态文档 | 临时 Go YAML 解析；`go run github.com/rhysd/actionlint/cmd/actionlint@latest .github/workflows/ci.yml .github/workflows/deploy-remote.yml`；`git diff --check` | [CONFIRMED] TASK-P2-003 已新增 workflow 和说明；本会话不执行真实部署、不连接远程服务器、不写入真实密钥 | BL-024、RISK-016、RISK-017 |
-| TM-P2-005 | Linux Docker production 部署制品 | 新增 Dockerfile、production Compose 示例、远程 Linux 动态 env 部署脚本和手动 production workflow 闸门，确保 production 需要显式环境选择与确认词 | `Dockerfile`、`.dockerignore`、`deploy/*`、`.github/workflows/deploy-remote.yml`、`.env.deploy.example`、`docs/deployment.md`、`README.md`、状态文档 | `docker build -t go-scaffold:local .`；`bash -n deploy/remote-linux-deploy.sh` 或 `shfmt` Bash 语法解析；临时 Go YAML 解析；`go run github.com/rhysd/actionlint/cmd/actionlint@latest .github/workflows/ci.yml .github/workflows/deploy-remote.yml`；`go test ./... -count=1`；`git diff --check` | [PENDING_VERIFICATION] 制品、动态 env 脚本和静态验证已完成；Docker CLI 缺失导致镜像构建待补跑；不触发 workflow、不连接服务器、不推送镜像、不执行真实 production | BL-024、RISK-016、RISK-017、RISK-018 |
+| TM-P2-003 | 显式参数部署入口 | 提供可提交的远程部署显式参数契约，并删除旧本地部署 env 文件依赖 | `deploy.sh`、`script/install.sh`、`docs/deployment.md`、`README.md`、状态文档 | `git diff --check` | [CONFIRMED] 部署入口不包含真实密钥、服务器地址或远程部署动作 | BL-024、RISK-017 |
+| TM-P2-004 | 手动远程部署 workflow | 新增手动 staging/production 远程部署 workflow，通过 SSH 执行 `script/install.sh` 并传入 `deploy.sh` 显式参数 | `.github/workflows/deploy-remote.yml`、`deploy.sh`、`script/install.sh`、`docs/deployment.md`、`README.md`、状态文档 | 临时 Go YAML 解析；`go run github.com/rhysd/actionlint/cmd/actionlint@latest .github/workflows/ci.yml .github/workflows/deploy-remote.yml`；`git diff --check` | [CONFIRMED] workflow 改为显式参数入口；本会话不执行真实部署、不连接远程服务器、不写入真实密钥 | BL-024、RISK-016、RISK-017 |
+| TM-P2-005 | Linux Docker production 部署制品 | 新增 Dockerfile、production Compose 示例、统一 `deploy.sh` 部署入口和手动 production workflow 闸门，确保 production 需要显式环境选择与确认词 | `Dockerfile`、`.dockerignore`、`deploy/*`、`.github/workflows/deploy-remote.yml`、`deploy.sh` / `script/install.sh` 显式参数契约、`docs/deployment.md`、`README.md`、状态文档 | `docker build -t go-scaffold:local .`；`bash -n deploy.sh` 或 `shfmt` Bash 语法解析；临时 Go YAML 解析；`go run github.com/rhysd/actionlint/cmd/actionlint@latest .github/workflows/ci.yml .github/workflows/deploy-remote.yml`；`go test ./... -count=1`；`git diff --check` | [PENDING_VERIFICATION] 制品、统一 `deploy.sh` 入口和静态验证已完成；Docker CLI 缺失导致镜像构建待补跑；不触发 workflow、不连接服务器、不推送镜像、不执行真实 production | BL-024、RISK-016、RISK-017、RISK-018 |
 
 ## P1 优化任务草案
 
@@ -88,9 +88,9 @@
 | TASK-P1-017 | 分阶段中文化 `pkg/*` README | P1 | 文档 | `pkg/*/README.md`、需求/架构/模块和状态文档 | `go test ./... -count=1`；`git diff --check` | [CONFIRMED] 第一阶段包 README 中文化完成，未新增功能承诺或修改代码 | COMPLETED |
 | TASK-P2-001 | 补 CI 质量门禁与部署说明 | P2 | 质量工程+文档 | `.github/workflows/ci.yml`、`docs/deployment.md`、`README.md`、状态文档 | `go test ./... -count=1`；`go build -o <temp> ./cmd/server`；`git diff --check` | [CONFIRMED] CI 只做非生产质量门禁；部署说明记录手动边界和后续真实 CD 非目标 | COMPLETED |
 | TASK-NEXT-SCOPE-010 | 确认真实 CD / 镜像发布 / 远程部署自动化边界 | P2 | 确认 | 项目状态文档 | `git diff --check` | [CONFIRMED] 用户确认远程部署并使用 `.env` 风格配置 | COMPLETED |
-| TASK-P2-002 | 补远程部署 env 配置模板 | P2 | 发布配置文档 | `.env.deploy.example`、`.gitignore`、`docs/deployment.md`、`README.md`、状态文档 | `git diff --check` | [CONFIRMED] 模板存在，真实 `.env.deploy` 被忽略，不实现真实部署 | COMPLETED |
-| TASK-P2-003 | 实现手动远程部署 workflow | P2 | CI/CD 配置+文档 | `.github/workflows/deploy-remote.yml`、`.env.deploy.example`、`docs/deployment.md`、`README.md`、状态文档 | 临时 Go YAML 解析；actionlint；`git diff --check` | [CONFIRMED] workflow 手动触发、staging 限定、Secrets 注入、SSH/Docker Compose 部署路径和文档说明均已完成 | COMPLETED |
-| TASK-P2-004 | 补 Linux Docker production 部署制品 | P2 | 发布工程配置+文档 | `Dockerfile`、`.dockerignore`、`deploy/*`、`.github/workflows/deploy-remote.yml`、`.env.deploy.example`、`docs/deployment.md`、`README.md`、状态文档 | `docker build -t go-scaffold:local .`；`bash -n deploy/remote-linux-deploy.sh` 或 `shfmt` Bash 语法解析；临时 Go YAML 解析；actionlint；`go test ./... -count=1`；`git diff --check` | [PENDING_VERIFICATION] Dockerfile、production Compose 示例、远程 Linux 动态 env 脚本和手动 production 闸门已补齐；Docker build 待具备 Docker 的环境补跑 | PENDING_VERIFICATION |
+| TASK-P2-002 | 补显式参数部署入口 | P2 | 发布配置文档 | `deploy.sh`、`script/install.sh`、`docs/deployment.md`、`README.md`、状态文档 | `git diff --check` | [CONFIRMED] 旧本地部署 env 文件依赖已删除，不实现真实部署 | COMPLETED |
+| TASK-P2-003 | 实现手动远程部署 workflow | P2 | CI/CD 配置+文档 | `.github/workflows/deploy-remote.yml`、`deploy.sh`、`script/install.sh`、`docs/deployment.md`、`README.md`、状态文档 | 临时 Go YAML 解析；actionlint；`git diff --check` | [CONFIRMED] workflow 手动触发、Secrets/Variables 注入显式参数、SSH 执行部署入口和文档说明均已完成 | COMPLETED |
+| TASK-P2-004 | 补 Linux Docker production 部署制品 | P2 | 发布工程配置+文档 | `Dockerfile`、`.dockerignore`、`deploy/*`、`.github/workflows/deploy-remote.yml`、`deploy.sh` / `script/install.sh` 显式参数契约、`docs/deployment.md`、`README.md`、状态文档 | `docker build -t go-scaffold:local .`；`bash -n deploy.sh` 或 `shfmt` Bash 语法解析；临时 Go YAML 解析；actionlint；`go test ./... -count=1`；`git diff --check` | [PENDING_VERIFICATION] Dockerfile、production Compose 示例、远程 Linux 统一 `deploy.sh` 入口和手动 production 闸门已补齐；Docker build 待具备 Docker 的环境补跑 | PENDING_VERIFICATION |
 
 ## 推荐执行顺序
 

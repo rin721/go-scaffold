@@ -33,7 +33,7 @@
 | BL-021 | 明确 `types/result` 是否属于 HTTP 契约 | `MODULES.md` types 边界 | P1 | 已提升为 TASK-P1-009 并完成 | [COMPLETED] |
 | BL-022 | 收拢 `pkg/plugin` 被动注册边界 | 用户架构修正 | P1 | 已提升为 TASK-P1-010 并完成 | [COMPLETED] |
 | BL-023 | 为 `pkg/utils` 内部支撑工具补最小测试 | `MODULES.md` pkg 分类草案 | P2 | 已提升为 TASK-P1-014 / TS-P1-014 并完成 | [COMPLETED] |
-| BL-024 | 增加真实 CD、镜像发布或远程部署自动化 | CI/CD 首切片后续 | P2 | 远程部署 `.env` 模板已由 TASK-P2-002 完成；手动 staging 远程部署 workflow 已由 TASK-P2-003 完成；Linux Docker production 部署制品和远程 Linux 动态 env 脚本已由 TASK-P2-004 补齐但 Docker build 待具备 Docker 的环境验证；镜像发布流水线和真实运行仍需单独确认 | [PENDING_VERIFICATION] |
+| BL-024 | 增加真实 CD、镜像发布或远程部署自动化 | CI/CD 首切片后续 | P2 | 显式参数部署入口已由 TASK-P2-002/TASK-P2-004 收敛；手动 staging/production 远程部署 workflow 闸门已补齐；Docker build 待具备 Docker 的环境验证；镜像发布流水线和真实运行仍需单独确认 | [PENDING_VERIFICATION] |
 | BL-025 | 统一 Go 文件 gofmt 格式 | CI 格式审计 | P2 | 当前仓库存在历史 gofmt 漂移，批量格式化会触碰大量 Go 文件，需单独确认后执行 | [DEFERRED] |
 
 ## 提升规则

@@ -5,7 +5,7 @@
 - Task ID：TASK-P2-004
 - Status：PENDING_VERIFICATION
 - Time Slice：TS-P2-004
-- Summary：Linux/Docker/production 部署制品和远程 Linux 动态 env 部署脚本已实现；由于本机缺少 Docker CLI，Docker 镜像构建仍待具备 Docker 的环境验证。
+- Summary：Linux/Docker/production 部署制品和统一 `deploy.sh` 部署入口已实现；由于本机缺少 Docker CLI，Docker 镜像构建仍待具备 Docker 的环境验证。
 
 ## 任务列表
 
@@ -1119,15 +1119,15 @@
 - Status：COMPLETED
 - Time Slice：TS-P2-002
 - Source：用户要求“远程部署 .env 来配置”。
-- Goal：提供可提交的远程部署变量模板和说明，同时确保真实 `.env.deploy` 不会进入 Git。
+- Goal：提供可提交的远程部署显式参数契约和说明，同时确保真实 显式部署参数 不会进入 Git。
 - Allowed Files：
-  - `.env.deploy.example`
+  - `deploy.sh` / `script/install.sh` 显式参数契约
   - `.gitignore`
   - `README.md`
   - `docs/deployment.md`
   - 项目状态文档
 - Forbidden Files：
-  - 真实 `.env` / `.env.deploy`
+  - 真实 `.env` / 显式部署参数
   - `.github/workflows/*` 自动部署实现
   - Go 源码和测试文件
   - `go.mod`、`go.sum`
@@ -1136,8 +1136,8 @@
 - Verification：
   - `git diff --check`
 - Evidence：
-  - 新增 `.env.deploy.example`，仅包含占位值和说明。
-  - `.gitignore` 新增 `.env.deploy`。
+  - 新增 `deploy.sh` / `script/install.sh` 显式参数契约，仅包含占位值和说明。
+  - 删除旧本地部署 env 文件依赖，部署配置改由显式参数传入。
   - `docs/deployment.md` 增加远程部署变量说明。
   - `README.md` 增加模板入口。
   - 未实现真实部署 workflow、未连接服务器、未读取 secrets。
@@ -1150,15 +1150,15 @@
 - Source：用户明确回复“确认实现远程部署 workflow”。
 - Priority：P2
 - Type：CI/CD 配置与文档；不执行真实部署。
-- Goal：新增手动触发的 GitHub Actions 远程部署 workflow，读取 GitHub Secrets 中的 `.env.deploy` 内容和 SSH 密钥，通过 SSH 到远程 Linux 主机执行 Docker Compose 拉取镜像、重启服务和健康检查。
+- Goal：新增手动触发的 GitHub Actions 远程部署 workflow，读取 GitHub Secrets 中的 显式部署参数 内容和 SSH 密钥，通过 SSH 到远程 Linux 主机执行 Docker Compose 拉取镜像、重启服务和健康检查。
 - Allowed Files：
   - `.github/workflows/deploy-remote.yml`
-  - `.env.deploy.example`
+  - `deploy.sh` / `script/install.sh` 显式参数契约
   - `README.md`
   - `docs/deployment.md`
   - 项目状态文档
 - Forbidden Files：
-  - 真实 `.env` / `.env.deploy`
+  - 真实 `.env` / 显式部署参数
   - Go 源码和测试文件
   - `go.mod`、`go.sum`
   - 数据库 schema、真实服务器地址、真实 token、SSH 私钥、密码或生产配置
@@ -1174,15 +1174,15 @@
 - Exit Conditions：
   - [CONFIRMED] workflow 只通过 `workflow_dispatch` 手动触发，默认 staging，不自动生产发布。
   - [CONFIRMED] workflow 使用 GitHub Secrets，不在仓库写入真实部署值。
-  - [CONFIRMED] workflow 能从 `DEPLOY_ENV_FILE` secret 解析 `.env.deploy` 形状，并校验必需变量。
+  - [CONFIRMED] workflow 能从 显式部署参数 secret 解析 显式部署参数 形状，并校验必需变量。
   - [CONFIRMED] workflow 使用 SSH 执行 Docker Compose pull/up 和 health/ready 检查。
   - [CONFIRMED] 部署说明记录需要配置的 Secrets、远程主机前置条件和手动触发步骤。
   - [CONFIRMED] 验证命令通过，状态文档、测试报告和交接说明已更新。
 - Evidence：
   - 新增 `.github/workflows/deploy-remote.yml`。
   - workflow 使用 `workflow_dispatch`，需要 `confirm=deploy`，且当前只允许 `staging`。
-  - workflow 读取 `DEPLOY_ENV_FILE`、`DEPLOY_SSH_KEY`、可选 `DEPLOY_SSH_KNOWN_HOSTS`、可选 `GHCR_USERNAME` / `GHCR_TOKEN`。
-  - workflow 解析和校验 `.env.deploy`，通过 SSH/SCP 上传 env 文件，并在远程执行 Docker Compose pull/up 与 health/ready 检查。
+  - workflow 读取 显式部署参数、`DEPLOY_SSH_KEY`、可选 `DEPLOY_SSH_KNOWN_HOSTS`、可选 `GHCR_USERNAME` / `GHCR_TOKEN`。
+  - workflow 从 GitHub Variables/Secrets 组装显式部署参数，通过 SSH 执行 `script/install.sh` / `deploy.sh`，并由远程脚本执行 Docker build/pull、Compose up 与 health/ready 检查。
   - `docs/deployment.md` 已补 Secrets、远程主机前置条件和手动触发步骤。
   - 验证：临时 Go YAML 解析 PASS；`go run github.com/rhysd/actionlint/cmd/actionlint@latest .github/workflows/ci.yml .github/workflows/deploy-remote.yml` PASS；`git diff --check` PASS。
   - 未执行真实部署、未连接远程服务器、未写入真实密钥、未推送镜像、未修改 Go 代码。
@@ -1195,20 +1195,20 @@
 - Source：用户要求“开始，linux、docker、production -> 部署”。
 - Priority：P2
 - Type：发布工程配置+文档；不执行真实 production 部署。
-- Goal：新增可提交的 Linux Docker 运行制品、production Compose 示例和远程 Linux 动态 env 部署脚本，并把远程部署 workflow 从 staging-only 扩展为手动 staging/production，但 production 必须显式选择 GitHub Environment 并输入环境绑定确认词。
+- Goal：新增可提交的 Linux Docker 运行制品、production Compose 示例和统一 `deploy.sh` 部署入口，并把远程部署 workflow 从 staging-only 扩展为手动 staging/production，但 production 必须显式选择 GitHub Environment 并输入环境绑定确认词。
 - Allowed Files：
   - `Dockerfile`
   - `.dockerignore`
   - `deploy/docker-compose.production.example.yml`
   - `deploy/config.production.example.yaml`
-  - `deploy/remote-linux-deploy.sh`
+  - `deploy.sh`
   - `.github/workflows/deploy-remote.yml`
-  - `.env.deploy.example`
+  - `deploy.sh` / `script/install.sh` 显式参数契约
   - `README.md`
   - `docs/deployment.md`
   - 项目状态文档
 - Forbidden Files：
-  - 真实 `.env` / `.env.deploy`
+  - 真实 `.env` / 显式部署参数
   - Go 源码和测试文件
   - `go.mod`、`go.sum`
   - 数据库 schema、真实服务器地址、真实 token、SSH 私钥、密码或生产配置
@@ -1223,7 +1223,7 @@
   - `docker build -t go-scaffold:local .`：PENDING，当前本机未安装 Docker CLI。
   - 临时 Go YAML 解析：PASS。
   - `go run github.com/rhysd/actionlint/cmd/actionlint@latest .github/workflows/ci.yml .github/workflows/deploy-remote.yml`：PASS。
-  - `bash -n deploy/remote-linux-deploy.sh`：FAIL_ENV，本机无可用 bash，WSL 未安装 Linux 发行版。
+  - `bash -n deploy.sh`：FAIL_ENV，本机无可用 bash，WSL 未安装 Linux 发行版。
   - `shfmt` Bash 语法解析：PASS。
   - `go test ./... -count=1`：PASS。
   - `go build -o <temp> ./cmd/server`：PASS。
@@ -1232,13 +1232,13 @@
   - [PENDING_VERIFICATION] Dockerfile 镜像构建待具备 Docker 的环境验证。
   - [CONFIRMED] production Compose 示例使用 `DEPLOY_IMAGE`、只挂载示例路径，并包含 healthcheck。
   - [CONFIRMED] production 配置样例绑定 `0.0.0.0:9999`，不包含真实密钥。
-  - [CONFIRMED] 远程 Linux 部署脚本会按参数/环境变量动态生成 `DEPLOY_PATH/.env.deploy`，不要求提交真实 `.env.deploy`。
+  - [CONFIRMED] 远程 Linux 部署脚本会按参数/环境变量动态生成 `运行期显式部署参数`，不要求提交真实 显式部署参数。
   - [CONFIRMED] workflow 仍只支持 `workflow_dispatch`，staging/production 均需要环境绑定确认词。
   - [CONFIRMED] production 发布依赖 GitHub Environment `production` 和 Secrets，不保存真实值。
   - [CONFIRMED] 部署说明记录 Linux 主机、Docker Compose、目录权限、production 手动触发和回滚边界。
   - [CONFIRMED] 除 Docker build 与本机 `bash -n` 外的验证命令已通过；Docker build 和 `bash -n` 不可执行原因已记录，脚本已通过 Bash 语法解析。
 - Evidence：
-  - 修改文件：`Dockerfile`、`.dockerignore`、`deploy/docker-compose.production.example.yml`、`deploy/config.production.example.yaml`、`deploy/remote-linux-deploy.sh`、`.github/workflows/deploy-remote.yml`、`.env.deploy.example`、README、部署说明和项目状态文档。
+  - 修改文件：`Dockerfile`、`.dockerignore`、`deploy/docker-compose.production.example.yml`、`deploy/config.production.example.yaml`、`deploy.sh`、`.github/workflows/deploy-remote.yml`、`deploy.sh` / `script/install.sh` 显式参数契约、README、部署说明和项目状态文档。
   - Docker build：未执行，原因是当前环境 `docker`、`podman`、`nerdctl` 均不可用。
   - 其他验证：脚本 Bash 语法解析 PASS；YAML 解析 PASS；actionlint PASS；`go test ./... -count=1` PASS；server build PASS；`git diff --check` PASS。
   - Next Task：补跑 Docker build；真实 production 运行、镜像发布流水线和生产迁移框架仍需单独确认。

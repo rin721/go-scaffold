@@ -3,9 +3,9 @@
 ## 风险登记状态
 
 - Project：go-scaffold
-- Phase：P2 Linux Docker production 部署制品与远程 Linux 动态 env 脚本
+- Phase：P2 Linux Docker production 部署制品与远程 Linux 统一 `deploy.sh` 入口
 - Status：PENDING_VERIFICATION
-- Last Updated：2026-05-26
+- Last Updated：2026-05-27
 
 ## 风险列表
 
@@ -196,7 +196,7 @@
 - Probability：Medium
 - Impact：如果 CI/CD workflow 自动连接生产环境、推送镜像或执行部署，可能造成未授权发布、密钥暴露或生产变更。
 - Trigger：在未确认密钥、环境、权限和回滚策略前实现自动 CD。
-- Mitigation：TASK-P2-001 已新增只读 CI 质量门禁和手动部署说明；TASK-P2-003 已新增手动 staging 远程部署 workflow；TASK-P2-004 已补 production Docker 制品、手动 production 闸门和远程 Linux 动态 env 部署脚本，Docker build 待具备 Docker 的环境补跑。workflow 和脚本均不在本会话触发远程连接、不推送镜像、不写真实 secrets。
+- Mitigation：TASK-P2-001 已新增只读 CI 质量门禁和手动部署说明；TASK-P2-003 已新增手动 staging 远程部署 workflow；TASK-P2-004 已补 production Docker 制品、手动 production 闸门和统一 `deploy.sh` 部署入口，Docker build 待具备 Docker 的环境补跑。workflow 和脚本均不在本会话触发远程连接、不推送镜像、不写真实 secrets。
 - Owner：User/Agent
 - Status：[CONFIRMED] 非生产 CI、手动 staging workflow 和 production 手动闸门均按受控方向推进
 - Blocking：No；会阻塞 production 自动化，直到用户单独确认。
@@ -207,8 +207,8 @@
 - Severity：High
 - Probability：High
 - Impact：在未确认镜像仓库、远程环境、触发策略和 secrets 权限前实现真实 CD，可能导致错误环境发布、凭据暴露、镜像覆盖或不可回滚变更。
-- Trigger：用户选择 C 并确认使用远程部署；TASK-P2-002 已提供 `.env.deploy.example`，TASK-P2-003 已新增手动 staging 远程部署 workflow；用户随后确认 Linux/Docker/production 部署制品。
-- Mitigation：`.env.deploy.example` 只提供占位变量，真实 `.env.deploy` 已被忽略；workflow 仅手动触发，production 需要 GitHub Environment 和 `deploy-production` 确认词；远程 Linux 脚本只动态写入非密钥部署运行变量，真实数据库/Redis 密码仍应位于远程 `configs/config.yaml` 或密钥系统；本会话不触发 workflow、不连接远程环境、不读取真实 secrets、不部署生产。
+- Trigger：用户选择 C 并确认使用远程部署；TASK-P2-002 已提供显式参数部署入口，TASK-P2-003 已新增手动 staging 远程部署 workflow；用户随后确认 Linux/Docker/production 部署制品。
+- Mitigation：`deploy.sh` / `script/install.sh` 显式参数契约只提供占位示例，旧本地部署 env 文件已删除；workflow 仅手动触发，production 需要 GitHub Environment 和 `deploy-production` 确认词；远程 Linux 脚本按显式参数注入运行环境且不打印密钥值；本会话不触发 workflow、不连接远程环境、不读取真实 secrets、不部署生产。
 - Owner：User/Agent
 - Status：[CONFIRMED] env 模板、手动 workflow 和 production Docker 制品方向已确认；镜像发布流水线和真实运行仍受阻
 - Blocking：Yes，阻塞镜像发布流水线 / 真实 production 运行 / 生产迁移后续范围。
@@ -220,7 +220,14 @@
 - Probability：Medium
 - Impact：使用者可能把 Dockerfile、Compose 示例或 production workflow 闸门误认为已经完成真实生产上线，从而跳过 GitHub Environment 审批、真实镜像标签确认、远程目录权限、回滚和迁移检查。
 - Trigger：用户要求进入 production 部署；仓库新增 production 命名的部署制品。
-- Mitigation：所有制品使用占位值和 example 文件；workflow 仅手动触发，production 要求 `deploy-production`；远程 Linux 部署脚本会按参数动态生成 `.env.deploy`，且只写入部署环境、镜像、端口和健康检查地址等非密钥变量；文档明确本会话未触发真实部署、未连接服务器、未推送镜像、未执行迁移。
+- Mitigation：所有制品使用占位值和 example 文件；workflow 仅手动触发，production 要求 `deploy-production`；远程 Linux 部署脚本按显式参数注入运行环境且不打印 password/token/secret 值；文档明确本会话未触发真实部署、未连接服务器、未推送镜像、未执行迁移。
+
+### RISK-019：命令行传递密钥可能暴露到 shell history 或进程列表
+
+- Trigger：新部署流程要求通过 `deploy.sh` 显式参数传入数据库密码、Redis 密码、registry token 等敏感配置。
+- Impact：如果操作者在普通 shell 中直接输入敏感参数，密钥可能进入 shell history、进程列表或审计日志。
+- Mitigation：脚本和文档明确提示风险；脚本不打印 password/token/secret 类参数值；GitHub workflow 依赖 Secrets masking；真实生产建议使用受控 shell、CI secret masking 或主机密钥管理器。
+- Status：[CONFIRMED] 已记录并在部署文档、脚本帮助文本中提示
 - Owner：User/Agent
 - Status：[RISK] 制品已补齐，Docker build 待验证；不得宣称真实 production 已上线
 - Blocking：No；但阻塞把本切片结果宣称为真实 production 已上线。

@@ -5,7 +5,7 @@
 - 项目：go-scaffold
 - 当前阶段：P2 Linux Docker production 部署制品与远程 Linux 脚本待验证
 - 总体状态：PENDING_VERIFICATION
-- 最后更新：2026-05-26
+- 最后更新：2026-05-27
 - 最近 Agent：Codex
 - 最近工具：Codex Desktop
 
@@ -15,7 +15,7 @@
 - 当前任务 ID：TASK-P2-004
 - 当前时间切片 ID：TS-P2-004
 - 当前状态：PENDING_VERIFICATION
-- 为什么这是当前唯一合法状态：[CONFIRMED] 用户要求“开始，linux、docker、production -> 部署”，并修正为“环境变量在部署脚本上动态配置”；已提升 `BL-024` 中 production Docker 远程部署剩余范围。Dockerfile、production Compose 示例、production 配置样例、手动 production workflow 闸门和远程 Linux 动态 env 部署脚本已实现，但本机缺少 Docker CLI，`docker build -t go-scaffold:local .` 尚待具备 Docker 的环境验证。
+- 为什么这是当前唯一合法状态：[CONFIRMED] 用户要求“开始，linux、docker、production -> 部署”，并修正为“环境变量在部署脚本上动态配置”；已提升 `BL-024` 中 production Docker 远程部署剩余范围。Dockerfile、production Compose 示例、production 配置样例、手动 production workflow 闸门和统一 `deploy.sh` 部署入口已实现，但本机缺少 Docker CLI，`docker build -t go-scaffold:local .` 尚待具备 Docker 的环境验证。
 
 ## 阶段状态
 
@@ -50,10 +50,10 @@
 | pkg README 中文化 | COMPLETED | TASK-P1-017 已完成第一阶段 `pkg/*/README.md` 中文化，不修改 Go 代码或依赖 |
 | CI 质量门禁与部署说明 | COMPLETED | TASK-P2-001 已新增 GitHub Actions CI workflow、手动部署说明和 README 入口，不执行真实部署或使用密钥 |
 | 真实 CD 范围确认 | COMPLETED | 用户选择 C、确认使用远程部署，并进一步确认用 `.env` 风格文件配置；TASK-P2-002 已新增远程部署变量模板 |
-| 远程部署 env 模板 | COMPLETED | `.env.deploy.example` 已新增，`.env.deploy` 已加入 `.gitignore`，部署说明已同步 |
+| 显式参数部署入口 | COMPLETED | `deploy.sh` 和 `script/install.sh` 已新增，旧本地部署 env 文件已删除，部署说明已同步 |
 | 远程部署 workflow | COMPLETED | TASK-P2-003 已新增手动 staging workflow、Secrets 配置说明和远程主机前置条件；未执行真实部署 |
-| Linux Docker production 部署制品 | PENDING_VERIFICATION | TASK-P2-004 / TS-P2-004 已实现 Dockerfile、production Compose 示例、手动 production workflow 闸门和远程 Linux 动态 env 部署脚本；Docker 构建待验证 |
-| 实现 | COMPLETED | TASK-P2-004 已补齐 Dockerfile、production Compose 示例、production 配置样例、远程 Linux 动态 env 部署脚本和手动 production workflow 闸门 |
+| Linux Docker production 部署制品 | PENDING_VERIFICATION | TASK-P2-004 / TS-P2-004 已实现 Dockerfile、production Compose 示例、手动 production workflow 闸门和统一 `deploy.sh` 部署入口；Docker 构建待验证 |
+| 实现 | COMPLETED | TASK-P2-004 已补齐 Dockerfile、production Compose 示例、production 配置样例、统一 `deploy.sh` 部署入口和手动 production workflow 闸门 |
 | 验证 | PENDING_VERIFICATION | 脚本 Bash 语法解析、YAML 解析、actionlint、`go test ./... -count=1`、server build 和 `git diff --check` 均通过；Docker build 因本机缺少 Docker CLI 待补跑 |
 | 交接 | COMPLETED | `AGENT_HANDOFF.md` 已更新到 TASK-P2-004 待验证状态 |
 | Phase 6 收尾 | COMPLETED | 用户选择 A 后已完成 TASK-PHASE6-001；最终回归和交接文档已更新 |
@@ -74,7 +74,7 @@
 | FIND-014 | 背景文档保留 TASK-P1-016 前旧状态 | `ARCHITECTURE.md`、`MODULES.md`、`PROJECT_BRIEF.md`、`ROADMAP.md`；TASK-INFRA-003 已修复 | [CONFIRMED] 已处理 |
 | FIND-015 | CI/CD 与部署缺少首个安全边界 | `REQ-OPT-P2-003`、`BL-007`、`BL-008`；用户选择 D | [CONFIRMED] TASK-P2-001 已处理非生产 CI 门禁和部署说明 |
 | FIND-016 | 真实 CD 自动化缺少环境与密钥决策 | `BL-024`；用户选择 C、确认远程部署，并确认使用 `.env` 风格配置和实现 workflow | [CONFIRMED] 手动 staging 远程部署 workflow 已补；镜像发布、production 和真实运行仍需单独确认 |
-| FIND-017 | production Docker 部署缺少可提交制品 | 用户要求“linux、docker、production -> 部署”；用户修正“环境变量在部署脚本上动态配置”；`BL-024` 剩余范围 | [PENDING_VERIFICATION] 制品和远程 Linux 动态 env 脚本已补；Docker CLI 缺失导致镜像构建待验证，真实 production 运行仍不在当前会话执行 |
+| FIND-017 | production Docker 部署缺少可提交制品 | 用户要求“linux、docker、production -> 部署”；用户修正“环境变量在部署脚本上动态配置”；`BL-024` 剩余范围 | [PENDING_VERIFICATION] 制品和统一 `deploy.sh` 入口已补；Docker CLI 缺失导致镜像构建待验证，真实 production 运行仍不在当前会话执行 |
 | FIND-006 | P1 执行顺序尚未确认 | `TEST_MATRIX.md`、`RISK_REGISTER.md` RISK-009；用户再次发送“下一步” | [CONFIRMED] 已确认 |
 | FIND-007 | `AGENTS.md` 被状态文件声明已补齐但实际缺失 | `Test-Path AGENTS.md`、`docs/reports/status_diagnostics/2026-05-25-task-infra-002-agents-md-missing.md` | [CONFIRMED] 已修复 |
 | FIND-008 | `/health`、`/ready` 路由缺少 smoke test | `TEST_MATRIX.md` TM-P0-003；TASK-P1-003 已补测试 | [CONFIRMED] 已处理 |
@@ -111,8 +111,8 @@
 ## 最近执行
 
 - 摘要：用户确认进入 Linux/Docker/production 部署方向，并修正远程部署环境变量应由部署脚本动态配置；TASK-P2-004 / TS-P2-004 已实现，等待 Docker 构建验证。
-- 变更文件：新增 `Dockerfile`、`.dockerignore`、`deploy/docker-compose.production.example.yml`、`deploy/config.production.example.yaml`、`deploy/remote-linux-deploy.sh`；更新远程部署 workflow、`.env.deploy.example`、README、部署说明和状态文档。
-- 执行命令：必读文件读取；用户修正审查；`docker version`；bash/WSL 可用性检查；`shfmt` Bash 语法解析；临时 Go YAML 解析；`actionlint`；`go test ./... -count=1`；`go build -o <temp> ./cmd/server`；`git diff --check`。
+- 变更文件：新增 `deploy.sh`、`script/install.sh`；删除旧部署 env 示例和旧远程 Linux 脚本；更新远程部署 workflow、Compose 示例、README、部署说明和状态文档。
+- 执行命令：必读文件读取；用户修正审查；`docker version`；`shfmt` Bash 语法解析；临时 Go YAML 解析；`actionlint`；旧引用 `rg` 检查；`go test ./... -count=1`；`go build -o <temp> ./cmd/server`；`git diff --check`。
 - 测试结果：脚本 Bash 语法解析 PASS；YAML 解析 PASS；actionlint PASS；全量 Go 回归 PASS；server build PASS；diff 检查 PASS；Docker CLI 不存在，Docker build 未执行；本机无 bash 且 WSL 未安装 Linux 发行版，`bash -n` 未执行。
 - 完成判断：PENDING_VERIFICATION。
 

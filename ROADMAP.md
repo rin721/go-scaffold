@@ -154,12 +154,12 @@
   - Docker build 在具备 Docker 的环境中补跑验证。
   - 镜像发布流水线、真实 production 运行和生产迁移框架是否开始实现。
 - 已完成：
-  - `.env.deploy.example` 远程部署变量模板。
-  - `.env.deploy` Git 忽略规则。
+  - `deploy.sh` / `script/install.sh` 显式参数契约 远程部署显式参数契约。
+  - 显式参数部署规则。
   - 部署说明中的远程变量边界。
   - 手动 staging 远程部署 workflow。
-  - Dockerfile、production Compose 示例、production 配置样例、远程 Linux 动态 env 部署脚本和手动 production workflow 闸门。
+  - Dockerfile、production Compose 示例、production 配置样例、统一 `deploy.sh` 部署入口和手动 production workflow 闸门。
 - 约束：
-  - 本会话未执行远程部署、不推送镜像、不连接远程环境、不读取真实 secrets；远程 Linux 脚本仅按参数生成非密钥 `.env.deploy`。
+  - 本会话未执行远程部署、不推送镜像、不连接远程环境、不读取真实 secrets；远程 Linux 脚本仅按参数生成非密钥 显式部署参数。
   - 当前本机缺少 Docker CLI，`docker build -t go-scaffold:local .` 待补跑。
   - 镜像发布、真实 production 运行、生产迁移框架仍需单独确认。

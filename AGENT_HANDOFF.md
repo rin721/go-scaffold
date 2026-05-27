@@ -2,7 +2,7 @@
 
 ## Last Updated
 
-- Date: 2026-05-26
+- Date: 2026-05-27
 - Agent: Codex
 - Tool: Codex Desktop
 
@@ -23,9 +23,9 @@
 - 新增 `.dockerignore`，排除 Git、真实 env、缓存、日志和非运行制品。
 - 新增 `deploy/docker-compose.production.example.yml`，使用 `DEPLOY_IMAGE`、外置配置、数据和日志挂载，并包含 `/health` healthcheck。
 - 新增 `deploy/config.production.example.yaml`，绑定 `0.0.0.0:9999`，不包含真实密钥。
-- 新增 `deploy/remote-linux-deploy.sh`，用于在远程 Linux 主机按参数/环境变量动态生成 `DEPLOY_PATH/.env.deploy`，再执行 Docker build 或 pull、Compose up 和 health/ready 检查。
+- 新增根 `deploy.sh` 和 `script/install.sh`，用于在远程 Linux 主机按显式参数注入运行环境，再执行 Docker build 或 pull、Compose up 和 health/ready 检查。
 - 扩展 `.github/workflows/deploy-remote.yml`，支持 `staging` / `production` 手动环境选择，并要求 `deploy-staging` 或 `deploy-production` 确认词。
-- 更新 `.env.deploy.example`、`docs/deployment.md` 和 README，记录 Linux Docker、Windows 到远程 Linux 直接部署、production Compose、GitHub Environment、Secrets、目录权限和回滚边界。
+- 删除旧部署 env 示例和旧远程 Linux 动态 env 脚本；更新 `docs/deployment.md`、README 和 workflow，记录 Linux Docker、直装入口、production Compose、GitHub Environment、Secrets、目录权限和回滚边界。
 - 未修改 Go 代码、测试文件、导出业务 API、配置 schema、HTTP 路由、数据库 schema、依赖文件、真实配置、部署凭据或密钥。
 - 未执行真实部署、未触发 workflow、未连接远程服务器、未推送镜像。
 
@@ -37,9 +37,9 @@
 | `.dockerignore` | Added | 控制 Docker build context，避免真实 env 和非运行制品进入镜像构建 |
 | `deploy/docker-compose.production.example.yml` | Added | production Docker Compose 示例 |
 | `deploy/config.production.example.yaml` | Added | production 配置样例，无真实密钥 |
-| `deploy/remote-linux-deploy.sh` | Added | 远程 Linux 动态生成 `.env.deploy` 并执行受控 Docker Compose 部署路径 |
+| `deploy.sh` | Added | 远程 Linux 按显式参数注入运行环境并执行受控 Docker Compose 部署路径 |
 | `.github/workflows/deploy-remote.yml` | Updated | 支持手动 staging/production 环境选择和环境绑定确认词 |
-| `.env.deploy.example` | Updated | 补充 `APP_PORT`、`DEPLOY_CONTAINER_NAME` 和 production 环境说明 |
+| `script/install.sh` | Added | 直接下载执行入口，clone 仓库后委托根 `deploy.sh` |
 | `README.md`、`docs/deployment.md` | Updated | 记录 Docker、Compose、GitHub Environment、Secrets、权限和回滚边界 |
 | Project status docs | Updated | 标记 TASK-P2-004 / TS-P2-004 为 `PENDING_VERIFICATION` |
 
@@ -52,8 +52,8 @@
 | `docker version` | FAIL_ENV，当前环境未安装 Docker CLI |
 | `Get-Command podman` / `Get-Command nerdctl` / `Get-Command docker.exe` | NOT_AVAILABLE |
 | `Get-Command bash` | FAIL_ENV，本机无可用 bash |
-| `wsl bash -lc ... bash -n deploy/remote-linux-deploy.sh` | FAIL_ENV，WSL 未安装 Linux 发行版 |
-| `go run mvdan.cc/sh/v3/cmd/shfmt@latest -ln bash -tojson` | PASS，脚本 Bash 语法解析通过 |
+| `go run mvdan.cc/sh/v3/cmd/shfmt@latest -ln bash -d deploy.sh script/install.sh` | PASS，脚本 Bash 语法解析通过并已格式化 |
+| `rg -n "<old deploy env patterns>" -S .` | PASS，无旧部署 env 文件和旧脚本引用 |
 | Temporary Go YAML parse | PASS |
 | `go run github.com/rhysd/actionlint/cmd/actionlint@latest .github/workflows/ci.yml .github/workflows/deploy-remote.yml` | PASS |
 | `go test ./... -count=1` | PASS |
@@ -78,11 +78,11 @@
 ## Important Decisions
 
 - [CONFIRMED] User wants remote deployment configured through an `.env` style file.
-- [CONFIRMED] Commit only `.env.deploy.example`, never real `.env.deploy`.
+- [CONFIRMED] Keep real secrets out of tracked files; pass deployment settings through explicit `deploy.sh` parameters.
 - [CONFIRMED] User explicitly confirmed implementing the remote deployment workflow.
 - [CONFIRMED] User explicitly requested Linux/Docker/production deployment artifacts.
 - [CONFIRMED] Production workflow access must remain manual and require GitHub Environment `production` plus `deploy-production` confirmation.
-- [CONFIRMED] Remote Linux direct deployment should generate `.env.deploy` dynamically from non-secret runtime variables in `deploy/remote-linux-deploy.sh`.
+- [CONFIRMED] Remote Linux direct deployment should inject runtime configuration from explicit parameters without printing sensitive values.
 - [CONFIRMED] Current slice does not trigger workflow, connect to any remote host, push images, execute production deployment or run migrations.
 
 ## Risks
