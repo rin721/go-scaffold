@@ -1,11 +1,6 @@
 package config
 
-import (
-	"os"
-	"strconv"
-
-	"github.com/joho/godotenv"
-)
+import "github.com/joho/godotenv"
 
 // LoadEnv 加载 .env 文件
 // .env 文件是可选的,如果不存在不会报错
@@ -46,94 +41,8 @@ func LoadEnv() {
 //	OverrideWithEnv(config)
 //	// 此时 config 中的值可能已被环境变量覆盖
 func OverrideWithEnv(cfg *Config) {
-	// 数据库配置
-	overrideDatabaseConfig(&cfg.Database)
-
-	// Redis 配置
-	overrideRedisConfig(&cfg.Redis)
-
-	// 服务器配置
-	overrideServerConfig(&cfg.Server)
-
-	// 日志配置
-	overrideLoggerConfig(&cfg.Logger)
-
-	// 国际化配置
-	overrideI18nConfig(&cfg.I18n)
-
-	// 插件配置
-	overridePluginConfig(&cfg.Plugin)
-
-	// IAM 配置
-	overrideIAMConfig(&cfg.IAM)
-}
-
-// getEnvOrDefault 获取环境变量,如果不存在则返回默认值
-// 这是一个辅助函数,用于简化环境变量读取
-//
-// 参数:
-//
-//	key: 环境变量名称
-//	defaultValue: 默认值
-//
-// 返回:
-//
-//	string: 环境变量的值,或默认值
-//
-// 使用示例:
-//
-//	host := getEnvOrDefault("DB_HOST", "localhost")
-func getEnvOrDefault(key, defaultValue string) string {
-	if val := os.Getenv(key); val != "" {
-		return val
+	if cfg == nil {
+		return
 	}
-	return defaultValue
-}
-
-// getEnvAsInt 获取环境变量并转换为整数
-// 如果环境变量不存在或转换失败,返回默认值
-//
-// 参数:
-//
-//	key: 环境变量名称
-//	defaultValue: 默认值
-//
-// 返回:
-//
-//	int: 环境变量转换后的整数值,或默认值
-//
-// 使用示例:
-//
-//	port := getEnvAsInt("SERVER_PORT", 8080)
-func getEnvAsInt(key string, defaultValue int) int {
-	if val := os.Getenv(key); val != "" {
-		if intVal, err := strconv.Atoi(val); err == nil {
-			return intVal
-		}
-	}
-	return defaultValue
-}
-
-// getEnvAsBool 获取环境变量并转换为布尔值
-// 如果环境变量不存在或转换失败,返回默认值
-//
-// 参数:
-//
-//	key: 环境变量名称
-//	defaultValue: 默认值
-//
-// 返回:
-//
-//	bool: 环境变量转换后的布尔值,或默认值
-//
-// 使用示例:
-//
-//	enabled := getEnvAsBool("REDIS_ENABLED", true)
-func getEnvAsBool(key string, defaultValue bool) bool {
-	if val := os.Getenv(key); val != "" {
-		if boolVal, err := strconv.ParseBool(val); err == nil {
-			return boolVal
-		}
-	}
-	return defaultValue
+	overrideConfigFromEnv(cfg)
 }

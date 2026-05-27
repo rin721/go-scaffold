@@ -134,9 +134,9 @@
 - Type：Configuration/Documentation
 - Severity：Medium
 - Probability：High
-- Impact：使用 `.env.example` 的开发者设置 `DB_*` 后数据库配置不生效，造成本地和部署配置漂移。
-- Trigger：数据库 override 曾读取 `REI_APP_DB_*`，而 `.env.example` 和其他模块使用未加前缀变量。
-- Mitigation：TASK-P1-002 已统一为 `DB_*` 优先，旧 `REI_APP_DB_*` 兼容 fallback；`.env.example` 已同步；配置测试已覆盖。
+- Impact：使用 `.env.example`、部署脚本或不同模块环境变量时可能因前缀策略不一致导致配置不生效。
+- Trigger：数据库 override 曾读取固定 `REI_APP_DB_*`，后续又以未加前缀 `DB_*` 为主；用户进一步要求前缀必须从 `AppPrefix` 动态派生。
+- Mitigation：TASK-P2-011 已将配置覆盖统一为 `AppPrefix` 动态前缀 + `envname` 字段标签；当前主变量为 `RIN_APP_*`，未加前缀变量保留兼容 fallback；`.env.example`、Compose 示例和部署说明已同步，配置测试已覆盖。TASK-P2-012 已删除 `EnvDB*` / `EnvRedis*` 等重复 env-name 常量，避免字段标签之外再出现第二事实源。
 - Owner：Agent
 - Status：[CONFIRMED] 已修复
 - Blocking：No。
@@ -170,9 +170,9 @@
 - Type：Architecture/API
 - Severity：Medium
 - Probability：Medium
-- Impact：`types/result` 依赖 Gin 且承担 HTTP 响应契约，若被误认为纯类型包，后续重构或复用会破坏跨层边界；auth/rbac 错误码预留也可能被误解为已实现能力。
-- Trigger：`types/*` 当前承载常量、错误码、响应结构和聚合类型，但公共契约与实现范围尚未完整标注。
-- Mitigation：TASK-P1-009 已明确 `types/*` 契约边界，补充 `types/result` 和 `types/errors` 最小测试，并运行 `go test ./types/... -count=1` 与全量回归。
+- Impact：`types/result` 依赖 Gin 且承担 HTTP 响应契约，若被误认为纯类型包，后续重构或复用会破坏跨层边界；auth/rbac 错误码预留也可能被误解为已实现能力；`types/*` 若聚合 `pkg/*` 基础设施接口，会模糊应用层以上契约和下层基础设施依赖方向。
+- Trigger：`types/*` 当前承载常量、错误码、响应结构；历史根 `types` 曾提供 `pkg/crypto.Crypto` 别名和依赖 `pkg/cache.Cache` 的 `CacheInjectable`，`types/constants` 曾依赖 `pkg/executor.PoolName`。
+- Mitigation：TASK-P1-009 已明确 `types/*` 契约边界；2026-05-27 用户修正后已删除根 `types` 的 `Crypto` 别名和 `CacheInjectable`，将 executor pool 名称改为字符串常量，并新增导入边界测试固定 `types/*` 不得直接导入 `pkg/*`。
 - Owner：Agent
 - Status：[CONFIRMED] 已处理
 - Blocking：No。
@@ -287,3 +287,4 @@
 | RD-011 | 确认 Linux Docker production 部署制品 | 用户确认 production 部署方向；本切片只补制品和手动闸门，不执行真实 production | [CONFIRMED] |
 | RD-012 | 确认插件钩子运行时与 IAM 公共接口主线 | 用户确认 `dev.tmp/new-plugin.md` 设计；TASK-P2-005 至 TASK-P2-010 已实现并验证，TASK-P2-004 Docker build 阻塞已解除 | [CONFIRMED] |
 | RD-013 | 确认当前项目未达第一版发布条件 | 用户纠正当前项目仍未开发完整；Docker build 和部署制品完成不等于 v1 release-ready | [CONFIRMED] |
+| RD-014 | 确认 `types/*` 不聚合 `pkg/*` 基础设施接口 | 用户修正 `types` 只能存在应用层以上的层级再定义；本轮已移除根别名/注入接口和 `types/constants` 对 `pkg/executor` 的直接依赖，并补导入边界测试 | [CONFIRMED] |

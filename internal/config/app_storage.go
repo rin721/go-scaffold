@@ -2,8 +2,6 @@ package config
 
 import (
 	"fmt"
-	"os"
-	"strconv"
 
 	"github.com/rei0721/go-scaffold/pkg/storage"
 )
@@ -11,20 +9,20 @@ import (
 // StorageConfig 保存 Storage 文件服务配置
 type StorageConfig struct {
 	// Enabled 是否启用文件服务
-	Enabled bool `mapstructure:"enabled" json:"enabled" yaml:"enabled" toml:"enabled"`
+	Enabled bool `mapstructure:"enabled" envname:"STORAGE_ENABLED" json:"enabled" yaml:"enabled" toml:"enabled"`
 
 	// FSType 文件系统类型
 	// 可选值: os, memory, readonly, basepath
-	FSType string `mapstructure:"fs_type" json:"fs_type" yaml:"fs_type" toml:"fs_type"`
+	FSType string `mapstructure:"fs_type" envname:"STORAGE_FS_TYPE" json:"fs_type" yaml:"fs_type" toml:"fs_type"`
 
 	// BasePath 基础路径 (仅basepath类型需要)
-	BasePath string `mapstructure:"base_path" json:"base_path" yaml:"base_path" toml:"base_path"`
+	BasePath string `mapstructure:"base_path" envname:"STORAGE_BASE_PATH" json:"base_path" yaml:"base_path" toml:"base_path"`
 
 	// EnableWatch 是否启用文件监听功能
-	EnableWatch bool `mapstructure:"enable_watch" json:"enable_watch" yaml:"enable_watch" toml:"enable_watch"`
+	EnableWatch bool `mapstructure:"enable_watch" envname:"STORAGE_ENABLE_WATCH" json:"enable_watch" yaml:"enable_watch" toml:"enable_watch"`
 
 	// WatchBufferSize 文件监听事件缓冲区大小
-	WatchBufferSize int `mapstructure:"watch_buffer_size" json:"watch_buffer_size" yaml:"watch_buffer_size" toml:"watch_buffer_size"`
+	WatchBufferSize int `mapstructure:"watch_buffer_size" envname:"STORAGE_WATCH_BUFFER_SIZE" json:"watch_buffer_size" yaml:"watch_buffer_size" toml:"watch_buffer_size"`
 }
 
 // ValidateName 返回配置名称
@@ -85,36 +83,7 @@ func (c *StorageConfig) DefaultConfig() {
 
 // OverrideConfig 从环境变量覆盖配置
 func (c *StorageConfig) OverrideConfig() {
-	// STORAGE_ENABLED
-	if enabled := os.Getenv("STORAGE_ENABLED"); enabled != "" {
-		if val, err := strconv.ParseBool(enabled); err == nil {
-			c.Enabled = val
-		}
-	}
-
-	// STORAGE_FS_TYPE
-	if fsType := os.Getenv("STORAGE_FS_TYPE"); fsType != "" {
-		c.FSType = fsType
-	}
-
-	// STORAGE_BASE_PATH
-	if basePath := os.Getenv("STORAGE_BASE_PATH"); basePath != "" {
-		c.BasePath = basePath
-	}
-
-	// STORAGE_ENABLE_WATCH
-	if enableWatch := os.Getenv("STORAGE_ENABLE_WATCH"); enableWatch != "" {
-		if val, err := strconv.ParseBool(enableWatch); err == nil {
-			c.EnableWatch = val
-		}
-	}
-
-	// STORAGE_WATCH_BUFFER_SIZE
-	if bufferSize := os.Getenv("STORAGE_WATCH_BUFFER_SIZE"); bufferSize != "" {
-		if val, err := strconv.Atoi(bufferSize); err == nil {
-			c.WatchBufferSize = val
-		}
-	}
+	overrideConfigFromEnv(c)
 }
 
 // ToPkgConfig 转换为 pkg/storage.Config

@@ -9,14 +9,13 @@ import (
 	"testing"
 
 	"github.com/rei0721/go-scaffold/pkg/cli"
-	"github.com/rei0721/go-scaffold/types/constants"
 )
 
 func TestTestsCommandMetadata(t *testing.T) {
 	cmd := NewTestsCommand()
 
-	if got := cmd.Name(); got != constants.AppTestsCommandName {
-		t.Fatalf("Name() = %q, want %q", got, constants.AppTestsCommandName)
+	if got := cmd.Name(); got != testsCommandName {
+		t.Fatalf("Name() = %q, want %q", got, testsCommandName)
 	}
 	if !strings.Contains(cmd.Description(), "Go tests") {
 		t.Fatalf("Description() = %q, want Go tests wording", cmd.Description())

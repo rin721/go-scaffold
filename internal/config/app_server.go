@@ -1,10 +1,6 @@
 package config
 
-import (
-	"errors"
-	"os"
-	"strconv"
-)
+import "errors"
 
 // ServerConfig HTTP 服务器配置
 // 控制 HTTP 服务的行为
@@ -12,12 +8,12 @@ type ServerConfig struct {
 	// Host HTTP服务器地址
 	// 例如: localhost, 127.0.0.1, db.example.com
 	// SQLite 不需要此字段
-	Host string `mapstructure:"host"`
+	Host string `mapstructure:"host" envname:"SERVER_HOST"`
 
 	// Port 监听端口
 	// 有效范围: 1-65535
 	// 常用端口: 8080, 3000, 80(需要 root)
-	Port int `mapstructure:"port"`
+	Port int `mapstructure:"port" envname:"SERVER_PORT"`
 
 	// Mode 运行模式
 	// 可选值:
@@ -28,25 +24,25 @@ type ServerConfig struct {
 	// - Gin 的日志详细程度
 	// - 性能优化级别
 	// - panic 恢复行为
-	Mode string `mapstructure:"mode"`
+	Mode string `mapstructure:"mode" envname:"SERVER_MODE"`
 
 	// ReadTimeout 读取请求的超时时间(秒)
 	// 从连接建立到读取完整请求体的最大时间
 	// 防止慢速客户端占用连接
 	// 推荐: 5-60 秒
-	ReadTimeout int `mapstructure:"read_timeout"`
+	ReadTimeout int `mapstructure:"read_timeout" envname:"SERVER_READ_TIMEOUT"`
 
 	// WriteTimeout 写入响应的超时时间(秒)
 	// 从请求处理完成到写入完整响应的最大时间
 	// 防止慢速客户端占用连接
 	// 推荐: 10-120 秒(取决于响应大小)
-	WriteTimeout int `mapstructure:"write_timeout"`
+	WriteTimeout int `mapstructure:"write_timeout" envname:"SERVER_WRITE_TIMEOUT"`
 
 	// IdleTimeout 空闲连接的超时时间(秒)
 	// 从连接建立到空闲的最大时间
 	// 防止慢速客户端占用连接
 	// 推荐: 60-300 秒
-	IdleTimeout int `mapstructure:"idle_timeout"`
+	IdleTimeout int `mapstructure:"idle_timeout" envname:"SERVER_IDLE_TIMEOUT"`
 }
 
 func (c *ServerConfig) ValidateName() string {
@@ -92,29 +88,5 @@ func (c *ServerConfig) Validate() error {
 
 // overrideServerConfig 使用环境变量覆盖服务器配置
 func overrideServerConfig(cfg *ServerConfig) {
-	// Port
-	if val := os.Getenv(EnvServerPort); val != "" {
-		if port, err := strconv.Atoi(val); err == nil {
-			cfg.Port = port
-		}
-	}
-
-	// Mode
-	if val := os.Getenv(EnvServerMode); val != "" {
-		cfg.Mode = val
-	}
-
-	// ReadTimeout
-	if val := os.Getenv(EnvServerReadTimeout); val != "" {
-		if timeout, err := strconv.Atoi(val); err == nil {
-			cfg.ReadTimeout = timeout
-		}
-	}
-
-	// WriteTimeout
-	if val := os.Getenv(EnvServerWriteTimeout); val != "" {
-		if timeout, err := strconv.Atoi(val); err == nil {
-			cfg.WriteTimeout = timeout
-		}
-	}
+	overrideConfigFromEnv(cfg)
 }

@@ -1,5 +1,7 @@
 # 部署说明
 
+配置加载、动态环境变量前缀和 `envname` 字段约定见 [`configuration.md`](configuration.md)。
+
 ## 范围
 
 本文记录当前项目的最小发布前检查、Linux Docker 制品和手动远程部署边界。当前仓库提供 CI 质量门禁、`Dockerfile`、production Compose 示例、统一 `deploy.sh` 部署入口和手动远程部署 workflow；这些内容只是部署准备制品，不代表项目已达第一版发布条件。本地会话不执行真实部署、不推送镜像、不连接服务器、不处理生产密钥。
@@ -103,15 +105,16 @@ cp deploy/docker-compose.production.example.yml docker-compose.yml
 sudo chown -R 10001:10001 data logs
 ```
 
-Compose 示例读取 `DEPLOY_IMAGE`、`APP_PORT`、`DEPLOY_CONTAINER_NAME` 以及 DB、Redis、Server、Logger、I18n、Storage、CORS 显式环境变量，并对 `/health` 配置容器内 healthcheck。
+Compose 示例读取 `DEPLOY_IMAGE`、`APP_PORT`、`DEPLOY_CONTAINER_NAME` 以及 `RIN_APP_*` 配置覆盖环境变量，并对 `/health` 配置容器内 healthcheck。
 
 ## 配置边界
 
 - 默认配置文件：`configs/config.yaml`。
 - 示例配置文件：`configs/config.example.yaml`。
 - 命令行配置参数：`--config=<path>`。
-- 环境变量配置路径：`REI_CONFIG_PATH`。
+- 环境变量配置路径：`RIN_CONFIG_PATH`，名称由 `AppPrefix` 动态派生。
 - 本地开发环境变量示例见 `.env.example`。
+- 配置字段覆盖优先读取 `<APP_PREFIX>_APP_<MODULE>_<FIELD>`；当前前缀为 `RIN_APP`，未加前缀变量仍作为兼容 fallback。
 - 部署脚本参数直接映射到当前已实现的环境变量覆盖策略。
 
 生产环境不要提交真实 `.env`。数据库密码、Redis 密码和其他敏感值应由运行环境或密钥管理服务注入。
@@ -141,8 +144,8 @@ workflow 支持 `staging` 和 `production` 两个环境。production 必须在 G
 | `DEPLOY_PULL` | 否 | 是否拉取镜像，默认 `n` |
 | `APP_PORT` | 否 | 主机端口，默认 `9999` |
 | `DEPLOY_CONTAINER_NAME` | 否 | 容器名，默认 `go-scaffold` |
-| `DB_DRIVER`、`DB_HOST`、`DB_PORT`、`DB_USER`、`DB_NAME` | 否 | 数据库非密钥参数 |
-| `REDIS_ENABLED`、`REDIS_HOST`、`REDIS_PORT`、`REDIS_DB` | 否 | Redis 非密钥参数 |
+| `RIN_APP_DB_DRIVER`、`RIN_APP_DB_HOST`、`RIN_APP_DB_PORT`、`RIN_APP_DB_USER`、`RIN_APP_DB_NAME` | 否 | 数据库非密钥参数 |
+| `RIN_APP_REDIS_ENABLED`、`RIN_APP_REDIS_HOST`、`RIN_APP_REDIS_PORT`、`RIN_APP_REDIS_DB` | 否 | Redis 非密钥参数 |
 
 常用 Secrets：
 
@@ -150,8 +153,8 @@ workflow 支持 `staging` 和 `production` 两个环境。production 必须在 G
 |---|---|---|
 | `DEPLOY_SSH_KEY` | 是 | 能以 `DEPLOY_USER` 登录远程主机的 SSH 私钥 |
 | `DEPLOY_SSH_KNOWN_HOSTS` | 否 | 推荐提供远程主机 known_hosts；缺省时 workflow 会用 `ssh-keyscan` 生成 |
-| `DB_PASSWORD` | 否 | 数据库密码 |
-| `REDIS_PASSWORD` | 否 | Redis 密码 |
+| `RIN_APP_DB_PASSWORD` | 否 | 数据库密码 |
+| `RIN_APP_REDIS_PASSWORD` | 否 | Redis 密码 |
 | `GHCR_USERNAME` | 否 | 私有 GHCR 镜像需要；公开镜像可不填 |
 | `GHCR_TOKEN` | 否 | 私有 GHCR 镜像需要；只授予拉取镜像所需权限 |
 
@@ -186,7 +189,7 @@ go run ./cmd/server server --config=configs/config.yaml
 Windows PowerShell 可使用：
 
 ```powershell
-$env:REI_CONFIG_PATH = "configs/config.yaml"
+$env:RIN_CONFIG_PATH = "configs/config.yaml"
 go run ./cmd/server server
 ```
 

@@ -1,5 +1,11 @@
 # TEST_MATRIX.md
 
+## 最新补充矩阵项
+
+| ID | 范围 | 验证目标 | 建议文件范围 | 验证命令 | 退出条件 | 关联风险 |
+|---|---|---|---|---|---|---|
+| TM-P2-015 | 配置文档说明 | 配置入口、动态前缀、`.env` 自动加载、`envname` 单一事实源和新增字段流程有可恢复文档 | `docs/configuration.md`、`README.md`、`docs/deployment.md`、状态文档 | 文档关键文本 `rg`；`go test ./internal/config -count=1`；`go test ./... -count=1`；`git diff --check` | [CONFIRMED] TASK-P2-013 已新增配置文档说明并补入口 | RISK-011 |
+
 ## 测试矩阵状态
 
 - 项目：go-scaffold
@@ -70,6 +76,8 @@
 | TM-P2-010 | 配置与 app 组装 | `plugin` / `iam` 默认 disabled，配置 HTTP 插件 adapter、远程钩子绑定和 app 层 IAM hook 可验证 | `internal/config/**/*`、`internal/app/**/*` | `go test ./internal/config ./internal/app/... -count=1` | [CONFIRMED] TASK-P2-009 已完成 | RISK-020、RISK-021 |
 | TM-P2-011 | reload、lifecycle 与全量验证 | 配置重载先构建新实例再替换，失败保留旧实例；关闭顺序安全；全量回归通过 | `internal/app/**/*`、状态文档 | `go test ./internal/config ./internal/app/... -count=1`；`go test ./... -count=1`；`go build -o <temp> ./cmd/server`；`git diff --check` | [CONFIRMED] TASK-P2-010 已完成 | RISK-020、RISK-021 |
 | TM-P2-012 | 第一版发布验收清单 | 明确 v1 功能范围、真实环境验证、镜像发布、生产迁移、密钥管理、回滚和发布门禁 | 项目状态文档、发布说明、后续任务文档 | 待用户确认后定义 | [NOT_STARTED] 用户已纠正当前项目不应发布第一版；需单独确认后才能提升 | RISK-022 |
+| TM-P2-013 | 配置环境变量动态前缀 | `internal/config` 从 `AppPrefix` 派生环境变量前缀，字段通过 `envname` 自动覆盖，`.env` 自动加载可验证 | `internal/config/**/*`、`cmd/server/**/*`、配置示例和状态文档 | `go test ./internal/config -count=1`；`go test ./cmd/server ./internal/app/... -count=1`；`go test ./... -count=1`；`git diff --check` | [CONFIRMED] TASK-P2-011 已完成 | RISK-011 |
+| TM-P2-014 | 配置 env-name 单一事实源 | 删除 `internal/config` 中重复导出的字段环境变量名常量，测试从 `envname` 标签读取变量名 | `internal/config/constants.go`、`internal/config/manager_test.go`、状态文档 | `rg -n "Env(DB|Redis|Server|Log|I18n|CORS|InitDB|Executor|Storage|Plugin|IAM)" internal cmd types deploy docs .env.example Dockerfile -S`；`go test ./internal/config -count=1`；`go test ./cmd/server ./internal/app/... -count=1`；`go test ./... -count=1`；`git diff --check` | [CONFIRMED] TASK-P2-012 已完成 | RISK-011 |
 
 ## P1 优化任务草案
 
@@ -84,7 +92,7 @@
 | TASK-P1-006 | 收拢 `cmd/server tests` 命令语义 | P1 | CLI 小修+测试 | `cmd/server/*`、CLI 文档、状态文档 | `go test ./cmd/server -count=1`；`go test ./... -count=1` | 命令名、描述或行为与真实用途一致 | COMPLETED |
 | TASK-P1-007 | 完成 `pkg/*` 公共/内部分类 | P1 | 文档 | `ARCHITECTURE.md`、`MODULES.md`、包 README、状态文档 | `go test ./... -count=1` | [CONFIRMED] 每个 `pkg/*` 包定位已标注；破坏性重构仍需单独确认 | COMPLETED |
 | TASK-P1-008 | 标注 `pkg/sqlgen` 未实现能力 | P1 | 文档+测试或小修 | `pkg/sqlgen/*`、包 README、状态文档 | `go test ./pkg/sqlgen -count=1`；`go test ./... -count=1` | [CONFIRMED] TODO/unsupported 边界不再误导使用者 | COMPLETED |
-| TASK-P1-009 | 明确 `types/*` 契约边界 | P1 | 文档+测试或小修 | `types/**/*`、`ARCHITECTURE.md`、`MODULES.md`、`TEST_MATRIX.md`、`ACCEPTANCE.md`、`docs/specs/types_contract_boundary.md`、状态文档 | `go test ./types/... -count=1`；`go test ./... -count=1` | [CONFIRMED] `types/result` HTTP 契约、错误码预留和跨层类型边界已标注 | COMPLETED |
+| TASK-P1-009 | 明确 `types/*` 契约边界 | P1 | 文档+测试或小修 | `types/**/*`、`ARCHITECTURE.md`、`MODULES.md`、`TEST_MATRIX.md`、`ACCEPTANCE.md`、`docs/specs/types_contract_boundary.md`、状态文档 | `go test ./types/... -count=1`；`go test ./... -count=1` | [CONFIRMED] `types/result` HTTP 契约、错误码预留和跨层类型边界已标注；[ACCEPT] `types/*` 不再聚合 `pkg/*` 基础设施接口 | COMPLETED |
 | TASK-P1-010 | 收拢 `pkg/plugin` 被动注册边界 | P1 | API 小修+测试+文档 | `pkg/plugin/*`、包 README、架构/决策/状态文档 | `go test ./pkg/plugin -count=1`；`go test ./... -count=1` | [CONFIRMED] `pkg/plugin` 不主动注册插件服务，local/http 插件由插件服务显式注册 | COMPLETED |
 | TASK-P1-011 | 补首批无外部服务依赖 `pkg/*` 行为测试 | P1 | 测试 | `pkg/cli/**/*_test.go`、`pkg/i18n/**/*_test.go`、`pkg/yaml2go/**/*_test.go`、必要时限当前包实现文件、状态文档 | `go test ./pkg/cli ./pkg/i18n ./pkg/yaml2go -count=1`；`go test ./... -count=1` | [CONFIRMED] `pkg/cli`、`pkg/i18n`、`pkg/yaml2go` 均有最小行为测试且不依赖外部服务 | COMPLETED |
 | TASK-P1-012 | 补第二批 `pkg/*` 行为测试 | P1 | 测试 | `pkg/executor/**/*_test.go`、`pkg/httpserver/**/*_test.go`、`pkg/storage/**/*_test.go`、必要时限当前三包实现文件、状态文档 | `go test ./pkg/executor ./pkg/httpserver ./pkg/storage -count=1`；`go test ./... -count=1` | [CONFIRMED] `pkg/executor`、`pkg/httpserver`、`pkg/storage` 均有最小行为测试且不依赖外部服务 | COMPLETED |
@@ -104,6 +112,8 @@
 | TASK-P2-008 | 实现 `pkg/iam` 与 memory | P2 | 公共 API+测试 | `pkg/iam/**/*`、状态文档 | `go test ./pkg/iam/... -count=1` | [CONFIRMED] IAM 公共接口和内存实现完成 | COMPLETED |
 | TASK-P2-009 | 接入配置与应用组装 | P2 | 配置+app 组合 | `internal/config/**/*`、`internal/app/**/*`、相关公共包 | `go test ./internal/config ./internal/app/... -count=1` | [CONFIRMED] 默认 disabled、HTTP adapter、RemoteHook 和 IAM hook 接入完成 | COMPLETED |
 | TASK-P2-010 | reload、生命周期和最终验证 | P2 | app 生命周期+验证 | `internal/app/**/*`、状态文档 | `go test ./internal/config ./internal/app/... -count=1`；`go test ./... -count=1`；`go build -o <temp> ./cmd/server`；`git diff --check` | [CONFIRMED] reload/lifecycle/全量验证完成 | COMPLETED |
+| TASK-P2-011 | 配置环境变量动态前缀与 envname 注入 | P2 | 配置基础设施+测试+示例文档 | `internal/config/**/*`、`cmd/server/**/*`、配置示例、部署说明和状态文档 | `go test ./internal/config -count=1`；`go test ./cmd/server ./internal/app/... -count=1`；`go test ./... -count=1`；`git diff --check` | [CONFIRMED] `RIN_APP_*` 动态前缀、`envname` 自动覆盖和 `.env` 自动加载均完成 | COMPLETED |
+| TASK-P2-012 | 删除重复配置 env-name 常量 | P2 | 配置基础设施清理+测试 | `internal/config/constants.go`、`internal/config/manager_test.go`、状态文档 | env 常量 `rg` 扫描；`go test ./internal/config -count=1`；`go test ./cmd/server ./internal/app/... -count=1`；`go test ./... -count=1`；`git diff --check` | [CONFIRMED] 字段环境变量名由 `envname` 标签单一维护 | COMPLETED |
 
 ## 推荐执行顺序
 
@@ -127,6 +137,8 @@
 18. TASK-P2-003：实现手动远程部署 workflow。
 19. TASK-P2-004：补 Linux Docker production 部署制品。
 20. TASK-P2-005 至 TASK-P2-010：实现插件钩子运行时、HTTP 远程插件、IAM 公共接口和 app 组合层接入。
+21. TASK-P2-011：配置环境变量动态前缀与 `envname` 注入。
+22. TASK-P2-012：删除重复配置 env-name 常量。
 
 当前合法下一项：
 

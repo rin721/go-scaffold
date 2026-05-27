@@ -2,15 +2,13 @@ package config
 
 import (
 	"fmt"
-	"os"
-	"strconv"
 	"time"
 )
 
 type PluginConfig struct {
-	Enabled          bool                      `mapstructure:"enabled" json:"enabled" yaml:"enabled" toml:"enabled"`
-	DefaultTimeout   int                       `mapstructure:"default_timeout" json:"default_timeout" yaml:"default_timeout" toml:"default_timeout"`
-	MaxResponseBytes int64                     `mapstructure:"max_response_bytes" json:"max_response_bytes" yaml:"max_response_bytes" toml:"max_response_bytes"`
+	Enabled          bool                      `mapstructure:"enabled" envname:"PLUGIN_ENABLED" json:"enabled" yaml:"enabled" toml:"enabled"`
+	DefaultTimeout   int                       `mapstructure:"default_timeout" envname:"PLUGIN_DEFAULT_TIMEOUT" json:"default_timeout" yaml:"default_timeout" toml:"default_timeout"`
+	MaxResponseBytes int64                     `mapstructure:"max_response_bytes" envname:"PLUGIN_MAX_RESPONSE_BYTES" json:"max_response_bytes" yaml:"max_response_bytes" toml:"max_response_bytes"`
 	Plugins          []PluginDefinitionConfig  `mapstructure:"plugins" json:"plugins" yaml:"plugins" toml:"plugins"`
 	Hooks            []PluginHookBindingConfig `mapstructure:"hooks" json:"hooks" yaml:"hooks" toml:"hooks"`
 }
@@ -93,21 +91,7 @@ func (c *PluginConfig) DefaultTimeoutDuration() time.Duration {
 }
 
 func overridePluginConfig(cfg *PluginConfig) {
-	if val := os.Getenv(EnvPluginEnabled); val != "" {
-		if enabled, err := strconv.ParseBool(val); err == nil {
-			cfg.Enabled = enabled
-		}
-	}
-	if val := os.Getenv(EnvPluginDefaultTimeout); val != "" {
-		if timeout, err := strconv.Atoi(val); err == nil {
-			cfg.DefaultTimeout = timeout
-		}
-	}
-	if val := os.Getenv(EnvPluginMaxResponseBytes); val != "" {
-		if max, err := strconv.ParseInt(val, 10, 64); err == nil {
-			cfg.MaxResponseBytes = max
-		}
-	}
+	overrideConfigFromEnv(cfg)
 }
 
 func copyPluginDefinitions(src []PluginDefinitionConfig) []PluginDefinitionConfig {

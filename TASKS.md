@@ -1,11 +1,118 @@
 # TASKS.md
 
+## 最新补充任务
+
+### TASK-P2-013：新增配置文档说明
+
+- Status：COMPLETED
+- Time Slice：TS-P2-013
+- Source：用户要求“给我一份：新增配置文档说明”。
+- Priority：P2
+- Type：配置文档
+- Goal：新增一份可恢复的配置说明文档，明确配置文件入口、`.env` 自动加载、动态环境变量前缀、`envname` 单一事实源、常用变量和新增配置字段流程。
+- Allowed Files：
+  - `docs/configuration.md`
+  - `README.md`
+  - `docs/deployment.md`
+  - 项目状态、测试报告、验收、变更记录、问题记录和交接文档
+- Forbidden Files：
+  - Go 实现文件和测试文件
+  - 真实 `.env`、密钥、部署凭据、生产配置
+  - 数据库 schema、HTTP 路由、业务模块、生产迁移或远程服务器配置
+- Verification：
+  - `rg -n "配置文档说明|RIN_APP|RIN_CONFIG_PATH|envname|EnvDBHost|\\.env" docs\\configuration.md README.md docs\\deployment.md -S`：PASS
+  - `go test ./internal/config -count=1`：PASS
+  - `go test ./... -count=1`：PASS
+  - `git diff --check`：PASS，仅 Windows LF/CRLF 提示
+- Exit Conditions：
+  - [CONFIRMED] 新增 `docs/configuration.md`，覆盖配置入口、加载顺序、动态前缀和 `envname` 规则。
+  - [CONFIRMED] 文档明确不要恢复 `EnvDB*` / `EnvRedis*` / `EnvServer*` 等字段环境变量镜像常量。
+  - [CONFIRMED] README 和部署说明提供配置文档入口。
+  - [CONFIRMED] 本次仅变更文档和状态记录，不触碰生产 secrets 或运行部署。
+- Evidence：配置说明文档已新增并通过关键文本检索、配置包测试和全量回归。
+
 ## 当前合法任务
 
 - Task ID：NONE
 - Status：PENDING_USER_CONFIRMATION
 - Time Slice：NONE
-- Summary：[ACCEPT] 用户纠正当前项目仍未开发完整，不应发布第一版。`dev.tmp/new-plugin.md` 设计已完成，TASK-P2-004 的 Docker build 验证也已解除阻塞；这些只代表已确认切片完成，不代表项目整体完成或 v1 可发布。当前无自动下一实现任务；下一阶段开发范围或第一版发布验收清单需由用户重新确认。
+- Summary：[ACCEPT] 用户纠正 `internal/config` 中 `EnvDB*` / `EnvRedis*` 等 env-name 常量已无存在必要；TASK-P2-012 已删除重复常量，并把测试改为从配置结构体 `envname` 标签读取环境变量名。`dev.tmp/new-plugin.md` 设计和 TASK-P2-004 Docker build 验证保持完成；这些只代表已确认切片完成，不代表项目整体完成或 v1 可发布。当前无自动下一实现任务；下一阶段开发范围或第一版发布验收清单需由用户重新确认。
+
+## 最近用户修正任务
+
+### USER-CORRECTION-2026-05-27-CONFIG-ENV-CONSTANTS：删除重复配置 env-name 常量
+
+- Status：COMPLETED
+- Review Result：ACCEPT
+- User Intent：`EnvDBDriver`、`EnvDBHost` 等环境变量名常量在 `envname` 标签机制落地后已经没有存在必要。
+- Goal：删除 `internal/config/constants.go` 中按模块镜像字段环境变量名的常量，让 `envname` 标签成为配置字段环境变量名唯一事实源。
+- Allowed Files：
+  - `internal/config/constants.go`
+  - `internal/config/manager_test.go`
+  - 项目状态文档
+- Non-Goals：
+  - 不改变 `RIN_APP_*` 动态前缀策略。
+  - 不删除未加前缀 fallback 兼容行为。
+  - 不修改配置 schema、部署密钥、数据库 schema、HTTP 路由或业务模块。
+- Verification：
+  - `rg -n "Env(DB|Redis|Server|Log|I18n|CORS|InitDB|Executor|Storage|Plugin|IAM)" internal cmd types deploy docs .env.example Dockerfile -S`：PASS，无匹配
+  - `go test ./internal/config -count=1`：PASS
+  - `go test ./cmd/server ./internal/app/... -count=1`：PASS
+  - `go test ./... -count=1`：PASS
+  - `git diff --check`：PASS，仅有 Windows LF/CRLF 提示
+- Completion Evidence：
+  - `internal/config/constants.go` 仅保留动态前缀 helper、`.env` 文件名、分隔符和配置段名常量。
+  - `internal/config/manager_test.go` 通过 `taggedEnvName` 从结构体 `envname` 标签取字段环境变量名，不再依赖导出 env-name 常量。
+
+### USER-CORRECTION-2026-05-27-TYPES-APP-CONSTANTS：收拢 `types/constants` 应用常量
+
+- Status：COMPLETED
+- Review Result：ACCEPT
+- User Intent：在 `types` 将 `AppPrefix = "Rin"`，删除 `AppTestsCommandName`。
+- Goal：更新应用前缀常量，并让 `cmd/server tests` 命令名不再由 `types/constants` 暴露。
+- Allowed Files：
+  - `types/constants/**/*`
+  - `cmd/server/tests.go`
+  - `cmd/server/tests_test.go`
+  - 项目状态、验收、决策、测试报告、变更记录、问题记录和交接文档
+- Non-Goals：
+  - 不恢复 `types/*` 对 `pkg/*` 的聚合。
+  - 不修改 server/initdb 命令名、HTTP 路由、配置 schema 或数据库 schema。
+  - 不实现新 CLI 命令或新业务功能。
+- Verification：
+  - `go test ./types/... ./cmd/server -count=1`：PASS
+  - `go test ./... -count=1`：PASS
+- Completion Evidence：
+  - `types/constants.AppPrefix` 已改为 `Rin`。
+  - `types/constants.AppTestsCommandName` 已删除。
+  - `cmd/server` tests 命令名改为私有 `testsCommandName`。
+  - `types/constants/app_test.go` 固定应用常量。
+
+### USER-CORRECTION-2026-05-27-TYPES-LAYERING：收拢 `types/*` 应用层以上边界
+
+- Status：COMPLETED
+- Review Result：ACCEPT
+- User Intent：`types` 不能直接向 `pkg/crypto.Crypto` 提供别名和 `CacheInjectable` 接口；`types` 只能存在应用层以上的层级再定义。
+- Goal：移除 `types/*` 对 `pkg/*` 基础设施接口的直接聚合，并把边界写入可恢复文档和测试。
+- Allowed Files：
+  - `types/**/*`
+  - `pkg/executor/doc.go`
+  - `docs/specs/types_contract_boundary.md`
+  - 项目状态、验收、风险、决策、测试报告、变更记录、问题记录和交接文档
+- Non-Goals：
+  - 不移动 `types/*` 包。
+  - 不修改 HTTP router、middleware、demo handler、配置 schema 或数据库 schema。
+  - 不实现 auth/rbac 或其他新功能。
+- Verification：
+  - `go test ./types/... -count=1`：PASS
+  - `go test ./... -count=1`：PASS
+  - `git diff --check`：PASS，仅有 Windows LF/CRLF 提示
+- Completion Evidence：
+  - 删除 `types/interfaces.go`，移除 `Crypto` 类型别名和 `CacheInjectable`。
+  - `types/constants` executor pool 名称改为字符串常量，不再直接导入 `pkg/executor`。
+  - `types/import_boundary_test.go` 固定 `types/*` 不得直接导入 `pkg/*`。
+  - `pkg/executor/doc.go` 示例改为应用层常量包，不再反向要求 `types/constants` typed constants。
+  - 相关架构、模块、契约和状态文档已同步。
 
 ## 任务列表
 
@@ -377,9 +484,10 @@
 
 - Status：COMPLETED
 - Matrix：TM-P1-005、TM-P0-006
-- Goal：明确 `types/constants`、`types/errors`、`types/result` 和根 `types` 聚合入口的公共契约定位，尤其标注 `types/result` 属于 HTTP/Gin 响应契约而非纯类型包。
+- Goal：明确 `types/constants`、`types/errors`、`types/result` 和根 `types` 的公共契约定位，尤其标注 `types/result` 属于 HTTP/Gin 响应契约而非纯类型包；按 2026-05-27 用户修正，`types/*` 不得作为 `pkg/*` 基础设施聚合入口。
 - Source：
   - 用户选择 A。
+  - 2026-05-27 用户修正：`types` 包不能直接向 `pkg/crypto.Crypto` 提供别名和 `CacheInjectable` 接口；`types` 只能存在应用层以上的层级再定义。按该边界同步移除 `types/constants` 对 `pkg/executor` 的直接依赖。
   - `BL-021`：明确 `types/result` 是否属于 HTTP 契约。
   - `TM-P1-005`：`types/result`、错误码、跨层契约边界清晰。
 - Allowed Files：
@@ -404,13 +512,14 @@
 - Exit Conditions：
   - [CONFIRMED] `types/result` 的 HTTP/Gin 契约定位被文档化。
   - [CONFIRMED] `types/errors` 中 auth/rbac 预留错误码与当前未实现范围的关系被标注。
-  - [CONFIRMED] `types/constants` 和根 `types` 聚合入口的公共/跨层边界被标注。
+  - [CONFIRMED] `types/constants` 和根 `types` 的公共/跨层边界被标注，且 `types/*` 不再聚合 `pkg/*` 基础设施接口。
   - [CONFIRMED] 如新增或修改行为测试，相关 `types` 包测试和全量回归通过。
   - [CONFIRMED] 状态、测试报告、变更日志、风险、Backlog 和交接文档已更新。
 - Completion Evidence：
   - `types/result/result.go` 包注释已明确 `types/result` 是 HTTP API 响应契约，其中 Gin helper 属于 HTTP/Gin 适配层。
   - `types/doc.go`、`types/constants/doc.go`、`types/errors/doc.go` 已标注根 `types`、常量和错误码契约边界。
   - `docs/specs/types_contract_boundary.md` 已记录 `types/*` 包边界、依赖说明、auth/rbac 非目标和验收证据。
+  - 2026-05-27 已删除根 `types` 中的 `Crypto` 别名和 `CacheInjectable`，将 executor pool 名称改为字符串常量，并新增 `types/import_boundary_test.go` 固定 `types/*` 不得导入 `pkg/*` 基础设施包。
   - `types/result/result_test.go` 已覆盖响应结构、分页总页数、Gin helper 的 HTTP 状态码和错误码映射、trace id 提取。
   - `types/errors/error_test.go` 已覆盖 `BizError` 错误链和错误码分段。
   - `go test ./types/... -count=1` 和 `go test ./... -count=1` 均通过。
@@ -1306,6 +1415,51 @@
 - Verification：`go test ./internal/config ./internal/app/... -count=1`；`go test ./... -count=1`；`go build -o <temp> ./cmd/server`；`git diff --check`。
 - Exit Conditions：重载先构建新实例再替换，失败保留旧实例；关闭时 HTTP server 停止后、cache/database 前关闭插件管理器；最终状态和交接文档一致。
 - Evidence：reload 先构建新 IAM/plugin 基础设施再替换；关闭顺序已在 HTTP server 后、cache/database 前关闭插件管理器；目标包测试、全量回归、server build 和 diff 检查通过。
+
+### TASK-P2-011：配置环境变量动态前缀与 envname 注入
+
+- Status：COMPLETED
+- Time Slice：TS-P2-011
+- Source：用户要求分析 `internal/config`，结合 `app.AppPrefix` 自动注入环境变量，不固定环境变量前缀，并让配置实例字段使用 `envname` 配置环境变量。
+- Priority：P2
+- Type：配置基础设施 + 测试 + 示例文档
+- Goal：从 `types/constants.AppPrefix` 动态派生配置环境变量前缀，统一用 `envname` 标签覆盖配置字段，并保留 `.env` 自动加载能力。
+- Allowed Files：`internal/config/**/*`、`cmd/server/**/*`、`internal/app/**/*_test.go`、`.env.example`、`Dockerfile`、`deploy.sh`、`deploy/docker-compose.production.example.yml`、`docs/deployment.md`、项目状态文档。
+- Forbidden Files：真实 `.env`、密钥、部署凭据、数据库 schema、HTTP 路由、业务模块、生产迁移、远程服务器配置。
+- Verification：
+  - `go test ./internal/config -count=1`
+  - `go test ./cmd/server ./internal/app/... -count=1`
+  - `go test ./... -count=1`
+  - `git diff --check`
+- Exit Conditions：
+  - [CONFIRMED] `EnvPrefix()` 由 `AppPrefix=Rin` 派生为 `RIN_APP`，配置路径环境变量派生为 `RIN_CONFIG_PATH`。
+  - [CONFIRMED] 配置字段通过 `envname` 标签自动读取环境变量，优先级为动态前缀变量高于未加前缀 fallback。
+  - [CONFIRMED] 数据库、Redis、Server、Logger、I18n、InitDB、Executor、Storage、Plugin、IAM、CORS 的可覆盖字段已覆盖。
+  - [CONFIRMED] `Manager.Load` 与配置热重载路径均会加载 `.env` 并执行环境变量覆盖。
+  - [CONFIRMED] `.env.example`、production Compose 示例、Dockerfile 配置路径环境变量和部署说明已同步到 `RIN_APP_*` / `RIN_CONFIG_PATH`。
+- Evidence：新增 `internal/config/override_env.go` 反射覆盖实现，配置结构体补 `envname` 标签，目标包测试、cmd/app 相关测试和全量回归均通过。
+
+### TASK-P2-012：删除重复配置 env-name 常量
+
+- Status：COMPLETED
+- Time Slice：TS-P2-012
+- Source：用户指出 `EnvDBDriver`、`EnvDBHost` 等环境变量名常量在 `envname` 标签机制落地后已无存在必要。
+- Priority：P2
+- Type：配置基础设施清理 + 测试
+- Goal：删除 `internal/config/constants.go` 中按模块复制 `envname` 标签值的常量，避免环境变量名出现第二事实源。
+- Allowed Files：`internal/config/constants.go`、`internal/config/manager_test.go`、项目状态文档。
+- Forbidden Files：真实 `.env`、密钥、部署凭据、数据库 schema、HTTP 路由、业务模块、生产迁移、远程服务器配置。
+- Verification：
+  - `rg -n "Env(DB|Redis|Server|Log|I18n|CORS|InitDB|Executor|Storage|Plugin|IAM)" internal cmd types deploy docs .env.example Dockerfile -S`：PASS，无匹配
+  - `go test ./internal/config -count=1`：PASS
+  - `go test ./cmd/server ./internal/app/... -count=1`：PASS
+  - `go test ./... -count=1`：PASS
+  - `git diff --check`：PASS，仅有 Windows LF/CRLF 提示
+- Exit Conditions：
+  - [CONFIRMED] `EnvDB*`、`EnvRedis*`、`EnvServer*`、`EnvLog*`、`EnvI18n*`、`EnvCORS*`、`EnvInitDB*`、`EnvExecutor*`、`EnvStorage*`、`EnvPlugin*`、`EnvIAM*` 不再存在。
+  - [CONFIRMED] 配置测试从结构体 `envname` 标签读取环境变量名。
+  - [CONFIRMED] 动态前缀、未加前缀 fallback、`.env` 自动加载和 app/cmd 集成不回归。
+- Evidence：`internal/config/constants.go` 只保留动态前缀、`.env` 文件名、分隔符和配置段名；目标包测试、相关集成测试和全量回归均通过。
 
 ## 历史任务
 

@@ -1,10 +1,6 @@
 package config
 
-import (
-	"errors"
-	"os"
-	"strings"
-)
+import "errors"
 
 // I18nConfig 国际化配置
 // 支持多语言
@@ -12,18 +8,18 @@ type I18nConfig struct {
 	// Default 默认语言
 	// 当请求的语言不支持时使用
 	// 例如: en, zh-CN, ja
-	Default string `mapstructure:"default"`
+	Default string `mapstructure:"default" envname:"I18N_DEFAULT" json:"default" yaml:"default" toml:"default"`
 
 	// Supported 支持的语言列表
 	// 必须包含 Default 语言
 	// 例如: ["en", "zh-CN", "ja"]
-	Supported []string `mapstructure:"supported"`
+	Supported []string `mapstructure:"supported" envname:"I18N_SUPPORTED" json:"supported" yaml:"supported" toml:"supported"`
 
 	// MessagesDir 语言文件目录
 	// 包含所有语言的翻译文件
 	// 目录结构: MessagesDir/{lang}.yaml
 	// 例如: ./configs/locales/en.yaml, ./configs/locales/zh-CN.yaml
-	MessagesDir string `mapstructure:"messages_dir"`
+	MessagesDir string `mapstructure:"messages_dir" envname:"I18N_MESSAGES_DIR" json:"messages_dir" yaml:"messages_dir" toml:"messages_dir"`
 }
 
 func (c *I18nConfig) ValidateName() string {
@@ -66,26 +62,5 @@ func (c *I18nConfig) Validate() error {
 
 // overrideI18nConfig 使用环境变量覆盖国际化配置
 func overrideI18nConfig(cfg *I18nConfig) {
-	// Default
-	if val := os.Getenv(EnvI18nDefault); val != "" {
-		cfg.Default = val
-	}
-
-	// Supported
-	// 环境变量格式: "zh-CN,en-US,ja-JP"
-	// 解析为: ["zh-CN", "en-US", "ja-JP"]
-	if val := os.Getenv(EnvI18nSupported); val != "" {
-		langs := strings.Split(val, DefaultSeparator)
-		// 去除空白
-		var supported []string
-		for _, lang := range langs {
-			trimmed := strings.TrimSpace(lang)
-			if trimmed != "" {
-				supported = append(supported, trimmed)
-			}
-		}
-		if len(supported) > 0 {
-			cfg.Supported = supported
-		}
-	}
+	overrideConfigFromEnv(cfg)
 }

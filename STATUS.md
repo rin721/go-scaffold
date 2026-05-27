@@ -1,5 +1,12 @@
 # STATUS.md
 
+## 最新补充
+
+- 2026-05-27 已完成 TASK-P2-013 / TS-P2-013：新增 `docs/configuration.md` 配置文档说明，补充配置入口、`.env` 自动加载、`RIN_APP_*` 动态前缀、`RIN_CONFIG_PATH`、`envname` 单一事实源、常用变量和新增配置字段流程。
+- 已在 `README.md` 和 `docs/deployment.md` 增加配置文档入口；本次未修改 Go 实现、配置 schema、数据库 schema、真实 `.env`、部署凭据或生产配置。
+- 验证结果：配置文档关键约定 `rg` 检查通过，`go test ./internal/config -count=1` 通过，`go test ./... -count=1` 通过，`git diff --check` 通过（仅 Windows LF/CRLF 提示）。
+- 当前合法工作仍为 `NONE / NONE / PENDING_USER_CONFIRMATION`；项目整体仍为 `IN_DEVELOPMENT_NOT_RELEASE_READY`，不代表 v1 release-ready。
+
 ## 项目状态
 
 - 项目：go-scaffold
@@ -15,7 +22,7 @@
 - 当前任务 ID：NONE
 - 当前时间切片 ID：NONE
 - 当前状态：PENDING_USER_CONFIRMATION
-- 为什么这是当前唯一合法状态：[ACCEPT] 用户纠正当前项目“还未开发完整，半成品都算不上，不应该发布第一版”。TASK-P2-004 / TS-P2-004 的 Docker build 已由用户在 Linux Docker 环境补跑并通过：`docker build --build-arg GOPROXY=https://goproxy.cn,direct -t go-scaffold:local .`，BuildKit 输出 `23/23 FINISHED`，镜像标记为 `docker.io/library/go-scaffold:local`；这只证明 Docker 制品切片验证通过，不代表项目整体完成、可发布 v1 或已完成真实 production 上线。当前没有自动下一实现任务；后续必须先由用户确认新的开发范围或第一版发布验收清单，再拆分任务/时间切片。
+- 为什么这是当前唯一合法状态：[ACCEPT] 用户确认 `EnvDB*`、`EnvRedis*` 等环境变量名常量已无存在必要；本轮已完成 TASK-P2-012 / TS-P2-012，删除重复 env-name 常量并让测试从 `envname` 标签读取变量名。项目仍未达第一版发布条件；当前没有自动下一实现任务，后续必须先由用户确认新的开发范围或第一版发布验收清单，再拆分任务/时间切片。
 
 ## 阶段状态
 
@@ -30,7 +37,8 @@
 | 测试矩阵与任务拆分 | COMPLETED | `TEST_MATRIX.md` 已生成，`TASKS.md` 和 `TIME_SLICES.md` 已写入 P1 草案 |
 | P1 执行顺序确认 | COMPLETED | 用户再次发送“下一步”，按推荐默认顺序确认 |
 | 配置 copy/update 测试与修复 | COMPLETED | `internal/config/manager_test.go` 已新增，`copyConfig` 已修复 |
-| 配置环境变量策略收拢 | COMPLETED | `DB_*` 成为数据库主环境变量，`REI_APP_DB_*` 保留兼容 fallback；`.env.example` 与实现一致 |
+| 配置环境变量策略收拢 | COMPLETED | 历史 TASK-P1-002 曾收拢数据库 `DB_*` 策略；TASK-P2-011 已进一步升级为 `RIN_APP_*` 动态前缀主策略 |
+| 配置环境变量动态前缀 | COMPLETED | `internal/config` 已从 `types/constants.AppPrefix` 推导 `RIN_APP` 前缀，字段通过 `envname` 自动覆盖；TASK-P2-012 已删除 `EnvDB*` / `EnvRedis*` 等重复 env-name 常量，未加前缀变量保留兼容 fallback |
 | HTTP health/ready smoke test | COMPLETED | `internal/transport/http/router_test.go` 已覆盖 `/health`、`/ready` missing/failure/ready 路径 |
 | demo CRUD 测试基线 | COMPLETED | `internal/modules/demo/service/todo_test.go` 已用临时 SQLite 覆盖 Todo Create/List/Get/Update/Delete |
 | demo 迁移边界收拢 | COMPLETED | `DemoMigrationPolicyFor` 固定 server-start/initdb/reload 策略，reload 不再隐式执行 demo `AutoMigrate` |
@@ -40,7 +48,7 @@
 | Agent 基础设施补齐 | COMPLETED | `AGENTS.md`、`AGENT_RULES.md`、`SKILLS.md`、项目 skills、reports/specs 和跨工具目录已补齐 |
 | Agent 基础设施一致性修复 | COMPLETED | TASK-INFRA-002 已补齐实际缺失的 `AGENTS.md`，规范化 skills、模板和 `.agents` 适配器 |
 | Agent 状态一致性修复 | COMPLETED | TASK-INFRA-003 已生成状态诊断报告，并修复 TASK-P1-016/017 后背景文档中的旧待办表述 |
-| types/* 契约边界 | COMPLETED | TASK-P1-009 已补契约说明和最小测试，`go test ./types/... -count=1` 与全量回归通过 |
+| types/* 契约边界 | COMPLETED | TASK-P1-009 已补契约说明和最小测试；2026-05-27 用户修正 `types/*` 不得聚合 `pkg/*`，已移除 `Crypto` 别名、`CacheInjectable` 和 `types/constants` 对 `pkg/executor` 的直接依赖，并补导入边界测试；同日 `AppPrefix` 已改为 `Rin`，`AppTestsCommandName` 已删除 |
 | pkg/plugin 被动注册边界 | COMPLETED | TASK-P1-010 已移除 manager 主动配置加载/local factory 公共面，local/http 插件改为服务侧显式 `Register` |
 | pkg/* 行为测试首批 | COMPLETED | TASK-P1-011 已补 `pkg/cli`、`pkg/i18n`、`pkg/yaml2go` 最小行为测试，并修复新增测试暴露的 `pkg/yaml2go` 生成 tag/import 顺序缺陷 |
 | pkg/* 行为测试第二批 | COMPLETED | TASK-P1-012 已补 `pkg/executor`、`pkg/httpserver`、`pkg/storage` 最小行为测试，并修复新增测试暴露的 `pkg/executor` 错误包装与 panic handler 缺陷 |
@@ -71,13 +79,15 @@
 | FIND-005 | `cmd/server tests` 命令语义与行为不一致 | `MODULES.md` BC-004；TASK-P1-006 已改为真实 Go test 入口 | [CONFIRMED] 已处理 |
 | FIND-010 | `pkg/*` 公共/内部定位未逐包标记 | `ARCHITECTURE.md`、`MODULES.md`；TASK-P1-007 已完成分类 | [CONFIRMED] 已处理 |
 | FIND-011 | `pkg/sqlgen` TODO/unsupported 边界不清 | `pkg/sqlgen` README 和源码；TASK-P1-008 已显式返回 unsupported 或文档化 partial 能力 | [CONFIRMED] 已处理 |
-| FIND-012 | `types/result`、错误码和跨层类型边界待明确 | TASK-P1-009 已补 `docs/specs/types_contract_boundary.md`、package doc 和最小测试 | [CONFIRMED] 已处理 |
+| FIND-012 | `types/result`、错误码和跨层类型边界待明确 | TASK-P1-009 已补 `docs/specs/types_contract_boundary.md`、package doc 和最小测试；用户修正 `types` 只能存在应用层以上的层级再定义，不得直接聚合 `pkg/*` 基础设施接口 | [CONFIRMED] 已处理 |
 | FIND-013 | `pkg/plugin` 主动注册服务边界需收拢 | 用户修正；TASK-P1-010 已改为被动 registry/runtime | [CONFIRMED] 已处理 |
 | FIND-014 | 背景文档保留 TASK-P1-016 前旧状态 | `ARCHITECTURE.md`、`MODULES.md`、`PROJECT_BRIEF.md`、`ROADMAP.md`；TASK-INFRA-003 已修复 | [CONFIRMED] 已处理 |
 | FIND-015 | CI/CD 与部署缺少首个安全边界 | `REQ-OPT-P2-003`、`BL-007`、`BL-008`；用户选择 D | [CONFIRMED] TASK-P2-001 已处理非生产 CI 门禁和部署说明 |
 | FIND-016 | 真实 CD 自动化缺少环境与密钥决策 | `BL-024`；用户选择 C、确认远程部署，并确认使用 `.env` 风格配置和实现 workflow | [CONFIRMED] 手动 staging 远程部署 workflow 已补；镜像发布、production 和真实运行仍需单独确认 |
 | FIND-017 | production Docker 部署缺少可提交制品 | 用户要求“linux、docker、production -> 部署”；用户修正“环境变量在部署脚本上动态配置”；`BL-024` 剩余范围 | [CONFIRMED] 制品和统一 `deploy.sh` 入口已补；用户已在 Linux Docker 环境完成镜像构建验证，真实 production 运行仍不在当前会话执行 |
 | FIND-018 | 当前仓库未达第一版发布条件 | 用户纠正；`README.md` 当前仍说明仅保留基础设施启动链路和 demo CRUD，auth/rbac、生产迁移、镜像发布、真实 production 运行和完整产品验收均未完成 | [CONFIRMED] 不发布第一版；后续需先确认发布验收清单和剩余开发范围 |
+| FIND-019 | 配置环境变量前缀曾固定或分散 | 用户修正；`internal/config` 旧实现硬编码 `REI_APP` 且按模块手写覆盖 | [CONFIRMED] 已改为 `AppPrefix` 动态前缀 + `envname` 反射覆盖，`.env` 自动加载路径已测试 |
+| FIND-020 | 配置 env-name 常量与 `envname` 标签重复 | 用户修正；`EnvDB*`、`EnvRedis*`、`EnvServer*` 等常量在 `envname` 标签落地后成为第二事实源 | [CONFIRMED] 已删除重复常量；测试 helper 从配置结构体标签读取环境变量名 |
 | FIND-006 | P1 执行顺序尚未确认 | `TEST_MATRIX.md`、`RISK_REGISTER.md` RISK-009；用户再次发送“下一步” | [CONFIRMED] 已确认 |
 | FIND-007 | `AGENTS.md` 被状态文件声明已补齐但实际缺失 | `Test-Path AGENTS.md`、`docs/reports/status_diagnostics/2026-05-25-task-infra-002-agents-md-missing.md` | [CONFIRMED] 已修复 |
 | FIND-008 | `/health`、`/ready` 路由缺少 smoke test | `TEST_MATRIX.md` TM-P0-003；TASK-P1-003 已补测试 | [CONFIRMED] 已处理 |
@@ -106,6 +116,8 @@
 |---|---|---|---|
 | VERIFY-P2-004 | TASK-P2-004 | Dockerfile 镜像构建 | [CONFIRMED] 用户已在 Linux Docker 环境运行 `docker build --build-arg GOPROXY=https://goproxy.cn,direct -t go-scaffold:local .`，BuildKit 输出 `23/23 FINISHED`，镜像标记为 `docker.io/library/go-scaffold:local` |
 | VERIFY-P2-005 | TASK-P2-005 至 TASK-P2-010 | 插件钩子运行时、远程插件传输、IAM 公共接口和 app 装配 | [CONFIRMED] `go test ./pkg/plugin/... -count=1`；`go test ./pkg/iam/... -count=1`；`go test ./internal/config ./internal/app/... -count=1`；`go test ./... -count=1`；`go build -o <temp> ./cmd/server`；`git diff --check` |
+| VERIFY-P2-011 | TASK-P2-011 | 动态配置环境变量前缀、`envname` 覆盖、`.env` 自动加载和相关 app/cmd 集成 | [CONFIRMED] `go test ./internal/config -count=1`；`go test ./cmd/server ./internal/app/... -count=1`；`go test ./... -count=1`；`git diff --check` |
+| VERIFY-P2-012 | TASK-P2-012 | 删除重复 env-name 常量，确认 `envname` 标签是字段环境变量名唯一来源 | [CONFIRMED] `rg -n "Env(DB|Redis|Server|Log|I18n|CORS|InitDB|Executor|Storage|Plugin|IAM)" internal cmd types deploy docs .env.example Dockerfile -S` 无匹配；`go test ./internal/config -count=1`；`go test ./cmd/server ./internal/app/... -count=1`；`go test ./... -count=1`；`git diff --check` |
 
 ## 需要返工
 
@@ -115,11 +127,11 @@
 
 ## 最近执行
 
-- 摘要：接受用户纠正：当前项目仍在开发中，不能发布第一版；Docker build 通过只作为 TASK-P2-004 切片完成证据。
-- 变更文件：项目状态、验收、风险、决策、测试报告、变更记录、问题记录和交接文档。
-- 执行命令：必读文件读取；用户纠正审查；用户远端 Docker build 输出审查；`git diff --check`。
-- 测试结果：本轮仅更新文档，未修改 Go 代码，未运行 Go 测试；Docker build 既有证据保持 PASS。
-- 完成判断：TASK-P2-004 至 TASK-P2-010 的切片完成判断保持；项目整体状态改为 `IN_DEVELOPMENT_NOT_RELEASE_READY`，当前等待用户确认下一阶段范围或第一版发布验收清单。
+- 摘要：接受用户修正：`internal/config` 不再保留 `EnvDB*`、`EnvRedis*`、`EnvServer*` 等重复 env-name 常量；字段环境变量名统一由配置结构体 `envname` 标签声明。
+- 变更文件：`internal/config/constants.go`、`internal/config/manager_test.go` 和项目状态文档。
+- 执行命令：必读文件读取；用户纠正审查；`gofmt -w internal/config/constants.go internal/config/manager_test.go`；`rg -n "Env(DB|Redis|Server|Log|I18n|CORS|InitDB|Executor|Storage|Plugin|IAM)" internal cmd types deploy docs .env.example Dockerfile -S`；`go test ./internal/config -count=1`；`go test ./cmd/server ./internal/app/... -count=1`；`go test ./... -count=1`；`git diff --check`。
+- 测试结果：重复常量引用扫描无匹配；目标包测试、cmd/app 相关测试和全量回归均通过。
+- 完成判断：TASK-P2-012 / TS-P2-012 完成；TASK-P2-011 的动态前缀实现保持完成；项目整体仍为 `IN_DEVELOPMENT_NOT_RELEASE_READY`，当前等待用户确认下一阶段范围或第一版发布验收清单。
 
 ## 下一步
 

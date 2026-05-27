@@ -24,6 +24,8 @@
 - [CONFIRMED] 优先建立稳定项目事实、状态、风险、验收和路线图，再进入任何代码优化。
 - [CONFIRMED] 后续每个代码优化必须映射到已确认需求、架构边界、任务和时间切片。
 - [ACCEPT] 当前项目未达第一版发布条件；发布 v1 前必须另行确认完整功能范围、质量门禁、真实环境验证、迁移和安全边界。
+- [ACCEPT] `types/*` 不得直接为 `pkg/*` 基础设施提供别名、注入接口或 typed constants；`types` 只能承载应用层以上确认过的跨层契约。
+- [ACCEPT_WITH_RISK] `internal/config` 环境变量覆盖必须从 `AppPrefix` 动态派生前缀，不再固定 `REI_APP`；配置字段使用 `envname` 标签声明环境变量名，并自动加载 `.env`。`EnvDB*` / `EnvRedis*` 等重复 env-name 常量已删除，不再作为字段命名来源。
 
 ## P0 需求
 
@@ -55,6 +57,7 @@
 | REQ-OPT-P2-004 | 性能基准测试 | 需先完成测试矩阵和功能边界收拢 | [DEFERRED] |
 | REQ-OPT-P2-005 | 脚手架生成器 | 需先确认框架化抽取路线 | [DEFERRED] |
 | REQ-OPT-P2-006 | 插件钩子运行时、HTTP 远程插件传输和 IAM 公共接口 | 用户确认 `dev.tmp/new-plugin.md` 设计；本轮仅实现公共基础设施接口、内存 IAM 和 app 组合层接入，不实现完整业务登录/RBAC | [CONFIRMED] |
+| REQ-OPT-P2-007 | 配置环境变量动态前缀与字段标签覆盖 | 用户要求 `internal/config` 结合 `AppPrefix` 自动注入环境变量，并使用 `envname` 配置字段环境变量名；已实现 `RIN_APP_*` 动态前缀、未加前缀 fallback 和 `.env` 自动加载测试；重复 env-name 常量已删除，字段名以 `envname` 标签为唯一事实源 | [CONFIRMED] |
 
 ## 非需求
 
@@ -63,6 +66,7 @@
 - [CONFIRMED] 当前不发布第一版、不创建 v1 release、不宣称 release-ready。
 - [CONFIRMED] 当前不删除插件系统历史记录。
 - [CONFIRMED] 当前不实现 JWT 中间件、数据库版权限、OPA/Casbin、Go `.so` 插件、插件发现、RPC/WS 传输、镜像发布、真实生产部署或密钥管理。
+- [CONFIRMED] `types/*` 不作为 `pkg/*` 基础设施聚合入口；缓存、加密和 executor 等接口不通过 `types` 重新导出或直接依赖。
 
 ## 完成判断
 

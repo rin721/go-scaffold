@@ -1,9 +1,6 @@
 package config
 
-import (
-	"errors"
-	"os"
-)
+import "errors"
 
 // Config 保存日志配置
 // 包含日志库初始化所需的所有参数
@@ -15,7 +12,7 @@ type LoggerConfig struct {
 	// 例如:如果设置为 info,debug 日志不会输出
 	// 开发环境推荐: debug
 	// 生产环境推荐: info 或 warn
-	Level string `mapstructure:"level"`
+	Level string `mapstructure:"level" envname:"LOG_LEVEL"`
 
 	// Format 默认输出格式(用于所有输出)
 	// 可选值:
@@ -24,19 +21,19 @@ type LoggerConfig struct {
 	// 如果设置了 ConsoleFormat 或 FileFormat,则此字段作为后备默认值
 	// 生产环境推荐: json(便于 ELK、Splunk 等系统分析)
 	// 开发环境推荐: console(易读)
-	Format string `mapstructure:"format"`
+	Format string `mapstructure:"format" envname:"LOG_FORMAT"`
 
 	// ConsoleFormat 控制台输出专用格式(可选)
 	// 可选值: json, console
 	// 如果为空,则使用 Format 的值
 	// 使用场景: 希望控制台用易读的 console 格式,文件用 json 格式
-	ConsoleFormat string `mapstructure:"console_format"`
+	ConsoleFormat string `mapstructure:"console_format" envname:"LOG_CONSOLE_FORMAT"`
 
 	// FileFormat 文件输出专用格式(可选)
 	// 可选值: json, console
 	// 如果为空,则使用 Format 的值
 	// 使用场景: 希望控制台用 console 格式,文件用 json 格式
-	FileFormat string `mapstructure:"file_format"`
+	FileFormat string `mapstructure:"file_format" envname:"LOG_FILE_FORMAT"`
 
 	// Output 输出目标
 	// 可选值:
@@ -47,7 +44,7 @@ type LoggerConfig struct {
 	// - 容器/K8s 环境: stdout
 	// - 传统部署: file
 	// - 开发环境: both
-	Output string `mapstructure:"output"`
+	Output string `mapstructure:"output" envname:"LOG_OUTPUT"`
 
 	// FilePath 日志文件路径
 	// 仅当 Output="file" 或 Output="both" 时有效
@@ -55,14 +52,14 @@ type LoggerConfig struct {
 	// 注意:
 	// - 确保目录存在且有写权限
 	// - 建议使用绝对路径
-	FilePath string `mapstructure:"file_path"`
+	FilePath string `mapstructure:"file_path" envname:"LOG_FILE_PATH"`
 
 	// MaxSize 单个日志文件的最大大小(MB)
 	// 超过此大小会触发日志轮转
 	// 推荐值: 100-500 MB
 	// 设置过大:单个文件难以处理
 	// 设置过小:文件过多
-	MaxSize int `mapstructure:"max_size"`
+	MaxSize int `mapstructure:"max_size" envname:"LOG_MAX_SIZE"`
 
 	// MaxBackups 保留的旧日志文件最大数量
 	// 超过此数量的旧文件会被删除
@@ -70,7 +67,7 @@ type LoggerConfig struct {
 	// 用途:
 	// - 防止日志占满磁盘
 	// - 保留足够的历史日志用于问题排查
-	MaxBackups int `mapstructure:"max_backups"`
+	MaxBackups int `mapstructure:"max_backups" envname:"LOG_MAX_BACKUPS"`
 
 	// MaxAge 保留旧日志文件的最大天数
 	// 超过此天数的日志文件会被删除
@@ -79,7 +76,7 @@ type LoggerConfig struct {
 	// - 法规要求(某些行业要求保留审计日志)
 	// - 磁盘空间
 	// - 问题排查需求
-	MaxAge int `mapstructure:"max_age"`
+	MaxAge int `mapstructure:"max_age" envname:"LOG_MAX_AGE"`
 }
 
 func (c *LoggerConfig) ValidateName() string {
@@ -116,18 +113,5 @@ func (c *LoggerConfig) Validate() error {
 
 // overrideLoggerConfig 使用环境变量覆盖日志配置
 func overrideLoggerConfig(cfg *LoggerConfig) {
-	// Level
-	if val := os.Getenv(EnvLogLevel); val != "" {
-		cfg.Level = val
-	}
-
-	// Format
-	if val := os.Getenv(EnvLogFormat); val != "" {
-		cfg.Format = val
-	}
-
-	// Output
-	if val := os.Getenv(EnvLogOutput); val != "" {
-		cfg.Output = val
-	}
+	overrideConfigFromEnv(cfg)
 }

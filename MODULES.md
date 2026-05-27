@@ -26,7 +26,7 @@ types/*
 - [CONFIRMED] `internal/app` 是组合根，负责初始化、模式构建、热重载和生命周期。
 - [CONFIRMED] `internal/modules/demo` 是当前唯一业务示例模块。
 - [CONFIRMED] `pkg/*` 采用混合 API 策略，已逐包标注公共 API、内部支撑或待确认。
-- [CONFIRMED] `types/*` 当前承载常量、错误码、响应类型和少量类型别名。
+- [CONFIRMED] `types/*` 当前承载应用层以上常量、错误码和 HTTP 响应契约，不聚合 `pkg/*` 基础设施接口。
 
 ## 模块总览
 
@@ -39,7 +39,7 @@ types/*
 | `internal/transport/http` | Gin router、health/ready、demo API 注册 | 传输层 | health/ready smoke test、demo HTTP 集成测试和 app 装配级 server/initdb 测试已补 | 真实 HTTP server 启动仍非当前测试目标 |
 | `internal/modules/demo` | Todo 示例业务模块 | 标准示例模块 | service/repository CRUD 基线和 handler/router HTTP 集成已补 | 示例与生产约束需继续保持分离 |
 | `pkg/*` | 可复用基础设施、公共工具和内部支撑工具 | 混合 API | 主要公共包与内部支撑路径已有最小测试 | [CONFIRMED] TASK-P1-017 已完成第一阶段包 README 中文化 |
-| `types/*` | 公共常量、错误码、HTTP 响应结构、类型别名 | 跨层契约和 HTTP/Gin 响应契约 | `types/constants`、`types/errors`、`types/result` 有测试 | auth 错误码仅为预留契约，auth/rbac 不在当前功能范围 |
+| `types/*` | 应用层以上常量、错误码、HTTP 响应结构 | 跨层契约和 HTTP/Gin 响应契约 | `types/constants`、`types/errors`、`types/result` 有测试 | auth 错误码仅为预留契约，auth/rbac 不在当前功能范围；`types/*` 不聚合 `pkg/*` 基础设施接口 |
 
 ## `cmd/server`
 
@@ -53,7 +53,7 @@ types/*
 ### 优势
 
 - [CONFIRMED] 入口职责整体较薄，主要负责 CLI、配置路径和信号。
-- [CONFIRMED] 配置路径可通过 `--config` 或 `REI_CONFIG_PATH` 指定。
+- [CONFIRMED] 配置路径可通过 `--config` 或动态派生的 `RIN_CONFIG_PATH` 指定。
 
 ### 问题和风险
 
@@ -111,15 +111,15 @@ types/*
 ### 问题和风险
 
 - [CONFIRMED] `manager.copyConfig` 字段覆盖问题已在 TASK-P1-001 修复并补测试。
-- [CONFIRMED] 数据库环境变量策略已在 TASK-P1-002 收拢为 `DB_*` 优先，旧 `REI_APP_DB_*` 作为兼容 fallback。
-- [CONFIRMED] `.env.example` 已移除未实现 JWT 示例，并与实际环境变量覆盖策略对齐。
+- [CONFIRMED] 数据库环境变量策略曾在 TASK-P1-002 收拢为 `DB_*` 优先；TASK-P2-011 已进一步改为由 `AppPrefix` 动态派生 `RIN_APP_*` 主前缀，未加前缀变量作为兼容 fallback；TASK-P2-012 已删除重复 env-name 常量。
+- [CONFIRMED] `.env.example` 已移除未实现 JWT 示例，并与 `RIN_APP_*` 动态环境变量覆盖策略对齐。
 - [CONFIRMED] 配置 reload 路径已由 TASK-P1-016 使用 fake 组件覆盖分发、关闭配置和 database reload 不隐式迁移。
 
 ### 优化候选
 
 - [CONFIRMED] 统一环境变量命名策略，并同步 `.env.example`。
 - [CONFIRMED] 修复并测试 `copyConfig`，确保热更新不会丢字段。
-- [CONFIRMED] 清理重复 database override 行为，共用同一覆盖实现。
+- [CONFIRMED] 清理重复 database override 行为和重复 env-name 常量，共用 `envname` 标签驱动的动态前缀覆盖实现。
 - [DEFERRED] 增加配置加载、环境覆盖、无效变更回滚测试。
 
 ## `internal/middleware`
@@ -220,12 +220,13 @@ types/*
 
 | 包 | 当前职责 | 风险 |
 |---|---|---|
-| `types/constants` | 应用名、命令名、超时、executor 池名等常量 | 与 `pkg/executor` 有依赖，属于跨层公共常量 |
+| `types/constants` | 应用名、命令名、超时、executor 池名等字符串常量 | 属于应用层以上公共常量，不直接依赖 `pkg/executor` |
 | `types/errors` | 应用错误码和 `BizError` | auth/rbac 未实现，认证/授权错误码只是预留契约 |
 | `types/result` | JSON 响应结构、Gin 响应 helper、分页结构、trace id 错误响应 | 依赖 Gin，属于 HTTP API 响应契约而不是纯类型包 |
-| `types` | `Crypto` 类型别名、`CacheInjectable` 接口 | 依赖 `pkg/cache`、`pkg/crypto`，是有限聚合入口 |
+| `types` | 应用层以上契约说明入口 | 不再提供 `pkg/crypto.Crypto` 别名或依赖 `pkg/cache.Cache` 的 `CacheInjectable`；根包不得作为 `pkg/*` 基础设施聚合入口 |
 
 - [CONFIRMED] TASK-P1-009 已完成 `types/*` 契约边界标注，详见 `docs/specs/types_contract_boundary.md`。
+- [ACCEPT] 用户修正根 `types` 分层：`types` 只能承载应用层以上确认过的跨层契约，缓存/加密等基础设施接口应由应用层显式依赖对应 `pkg/*` 包或在应用层以上另行定义。
 
 ## `pkg/plugin` 注册边界
 
@@ -239,7 +240,7 @@ types/*
 
 | ID | 冲突 | 影响 | 建议 |
 |---|---|---|---|
-| BC-001 | `.env.example` 使用 `DB_*`，数据库 override 使用 `REI_APP_DB_*` | 环境变量文档与实现不一致 | [CONFIRMED] TASK-P1-002 已统一为 `DB_*` 优先，旧前缀兼容 |
+| BC-001 | 环境变量文档与实现曾在 `DB_*`、固定 `REI_APP_*`、模块手写 override 和重复 env-name 常量间漂移 | 配置覆盖可能在本地、部署和 reload 路径表现不一致 | [CONFIRMED] TASK-P2-011 已统一为 `AppPrefix` 动态前缀 + `envname` 标签；TASK-P2-012 已删除重复常量；未加前缀变量兼容 |
 | BC-002 | `copyConfig` 未覆盖完整配置字段 | 配置 Update/热更新可能丢字段 | [CONFIRMED] TASK-P1-001 已修复并补测试 |
 | BC-003 | demo schema 在 server/initdb/reload 路径自动迁移 | dev/prod 迁移职责混乱 | [CONFIRMED] TASK-P1-005 已明确 server-start/initdb 执行、reload 跳过 |
 | BC-004 | `cmd/server tests` 不运行测试 | CLI 语义误导 | [CONFIRMED] TASK-P1-006 已改为真实测试入口 |

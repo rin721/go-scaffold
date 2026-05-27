@@ -1,42 +1,76 @@
 # TEST_REPORT.md
 
 ## 最新验证
+- 日期：2026-05-27
+- 任务 ID：TASK-P2-013
+- 时间切片 ID：TS-P2-013
+- 状态：COMPLETED
+- 范围：新增配置文档说明，记录配置入口、`.env` 自动加载、`RIN_APP_*` 动态前缀、`RIN_CONFIG_PATH`、`envname` 单一事实源、常用变量和新增配置字段流程。
+
+## 执行命令
+
+| 命令 | 结果 | 备注 |
+|---|---|---|
+| 必读文件读取 | PASS | 已读取 Agent 规则、状态、任务、切片、需求、架构、验收、问题、测试报告和交接文档 |
+| `rg -n "配置文档说明|RIN_APP|RIN_CONFIG_PATH|envname|EnvDBHost|\\.env" docs\\configuration.md README.md docs\\deployment.md -S` | PASS | 新文档和入口能检索到关键配置约定 |
+| `go test ./internal/config -count=1` | PASS | 配置包动态前缀、`envname`、fallback 和 `.env` 自动加载既有测试保持通过 |
+| `go test ./... -count=1` | PASS | 全量回归通过 |
+| `git diff --check` | PASS | 仅输出 Windows LF/CRLF 提示，无空白错误 |
+
+## 结果
+
+- [CONFIRMED] `docs/configuration.md` 已新增。
+- [CONFIRMED] README 和 `docs/deployment.md` 已提供配置文档入口。
+- [CONFIRMED] 本次未修改 Go 实现、真实 `.env`、密钥、数据库 schema、HTTP 路由、业务模块或生产部署配置。
+- [CONFIRMED] 项目整体仍为 `IN_DEVELOPMENT_NOT_RELEASE_READY`。
+
+## 最新验证
 
 - 日期：2026-05-27
-- 任务 ID：USER-CORRECTION-2026-05-27-RELEASE-READINESS
-- 时间切片 ID：N/A
+- 任务 ID：TASK-P2-012
+- 时间切片 ID：TS-P2-012
 - 状态：COMPLETED
-- 范围：接受用户纠正，明确当前项目仍未达第一版发布条件；保留 TASK-P2-004 Docker build 通过证据，但不把它解释为 v1 release-ready。
+- 范围：接受用户修正，删除 `internal/config` 中重复维护 `envname` 标签值的字段环境变量名常量，并确认动态前缀、fallback、`.env` 自动加载和相关集成不回归。
 
 ## 执行命令
 
 | 命令 | 结果 | 备注 |
 |---|---|---|
 | 必读文件读取 | PASS | 已读取 `AGENTS.md`、Agent 规则、状态、任务、切片、需求、架构、验收、问题、测试报告、交接和恢复所需背景文件 |
-| 用户纠正审查 | ACCEPT | 用户意图为撤销“可发布第一版/项目整体完成”的误读；本轮按用户修正规程更新文档状态 |
-| 用户 Linux `docker build --build-arg GOPROXY=https://goproxy.cn,direct -t go-scaffold:local .` 输出审查 | PASS_REMOTE | BuildKit 输出 `23/23 FINISHED`；`go mod download`、`go build`、runtime image copy 和 export 均完成；镜像标记为 `docker.io/library/go-scaffold:local` |
-| Go 测试 | NOT_RUN | 本轮仅更新文档和状态，未修改 Go 代码；此前 TASK-P2-004 至 TASK-P2-010 的相关验证已通过 |
+| 用户纠正审查 | ACCEPT | `envname` 标签已是字段环境变量名来源，重复常量删除可降低漂移风险 |
+| `gofmt -w internal/config/constants.go internal/config/manager_test.go` | PASS | 配置常量和测试文件已格式化 |
+| `rg -n "Env(DB|Redis|Server|Log|I18n|CORS|InitDB|Executor|Storage|Plugin|IAM)" internal cmd types deploy docs .env.example Dockerfile -S` | PASS | 无匹配，重复 env-name 常量和引用已清除 |
+| `go test ./internal/config -count=1` | PASS | 标签驱动 env-name 测试、动态前缀、未加前缀 fallback 和 `.env` 自动加载测试通过 |
+| `go test ./cmd/server ./internal/app/... -count=1` | PASS | CLI 配置路径动态环境变量和 app 初始化/reload 相关测试通过 |
+| `go test ./... -count=1` | PASS | 全量回归通过 |
 | `git diff --check` | PASS | 仅输出 Windows LF/CRLF 提示，不存在空白错误 |
 
 ## 结果
 
-- [ACCEPT] 当前项目仍未开发完整，不应发布第一版。
-- [CONFIRMED] TASK-P2-004 的 Docker build 验证已通过，阻塞解除；该证据仅覆盖 Docker 制品切片。
-- [CONFIRMED] 用户 Linux 构建使用更新后的 Dockerfile 和 `GOPROXY=https://goproxy.cn,direct`，构建 214.8s 完成，镜像 sha256 为 `4df5520bcf1c45a922be8db2e6c5e58ae8fc025f34bea5f1d4bf33f0b2301785`。
-- [CONFIRMED] 当前本机会话仍未执行 Docker build；完成判断基于用户提供的 Linux Docker 构建输出。
-- [CONFIRMED] TASK-P2-005 至 TASK-P2-010 的插件/IAM 主线保持完成，不受本轮 Docker 环境阻塞影响。
+- [ACCEPT] `EnvDB*`、`EnvRedis*`、`EnvServer*`、`EnvLog*`、`EnvI18n*`、`EnvCORS*`、`EnvInitDB*`、`EnvExecutor*`、`EnvStorage*`、`EnvPlugin*`、`EnvIAM*` 已删除。
+- [CONFIRMED] `internal/config/constants.go` 仅保留动态前缀 helper、`.env` 文件名、分隔符和配置段名常量。
+- [CONFIRMED] `internal/config/manager_test.go` 通过 `taggedEnvName` 从结构体 `envname` 标签读取环境变量名。
+- [CONFIRMED] 动态前缀变量优先、未加前缀 fallback、`.env` 自动加载、cmd/app 相关集成和全量回归不回归。
 
 ## 失败项
 
 - 无代码失败项。
-- 当前任务无未关闭阻塞项；第一版发布被 `RISK-022` 阻塞。真实 production 运行、镜像发布流水线、生产迁移框架、完整 auth/rbac、密钥管理和发布验收清单仍不属于已完成范围。
+- 当前任务无未关闭阻塞项；第一版发布仍被 `RISK-022` 阻塞，不受本次配置环境变量修正影响。
 
 ## 验证结论
 
-- TASK-P2-004 / TS-P2-004 完成判定保持：`COMPLETED`。
-- TASK-P2-005 至 TASK-P2-010 完成判定保持：`COMPLETED`。
-- 项目整体状态修正为 `IN_DEVELOPMENT_NOT_RELEASE_READY`。
+- TASK-P2-012 / TS-P2-012 完成，配置 env-name 常量重复事实源已删除。
+- TASK-P2-011 / TS-P2-011 保持完成，配置环境变量动态前缀与 `envname` 注入仍通过回归验证。
+- TASK-P2-004 至 TASK-P2-010 完成判定保持：`COMPLETED`。
+- 项目整体状态保持 `IN_DEVELOPMENT_NOT_RELEASE_READY`。
 - 当前无自动下一实现任务；后续开发范围或第一版发布验收清单需用户重新确认。
+
+### 2026-05-27 USER-CORRECTION-2026-05-27-TYPES-APP-CONSTANTS
+
+- `types/constants.AppPrefix` 改为 `Rin`，`types/constants.AppTestsCommandName` 已删除。
+- `cmd/server` tests 命令名改为私有 `testsCommandName`，不再依赖 `types/constants`。
+- `go test ./types/... ./cmd/server -count=1`：PASS。
+- `go test ./... -count=1`：PASS。
 
 ### 2026-05-27 TASK-P2-004 Docker build completed
 
@@ -55,6 +89,15 @@
 - 结论：TASK-P2-004 / TS-P2-004 保持 `BLOCKED`，`ISSUE-P2-005` 保持 OPEN，待 Docker 环境重跑构建。
 
 ## 历史报告
+
+### 2026-05-27 USER-CORRECTION-2026-05-27-TYPES-LAYERING
+
+- 范围：接受用户纠正，`types/*` 不得直接聚合 `pkg/*` 基础设施接口；根 `types` 不得直接为 `pkg/crypto.Crypto` 提供别名，也不得定义依赖 `pkg/cache.Cache` 的 `CacheInjectable`；`types/constants` 不得直接依赖 `pkg/executor`。
+- `gofmt -w types/doc.go types/constants/executor.go types/constants/executor_test.go types/import_boundary_test.go`：PASS。
+- `go test ./types/... -count=1`：PASS。
+- `go test ./... -count=1`：PASS。
+- `git diff --check`：PASS，仅输出 Windows LF/CRLF 提示。
+- 结论：`types` 分层修正完成，TASK-P1-009 的 `types/*` 边界说明已同步为“不聚合 `pkg/*` 基础设施接口”。
 
 ### 2026-05-27 TASK-P2-004 TS-P2-004 blocked recheck
 

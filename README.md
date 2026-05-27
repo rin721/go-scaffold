@@ -1,5 +1,7 @@
 # go-scaffold
 
+配置加载、动态环境变量前缀和 `envname` 字段约定见 [`docs/configuration.md`](docs/configuration.md)。
+
 当前阶段只保留基础设施启动链路和一个 demo CRUD 示例，暂不实现 auth/rbac。
 
 注意：当前项目仍在开发中，未达第一版发布条件；Docker 构建、部署示例和 CI 门禁只是阶段性制品，不代表 v1 可发布。

@@ -1,15 +1,11 @@
 package config
 
-import (
-	"fmt"
-	"os"
-	"strconv"
-)
+import "fmt"
 
 type IAMConfig struct {
-	Enabled     bool              `mapstructure:"enabled" json:"enabled" yaml:"enabled" toml:"enabled"`
-	Mode        string            `mapstructure:"mode" json:"mode" yaml:"mode" toml:"mode"`
-	DefaultDeny *bool             `mapstructure:"default_deny" json:"default_deny" yaml:"default_deny" toml:"default_deny"`
+	Enabled     bool              `mapstructure:"enabled" envname:"IAM_ENABLED" json:"enabled" yaml:"enabled" toml:"enabled"`
+	Mode        string            `mapstructure:"mode" envname:"IAM_MODE" json:"mode" yaml:"mode" toml:"mode"`
+	DefaultDeny *bool             `mapstructure:"default_deny" envname:"IAM_DEFAULT_DENY" json:"default_deny" yaml:"default_deny" toml:"default_deny"`
 	Tokens      []IAMTokenConfig  `mapstructure:"tokens" json:"tokens" yaml:"tokens" toml:"tokens"`
 	Policies    []IAMPolicyConfig `mapstructure:"policies" json:"policies" yaml:"policies" toml:"policies"`
 }
@@ -79,19 +75,7 @@ func (c *IAMConfig) DefaultDenyEnabled() bool {
 }
 
 func overrideIAMConfig(cfg *IAMConfig) {
-	if val := os.Getenv(EnvIAMEnabled); val != "" {
-		if enabled, err := strconv.ParseBool(val); err == nil {
-			cfg.Enabled = enabled
-		}
-	}
-	if val := os.Getenv(EnvIAMMode); val != "" {
-		cfg.Mode = val
-	}
-	if val := os.Getenv(EnvIAMDefaultDeny); val != "" {
-		if defaultDeny, err := strconv.ParseBool(val); err == nil {
-			cfg.DefaultDeny = &defaultDeny
-		}
-	}
+	overrideConfigFromEnv(cfg)
 }
 
 func copyIAMTokens(src []IAMTokenConfig) []IAMTokenConfig {

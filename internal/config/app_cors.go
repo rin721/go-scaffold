@@ -1,11 +1,6 @@
 package config
 
-import (
-	"fmt"
-	"os"
-	"strconv"
-	"strings"
-)
+import "fmt"
 
 // CORSConfig 跨域资源共享(CORS)配置
 // 控制浏览器跨域访问策略
@@ -14,7 +9,7 @@ type CORSConfig struct {
 	// true: 启用跨域支持
 	// false: 禁用(所有跨域请求将被浏览器阻止)
 	// 开发环境通常启用,生产环境根据需求决定
-	Enabled bool `mapstructure:"enabled" json:"enabled" yaml:"enabled" toml:"enabled"`
+	Enabled bool `mapstructure:"enabled" envname:"CORS_ENABLED" json:"enabled" yaml:"enabled" toml:"enabled"`
 
 	// AllowOrigins 允许的源列表
 	// 指定哪些域名可以跨域访问
@@ -23,14 +18,14 @@ type CORSConfig struct {
 	//   - 通配符: "*" (允许所有源,不安全,仅开发环境使用)
 	// 示例: ["http://localhost:3000", "https://example.com"]
 	// 安全建议: 生产环境必须明确列出允许的域名,禁止使用通配符
-	AllowOrigins []string `mapstructure:"allow_origins" json:"allow_origins" yaml:"allow_origins" toml:"allow_origins"`
+	AllowOrigins []string `mapstructure:"allow_origins" envname:"CORS_ALLOW_ORIGINS" json:"allow_origins" yaml:"allow_origins" toml:"allow_origins"`
 
 	// AllowMethods 允许的 HTTP 方法
 	// 指定跨域请求允许使用的 HTTP 方法
 	// 常用方法: GET, POST, PUT, DELETE, PATCH, OPTIONS
 	// OPTIONS 用于预检请求,通常需要包含
 	// 示例: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
-	AllowMethods []string `mapstructure:"allow_methods" json:"allow_methods" yaml:"allow_methods" toml:"allow_methods"`
+	AllowMethods []string `mapstructure:"allow_methods" envname:"CORS_ALLOW_METHODS" json:"allow_methods" yaml:"allow_methods" toml:"allow_methods"`
 
 	// AllowHeaders 允许的请求头
 	// 指定跨域请求允许携带的自定义请求头
@@ -40,7 +35,7 @@ type CORSConfig struct {
 	//   - Authorization: 用于身份认证
 	//   - X-Request-ID: 用于请求追踪
 	// 示例: ["Origin", "Content-Type", "Authorization", "X-Request-ID"]
-	AllowHeaders []string `mapstructure:"allow_headers" json:"allow_headers" yaml:"allow_headers" toml:"allow_headers"`
+	AllowHeaders []string `mapstructure:"allow_headers" envname:"CORS_ALLOW_HEADERS" json:"allow_headers" yaml:"allow_headers" toml:"allow_headers"`
 
 	// ExposeHeaders 暴露给浏览器的响应头
 	// 默认情况下浏览器只能访问简单响应头(如 Content-Type)
@@ -49,7 +44,7 @@ type CORSConfig struct {
 	//   - X-Request-ID: 让前端获取请求追踪ID
 	//   - X-Total-Count: 分页总数
 	// 示例: ["X-Request-ID", "X-Total-Count"]
-	ExposeHeaders []string `mapstructure:"expose_headers" json:"expose_headers" yaml:"expose_headers" toml:"expose_headers"`
+	ExposeHeaders []string `mapstructure:"expose_headers" envname:"CORS_EXPOSE_HEADERS" json:"expose_headers" yaml:"expose_headers" toml:"expose_headers"`
 
 	// AllowCredentials 是否允许携带凭证
 	// true: 允许跨域请求携带 Cookie、HTTP Auth 等凭证
@@ -58,7 +53,7 @@ type CORSConfig struct {
 	//   - 设置为 true 时,AllowOrigins 不能使用通配符 "*"
 	//   - 必须明确指定允许的域名
 	// 使用场景: 需要在跨域请求中保持用户会话
-	AllowCredentials bool `mapstructure:"allow_credentials" json:"allow_credentials" yaml:"allow_credentials" toml:"allow_credentials"`
+	AllowCredentials bool `mapstructure:"allow_credentials" envname:"CORS_ALLOW_CREDENTIALS" json:"allow_credentials" yaml:"allow_credentials" toml:"allow_credentials"`
 
 	// MaxAge 预检请求缓存时间(秒)
 	// 浏览器会缓存 OPTIONS 预检请求的结果
@@ -67,7 +62,7 @@ type CORSConfig struct {
 	//   - 开发环境: 600-3600 (10分钟-1小时)
 	//   - 生产环境: 3600-86400 (1小时-24小时)
 	// 作用: 减少网络开销,提升性能
-	MaxAge int `mapstructure:"max_age" json:"max_age" yaml:"max_age" toml:"max_age"`
+	MaxAge int `mapstructure:"max_age" envname:"CORS_MAX_AGE" json:"max_age" yaml:"max_age" toml:"max_age"`
 }
 
 // ValidateName 返回配置名称
@@ -147,8 +142,9 @@ func (c *CORSConfig) DefaultConfig() {
 	}
 }
 
-// OverrideConfig 从环境变量覆盖配置
-// 环境变量命名规则: CORS_<字段名>,全大写,单词间用下划线
+// OverrideConfig 从环境变量覆盖配置。
+// 环境变量命名规则: <动态应用前缀>_CORS_<字段名>,全大写,单词间用下划线。
+// 当前 AppPrefix=Rin 时主变量形如 RIN_APP_CORS_ENABLED；未加前缀变量保留为兼容 fallback。
 // 支持的环境变量:
 //   - CORS_ENABLED: 是否启用(true/false)
 //   - CORS_ALLOW_ORIGINS: 允许的源(逗号分隔)
@@ -158,61 +154,5 @@ func (c *CORSConfig) DefaultConfig() {
 //   - CORS_ALLOW_CREDENTIALS: 是否允许凭证(true/false)
 //   - CORS_MAX_AGE: 预检缓存时间(秒)
 func (c *CORSConfig) OverrideConfig() {
-	// Enabled
-	if val := os.Getenv(EnvCORSEnabled); val != "" {
-		if enabled, err := strconv.ParseBool(val); err == nil {
-			c.Enabled = enabled
-		}
-	}
-
-	// AllowOrigins (逗号分隔列表)
-	if val := os.Getenv(EnvCORSAllowOrigins); val != "" {
-		origins := strings.Split(val, ",")
-		// 去除空白
-		for i := range origins {
-			origins[i] = strings.TrimSpace(origins[i])
-		}
-		c.AllowOrigins = origins
-	}
-
-	// AllowMethods (逗号分隔列表)
-	if val := os.Getenv(EnvCORSAllowMethods); val != "" {
-		methods := strings.Split(val, ",")
-		for i := range methods {
-			methods[i] = strings.TrimSpace(methods[i])
-		}
-		c.AllowMethods = methods
-	}
-
-	// AllowHeaders (逗号分隔列表)
-	if val := os.Getenv(EnvCORSAllowHeaders); val != "" {
-		headers := strings.Split(val, ",")
-		for i := range headers {
-			headers[i] = strings.TrimSpace(headers[i])
-		}
-		c.AllowHeaders = headers
-	}
-
-	// ExposeHeaders (逗号分隔列表)
-	if val := os.Getenv(EnvCORSExposeHeaders); val != "" {
-		headers := strings.Split(val, ",")
-		for i := range headers {
-			headers[i] = strings.TrimSpace(headers[i])
-		}
-		c.ExposeHeaders = headers
-	}
-
-	// AllowCredentials
-	if val := os.Getenv(EnvCORSAllowCredentials); val != "" {
-		if credentials, err := strconv.ParseBool(val); err == nil {
-			c.AllowCredentials = credentials
-		}
-	}
-
-	// MaxAge
-	if val := os.Getenv(EnvCORSMaxAge); val != "" {
-		if maxAge, err := strconv.Atoi(val); err == nil {
-			c.MaxAge = maxAge
-		}
-	}
+	overrideConfigFromEnv(c)
 }

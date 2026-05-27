@@ -560,6 +560,9 @@ func (m *manager) handleConfigChange(e fsnotify.Event) {
 		return
 	}
 
+	LoadEnv()
+	OverrideWithEnv(newCfg)
+
 	// 验证新配置
 	// 如果验证失败,保持当前配置不变
 	if err := newCfg.Validate(); err != nil {

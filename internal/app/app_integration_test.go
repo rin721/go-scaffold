@@ -263,7 +263,7 @@ func yamlString(value string) string {
 func clearAppIntegrationEnv(t *testing.T) {
 	t.Helper()
 
-	for _, key := range []string{
+	keys := []string{
 		"DB_DRIVER",
 		"DB_HOST",
 		"DB_PORT",
@@ -318,7 +318,9 @@ func clearAppIntegrationEnv(t *testing.T) {
 		"CORS_EXPOSE_HEADERS",
 		"CORS_ALLOW_CREDENTIALS",
 		"CORS_MAX_AGE",
-	} {
+	}
+	for _, key := range keys {
 		t.Setenv(key, "")
+		t.Setenv(config.EnvPrefixJoin(key), "")
 	}
 }

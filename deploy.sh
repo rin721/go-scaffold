@@ -152,6 +152,7 @@ SOURCE_DIR=""
 REGISTRY_HOST="ghcr.io"
 REGISTRY_USERNAME=""
 REGISTRY_TOKEN=""
+APP_ENV_PREFIX="${APP_ENV_PREFIX:-RIN_APP}"
 
 declare -A APP_ENV=()
 
@@ -159,7 +160,7 @@ set_app_env() {
 	local key="$1"
 	local value="$2"
 	validate_value "$key" "$value"
-	APP_ENV["$key"]="$value"
+	APP_ENV["${APP_ENV_PREFIX}_${key}"]="$value"
 }
 
 while [ "$#" -gt 0 ]; do

@@ -10,7 +10,7 @@ import (
 type ExecutorConfig struct {
 	// Enabled 是否启用执行器
 	// false 时,应用不会创建执行器
-	Enabled bool `mapstructure:"enabled"`
+	Enabled bool `mapstructure:"enabled" envname:"EXECUTOR_ENABLED"`
 
 	// Pools 池配置列表
 	// 每个池可以有不同的参数

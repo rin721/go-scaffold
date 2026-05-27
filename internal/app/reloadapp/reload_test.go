@@ -497,13 +497,15 @@ func (s *fakeStorage) Close() error {
 func clearReloadEnv(t *testing.T) {
 	t.Helper()
 
-	for _, key := range []string{
+	keys := []string{
 		"STORAGE_ENABLED",
 		"STORAGE_FS_TYPE",
 		"STORAGE_BASE_PATH",
 		"STORAGE_ENABLE_WATCH",
 		"STORAGE_WATCH_BUFFER_SIZE",
-	} {
+	}
+	for _, key := range keys {
 		t.Setenv(key, "")
+		t.Setenv(config.EnvPrefixJoin(key), "")
 	}
 }

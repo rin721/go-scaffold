@@ -1,5 +1,15 @@
 # ACCEPTANCE.md
 
+## TASK-P2-013 验收
+
+| ID | 验收项 | 方法 | 必须 | 状态 |
+|---|---|---|---|---|
+| ACC-P2-051 | `docs/configuration.md` 已新增配置文档说明 | 人工检查和 `rg` 关键文本检索 | 是 | [CONFIRMED] |
+| ACC-P2-052 | 文档说明动态前缀、`RIN_CONFIG_PATH`、`.env` 自动加载和 `envname` 单一事实源 | `rg -n "RIN_APP|RIN_CONFIG_PATH|envname|\\.env"` | 是 | [CONFIRMED] |
+| ACC-P2-053 | README 和部署说明提供配置文档入口 | 检查 `README.md` 和 `docs/deployment.md` | 是 | [CONFIRMED] |
+| ACC-P2-054 | 配置包和全量回归通过 | `go test ./internal/config -count=1`；`go test ./... -count=1` | 是 | [CONFIRMED] |
+| ACC-P2-055 | 本次未修改 Go 实现、真实 `.env`、密钥、数据库 schema 或生产配置 | 核对变更范围 | 是 | [CONFIRMED] |
+
 ## 验收状态
 
 - Project：go-scaffold
@@ -74,6 +84,9 @@
 - pkg/sqlgen unsupported 边界标注：COMPLETED
 - 下一阶段范围确认：COMPLETED，用户选择 A，提升 `BL-021` / `TM-P1-005`
 - types/* 契约边界：COMPLETED
+- `types/*` 分层修正：COMPLETED，已移除 `Crypto` 别名和 `CacheInjectable`，并固定 `types/*` 不得导入 `pkg/*` 基础设施包
+- `types/constants` 应用常量修正：COMPLETED，`AppPrefix` 已改为 `Rin`，`AppTestsCommandName` 已删除，tests 命令名由 `cmd/server` 自身维护
+- `internal/config` 动态环境变量前缀：COMPLETED，`RIN_APP_*` 由 `AppPrefix=Rin` 派生，配置字段通过 `envname` 自动覆盖，未加前缀变量保留兼容 fallback
 - `pkg/plugin` 被动注册边界：COMPLETED
 - `pkg/plugin` 后续范围确认：COMPLETED，用户选择 A，提升 `BL-020` 首批行为测试
 - 首批 `pkg/*` 行为测试：COMPLETED，`pkg/cli`、`pkg/i18n`、`pkg/yaml2go` 已有最小行为测试
@@ -150,6 +163,27 @@
 | ACC-P1-008 | `.env.example` 与实现一致且不再暗示 JWT 已实现 | 人工检查 `.env.example` | 是 | [CONFIRMED] |
 | ACC-P1-009 | 全量回归通过 | `go test ./... -count=1` | 是 | [CONFIRMED] |
 
+## TASK-P2-011 验收
+
+| ID | 验收项 | 方法 | 必须 | 状态 |
+|---|---|---|---|---|
+| ACC-P2-030 | 环境变量前缀由 `AppPrefix` 动态派生 | `go test ./internal/config -count=1` | 是 | [CONFIRMED] |
+| ACC-P2-031 | 配置字段通过 `envname` 标签自动覆盖 | `go test ./internal/config -count=1` | 是 | [CONFIRMED] |
+| ACC-P2-032 | 动态前缀变量优先于未加前缀 fallback | `go test ./internal/config -count=1` | 是 | [CONFIRMED] |
+| ACC-P2-033 | `.env` 自动加载能覆盖配置实例字段 | `go test ./internal/config -count=1` | 是 | [CONFIRMED] |
+| ACC-P2-034 | cmd/app 相关配置集成不回归 | `go test ./cmd/server ./internal/app/... -count=1` | 是 | [CONFIRMED] |
+| ACC-P2-035 | 全量回归通过 | `go test ./... -count=1` | 是 | [CONFIRMED] |
+
+## TASK-P2-012 验收
+
+| ID | 验收项 | 方法 | 必须 | 状态 |
+|---|---|---|---|---|
+| ACC-P2-046 | `internal/config/constants.go` 不再定义字段 env-name 镜像常量 | `rg -n "Env(DB|Redis|Server|Log|I18n|CORS|InitDB|Executor|Storage|Plugin|IAM)" internal cmd types deploy docs .env.example Dockerfile -S` | 是 | [CONFIRMED] |
+| ACC-P2-047 | 配置测试从结构体 `envname` 标签读取环境变量名 | `go test ./internal/config -count=1` | 是 | [CONFIRMED] |
+| ACC-P2-048 | 动态前缀、未加前缀 fallback 和 `.env` 自动加载不回归 | `go test ./internal/config -count=1` | 是 | [CONFIRMED] |
+| ACC-P2-049 | cmd/app 相关配置集成不回归 | `go test ./cmd/server ./internal/app/... -count=1` | 是 | [CONFIRMED] |
+| ACC-P2-050 | 全量回归和 diff 空白检查通过 | `go test ./... -count=1`；`git diff --check` | 是 | [CONFIRMED] |
+
 ## TASK-P1-003 验收
 
 | ID | 验收项 | 方法 | 必须 | 状态 |
@@ -222,7 +256,8 @@
 |---|---|---|---|---|
 | ACC-P1-038 | `types/result` HTTP/Gin 响应契约边界被标注 | 检查 `types/result/result.go` 和 `docs/specs/types_contract_boundary.md` | 是 | [CONFIRMED] |
 | ACC-P1-039 | `types/errors` auth/rbac 预留错误码不暗示当前已实现 auth/rbac | 检查 `types/errors/doc.go` 和 `docs/specs/types_contract_boundary.md` | 是 | [CONFIRMED] |
-| ACC-P1-040 | `types/constants` 和根 `types` 聚合入口的跨层边界被标注 | 检查 `types/constants/doc.go`、`types/doc.go` 和契约说明 | 是 | [CONFIRMED] |
+| ACC-P1-040 | `types/constants` 跨层常量边界和根 `types` 应用层以上契约边界被标注 | 检查 `types/constants/doc.go`、`types/doc.go` 和契约说明 | 是 | [CONFIRMED] |
+| ACC-P1-040A | `types/*` 不再直接暴露或依赖 `pkg/*` 基础设施接口 | `go test ./types/... -count=1`；检查 `types/import_boundary_test.go` | 是 | [CONFIRMED] |
 | ACC-P1-041 | `types` 包测试通过 | `go test ./types/... -count=1` | 是 | [CONFIRMED] |
 | ACC-P1-042 | 全量回归通过 | `go test ./... -count=1` | 是 | [CONFIRMED] |
 

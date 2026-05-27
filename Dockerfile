@@ -40,7 +40,7 @@ USER app
 
 EXPOSE 9999
 
-ENV REI_CONFIG_PATH=/app/configs/config.yaml
+ENV RIN_CONFIG_PATH=/app/configs/config.yaml
 
 ENTRYPOINT ["/app/go-scaffold-server"]
 CMD ["server", "--config=/app/configs/config.yaml"]

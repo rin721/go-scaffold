@@ -17,6 +17,7 @@
 - [CONFIRMED] `pkg/*` 采用混合策略，后续必须逐包标注公共 API 或内部支撑定位。
 - [CONFIRMED] 迁移采用 dev-prod 分层策略：server-start/initdb 可执行 demo `AutoMigrate`，reload 不执行隐式 schema 变更，生产/bootstrap 迁移框架延后。
 - [ACCEPT] 当前 Docker build 和部署制品完成不代表 v1 架构完成；第一版发布前仍需确认完整产品范围、生产迁移、真实环境运行、密钥管理和发布验收清单。
+- [ACCEPT_WITH_RISK] 配置环境变量前缀由 `types/constants.AppPrefix` 动态派生，当前为 `RIN_APP`；字段级环境变量名由 `envname` 标签声明，避免在各模块手写固定前缀或维护重复 env-name 常量。
 
 ## 目标依赖方向
 
@@ -36,6 +37,7 @@ types/*
 |---|---|---|---|
 | `cmd/server` | 进程入口、CLI 命令、信号处理 | 检查是否有业务逻辑外溢 | [CONFIRMED] |
 | `internal/app` | 组合根、生命周期、跨层装配 | 生成装配链路清单 | [CONFIRMED] |
+| `internal/config` | 配置加载、`.env` 自动加载、动态环境变量覆盖和热重载配置快照 | [CONFIRMED] TASK-P2-011 已将固定/手写环境变量覆盖收拢为 `AppPrefix` 动态前缀 + `envname` 标签映射；TASK-P2-012 已删除重复 env-name 常量；未加前缀变量保留兼容 fallback | [CONFIRMED] |
 | `internal/transport/http` | HTTP router、middleware、health/ready、API 注册 | [CONFIRMED] health/ready、demo Todo HTTP 集成测试和 app 装配级路径均已补最小测试；TASK-P1-016 覆盖真实 app server/initdb 装配与 reload/config 分发 | [CONFIRMED] |
 | `internal/modules/demo` | 长期标准示例 | 生成 demo 分层验收和测试路线 | [CONFIRMED] |
 | `pkg/*` | 混合策略 | [CONFIRMED] TASK-P1-007 已逐包分类为公共基础设施 API、公共工具 API 或内部支撑工具包 | [CONFIRMED] |
@@ -50,11 +52,11 @@ types/*
 | 模块 | 主要问题 | 下一步 |
 |---|---|---|
 | `internal/app` | 装配、reload、mode、lifecycle 边界需形成清单 | TASK-OPT-003 |
-| `internal/config` | 环境覆盖、热更新和默认值职责需统一说明 | TASK-OPT-003 |
+| `internal/config` | 环境覆盖已由动态前缀与 `envname` 标签统一，热更新会重新应用环境变量覆盖 | 后续如新增复杂 slice/map 环境覆盖需单独任务确认 |
 | `internal/transport/http` | health/ready、demo 路由和 app 装配级 server/initdb 路径均已补最小测试 | 继续保持不启动真实 HTTP server 的测试边界 |
 | `internal/modules/demo` | 示例职责与生产约束需分离 | TASK-OPT-003 |
 | `pkg/*` | 公共/内部定位已在 TASK-P1-007 标记，`pkg/sqlgen` unsupported 边界已在 TASK-P1-008 标记 | 后续破坏性重构或新能力实现仍需单独确认 |
-| `types/*` | 跨层公共契约、HTTP/Gin 响应契约和有限聚合入口 | [CONFIRMED] TASK-P1-009 已明确 `types/result`、`types/errors`、`types/constants` 和根 `types` 边界 |
+| `types/*` | 跨层公共契约、HTTP/Gin 响应契约和应用层以上契约说明入口 | [ACCEPT] 用户修正 `types/*` 不得聚合 `pkg/*` 基础设施接口；`Crypto` 别名、`CacheInjectable` 和 executor typed constants 已移除或解耦 |
 
 ## 代码变更门禁
 
@@ -87,18 +89,19 @@ types/*
 |---|---|---|---|---|
 | `types/result` | HTTP API 响应契约 | `Result`、`Success`、`Error`、`ErrorWithTrace`、分页结构和 Gin 响应 helper | 依赖 Gin，不能作为纯领域类型包使用 | [CONFIRMED] |
 | `types/errors` | 错误码和业务错误契约 | 错误码分段、`BizError`、错误链 | auth/rbac 错误码是预留契约，不代表当前已实现 auth/rbac | [CONFIRMED] |
-| `types/constants` | 跨层运行常量契约 | 应用命令、默认配置路径、关闭超时、cache key、executor pool 名称 | 常量修改会影响 cmd/internal/pkg 使用方 | [CONFIRMED] |
-| `types` | 有限聚合入口 | `Crypto` 别名、`CacheInjectable` 接口 | 新增聚合类型需单独确认 | [CONFIRMED] |
+| `types/constants` | 应用层以上运行常量契约 | 应用命令、默认配置路径、关闭超时、cache key、executor pool 名称字符串 | 常量修改会影响 cmd/internal/pkg 使用方；不得直接导入 `pkg/*` | [CONFIRMED] |
+| `types` | 应用层以上契约说明入口 | 当前不提供 `pkg/*` 别名或注入接口；根包不得直接依赖 `pkg/cache`、`pkg/crypto` | 新增根 `types` 类型需确认其属于应用层以上契约 | [CONFIRMED] |
 
 ## 下一架构任务
 
 - [CONFIRMED] TASK-P1-005 已完成 demo 迁移触发边界收拢。
 - [CONFIRMED] TASK-P1-007 已完成 `pkg/*` API 分类。
 - [CONFIRMED] TASK-P1-008 已完成 `pkg/sqlgen` unsupported 边界标注。
-- [CONFIRMED] TASK-P1-009 已明确 `types/*` 契约边界。
+- [ACCEPT] 用户修正 `types/*` 分层：不得直接暴露或依赖 `pkg/*` 基础设施接口，`types` 只能承载应用层以上确认过的跨层契约。
 - [CONFIRMED] TASK-P1-010 已收拢 `pkg/plugin` 被动注册边界。
 - [CONFIRMED] 用户选择 A，`BL-020` 首批 `pkg/*` 行为测试已完成 TASK-P1-011，第二批已完成 TASK-P1-012，第三批 `pkg/cache` 已完成 TASK-P1-013。
 - [CONFIRMED] TASK-P2-005 至 TASK-P2-010 已完成插件 hooks、HTTP 远程插件、IAM 公共接口、配置接入和 app reload/lifecycle 组装。
+- [CONFIRMED] TASK-P2-011 已完成配置环境变量动态前缀和 `envname` 注入；TASK-P2-012 已删除重复 env-name 常量，`envname` 标签是字段环境变量名唯一事实源。
 - [CONFIRMED] 用户选择 B，`BL-023` `pkg/utils` 内部支撑测试已完成 TASK-P1-014。
 - [CONFIRMED] 用户选择 B，`BL-002` router/middleware/demo HTTP 集成测试已完成 TASK-P1-015。
 - [CONFIRMED] 用户明确要求实施 TASK-P1-016，app 装配、配置变更 hook 与 reload/config 剩余集成测试已完成。

@@ -1,10 +1,6 @@
 package config
 
-import (
-	"errors"
-	"os"
-	"strconv"
-)
+import "errors"
 
 // DatabaseConfig 数据库连接配置
 // 包含连接数据库所需的所有信息
@@ -12,42 +8,42 @@ type DatabaseConfig struct {
 	// Driver 数据库驱动类型
 	// 可选值: postgres, mysql, sqlite
 	// 影响连接字符串格式和 SQL 方言
-	Driver string `mapstructure:"driver"`
+	Driver string `mapstructure:"driver" envname:"DB_DRIVER"`
 
 	// Host 数据库服务器地址
 	// 例如: localhost, 127.0.0.1, db.example.com
 	// SQLite 不需要此字段
-	Host string `mapstructure:"host"`
+	Host string `mapstructure:"host" envname:"DB_HOST"`
 
 	// Port 数据库端口
 	// PostgreSQL 默认: 5432
 	// MySQL 默认: 3306
 	// SQLite 不需要此字段
-	Port int `mapstructure:"port"`
+	Port int `mapstructure:"port" envname:"DB_PORT"`
 
 	// User 数据库用户名
 	// SQLite 不需要此字段
-	User string `mapstructure:"user"`
+	User string `mapstructure:"user" envname:"DB_USER"`
 
 	// Password 数据库密码
 	// 生产环境应该从环境变量或密钥管理服务读取
 	// 不要硬编码在配置文件中
-	Password string `mapstructure:"password"`
+	Password string `mapstructure:"password" envname:"DB_PASSWORD"`
 
 	// DBName 数据库名称
 	// PostgreSQL/MySQL: 数据库名
 	// SQLite: 文件路径
-	DBName string `mapstructure:"dbname"`
+	DBName string `mapstructure:"dbname" envname:"DB_NAME"`
 
 	// MaxOpenConns 最大打开连接数
 	// 0 表示无限制(不推荐)
 	// 推荐: 10-100,根据并发量调整
-	MaxOpenConns int `mapstructure:"max_open_conns"`
+	MaxOpenConns int `mapstructure:"max_open_conns" envname:"DB_MAX_OPEN_CONNS"`
 
 	// MaxIdleConns 最大空闲连接数
 	// 建议设置为 MaxOpenConns 的 50%-100%
 	// 保持空闲连接可以提高响应速度
-	MaxIdleConns int `mapstructure:"max_idle_conns"`
+	MaxIdleConns int `mapstructure:"max_idle_conns" envname:"DB_MAX_IDLE_CONNS"`
 }
 
 func (c *DatabaseConfig) ValidateName() string {
@@ -112,66 +108,10 @@ func (c *DatabaseConfig) Validate() error {
 
 // overrideDatabaseConfig 使用环境变量覆盖数据库配置
 func (cfg *DatabaseConfig) overrideDatabaseConfig() {
-	applyDatabaseEnvOverrides(cfg)
+	overrideConfigFromEnv(cfg)
 }
 
 // overrideDatabaseConfig 使用环境变量覆盖数据库配置
 func overrideDatabaseConfig(cfg *DatabaseConfig) {
-	applyDatabaseEnvOverrides(cfg)
-}
-
-func applyDatabaseEnvOverrides(cfg *DatabaseConfig) {
-	// Driver
-	if val := getDatabaseEnv(EnvDBDriver); val != "" {
-		cfg.Driver = val
-	}
-
-	// Host
-	if val := getDatabaseEnv(EnvDBHost); val != "" {
-		cfg.Host = val
-	}
-
-	// Port
-	if val := getDatabaseEnv(EnvDBPort); val != "" {
-		if port, err := strconv.Atoi(val); err == nil {
-			cfg.Port = port
-		}
-	}
-
-	// User
-	if val := getDatabaseEnv(EnvDBUser); val != "" {
-		cfg.User = val
-	}
-
-	// Password
-	// 密码应该优先使用环境变量
-	if val := getDatabaseEnv(EnvDBPassword); val != "" {
-		cfg.Password = val
-	}
-
-	// DBName
-	if val := getDatabaseEnv(EnvDBName); val != "" {
-		cfg.DBName = val
-	}
-
-	// MaxOpenConns
-	if val := getDatabaseEnv(EnvDBMaxOpenConns); val != "" {
-		if conns, err := strconv.Atoi(val); err == nil {
-			cfg.MaxOpenConns = conns
-		}
-	}
-
-	// MaxIdleConns
-	if val := getDatabaseEnv(EnvDBMaxIdleConns); val != "" {
-		if conns, err := strconv.Atoi(val); err == nil {
-			cfg.MaxIdleConns = conns
-		}
-	}
-}
-
-func getDatabaseEnv(key string) string {
-	if val := os.Getenv(key); val != "" {
-		return val
-	}
-	return os.Getenv(EnvPrefixJoin(key))
+	overrideConfigFromEnv(cfg)
 }

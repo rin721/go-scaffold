@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/rei0721/go-scaffold/internal/app"
+	appconfig "github.com/rei0721/go-scaffold/internal/config"
 	"github.com/rei0721/go-scaffold/pkg/cli"
 	"github.com/rei0721/go-scaffold/types/constants"
 )
@@ -32,7 +33,7 @@ func (c *InitdbCommand) Flags() []cli.Flag {
 			Required:    false,
 			Default:     constants.AppDefaultConfigPath,
 			Description: "Config file path",
-			EnvVar:      "REI_CONFIG_PATH",
+			EnvVar:      appconfig.EnvConfigPathName(),
 		},
 	}
 }

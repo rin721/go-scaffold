@@ -1,5 +1,14 @@
 # AGENT_HANDOFF.md
 
+## Latest Addendum
+
+- Date: 2026-05-27
+- Task: TASK-P2-013 / TS-P2-013
+- Summary: Added `docs/configuration.md` with configuration loading, `.env` auto-load, dynamic `RIN_APP_*` prefix, `RIN_CONFIG_PATH`, `envname` single source, common variables, and new config field workflow.
+- Files changed in this addendum: `docs/configuration.md`, `README.md`, `docs/deployment.md`, and project status documents.
+- Verification: config-doc `rg` check PASS, `go test ./internal/config -count=1` PASS, `go test ./... -count=1` PASS, `git diff --check` PASS with only Windows LF/CRLF warnings.
+- Legal next step remains `NONE / NONE / PENDING_USER_CONFIRMATION`; project remains `IN_DEVELOPMENT_NOT_RELEASE_READY`.
+
 ## Last Updated
 
 - Date: 2026-05-27
@@ -17,54 +26,48 @@
 
 ## What Was Done Last
 
-- 接受用户纠正：当前项目还未开发完整，不应该发布第一版。
-- Docker build 通过证据保持有效：用户在 Linux Docker 环境补跑 `docker build --build-arg GOPROXY=https://goproxy.cn,direct -t go-scaffold:local .` 并通过，BuildKit 输出 `23/23 FINISHED`，镜像标记为 `docker.io/library/go-scaffold:local`。
-- TASK-P2-004 至 TASK-P2-010 的切片完成判断保持；它们不代表项目整体完成、v1 可发布或真实 production 已上线。
-- 项目整体状态已改为 `IN_DEVELOPMENT_NOT_RELEASE_READY`，当前等待用户确认新的开发范围或第一版发布验收清单。
-- 本轮未修改 Go 代码，未触发 workflow、未连接远程服务器、未推送镜像、未执行真实 production、未写入真实密钥。
+- 接受用户修正：`internal/config` 中 `EnvDB*`、`EnvRedis*`、`EnvServer*` 等重复 env-name 常量在 `envname` 标签机制落地后已无存在必要。
+- 删除 `internal/config/constants.go` 中按模块镜像字段环境变量名的常量，只保留动态前缀 helper、`.env` 文件名、分隔符和配置段名。
+- 更新 `internal/config/manager_test.go`，测试通过 `taggedEnvName` 从配置结构体 `envname` 标签读取环境变量名，不再依赖第二套常量表。
+- 验证动态前缀变量优先、未加前缀 fallback、`.env` 自动加载、cmd/app 相关集成和全量回归均不回归。
+- 项目整体仍为 `IN_DEVELOPMENT_NOT_RELEASE_READY`，当前等待用户确认新的开发范围或第一版发布验收清单。
 
 ## Files Changed Last
 
 | File | Change | Reason |
 |---|---|---|
-| `STATUS.md` | Updated | 将项目整体状态改为开发中且未达发布条件 |
-| `TASKS.md` | Updated | 当前合法任务改为等待用户确认后续范围 |
-| `TIME_SLICES.md` | Updated | 当前合法切片改为等待用户确认后续范围 |
-| `ACCEPTANCE.md` | Updated | 新增发布验收状态，明确不发布第一版 |
-| `TEST_REPORT.md` | Updated | 记录用户纠正审查和文档验证 |
-| `CHANGELOG.md` | Updated | 新增 not release-ready 纠偏记录 |
-| `ISSUES.md` | Updated | 记录并关闭状态表述过度完成的问题 |
-| `PROJECT_BRIEF.md` | Updated | 同步项目仍未达发布条件 |
-| `REQUIREMENTS.md` | Updated | 明确 v1 发布前仍需确认完整验收范围 |
-| `ARCHITECTURE.md` | Updated | 明确 Docker 制品不等于 v1 架构完成 |
-| `MODULES.md` | Updated | 同步模块文档完成不等于发布验收 |
-| `ROADMAP.md` | Updated | 新增第一版发布条件确认阶段 |
-| `BACKLOG.md` | Updated | 新增 `BL-027` 发布验收清单与剩余路线 |
-| `RISK_REGISTER.md` | Updated | 新增 `RISK-022` 防止误判为第一版发布 |
-| `DECISIONS.md` | Updated | 新增 `DEC-027` 当前项目未达第一版发布条件 |
-| `TEST_MATRIX.md` | Updated | 新增第一版发布验收清单矩阵项 |
-| `README.md` | Updated | 入口说明当前不是 v1 发布候选 |
-| `docs/deployment.md` | Updated | 部署说明明确制品不代表第一版发布 |
-| `AGENT_HANDOFF.md` | Updated | 交接说明指向 not release-ready 状态 |
+| `internal/config/constants.go` | Updated | 删除重复 env-name 常量，只保留动态前缀和通用配置常量 |
+| `internal/config/manager_test.go` | Updated | 测试从 `envname` 标签读取环境变量名 |
+| `STATUS.md`、`TASKS.md`、`TIME_SLICES.md`、`TEST_MATRIX.md`、`ACCEPTANCE.md`、`REQUIREMENTS.md`、`ARCHITECTURE.md`、`MODULES.md`、`DECISIONS.md`、`RISK_REGISTER.md`、`ISSUES.md`、`TEST_REPORT.md`、`CHANGELOG.md`、`AGENT_HANDOFF.md` | Updated | 记录 TASK-P2-012 / TS-P2-012 完成 |
 
 ## Commands Run Last
 
 | Command | Result |
 |---|---|
 | Required file reads | PASS |
-| 用户纠正审查 | ACCEPT：当前项目未达第一版发布条件 |
-| 用户 Linux Docker build 输出审查 | PASS_REMOTE：`23/23 FINISHED`，镜像标记为 `docker.io/library/go-scaffold:local` |
-| Go tests | NOT_RUN，本轮仅更新文档，未修改 Go 代码 |
+| 用户纠正审查 | ACCEPT：重复 env-name 常量会造成第二事实源，删除后以 `envname` 标签为准 |
+| `gofmt -w internal/config/constants.go internal/config/manager_test.go` | PASS |
+| env 常量引用扫描 | PASS：`Env(DB|Redis|Server|Log|I18n|CORS|InitDB|Executor|Storage|Plugin|IAM)` 无匹配 |
+| `go test ./internal/config -count=1` | PASS |
+| `go test ./cmd/server ./internal/app/... -count=1` | PASS |
+| `go test ./... -count=1` | PASS |
 | `git diff --check` | PASS，仅有 Windows LF/CRLF 提示 |
 
 ## Test Status
 
+- `internal/config` env-name single source: PASS. 重复 env-name 常量已删除，测试从 `envname` 标签读取变量名。
+- `internal/config` dynamic env prefix: PASS. `RIN_APP_*` 动态前缀、`envname` 覆盖、未加前缀 fallback 和 `.env` 自动加载均有测试。
+- `cmd/server` config path env var: PASS. 配置路径 flag 使用 `RIN_CONFIG_PATH`。
+- `internal/app/...`: PASS. app 初始化、reload 和环境清理相关测试通过。
+- `types/constants` application constants: PASS from the previous correction. `AppPrefix` 固定为 `Rin`，`AppTestsCommandName` 已删除。
+- `types` package boundary: PASS from the previous correction. `types/*` 导入边界测试、`types/result`、`types/errors`、`types/constants` 均通过。
+- Full regression: PASS.
 - Docker image build: PASS_REMOTE for TASK-P2-004. 用户 Linux Docker build 已通过。
 - `pkg/plugin` and `pkg/plugin/hooks`: PASS from the previous completion audit.
 - `pkg/iam` and `pkg/iam/memory`: PASS from the previous completion audit.
 - `internal/config` and `internal/app/...`: PASS from the previous completion audit.
 - Full regression and server build: PASS from the previous completion audit.
-- Diff whitespace check: PASS for this documentation-only update; only Windows LF/CRLF warnings were printed.
+- Diff whitespace check: PASS for this code-and-documentation update; only Windows LF/CRLF warnings were printed.
 - Release readiness: NOT_READY. 当前不得发布第一版。
 
 ## Current Blockers
@@ -80,6 +83,10 @@
 - [CONFIRMED] Config-created plugins are HTTP adapters only; local plugins remain explicitly registered by code.
 - [CONFIRMED] TASK-P2-004 Docker verification is complete; no automatic next implementation task is active.
 - [ACCEPTED] 当前项目未达第一版发布条件；Docker build 和部署制品完成不等于 v1 release-ready。
+- [ACCEPTED] `types/*` 不再聚合 `pkg/*` 基础设施接口；缓存、加密、executor 等能力由应用层显式依赖对应 `pkg/*` 包，或在应用层以上另行定义契约。
+- [ACCEPTED] `types/constants` 不再提供 tests 命令名；`cmd/server` 自行维护 `tests` 命令名，`AppPrefix` 为 `Rin`。
+- [ACCEPTED] `internal/config` 环境变量覆盖主前缀从 `AppPrefix` 动态派生，当前为 `RIN_APP`；配置字段通过 `envname` 标签声明环境变量名。
+- [ACCEPTED] 配置字段环境变量名以 `envname` 标签为唯一事实源；不要恢复 `EnvDB*` / `EnvRedis*` 等镜像常量。
 
 ## Risks
 
@@ -89,13 +96,17 @@
 - Remote hook calls use the plugin invoke path; keep `hooks.execute` isolated from manager hook emission to avoid recursion.
 - Do not confuse the completed Docker image build with a real production deployment; this session did not deploy, push images, or run production migrations.
 - Do not publish or label v1/release-ready until the user confirms a release acceptance checklist and the required tasks pass.
+- Do not reintroduce `types.Crypto`, `types.CacheInjectable`, or direct `types/* -> pkg/*` imports.
+- Do not reintroduce `types/constants.AppTestsCommandName`; keep the tests command name local to `cmd/server`.
+- Do not reintroduce fixed `REI_APP` config override logic; use `internal/config.EnvPrefixJoin` and `envname` tags.
+- Do not reintroduce `EnvDB*` / `EnvRedis*` / `EnvServer*` style env-name constants; read field names from `envname` tags when tests need them.
 
 ## Legal Next Step
 
 - Task ID: NONE
 - Time Slice ID: NONE
 - Status: PENDING_USER_CONFIRMATION
-- Why: TASK-P2-004 through TASK-P2-010 are complete and verified, but the project is explicitly not release-ready; current confirmed scope has no automatic next task.
+- Why: TASK-P2-012 config env-name constants cleanup is complete, TASK-P2-011 dynamic config env prefix correction remains complete, TASK-P2-004 through TASK-P2-010 remain complete and verified, but the project is explicitly not release-ready; current confirmed scope has no automatic next task.
 - Entry condition for future work: user must confirm a new scope or first-version release acceptance checklist, and it must be written into `TASKS.md` and `TIME_SLICES.md`.
 - Likely next choices: define v1 acceptance checklist, complete product scope, image publishing pipeline, real staging/production run, production migration framework, complete auth/rbac, plugin discovery, or RPC/WS transport.
 
@@ -115,4 +126,6 @@
 1. Read `AGENTS.md`.
 2. Read `STATUS.md`, `TASKS.md`, and `TIME_SLICES.md`.
 3. Confirm current state is `NONE / NONE / PENDING_USER_CONFIRMATION` and overall status is `IN_DEVELOPMENT_NOT_RELEASE_READY`.
-4. Do not start new implementation or publish v1 until the user confirms a new task or release acceptance checklist and the task/time-slice documents are updated.
+4. Remember `types/*` no longer exposes `Crypto`, `CacheInjectable`, direct imports of `pkg/*`, or `AppTestsCommandName`; do not restore lower-layer aliases, typed constants, or the tests command constant.
+5. Remember config env overrides now use `RIN_APP_*` from `AppPrefix=Rin` and `envname` tags; keep unprefixed variables only as fallback compatibility, and do not reintroduce duplicate env-name constants.
+6. Do not start new implementation or publish v1 until the user confirms a new task or release acceptance checklist and the task/time-slice documents are updated.

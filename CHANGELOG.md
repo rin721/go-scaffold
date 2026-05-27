@@ -1,6 +1,50 @@
 # CHANGELOG.md
 
+## 最新补充
+
+### 2026-05-27 - TASK-P2-013 - Config documentation
+
+- 变更：新增 `docs/configuration.md`，说明配置入口、加载顺序、`.env` 自动加载、`RIN_APP_*` 动态前缀、`RIN_CONFIG_PATH`、`envname` 单一事实源、常用变量和新增配置字段流程。
+- 变更：`README.md` 和 `docs/deployment.md` 增加配置文档入口。
+- 范围：仅文档和状态记录；未修改 Go 实现、配置 schema、数据库 schema、真实 `.env`、密钥、部署凭据或生产配置。
+- 验证：配置文档关键文本 `rg` 检索通过；`go test ./internal/config -count=1`、`go test ./... -count=1` 和 `git diff --check` 通过。
+- 状态：TASK-P2-013 / TS-P2-013 完成；项目整体仍为 `IN_DEVELOPMENT_NOT_RELEASE_READY`，当前合法任务回到 `NONE / NONE / PENDING_USER_CONFIRMATION`。
+
 ## 最新变更
+
+### 2026-05-27 - TASK-P2-012 - Config envname constants cleanup
+
+- 变更：接受用户修正，删除 `internal/config/constants.go` 中 `EnvDB*`、`EnvRedis*`、`EnvServer*`、`EnvLog*`、`EnvI18n*`、`EnvCORS*`、`EnvInitDB*`、`EnvExecutor*`、`EnvStorage*`、`EnvPlugin*`、`EnvIAM*` 等重复 env-name 常量。
+- 变更：`internal/config/constants.go` 仅保留动态前缀 helper、`.env` 文件名、分隔符和配置段名常量；字段环境变量名由配置结构体 `envname` 标签单一维护。
+- 变更：`internal/config/manager_test.go` 新增标签读取 helper，测试从 `envname` 标签生成环境变量名，避免测试继续依赖第二套常量表。
+- 验证：env 常量 `rg` 扫描无匹配；`go test ./internal/config -count=1`、`go test ./cmd/server ./internal/app/... -count=1`、`go test ./... -count=1`、`git diff --check` 通过。
+- 状态：TASK-P2-012 / TS-P2-012 完成；项目整体仍为 `IN_DEVELOPMENT_NOT_RELEASE_READY`，当前合法任务回到 `NONE / NONE / PENDING_USER_CONFIRMATION`。
+
+### 2026-05-27 - TASK-P2-011 - Dynamic config environment prefix
+
+- 变更：接受用户修正，`internal/config` 环境变量前缀不再固定，改为从 `types/constants.AppPrefix` 动态派生；当前 `AppPrefix=Rin`，配置覆盖主前缀为 `RIN_APP`，配置路径变量为 `RIN_CONFIG_PATH`。
+- 变更：新增 `envname` 标签驱动的统一反射覆盖逻辑，覆盖 Database、Redis、Server、Logger、I18n、InitDB、Executor、Storage、Plugin、IAM 和 CORS 可配置字段；动态前缀变量优先，未加前缀变量作为兼容 fallback。
+- 变更：`Manager.Load` 和配置热重载路径均执行 `.env` 加载与环境变量覆盖；`cmd/server` 配置路径 flag 改用动态环境变量名。
+- 变更：同步 `.env.example`、Dockerfile、production Compose 示例、`deploy.sh` 和部署说明到 `RIN_APP_*` / `RIN_CONFIG_PATH`。
+- 验证：`go test ./internal/config -count=1`、`go test ./cmd/server ./internal/app/... -count=1`、`go test ./... -count=1`、`git diff --check` 通过。
+- 状态：TASK-P2-011 / TS-P2-011 完成；项目整体仍为 `IN_DEVELOPMENT_NOT_RELEASE_READY`，当前合法任务回到 `NONE / NONE / PENDING_USER_CONFIRMATION`。
+
+### 2026-05-27 - User correction - types app constants
+
+- 变更：接受用户修正，将 `types/constants.AppPrefix` 从 `Rei` 改为 `Rin`。
+- 变更：删除 `types/constants.AppTestsCommandName`，`cmd/server` 的 `tests` 命令名改为命令包内私有常量，不再由 `types` 提供。
+- 变更：新增 `types/constants/app_test.go` 固定应用常量，更新 `cmd/server/tests_test.go` 保持 CLI tests 命令语义。
+- 验证：`go test ./types/... ./cmd/server -count=1` 与 `go test ./... -count=1` 通过。
+- 状态：本次 `types` 常量修正完成；当前合法任务仍为 `NONE / NONE / PENDING_USER_CONFIRMATION`。
+
+### 2026-05-27 - User correction - root types layering
+
+- 变更：接受用户纠正，`types/*` 不得直接聚合 `pkg/*` 基础设施接口；根 `types` 不得为 `pkg/crypto.Crypto` 提供别名，也不得定义依赖 `pkg/cache.Cache` 的 `CacheInjectable`。
+- 变更：删除 `types/interfaces.go`，更新 `types/doc.go`，将 `types/constants` executor pool 名称改为字符串常量，新增 `types/import_boundary_test.go` 固定 `types/*` 不导入 `pkg/*`。
+- 变更：更新 `pkg/executor` 文档示例，不再建议下层 `pkg` 文档反向指定 `types/constants` 作为 typed constants 位置。
+- 变更：同步 `ARCHITECTURE.md`、`MODULES.md`、`REQUIREMENTS.md`、`ACCEPTANCE.md`、`TEST_MATRIX.md`、`docs/specs/types_contract_boundary.md` 和项目状态文档，明确 `types` 只能承载应用层以上确认过的跨层契约。
+- 验证：`go test ./types/... -count=1` 与 `go test ./... -count=1` 通过；`git diff --check` 仅有 Windows LF/CRLF 提示。
+- 状态：`types` 分层修正完成；当前合法任务仍为 `NONE / NONE / PENDING_USER_CONFIRMATION`。
 
 ### 2026-05-27 - User correction - project not release-ready
 

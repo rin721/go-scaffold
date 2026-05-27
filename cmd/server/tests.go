@@ -8,10 +8,12 @@ import (
 	"strings"
 
 	"github.com/rei0721/go-scaffold/pkg/cli"
-	"github.com/rei0721/go-scaffold/types/constants"
 )
 
-const defaultTestPackagePattern = "./..."
+const (
+	testsCommandName          = "tests"
+	defaultTestPackagePattern = "./..."
+)
 
 type goTestRunner func(stdout, stderr io.Writer, args ...string) error
 
@@ -24,7 +26,7 @@ func NewTestsCommand() *TestsCommand {
 }
 
 func (c *TestsCommand) Name() string {
-	return constants.AppTestsCommandName
+	return testsCommandName
 }
 
 func (c *TestsCommand) Description() string {
@@ -32,7 +34,7 @@ func (c *TestsCommand) Description() string {
 }
 
 func (c *TestsCommand) Usage() string {
-	return fmt.Sprintf("%s [--package=<pattern>]", constants.AppTestsCommandName)
+	return fmt.Sprintf("%s [--package=<pattern>]", testsCommandName)
 }
 
 func (c *TestsCommand) Flags() []cli.Flag {

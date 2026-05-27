@@ -2,6 +2,27 @@
 
 ## 决策记录
 
+### DEC-030：配置字段环境变量名以 `envname` 标签为唯一事实源
+
+- Date：2026-05-27
+- Status：ACCEPTED
+- Context：TASK-P2-011 已把配置覆盖迁移为动态前缀 + `envname` 标签。用户进一步指出 `EnvDBDriver`、`EnvDBHost` 等环境变量名常量已经没有存在必要。
+- Decision：删除 `internal/config/constants.go` 中按模块镜像 `envname` 标签值的导出常量；字段环境变量名只由配置结构体 `envname` 标签声明。`constants.go` 仅保留动态前缀 helper、`.env` 文件名、分隔符和配置段名常量。
+- Alternatives：继续保留 `EnvDB*` / `EnvRedis*` 等常量作为文档或测试辅助；仅废弃但不删除；把常量移动到测试文件。
+- Reason：重复常量会成为第二事实源，容易与结构体标签、`.env.example` 和部署示例漂移；测试从标签读取变量名更能验证真实契约。
+- Consequences：新增配置字段时只需维护 `envname` 标签；测试如需构造环境变量名应通过标签 helper 获取，不得重新引入按字段镜像的常量表。
+- Related Tasks：TASK-P2-012
+
+### DEC-029：配置环境变量前缀由 AppPrefix 动态派生
+
+- Date：2026-05-27
+- Status：ACCEPTED
+- Context：用户要求 `internal/config` 不再固定环境变量前缀，结合 `app.AppPrefix` 自动注入环境变量，并让配置实例字段通过 `envname` 配置环境变量。
+- Decision：配置覆盖变量使用 `<APP_PREFIX>_APP_<MODULE>_<FIELD>`；当前 `AppPrefix=Rin`，因此主前缀为 `RIN_APP`。配置路径变量使用 `RIN_CONFIG_PATH`。字段级环境变量名由结构体 `envname` 标签声明，`internal/config` 用统一反射覆盖逻辑处理。
+- Alternatives：继续使用 `DB_*` / `SERVER_*` 未加前缀策略；继续保留固定 `REI_APP`；继续逐模块手写 override。
+- Consequences：新增配置字段只需补 `envname` 标签即可纳入环境覆盖；未加前缀变量保留兼容 fallback，但部署示例和 `.env.example` 以 `RIN_APP_*` 为主。
+- Related Tasks：TASK-P2-011
+
 ### DEC-001：将插件系统实现为独立 `pkg/plugin`
 
 - Date：2026-05-25
@@ -294,3 +315,25 @@
 - Reason：当前仓库仍缺完整产品功能、第一版验收清单、真实 production 运行、镜像发布流水线、生产迁移、完整 auth/rbac 和密钥管理等发布前条件。
 - Consequences：后续工作必须先确认新的开发范围或第一版发布验收清单，再拆分任务/时间切片；Docker build 通过仍保留为 TASK-P2-004 的有效证据，但不构成项目发布证据。
 - Related Tasks：USER-CORRECTION-2026-05-27-RELEASE-READINESS、TASK-P2-004
+
+### DEC-028：`types/*` 不再聚合 `pkg/*` 基础设施接口
+
+- Date：2026-05-27
+- Status：ACCEPTED
+- Context：用户纠正“types 包，不能直接向 pkg/crypto.Crypto 提供别名和 CacheInjectable 接口，types 只能存在应用层以上的层级再定义”。此前 TASK-P1-009 将根 `types` 记录为有限聚合入口，并提供 `Crypto` 类型别名和 `CacheInjectable` 接口；`types/constants` 也直接依赖 `pkg/executor.PoolName`。
+- Decision：接受该修正。删除根 `types` 中的 `Crypto` 别名和 `CacheInjectable` 接口；`types/constants` 的 executor pool 名称改为字符串常量；`types/*` 不再导入 `pkg/*`，也不再作为 `pkg/*` 基础设施聚合入口。需要缓存、加密或 executor 等基础设施能力的应用层代码应显式依赖对应 `pkg/*` 包，或在应用层以上另行定义本层契约。
+- Alternatives：保留兼容别名；迁移到新的 `types/infrastructure` 子包；仅移除根 `types` 别名而保留 `types/constants` 对 `pkg/executor` 的 typed constants；暂时只更新文档不改代码。
+- Reason：`types` 属于应用层以上的跨层契约，不应替下层 `pkg/*` 基础设施重新导出接口，否则会模糊依赖方向和层级职责。
+- Consequences：这是 `types/*` API 的边界收窄；当前仓库无代码引用 `types.Crypto` 或 `types.CacheInjectable`，executor pool 名称从 typed constants 改为字符串常量后全量回归通过。新增 `types/import_boundary_test.go` 固定 `types/*` 不得直接导入 `pkg/*`。
+- Related Tasks：USER-CORRECTION-2026-05-27-TYPES-LAYERING、TASK-P1-009
+
+### DEC-029：`types/constants` 不再提供 tests 命令名
+
+- Date：2026-05-27
+- Status：ACCEPTED
+- Context：用户要求“在types将AppPrefix = "Rin"，删除AppTestsCommandName”。此前 `types/constants` 同时承载应用前缀、server/initdb 命令名和 tests 命令名。
+- Decision：接受该修正。`AppPrefix` 改为 `Rin`；删除 `AppTestsCommandName`；`cmd/server` 的 tests 命令名改为命令包内私有常量 `testsCommandName`。
+- Alternatives：保留 `AppTestsCommandName` 兼容常量；直接在 `cmd/server` 多处硬编码 `"tests"`；把 tests 命令名迁移到新的公共包。
+- Reason：`tests` 是 `cmd/server` 的具体 CLI 命令实现细节，不需要由 `types/constants` 作为跨层公共常量暴露；这与 `types` 只承载应用层以上确认过的公共契约边界一致。
+- Consequences：调用方不能再通过 `types/constants.AppTestsCommandName` 引用 tests 命令名；当前仓库引用点已迁移，目标包和全量回归通过。
+- Related Tasks：USER-CORRECTION-2026-05-27-TYPES-APP-CONSTANTS

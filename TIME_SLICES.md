@@ -1,11 +1,117 @@
 # TIME_SLICES.md
 
+## 最新补充时间切片
+
+### TS-P2-013：新增配置文档说明
+
+- Status：COMPLETED
+- Task ID：TASK-P2-013
+- Matrix：TM-P2-015
+- Purpose：新增配置文档，说明当前配置加载、动态环境变量前缀、`.env` 自动加载和 `envname` 字段环境变量约定。
+- Inputs：
+  - 用户要求“新增配置文档说明”。
+  - TASK-P2-011 / TASK-P2-012 已完成的动态前缀和 `envname` 单一事实源约束。
+- Allowed Files：
+  - `docs/configuration.md`
+  - `README.md`
+  - `docs/deployment.md`
+  - 项目状态文档
+- Forbidden：
+  - Go 实现、真实 `.env`、密钥、数据库 schema、HTTP 路由、业务模块、部署凭据或远程服务器配置。
+- Verification Commands：
+  - `rg -n "配置文档说明|RIN_APP|RIN_CONFIG_PATH|envname|EnvDBHost|\\.env" docs\\configuration.md README.md docs\\deployment.md -S`：PASS
+  - `go test ./internal/config -count=1`：PASS
+  - `go test ./... -count=1`：PASS
+  - `git diff --check`：PASS，仅 Windows LF/CRLF 提示
+- Acceptance：
+  - [CONFIRMED] 配置文档说明存在且能从 README / 部署说明发现。
+  - [CONFIRMED] 文档说明 `RIN_APP_*`、`RIN_CONFIG_PATH`、`.env` 自动加载、fallback 和 `envname` 维护规则。
+  - [CONFIRMED] 不新增或恢复字段环境变量镜像常量。
+
 ## 当前合法时间切片
 
 - Time Slice ID：NONE
 - Task ID：NONE
 - Status：PENDING_USER_CONFIRMATION
-- Summary：[ACCEPT] 用户纠正当前项目仍未开发完整，不应发布第一版。`dev.tmp/new-plugin.md` 主线已完成；TASK-P2-004 至 TASK-P2-010 均已通过验证。用户已在 Linux Docker 环境补跑 `docker build --build-arg GOPROXY=https://goproxy.cn,direct -t go-scaffold:local .`，BuildKit 输出 `23/23 FINISHED`。当前无自动下一实现任务；后续必须先确认新的开发范围或第一版发布验收清单。
+- Summary：[ACCEPT] 用户纠正 `internal/config` 中 `EnvDB*` / `EnvRedis*` 等 env-name 常量已无存在必要；TS-P2-012 已删除重复常量，并把测试改为从配置结构体 `envname` 标签读取环境变量名。`dev.tmp/new-plugin.md` 主线和 TASK-P2-004 至 TASK-P2-010 均保持完成。当前无自动下一实现任务；后续必须先确认新的开发范围或第一版发布验收清单。
+
+## 最近用户修正时间切片
+
+### USER-CORRECTION-2026-05-27-CONFIG-ENV-CONSTANTS：删除重复配置 env-name 常量
+
+- Status：COMPLETED
+- Task ID：USER-CORRECTION-2026-05-27-CONFIG-ENV-CONSTANTS
+- Purpose：按用户修正删除 `internal/config` 中重复维护 `envname` 标签值的环境变量名常量。
+- Inputs：
+  - 用户修正：`EnvDBDriver`、`EnvDBHost` 等常量已经没有存在必要。
+  - TASK-P2-011 既有动态前缀和 `envname` 标签覆盖机制。
+- Allowed Files：
+  - `internal/config/constants.go`
+  - `internal/config/manager_test.go`
+  - 项目状态文档
+- Forbidden：
+  - 真实 `.env`、密钥、数据库 schema、HTTP 路由、业务模块、部署凭据或远程服务器配置。
+- Verification Commands：
+  - `rg -n "Env(DB|Redis|Server|Log|I18n|CORS|InitDB|Executor|Storage|Plugin|IAM)" internal cmd types deploy docs .env.example Dockerfile -S`：PASS，无匹配
+  - `go test ./internal/config -count=1`：PASS
+  - `go test ./cmd/server ./internal/app/... -count=1`：PASS
+  - `go test ./... -count=1`：PASS
+  - `git diff --check`：PASS，仅有 Windows LF/CRLF 提示
+- Exit Conditions：
+  - [CONFIRMED] `internal/config/constants.go` 不再定义字段环境变量名常量。
+  - [CONFIRMED] 测试从 `envname` 标签读取环境变量名。
+  - [CONFIRMED] TASK-P2-011 动态前缀、fallback 和 `.env` 自动加载能力不回归。
+
+### USER-CORRECTION-2026-05-27-TYPES-APP-CONSTANTS：`types/constants` 应用常量修正
+
+- Status：COMPLETED
+- Task ID：USER-CORRECTION-2026-05-27-TYPES-APP-CONSTANTS
+- Purpose：按用户修正更新 `types/constants` 应用前缀，并删除不应继续暴露的 tests 命令名常量。
+- Inputs：
+  - 用户修正：在 `types` 将 `AppPrefix = "Rin"`，删除 `AppTestsCommandName`。
+  - 既有 `types/*` 分层修正要求：`types` 只承载应用层以上确认过的跨层契约，不聚合下层基础设施接口。
+- Allowed Files：
+  - `types/constants/**/*`
+  - `cmd/server/tests.go`
+  - `cmd/server/tests_test.go`
+  - 项目状态文档
+- Forbidden：
+  - HTTP router、middleware、demo handler、配置 schema、数据库 schema、真实部署配置或密钥文件。
+  - auth/rbac、生产迁移、插件发现、RPC/WS 或其他新功能。
+- Verification Commands：
+  - `go test ./types/... ./cmd/server -count=1`：PASS
+  - `go test ./... -count=1`：PASS
+- Exit Conditions：
+  - [CONFIRMED] `AppPrefix` 为 `Rin`。
+  - [CONFIRMED] `AppTestsCommandName` 不再存在于 `types/constants`。
+  - [CONFIRMED] `cmd/server tests` 命令名仍为 `tests` 且测试通过。
+  - [CONFIRMED] 状态、验收、决策、测试报告、变更记录和交接文档已更新。
+
+### USER-CORRECTION-2026-05-27-TYPES-LAYERING：`types/*` 应用层以上边界修正
+
+- Status：COMPLETED
+- Task ID：USER-CORRECTION-2026-05-27-TYPES-LAYERING
+- Purpose：按用户修正移除 `types/*` 对 `pkg/*` 基础设施接口的直接聚合，防止应用层以上契约反向依赖下层基础设施。
+- Inputs：
+  - 用户修正：`types` 包不能直接向 `pkg/crypto.Crypto` 提供别名和 `CacheInjectable` 接口，`types` 只能存在应用层以上的层级再定义。
+  - TASK-P1-009 既有 `types/*` 契约边界。
+- Allowed Files：
+  - `types/**/*`
+  - `pkg/executor/doc.go`
+  - `docs/specs/types_contract_boundary.md`
+  - 项目状态文档
+- Forbidden：
+  - HTTP router、middleware、demo handler、配置 schema、数据库 schema、真实部署配置或密钥文件。
+  - auth/rbac、生产迁移、插件发现、RPC/WS 或其他新功能。
+- Verification Commands：
+  - `go test ./types/... -count=1`：PASS
+  - `go test ./... -count=1`：PASS
+  - `git diff --check`：PASS，仅有 Windows LF/CRLF 提示
+- Exit Conditions：
+  - [CONFIRMED] 根 `types` 不再导出 `Crypto` 或 `CacheInjectable`。
+  - [CONFIRMED] `types/constants` 不再直接导入 `pkg/executor`。
+  - [CONFIRMED] `types/*` 导入边界测试存在并通过。
+  - [CONFIRMED] 状态、验收、风险、决策、测试报告、变更记录和交接文档已更新。
 
 ## 时间切片列表
 
@@ -420,10 +526,11 @@
 - Status：COMPLETED
 - Task ID：TASK-P1-009
 - Matrix：TM-P1-005、TM-P0-006
-- Purpose：明确 `types/*` 作为跨层契约、HTTP 响应契约或聚合入口的边界，避免 `types/result` 的 Gin 依赖被误解为纯领域类型。
+- Purpose：明确 `types/*` 作为跨层契约、HTTP 响应契约或应用层以上契约说明入口的边界，避免 `types/result` 的 Gin 依赖被误解为纯领域类型，并按用户修正移除 `types/*` 对 `pkg/*` 基础设施的聚合。
 - Inputs：
   - `BL-021`
   - `TM-P1-005`
+  - 2026-05-27 用户修正：`types` 不能直接向 `pkg/crypto.Crypto` 提供别名和 `CacheInjectable` 接口；`types` 只能存在应用层以上的层级再定义。按该边界同步移除 `types/constants` 对 `pkg/executor` 的直接依赖。
   - `MODULES.md` 的 `types/*` 边界说明
   - `ARCHITECTURE.md` 的目标依赖方向
 - Outputs：
@@ -449,7 +556,7 @@
 - Strict Non-Goals：
   - 不实现 auth/rbac。
   - 不修改 HTTP router、middleware 或 demo handler 行为。
-  - 不移动 `types/*` 包或做破坏性 API 重构。
+  - 不移动 `types/*` 包或做无关破坏性 API 重构。
   - 不补 `pkg/*` 行为测试；该方向仍留在 `BL-020`。
 - Execution Steps：
   1. 阅读 `types/*` 源码和现有调用点，确认 `types/result`、`types/errors`、`types/constants` 和根 `types` 的实际使用边界。
@@ -464,23 +571,29 @@
 - Exit Conditions：
   - [CONFIRMED] HTTP 契约与纯类型边界被标注。
   - [CONFIRMED] auth/rbac 预留错误码不再暗示当前已实现 auth/rbac。
+  - [CONFIRMED] `types/*` 不再导入 `pkg/*` 基础设施包，根 `types` 也不再导出 `Crypto` / `CacheInjectable`。
   - [CONFIRMED] 相关测试通过，或未新增测试的原因被记录并不影响本切片验收。
   - [CONFIRMED] 所有项目状态文件已更新，下一合法任务明确。
 - Files Changed：
   - `types/doc.go`
   - `types/constants/doc.go`
+  - `types/constants/executor.go`
+  - `types/constants/executor_test.go`
   - `types/errors/doc.go`
   - `types/result/result.go`
   - `types/result/result_test.go`
   - `types/errors/error_test.go`
+  - `types/import_boundary_test.go`
+  - 删除 `types/interfaces.go`
   - `docs/specs/types_contract_boundary.md`
   - 项目状态文档
 - Verification：
-  - `gofmt -w types/doc.go types/constants/doc.go types/errors/doc.go types/result/result.go types/result/result_test.go types/errors/error_test.go`：PASS
+  - `gofmt -w types/doc.go types/constants/doc.go types/constants/executor.go types/constants/executor_test.go types/errors/doc.go types/result/result.go types/result/result_test.go types/errors/error_test.go types/import_boundary_test.go`：PASS
   - `go test ./types/... -count=1`：PASS
   - `go test ./... -count=1`：PASS
 - Completion Evidence：
-  - HTTP/Gin 契约、错误码预留、跨层常量和根聚合入口边界已文档化。
+  - HTTP/Gin 契约、错误码预留、跨层常量和根 `types` 应用层以上契约边界已文档化。
+  - 根 `types` 已移除 `Crypto` 别名和 `CacheInjectable`，`types/constants` 已移除 `pkg/executor` typed constants，并用导入边界测试固定 `types/*` 不得直接依赖 `pkg/*`。
   - `types/result` 和 `types/errors` 已补最小契约测试。
 
 ### TS-NEXT-SCOPE：确认下一阶段范围
@@ -1423,6 +1536,54 @@
 - Verification Commands：`go test ./internal/config ./internal/app/... -count=1`；`go test ./... -count=1`；`go build -o <temp> ./cmd/server`；`git diff --check`。
 - Acceptance：新实例先构建后替换；失败保留旧实例；关闭顺序安全；最终文档可恢复。
 - Evidence：reload/lifecycle 已接入并通过目标包测试、全量回归、server build 和 diff 检查。
+
+### TS-P2-011：配置环境变量动态前缀与 envname 注入
+
+- Status：COMPLETED
+- Task ID：TASK-P2-011
+- Matrix：TM-P2-013
+- Purpose：将 `internal/config` 环境变量覆盖从固定/手写策略迁移为 `AppPrefix` 动态前缀和 `envname` 字段标签驱动。
+- Allowed Files：`internal/config/**/*`、`cmd/server/**/*`、`internal/app/**/*_test.go`、`.env.example`、`Dockerfile`、`deploy.sh`、`deploy/docker-compose.production.example.yml`、`docs/deployment.md`、项目状态文档。
+- Forbidden Files：真实 `.env`、密钥、部署凭据、数据库 schema、HTTP 路由、业务模块、生产迁移、远程服务器配置。
+- Execution Steps：
+  1. 审计 `internal/config` 手写 override、`.env` 加载和 app/cmd 调用路径。
+  2. 新增动态前缀 helper：`EnvPrefix()`、`EnvPrefixJoin()`、`EnvConfigPathName()`。
+  3. 为配置结构体字段补充 `envname` 标签，并以反射覆盖统一替代逐模块手写 override。
+  4. 保持未加前缀环境变量作为兼容 fallback，动态前缀变量优先。
+  5. 补充 `.env` 自动加载、动态前缀优先级和非数据库配置字段覆盖测试。
+  6. 同步示例、部署文档和状态文档。
+- Verification Commands：
+  - `go test ./internal/config -count=1`：PASS。
+  - `go test ./cmd/server ./internal/app/... -count=1`：PASS。
+  - `go test ./... -count=1`：PASS。
+  - `git diff --check`：PASS，仅有 Windows LF/CRLF 提示。
+- Acceptance：
+  - [CONFIRMED] `RIN_APP_*` 为当前主配置覆盖前缀。
+  - [CONFIRMED] `envname` 标签是配置字段到环境变量名的单一映射来源。
+  - [CONFIRMED] `.env` 会在 `Manager.Load` 中自动加载，并能覆盖配置实例字段。
+  - [CONFIRMED] 配置热重载也执行环境变量覆盖，避免首载和 reload 行为漂移。
+  - [CONFIRMED] 未加前缀变量仍作为兼容 fallback。
+- Evidence：`internal/config` 目标测试、cmd/app 相关测试和全量回归均通过。
+
+### TS-P2-012：删除重复配置 env-name 常量
+
+- Status：COMPLETED
+- Task ID：TASK-P2-012
+- Matrix：TM-P2-014
+- Purpose：删除 `internal/config` 中按模块导出的环境变量名常量，让配置结构体 `envname` 标签成为唯一字段命名来源。
+- Allowed Files：`internal/config/constants.go`、`internal/config/manager_test.go`、项目状态文档。
+- Forbidden Files：真实 `.env`、密钥、部署凭据、数据库 schema、HTTP 路由、业务模块、生产迁移、远程服务器配置。
+- Verification Commands：
+  - `rg -n "Env(DB|Redis|Server|Log|I18n|CORS|InitDB|Executor|Storage|Plugin|IAM)" internal cmd types deploy docs .env.example Dockerfile -S`：PASS，无匹配。
+  - `go test ./internal/config -count=1`：PASS。
+  - `go test ./cmd/server ./internal/app/... -count=1`：PASS。
+  - `go test ./... -count=1`：PASS。
+  - `git diff --check`：PASS，仅有 Windows LF/CRLF 提示。
+- Acceptance：
+  - [CONFIRMED] `EnvDB*` / `EnvRedis*` / `EnvServer*` 等重复 env-name 常量已删除。
+  - [CONFIRMED] 配置测试通过 `taggedEnvName` 从结构体标签读取变量名。
+  - [CONFIRMED] 动态前缀变量优先、未加前缀 fallback 和 `.env` 自动加载行为不回归。
+- Evidence：`constants.go` 仅保留动态前缀 helper、`.env` 文件名、分隔符和配置段名常量；目标包测试、相关集成测试和全量回归均通过。
 
 ## 历史时间切片
 
