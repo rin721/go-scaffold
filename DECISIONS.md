@@ -283,3 +283,14 @@
 - Reason：该设计延续 `pkg/plugin` 被动注册边界，又能为后续插件与权限能力建立公共基础设施；风险在于 IAM/插件容易被误解为完整生产权限系统，因此必须明确非目标并保留 Docker 验证阻塞。
 - Consequences：`pkg/plugin` 不导入 `pkg/iam`、日志、配置或 `internal/*`；`pkg/iam` 不导入 `pkg/plugin`；配置创建的插件仅限 HTTP adapter；本地插件继续由代码显式注册；JWT 中间件、数据库版权限、OPA/Casbin、Go `.so` 插件、插件发现、RPC/WS、生产部署、镜像发布和密钥管理仍需单独确认。
 - Related Tasks：TASK-P2-005、TASK-P2-006、TASK-P2-007、TASK-P2-008、TASK-P2-009、TASK-P2-010
+
+### DEC-027：当前项目未达第一版发布条件
+
+- Date：2026-05-27
+- Status：ACCEPTED
+- Context：用户纠正“当前项目还未开发完整，半成品都算不上，不应该发布第一版”。此前状态文档把 Docker build 验证通过后的总体状态写成 `COMPLETED`，容易被误解为项目整体完成或 v1 可发布。
+- Decision：接受该纠正。TASK-P2-004 至 TASK-P2-010 的完成判断只代表对应时间切片完成；项目整体状态必须标记为 `IN_DEVELOPMENT_NOT_RELEASE_READY`，当前不得发布第一版、不得标记 release-ready。
+- Alternatives：保持总体 `COMPLETED`；仅在部署文档中注明未真实 production；直接创建 v1 发布任务。
+- Reason：当前仓库仍缺完整产品功能、第一版验收清单、真实 production 运行、镜像发布流水线、生产迁移、完整 auth/rbac 和密钥管理等发布前条件。
+- Consequences：后续工作必须先确认新的开发范围或第一版发布验收清单，再拆分任务/时间切片；Docker build 通过仍保留为 TASK-P2-004 的有效证据，但不构成项目发布证据。
+- Related Tasks：USER-CORRECTION-2026-05-27-RELEASE-READINESS、TASK-P2-004

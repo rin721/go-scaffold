@@ -14,6 +14,7 @@
 
 ## Issue Details
 
+- ISSUE-STATUS-004：CLOSED。用户纠正当前项目还未开发完整，不应发布第一版；此前项目总体状态写为 `COMPLETED`，容易把 TASK-P2-004 Docker build 通过误判为 v1 release-ready。本轮已将项目整体状态改为 `IN_DEVELOPMENT_NOT_RELEASE_READY`，并在状态、验收、风险、决策、路线图、Backlog、README、部署说明和交接文档中明确 Docker build 只作为切片证据，不代表第一版发布。
 - ISSUE-P2-005：CLOSED。TASK-P2-004 已补齐 Dockerfile、production Compose 示例、production 配置样例、统一 `deploy.sh` 部署入口和手动 production workflow 闸门；shfmt Bash parser、临时 Go YAML 解析、actionlint、旧引用 `rg` 检查、全量 Go 回归、server build 和 `git diff --check` 均通过。2026-05-27 用户在 Linux Docker 环境补跑 `docker build --build-arg GOPROXY=https://goproxy.cn,direct -t go-scaffold:local .` 成功，BuildKit 输出 `23/23 FINISHED`，镜像标记为 `docker.io/library/go-scaffold:local`。
 - ISSUE-P2-006：无新增失败项。TASK-P2-005 至 TASK-P2-010 已完成插件钩子运行时、HTTP 远程插件传输、IAM 公共接口、配置/app/reload/lifecycle 接入；`go test ./pkg/plugin/... -count=1`、`go test ./pkg/iam/... -count=1`、`go test ./internal/config ./internal/app/... -count=1`、`go test ./... -count=1`、server build 和 `git diff --check` 均通过。
 - ISSUE-INFRA-002：`AGENTS.md` 缺失但状态文件声称已补齐。已在 TASK-INFRA-002 中修复，诊断报告见 `docs/reports/status_diagnostics/2026-05-25-task-infra-002-agents-md-missing.md`。
@@ -77,6 +78,7 @@
 - 2026-05-27：用户再次发送“下一步”后复验同一阻塞；当前环境仍无 Docker 兼容 CLI，`docker build -t go-scaffold:local .` 未执行，`ISSUE-P2-005` 保持 OPEN。
 - 2026-05-27：用户远端补跑 Docker build 时 `go mod download` 因 Go 代理网络超时失败；旧 Dockerfile 未声明 `GOPROXY` build arg，导致代理参数未生效。本轮已补 Dockerfile 代理参数和 BuildKit 缓存，`ISSUE-P2-005` 保持 OPEN。
 - 2026-05-27：用户在 Linux Docker 环境用更新后的 Dockerfile 补跑 `docker build --build-arg GOPROXY=https://goproxy.cn,direct -t go-scaffold:local .` 成功，`ISSUE-P2-005` 关闭。
+- 2026-05-27：用户纠正当前项目未达第一版发布条件；记录并关闭 `ISSUE-STATUS-004`，后续不得把当前切片完成误判为 v1 发布。
 - 2026-05-27：记录 TASK-P2-005 至 TASK-P2-010 无新增失败项，插件钩子运行时、远程插件传输、IAM 公共接口和 app 组合层接入已通过验证。
 - 2026-05-25：记录并关闭 `AGENTS.md` 缺失导致的 Agent 入口冲突。
 - 2026-05-25：创建 `ISSUES.md`，补齐 `docs/ai/prompt.md` 要求的项目问题记录入口。

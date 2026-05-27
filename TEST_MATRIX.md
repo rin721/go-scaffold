@@ -5,9 +5,9 @@
 - 项目：go-scaffold
 - 任务：TASK-P2-004 至 TASK-P2-010
 - 时间切片：TS-P2-004 至 TS-P2-010
-- 状态：COMPLETED
+- 状态：CURRENT_SLICES_COMPLETED_NOT_RELEASE_READY
 - 最后更新：2026-05-27
-- 原则：本文定义后续优化的验证边界，不代表测试代码已经实现。
+- 原则：本文定义后续优化的验证边界，不代表测试代码已经实现；已完成切片不等于第一版发布验收完成。
 
 ## 验证分层
 
@@ -69,6 +69,7 @@
 | TM-P2-009 | `pkg/iam` memory | IAM 公共类型、token 凭证、策略授权、通配、拒绝优先、过期和默认拒绝可验证 | `pkg/iam/**/*` | `go test ./pkg/iam/... -count=1` | [CONFIRMED] TASK-P2-008 已完成；仍非完整业务登录/RBAC | RISK-021 |
 | TM-P2-010 | 配置与 app 组装 | `plugin` / `iam` 默认 disabled，配置 HTTP 插件 adapter、远程钩子绑定和 app 层 IAM hook 可验证 | `internal/config/**/*`、`internal/app/**/*` | `go test ./internal/config ./internal/app/... -count=1` | [CONFIRMED] TASK-P2-009 已完成 | RISK-020、RISK-021 |
 | TM-P2-011 | reload、lifecycle 与全量验证 | 配置重载先构建新实例再替换，失败保留旧实例；关闭顺序安全；全量回归通过 | `internal/app/**/*`、状态文档 | `go test ./internal/config ./internal/app/... -count=1`；`go test ./... -count=1`；`go build -o <temp> ./cmd/server`；`git diff --check` | [CONFIRMED] TASK-P2-010 已完成 | RISK-020、RISK-021 |
+| TM-P2-012 | 第一版发布验收清单 | 明确 v1 功能范围、真实环境验证、镜像发布、生产迁移、密钥管理、回滚和发布门禁 | 项目状态文档、发布说明、后续任务文档 | 待用户确认后定义 | [NOT_STARTED] 用户已纠正当前项目不应发布第一版；需单独确认后才能提升 | RISK-022 |
 
 ## P1 优化任务草案
 
@@ -129,8 +130,8 @@
 
 当前合法下一项：
 
-- [CONFIRMED] TASK-P2-004 至 TASK-P2-010 已完成；当前无自动下一实现任务。
-- [CONFIRMED] 后续镜像发布流水线、真实 production 运行、生产迁移、auth/rbac 或插件扩展仍必须由用户重新确认并拆成新的任务/时间切片。
+- [PENDING_USER_CONFIRMATION] TASK-P2-004 至 TASK-P2-010 的切片已完成；项目整体仍未达第一版发布条件，当前无自动下一实现任务。
+- [CONFIRMED] 后续镜像发布流水线、真实 production 运行、生产迁移、auth/rbac、插件扩展或 v1 发布验收清单仍必须由用户重新确认并拆成新的任务/时间切片。
 
 ## 验收门禁
 
@@ -145,3 +146,4 @@
 - [CONFIRMED] 本文不要求一次性实现所有测试代码；具体测试按 P1 时间切片逐项落地。
 - [CONFIRMED] 本文不修改 Go 代码、配置结构、数据库结构或 HTTP 路由。
 - [CONFIRMED] 本文当前完成插件钩子运行时与 IAM 公共接口；不提升镜像发布流水线、真实 production 运行、生产迁移、JWT 中间件、数据库版权限、OPA/Casbin、Go `.so` 插件、插件发现或 RPC/WS 传输。
+- [CONFIRMED] 本文不授权发布第一版；v1 发布验收必须单独确认。

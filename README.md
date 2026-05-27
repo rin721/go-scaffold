@@ -2,6 +2,8 @@
 
 当前阶段只保留基础设施启动链路和一个 demo CRUD 示例，暂不实现 auth/rbac。
 
+注意：当前项目仍在开发中，未达第一版发布条件；Docker 构建、部署示例和 CI 门禁只是阶段性制品，不代表 v1 可发布。
+
 ## 启动
 
 ```bash
@@ -53,3 +55,4 @@ go test ./... -count=1
 - 直接下载安装入口见 `script/install.sh`，可通过 `curl -fsSL -o deploy.sh <raw-url>` 后执行。
 - 手动远程部署 workflow 见 `.github/workflows/deploy-remote.yml`，支持 `staging` / `production` 手动环境选择。
 - 部署边界、Secrets 配置和发布前检查见 `docs/deployment.md`。
+- 当前不发布第一版；发布验收清单、真实 production 运行、镜像发布、生产迁移和密钥管理仍需单独确认。

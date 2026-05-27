@@ -2,7 +2,7 @@
 
 ## 范围
 
-本文记录当前项目的最小发布前检查、Linux Docker 制品和手动远程部署边界。当前仓库提供 CI 质量门禁、`Dockerfile`、production Compose 示例、统一 `deploy.sh` 部署入口和手动远程部署 workflow；本地会话不执行真实部署、不推送镜像、不连接服务器、不处理生产密钥。
+本文记录当前项目的最小发布前检查、Linux Docker 制品和手动远程部署边界。当前仓库提供 CI 质量门禁、`Dockerfile`、production Compose 示例、统一 `deploy.sh` 部署入口和手动远程部署 workflow；这些内容只是部署准备制品，不代表项目已达第一版发布条件。本地会话不执行真实部署、不推送镜像、不连接服务器、不处理生产密钥。
 
 ## 发布前检查
 
@@ -14,7 +14,7 @@ go build -o ./bin/go-scaffold-server ./cmd/server
 git diff --check
 ```
 
-CI 中会报告 Go 格式漂移，并强制执行全量测试、server 构建和空白检查。当前仓库存在历史 gofmt 漂移，硬门禁需要单独任务收敛。
+CI 中会报告 Go 格式漂移，并强制执行全量测试、server 构建和空白检查。当前仓库存在历史 gofmt 漂移，硬门禁需要单独任务收敛。以上只是最低工程检查，不构成第一版发布验收清单。
 
 ## Docker 镜像
 
@@ -32,7 +32,7 @@ docker build \
   -t go-scaffold:local .
 ```
 
-当前会话环境未安装 Docker CLI，因此上述镜像构建命令尚未在本机完成验证；需在安装 Docker 的 Linux 或 Docker Desktop 环境补跑。
+用户已在 Linux Docker 环境执行 `docker build --build-arg GOPROXY=https://goproxy.cn,direct -t go-scaffold:local .` 并通过，BuildKit 输出 `23/23 FINISHED`，镜像标记为 `docker.io/library/go-scaffold:local`。该验证只证明 Dockerfile 可构建，不代表已发布第一版或已完成真实 production 部署。
 
 镜像内置 `deploy/config.production.example.yaml` 作为默认 `/app/configs/config.yaml`，其中 server 绑定 `0.0.0.0:9999`。真实 production 应在远程主机用只读挂载覆盖 `/app/configs/config.yaml`，不要把真实数据库密码、Redis 密码或 token 写入镜像。
 
@@ -226,6 +226,8 @@ go run ./cmd/server initdb --config=configs/config.yaml
 
 ## 尚未实现
 
+- 第一版发布验收清单。
+- 真实 production 运行验收。
 - 自动 production CD。
 - 镜像发布 workflow。
 - Kubernetes、systemd、云平台部署模板。

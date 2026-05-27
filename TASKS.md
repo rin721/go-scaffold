@@ -3,9 +3,9 @@
 ## 当前合法任务
 
 - Task ID：NONE
-- Status：COMPLETED
+- Status：PENDING_USER_CONFIRMATION
 - Time Slice：NONE
-- Summary：`dev.tmp/new-plugin.md` 设计已完成，TASK-P2-004 的 Docker build 验证也已解除阻塞。用户已在 Linux Docker 环境运行 `docker build --build-arg GOPROXY=https://goproxy.cn,direct -t go-scaffold:local .` 并得到 BuildKit `23/23 FINISHED`。当前无自动下一实现任务；镜像发布流水线、真实 production 运行、生产迁移和 auth/rbac 等仍需重新确认。
+- Summary：[ACCEPT] 用户纠正当前项目仍未开发完整，不应发布第一版。`dev.tmp/new-plugin.md` 设计已完成，TASK-P2-004 的 Docker build 验证也已解除阻塞；这些只代表已确认切片完成，不代表项目整体完成或 v1 可发布。当前无自动下一实现任务；下一阶段开发范围或第一版发布验收清单需由用户重新确认。
 
 ## 任务列表
 

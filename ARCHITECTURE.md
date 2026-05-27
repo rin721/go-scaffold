@@ -3,9 +3,10 @@
 ## 架构状态
 
 - 项目：go-scaffold
-- 当前焦点：项目治理与优化路线 v1
+- 当前焦点：项目治理与优化路线；项目仍未达第一版发布条件
 - 状态：COMPLETED
-- 最后更新：2026-05-26
+- 发布状态：NOT_RELEASE_READY
+- 最后更新：2026-05-27
 
 ## 已确认架构原则
 
@@ -15,6 +16,7 @@
 - [CONFIRMED] `internal/modules/demo` 暂定为长期标准示例。
 - [CONFIRMED] `pkg/*` 采用混合策略，后续必须逐包标注公共 API 或内部支撑定位。
 - [CONFIRMED] 迁移采用 dev-prod 分层策略：server-start/initdb 可执行 demo `AutoMigrate`，reload 不执行隐式 schema 变更，生产/bootstrap 迁移框架延后。
+- [ACCEPT] 当前 Docker build 和部署制品完成不代表 v1 架构完成；第一版发布前仍需确认完整产品范围、生产迁移、真实环境运行、密钥管理和发布验收清单。
 
 ## 目标依赖方向
 
@@ -41,6 +43,7 @@ types/*
 | 插件系统 | v1 local/http 保留；注册责任已收拢为被动 registry/runtime；TASK-P2-005 至 TASK-P2-007 已增加 hooks、HTTP server helper 和 `RemoteHook` | [CONFIRMED] rpc/ws/discovery、插件发现和 Go `.so` 插件仍留在 Backlog | [CONFIRMED] |
 | IAM/auth/JWT | `pkg/iam` 公共接口与 memory 实现已完成；JWT 中间件和业务 RBAC 仍不实现 | 后续如需业务登录、HTTP 中间件或数据库版权限，必须单独提升任务 | [CONFIRMED] |
 | CI/CD 与部署 | 先建立非生产质量门禁、手动部署说明、远程部署显式参数契约、手动远程部署 workflow、Docker production 制品和远程 Linux 统一 `deploy.sh` 入口；真实生产运行仍需单独确认 | [CONFIRMED] TASK-P2-001 已新增 CI workflow 和部署说明；TASK-P2-002 已新增 `deploy.sh` / `script/install.sh` 显式参数契约；TASK-P2-003 已新增手动 staging 远程部署 workflow；TASK-P2-004 已补 Dockerfile、production Compose 示例、统一 `deploy.sh` 部署入口、手动 production 闸门并完成 Docker build 验证；镜像发布和真实 production 运行仍需单独确认 | [CONFIRMED] |
+| 第一版发布 | 当前项目仍在开发中，不应发布第一版 | 需先确认 v1 功能范围、发布验收清单、真实运行、迁移、密钥管理和回滚策略，再拆分任务 | [NOT_RELEASE_READY] |
 
 ## 需要详细分析的模块
 
@@ -103,4 +106,5 @@ types/*
 - [CONFIRMED] TASK-INFRA-003 已修复 TASK-P1-016/017 后背景文档中的旧状态漂移。
 - [CONFIRMED] 用户选择 D，CI 质量门禁与部署说明首切片已完成 TASK-P2-001。
 - [CONFIRMED] 用户选择 C，进入真实 CD / 镜像发布 / 远程部署自动化范围确认；TASK-P2-002 已完成远程部署 `.env` 模板，TASK-P2-003 已完成手动 staging 远程部署 workflow，TASK-P2-004 已新增统一 `deploy.sh` 部署入口。
+- [ACCEPT] 用户纠正当前项目还未开发完整，不应发布第一版；后续发布路线需重新确认验收清单。
 - [DEFERRED] 生产迁移框架需要单独需求和架构确认，不属于当前切片。

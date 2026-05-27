@@ -2,6 +2,14 @@
 
 ## 最新变更
 
+### 2026-05-27 - User correction - project not release-ready
+
+- 变更：接受用户纠正，当前项目仍未开发完整，不应发布第一版。
+- 变更：将项目整体状态从易误解的 `COMPLETED` 调整为 `IN_DEVELOPMENT_NOT_RELEASE_READY`；TASK-P2-004 至 TASK-P2-010 的切片完成证据保留。
+- 变更：新增 `DEC-027`、`RISK-022`、`BL-027`、`TM-P2-012` 和 `ISSUE-STATUS-004`，明确 Docker build 通过、部署制品和基础设施切片完成不等于 v1 release-ready。
+- 范围：仅更新文档和状态；未修改 Go 代码、配置 schema、部署脚本或 workflow；未触发真实部署、未推送镜像、未执行生产迁移。
+- 状态：当前合法任务为 `NONE / NONE / PENDING_USER_CONFIRMATION`；后续需用户确认新的开发范围或第一版发布验收清单。
+
 ### 2026-05-27 - TASK-P2-004 - Docker build verification completed
 
 - 变更：记录用户在 Linux Docker 环境补跑 `docker build --build-arg GOPROXY=https://goproxy.cn,direct -t go-scaffold:local .` 成功，解除 TASK-P2-004 / TS-P2-004 的唯一阻塞项。

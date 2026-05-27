@@ -3,23 +3,25 @@
 ## 最新验证
 
 - 日期：2026-05-27
-- 任务 ID：TASK-P2-004
-- 时间切片 ID：TS-P2-004
+- 任务 ID：USER-CORRECTION-2026-05-27-RELEASE-READINESS
+- 时间切片 ID：N/A
 - 状态：COMPLETED
-- 范围：记录用户 Linux Docker 环境中的 Docker build 通过结果，解除 TASK-P2-004 / TS-P2-004 阻塞并关闭 `ISSUE-P2-005`。
+- 范围：接受用户纠正，明确当前项目仍未达第一版发布条件；保留 TASK-P2-004 Docker build 通过证据，但不把它解释为 v1 release-ready。
 
 ## 执行命令
 
 | 命令 | 结果 | 备注 |
 |---|---|---|
 | 必读文件读取 | PASS | 已读取 `AGENTS.md`、Agent 规则、状态、任务、切片、需求、架构、验收、问题、测试报告、交接和恢复所需背景文件 |
+| 用户纠正审查 | ACCEPT | 用户意图为撤销“可发布第一版/项目整体完成”的误读；本轮按用户修正规程更新文档状态 |
 | 用户 Linux `docker build --build-arg GOPROXY=https://goproxy.cn,direct -t go-scaffold:local .` 输出审查 | PASS_REMOTE | BuildKit 输出 `23/23 FINISHED`；`go mod download`、`go build`、runtime image copy 和 export 均完成；镜像标记为 `docker.io/library/go-scaffold:local` |
-| Go 测试 | NOT_RUN | 本轮仅根据外部 Docker 验证更新状态文档，未修改 Go 代码；此前 TASK-P2-004 的全量 Go 回归已通过 |
+| Go 测试 | NOT_RUN | 本轮仅更新文档和状态，未修改 Go 代码；此前 TASK-P2-004 至 TASK-P2-010 的相关验证已通过 |
 | `git diff --check` | PASS | 仅输出 Windows LF/CRLF 提示，不存在空白错误 |
 
 ## 结果
 
-- [CONFIRMED] TASK-P2-004 的 Docker build 验证已通过，阻塞解除。
+- [ACCEPT] 当前项目仍未开发完整，不应发布第一版。
+- [CONFIRMED] TASK-P2-004 的 Docker build 验证已通过，阻塞解除；该证据仅覆盖 Docker 制品切片。
 - [CONFIRMED] 用户 Linux 构建使用更新后的 Dockerfile 和 `GOPROXY=https://goproxy.cn,direct`，构建 214.8s 完成，镜像 sha256 为 `4df5520bcf1c45a922be8db2e6c5e58ae8fc025f34bea5f1d4bf33f0b2301785`。
 - [CONFIRMED] 当前本机会话仍未执行 Docker build；完成判断基于用户提供的 Linux Docker 构建输出。
 - [CONFIRMED] TASK-P2-005 至 TASK-P2-010 的插件/IAM 主线保持完成，不受本轮 Docker 环境阻塞影响。
@@ -27,13 +29,14 @@
 ## 失败项
 
 - 无代码失败项。
-- 当前任务无未关闭阻塞项；真实 production 运行、镜像发布流水线和生产迁移框架仍不属于本切片完成范围。
+- 当前任务无未关闭阻塞项；第一版发布被 `RISK-022` 阻塞。真实 production 运行、镜像发布流水线、生产迁移框架、完整 auth/rbac、密钥管理和发布验收清单仍不属于已完成范围。
 
 ## 验证结论
 
-- TASK-P2-004 / TS-P2-004 转为 `COMPLETED`。
-- TASK-P2-005 至 TASK-P2-010 完成判定保持：COMPLETED。
-- 当前无自动下一实现任务；后续镜像发布、真实 production 运行或生产迁移需用户重新确认。
+- TASK-P2-004 / TS-P2-004 完成判定保持：`COMPLETED`。
+- TASK-P2-005 至 TASK-P2-010 完成判定保持：`COMPLETED`。
+- 项目整体状态修正为 `IN_DEVELOPMENT_NOT_RELEASE_READY`。
+- 当前无自动下一实现任务；后续开发范围或第一版发布验收清单需用户重新确认。
 
 ### 2026-05-27 TASK-P2-004 Docker build completed
 

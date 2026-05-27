@@ -5,8 +5,8 @@
 - 项目：go-scaffold
 - 任务：TASK-OPT-003
 - 时间切片：TS-OPT-003
-- 状态：COMPLETED
-- 最后更新：2026-05-26
+- 状态：COMPLETED_BOUNDARY_DOC_NOT_RELEASE_READY
+- 最后更新：2026-05-27
 - 原则：本文只记录事实、风险和优化候选项，不授权 Go 代码修改。
 
 ## 总体依赖方向
@@ -286,3 +286,4 @@ types/*
 - [CONFIRMED] `types/*` 契约边界已完成。
 - [CONFIRMED] 用户已选择 A，`BL-020` 首批 `pkg/*` 行为测试已完成 TASK-P1-011 / TS-P1-011，第二批已完成 TASK-P1-012 / TS-P1-012，第三批 `pkg/cache` 已完成 TASK-P1-013 / TS-P1-013。
 - [CONFIRMED] 用户选择 A，`BL-006` 第一阶段包 README 中文化已完成 TASK-P1-017 / TS-P1-017。
+- [ACCEPT] 用户纠正当前项目还未开发完整，不应发布第一版；本文的模块边界和切片完成证据不构成 v1 发布验收。

@@ -3,8 +3,8 @@
 ## 风险登记状态
 
 - Project：go-scaffold
-- Phase：P2 Linux Docker production 部署制品完成
-- Status：COMPLETED
+- Phase：项目开发中，未达第一版发布条件
+- Status：IN_DEVELOPMENT_NOT_RELEASE_READY
 - Last Updated：2026-05-27
 
 ## 风险列表
@@ -221,6 +221,9 @@
 - Impact：使用者可能把 Dockerfile、Compose 示例或 production workflow 闸门误认为已经完成真实生产上线，从而跳过 GitHub Environment 审批、真实镜像标签确认、远程目录权限、回滚和迁移检查。
 - Trigger：用户要求进入 production 部署；仓库新增 production 命名的部署制品。
 - Mitigation：所有制品使用占位值和 example 文件；workflow 仅手动触发，production 要求 `deploy-production`；远程 Linux 部署脚本按显式参数注入运行环境且不打印 password/token/secret 值；文档明确本会话未触发真实部署、未连接服务器、未推送镜像、未执行迁移。
+- Owner：User/Agent
+- Status：[RISK] 制品和 Docker build 验证已完成；不得宣称真实 production 已上线
+- Blocking：No；但阻塞把本切片结果宣称为真实 production 已上线。
 
 ### RISK-019：命令行传递密钥可能暴露到 shell history 或进程列表
 
@@ -229,8 +232,7 @@
 - Mitigation：脚本和文档明确提示风险；脚本不打印 password/token/secret 类参数值；GitHub workflow 依赖 Secrets masking；真实生产建议使用受控 shell、CI secret masking 或主机密钥管理器。
 - Status：[CONFIRMED] 已记录并在部署文档、脚本帮助文本中提示
 - Owner：User/Agent
-- Status：[RISK] 制品和 Docker build 验证已完成；不得宣称真实 production 已上线
-- Blocking：No；但阻塞把本切片结果宣称为真实 production 已上线。
+- Blocking：No；但阻塞把命令行显式参数当作密钥管理方案。
 
 ### RISK-020：插件钩子成为隐式控制平面
 
@@ -256,6 +258,18 @@
 - Status：[CONFIRMED] 非目标已记录；生产权限能力仍需单独确认
 - Blocking：No；会阻塞把当前 IAM 直接宣称为完整生产 auth/rbac。
 
+### RISK-022：把当前切片完成误判为第一版发布
+
+- Type：Release/Process
+- Severity：High
+- Probability：High
+- Impact：后续 Agent 或维护者可能把 Docker build、部署制品和若干基础设施切片完成误解为项目整体完成，从而错误发布 v1、跳过剩余需求、发布验收、生产迁移、密钥管理和真实环境验证。
+- Trigger：状态文档曾把总体状态写为 `COMPLETED`，而用户明确纠正项目还未开发完整，不应发布第一版。
+- Mitigation：将项目整体状态改为 `IN_DEVELOPMENT_NOT_RELEASE_READY`；保留 TASK-P2-004 至 TASK-P2-010 的切片完成证据，但明确它们不构成 v1 发布验收；后续发布必须先确认发布验收清单并拆分任务/时间切片。
+- Owner：User/Agent
+- Status：[RISK] 已记录并完成本轮文档纠偏；仍阻塞任何第一版发布声明
+- Blocking：Yes，阻塞 v1 发布、release-ready 标记和真实 production 发布声明。
+
 ## 决策状态
 
 | ID | 决策 | 阻塞内容 | 状态 |
@@ -272,3 +286,4 @@
 | RD-010 | 确认真实 CD / 镜像发布 / 远程部署自动化边界 | 用户选择 C 并确认远程部署；env 模板和手动 staging workflow 已完成，production 与镜像发布仍需确认 | [CONFIRMED] |
 | RD-011 | 确认 Linux Docker production 部署制品 | 用户确认 production 部署方向；本切片只补制品和手动闸门，不执行真实 production | [CONFIRMED] |
 | RD-012 | 确认插件钩子运行时与 IAM 公共接口主线 | 用户确认 `dev.tmp/new-plugin.md` 设计；TASK-P2-005 至 TASK-P2-010 已实现并验证，TASK-P2-004 Docker build 阻塞已解除 | [CONFIRMED] |
+| RD-013 | 确认当前项目未达第一版发布条件 | 用户纠正当前项目仍未开发完整；Docker build 和部署制品完成不等于 v1 release-ready | [CONFIRMED] |

@@ -3,9 +3,16 @@
 ## 验收状态
 
 - Project：go-scaffold
-- Phase：P2 Linux Docker production 部署制品完成
-- Status：COMPLETED
+- Phase：项目开发中，未达第一版发布条件
+- Status：NOT_RELEASE_READY
 - Last Updated：2026-05-27
+
+## 发布验收状态
+
+- [ACCEPT] 用户纠正：当前项目还未开发完整，不应该发布第一版。
+- [CONFIRMED] `docker build --build-arg GOPROXY=https://goproxy.cn,direct -t go-scaffold:local .` 通过只作为 TASK-P2-004 / TS-P2-004 的切片验收证据。
+- [BLOCKING] 第一版发布验收清单尚未确认；真实 production 运行、镜像发布流水线、生产迁移、完整 auth/rbac、密钥管理和产品级验收仍未完成。
+- [CONFIRMED] 在用户确认新的发布目标和任务切片前，不得把当前仓库标记为 v1、release-ready 或第一版已发布。
 
 ## 本轮启动验收
 
@@ -85,9 +92,10 @@
 - TASK-P2-003 手动远程部署 workflow：COMPLETED，staging/manual/Secrets/SSH/Docker Compose 路径已新增，本会话未执行真实部署
 - TASK-P2-004 Linux Docker production 部署制品：COMPLETED，Dockerfile、production Compose 示例、统一 `deploy.sh` 部署入口和手动 production 闸门已补齐；用户已在 Linux Docker 环境执行带 `GOPROXY` 的 Docker build 并通过
 - TASK-P2-005 至 TASK-P2-010 插件钩子运行时与 IAM 公共接口：COMPLETED，`pkg/plugin/hooks`、hook-aware manager、HTTP 远程插件服务端、`RemoteHook`、`pkg/iam` memory、配置/app/reload/lifecycle 接入均已完成并通过验证
+- 项目整体 / 第一版发布：NOT_RELEASE_READY，当前完成项是若干治理、测试、部署制品和基础设施切片，不等同于完整产品或第一版发布
 - Agent 基础设施补齐：COMPLETED
 - Agent 基础设施一致性修复：COMPLETED
-- 代码实现：COMPLETED，TASK-P1-016 已完成并通过验证
+- 已确认切片代码实现：COMPLETED，TASK-P1-016 及后续已确认切片均按各自范围完成并通过验证；不代表项目整体或第一版发布完成
 
 ## Prompt 全量产物验收
 

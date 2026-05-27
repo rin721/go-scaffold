@@ -4,8 +4,8 @@
 
 - Time Slice ID：NONE
 - Task ID：NONE
-- Status：COMPLETED
-- Summary：`dev.tmp/new-plugin.md` 主线已完成；TASK-P2-004 至 TASK-P2-010 均已通过验证。用户已在 Linux Docker 环境补跑 `docker build --build-arg GOPROXY=https://goproxy.cn,direct -t go-scaffold:local .`，BuildKit 输出 `23/23 FINISHED`。当前无自动下一实现任务。
+- Status：PENDING_USER_CONFIRMATION
+- Summary：[ACCEPT] 用户纠正当前项目仍未开发完整，不应发布第一版。`dev.tmp/new-plugin.md` 主线已完成；TASK-P2-004 至 TASK-P2-010 均已通过验证。用户已在 Linux Docker 环境补跑 `docker build --build-arg GOPROXY=https://goproxy.cn,direct -t go-scaffold:local .`，BuildKit 输出 `23/23 FINISHED`。当前无自动下一实现任务；后续必须先确认新的开发范围或第一版发布验收清单。
 
 ## 时间切片列表
 

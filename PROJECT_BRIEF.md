@@ -3,9 +3,9 @@
 ## 项目身份
 
 - Project：go-scaffold
-- Current Phase：P2 Linux Docker production 部署制品完成
-- Overall Status：COMPLETED
-- Last Updated：2026-05-26
+- Current Phase：项目开发中，未达第一版发布条件
+- Overall Status：IN_DEVELOPMENT_NOT_RELEASE_READY
+- Last Updated：2026-05-27
 - Source Rule：`docs/ai/prompt.md`
 
 ## 摘要
@@ -17,6 +17,7 @@
 - [CONFIRMED] 本轮目标是生成和重写中文项目启动材料，重新启动“全项目分析与优化路线”主线。
 - [RISK] 旧状态文档曾停留在插件系统 v1 收尾，容易让后续“下一步”偏离当前目标。
 - [CONFIRMED] 根文档、模板和第一阶段 `pkg/*/README.md` 中文化已完成；历史文档更大范围中文化仍需单独确认。
+- [ACCEPT] 用户已纠正：当前项目还未开发完整，不应发布第一版；Docker build 通过只代表部署制品切片验证通过。
 
 ## 一句话目标
 
@@ -37,6 +38,7 @@
 - [CONFIRMED] 基础设施包覆盖数据库、日志、HTTP server、缓存、国际化、存储、执行器、SQL 生成、插件、工具等能力。
 - [CONFIRMED] 当前全量测试通过。
 - [CONFIRMED] 当前已建立非生产 CI 质量门禁、手动部署说明、手动远程部署 workflow 和统一 `deploy.sh` 部署入口。
+- [RISK] 当前仍未达 v1 发布条件，不能把 CI/CD 制品、Docker build 或基础设施切片完成宣称为第一版可发布。
 - [INFERRED] `internal/app` 的组合根适合成为后续边界治理的中心。
 
 ## 当前问题
@@ -70,11 +72,13 @@
 - [CONFIRMED] TASK-P2-001 已完成，CI 质量门禁和部署说明首切片已落地。
 - [CONFIRMED] TASK-P2-003 已完成，手动 staging 远程部署 workflow 已落地。
 - [CONFIRMED] 当前无自动下一实现任务。
+- [CONFIRMED] 当前项目整体仍为开发中；下一阶段开发范围或第一版发布验收清单必须重新确认。
 
 ### P2
 
 - [DEFERRED] auth/rbac、部署流水线、性能测试、多租户、脚手架生成器、插件系统 rpc/ws/discovery 扩展。
 - [CONFIRMED] 用户已选择真实 CD、镜像发布和远程部署自动化方向，并确认使用远程部署；TASK-P2-002 已补 `deploy.sh` / `script/install.sh` 显式参数契约 变量模板，TASK-P2-003 已补手动 staging 远程部署 workflow，TASK-P2-004 已补 Dockerfile、production Compose 示例、统一 `deploy.sh` 部署入口、手动 production 闸门并完成 Docker build 验证；镜像发布和真实 production 运行仍需单独确认。
+- [DEFERRED] 第一版发布验收清单、真实 production 运行、生产迁移、密钥管理和完整产品功能仍需单独确认。
 
 ## 非目标
 
@@ -83,6 +87,7 @@
 - [CONFIRMED] 本轮不新增业务功能。
 - [CONFIRMED] 本轮不实现 auth/rbac。
 - [CONFIRMED] 本轮不部署、不执行生产命令、不执行不可逆迁移。
+- [CONFIRMED] 本轮不发布第一版、不创建 v1 release、不标记 release-ready。
 
 ## 推荐默认
 
