@@ -203,17 +203,21 @@ curl http://127.0.0.1:9999/ready
 ## 初始化数据库
 
 ```bash
-go run ./cmd/server initdb --config=configs/config.yaml
+go run ./cmd/server db --config=configs/config.yaml --operation=schema
+go run ./cmd/server db --config=configs/config.yaml --operation=schema --apply
+go run ./cmd/server db --config=configs/config.yaml --operation=database
 ```
 
-`initdb` 当前用于 demo schema bootstrap。生产迁移框架尚未实现，生产数据库结构变更必须单独确认，不能依赖运行期隐式 `AutoMigrate`。
+Current rule: `db --operation=database` and `db --operation=schema` print sqlgen-generated DDL. Add `--apply` only when the target connection should execute that generated DDL and the environment has been explicitly confirmed. The removed `initdb` command, SQL script directory, and runtime `AutoMigrate` path must not be restored without a new confirmed task. Production schema changes still require a separately confirmed migration flow.
+
+For command usage and extension rules, see [`db-cli.md`](db-cli.md).
 
 ## 手动发布步骤
 
 1. 从干净工作区构建二进制。
 2. 在目标环境准备配置文件或环境变量。
 3. 先在目标环境执行只读健康检查所需依赖验证。
-4. 如需要初始化 demo schema，显式执行 `initdb`。
+4. 如需要初始化 demo schema，显式执行 `cmd/server db --operation=schema --apply`。
 5. 启动 server。
 6. 检查 `/health` 和 `/ready`。
 7. 保留上一版本二进制和配置以便回滚。

@@ -6,7 +6,6 @@ type AppMode = modeapp.Mode
 
 const (
 	ModeServer = modeapp.ModeServer
-	ModeInitDB = modeapp.ModeInitDB
 )
 
 const (
@@ -16,11 +15,3 @@ const (
 )
 
 var ConstantsI18nSupportedLanguages = []string{"zh-CN", "en-US"}
-
-const (
-	ConstantsInitDBScriptDir          = "./scripts/initdb"
-	ConstantsInitDBLockFile           = ".initialized"
-	ConstantsInitDBScriptFileName     = "init"
-	ConstantsInitDBScriptFileSuffix   = ".sql"
-	ConstantsInitDBScriptFileTemplate = "%s.%s.sql"
-)

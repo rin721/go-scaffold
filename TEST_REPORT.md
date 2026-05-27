@@ -1,5 +1,35 @@
 # TEST_REPORT.md
 
+## Latest Current Verification
+
+- TASK-P2-015: PASS.
+- Commands: `go test ./cmd/server -count=1`, `go test ./pkg/sqlgen ./cmd/server ./internal/app/dbapp -count=1`, DB docs `rg` scan, and `git diff --check`.
+- Note: `git diff --check` emitted only Git LF/CRLF notices.
+
+## Latest Verification Addendum
+
+- Date: 2026-05-27
+- Task ID: TASK-P2-015
+- Time Slice ID: TS-P2-015
+- Status: COMPLETED
+- Scope: Comments for `cmd/server db` plus `docs/db-cli.md` overview, usage, extension, and verification documentation.
+
+| Command | Result | Notes |
+|---|---|---|
+| Required file reads | PASS | Project driver documents and relevant skill instructions were reviewed before changes. |
+| User correction review | PASS | ACCEPT: documentation/comment-only scope, no DB behavior change. |
+| `gofmt -w cmd\server\db.go` | PASS | Comment-only Go change formatted. |
+| `go test ./cmd/server -count=1` | PASS | DB CLI command tests passed. |
+| `go test ./pkg/sqlgen ./cmd/server ./internal/app/dbapp -count=1` | PASS | sqlgen, CLI, and dbapp package tests passed. |
+| DB docs `rg` scan | PASS | New guide and links expose DB CLI usage and extension terms. |
+| `git diff --check` | PASS | Only Git LF/CRLF notices, no whitespace errors. |
+
+Result:
+
+- [CONFIRMED] Documentation and comments were added without changing DB behavior.
+- [CONFIRMED] No new blocking issue was found.
+- [CONFIRMED] Project remains `IN_DEVELOPMENT_NOT_RELEASE_READY`; legal next state is `NONE / NONE / PENDING_USER_CONFIRMATION`.
+
 ## 最新验证
 - 日期：2026-05-27
 - 任务 ID：TASK-P2-013
@@ -420,3 +450,11 @@
 - 历史记录：新增 `pkg/plugin` local/http 能力。
 - `go test ./pkg/plugin -count=1`：PASS。
 - `go test ./... -count=1`：PASS。
+## Latest Verification: TASK-P2-014
+
+- Date: 2026-05-27
+- Scope: sqlgen DB CLI, database DDL generation, demo schema bootstrap, Todo CRUD SQL generation, removal of current init/migration/script/AutoMigrate paths.
+- `rg -n "ModeInitDB|BuildInitDB|InitDB|Initdb|initdb|DemoMigration|MigrateDemo|AutoMigrate|scripts/initdb|init_db|AppInitDB" cmd internal types configs deploy scripts pkg -S`: PASS, no matches.
+- `go test ./cmd/server ./internal/app/dbapp ./internal/app/initapp ./internal/app/reloadapp ./internal/app ./internal/modules/demo/... ./internal/transport/http ./internal/config ./types/... ./pkg/database ./pkg/sqlgen -count=1`: PASS.
+- `go test ./... -count=1`: PASS.
+- `git diff --check`: PASS, only Git LF/CRLF notices.

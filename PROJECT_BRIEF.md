@@ -46,7 +46,7 @@
 - [RISK] 文档语言不统一，且旧模板偏英文。
 - [RISK] 当前状态主线曾偏向插件系统扩展，而不是全项目优化。
 - [RISK] `pkg/*` 公共性和兼容策略不清。
-- [RISK] demo `AutoMigrate`、`initdb` 命令和 SQL 脚本职责未统一。
+- [CONFIRMED] demo DB bootstrap and CLI now use `pkg/sqlgen`; `AutoMigrate`, `initdb`, and SQL bootstrap scripts have been removed from current code/config paths. Production migrations remain a separate future design.
 - [CONFIRMED] app/router/demo/config reload 等 P1 最小集成测试已由 TASK-P1-015 和 TASK-P1-016 覆盖。
 - [RISK] JWT/auth 示例与“暂不实现 auth/rbac”的 README 说明存在范围漂移。
 - [RISK] `pkg/sqlgen` 存在 TODO/未实现能力，需要确认是 unsupported、Backlog 还是后续实现。

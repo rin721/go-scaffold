@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/rei0721/go-scaffold/internal/modules/demo/model"
+	"github.com/rei0721/go-scaffold/internal/app/dbapp"
 	"github.com/rei0721/go-scaffold/internal/modules/demo/repository"
 	"github.com/rei0721/go-scaffold/internal/modules/demo/service"
 	"github.com/rei0721/go-scaffold/pkg/database"
@@ -136,8 +136,8 @@ func newTodoService(t *testing.T) service.TodoService {
 		}
 	})
 
-	if err := db.DB().AutoMigrate(&model.Todo{}); err != nil {
-		t.Fatalf("migrate todo schema: %v", err)
+	if _, err := dbapp.ApplyDemoSchema(context.Background(), db, string(database.DriverSQLite)); err != nil {
+		t.Fatalf("apply todo schema: %v", err)
 	}
 
 	return service.NewTodoService(db, repository.NewTodoRepository())

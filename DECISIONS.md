@@ -337,3 +337,10 @@
 - Reason：`tests` 是 `cmd/server` 的具体 CLI 命令实现细节，不需要由 `types/constants` 作为跨层公共常量暴露；这与 `types` 只承载应用层以上确认过的公共契约边界一致。
 - Consequences：调用方不能再通过 `types/constants.AppTestsCommandName` 引用 tests 命令名；当前仓库引用点已迁移，目标包和全量回归通过。
 - Related Tasks：USER-CORRECTION-2026-05-27-TYPES-APP-CONSTANTS
+## DEC-036: Database bootstrap and CLI use sqlgen toolchain
+
+- Date: 2026-05-27
+- Status: ACCEPTED
+- Context: User required removing current init/migration commands and reimplementing DB operations through the sqlgen toolchain. Table/database creation and CRUD data operations must not use hand-written scripts.
+- Decision: `cmd/server db` is the explicit DB CLI. Database DDL uses `pkg/sqlgen.DatabaseIfNotExists`, demo schema uses `pkg/sqlgen.TableIfNotExists`, and Todo CRUD uses sqlgen chain builders. `initdb`, InitDB config, SQL bootstrap scripts, demo migration wrappers, and GORM `AutoMigrate` are removed from current code/config paths.
+- Consequences: Server start may apply sqlgen-generated demo schema for the local demo path. Reload skips schema changes. Production migrations are still not release-ready and require a separate confirmed design.

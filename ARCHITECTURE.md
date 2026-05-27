@@ -15,7 +15,7 @@
 - [CONFIRMED] `internal/app` 是组合根和生命周期边界。
 - [CONFIRMED] `internal/modules/demo` 暂定为长期标准示例。
 - [CONFIRMED] `pkg/*` 采用混合策略，后续必须逐包标注公共 API 或内部支撑定位。
-- [CONFIRMED] 迁移采用 dev-prod 分层策略：server-start/initdb 可执行 demo `AutoMigrate`，reload 不执行隐式 schema 变更，生产/bootstrap 迁移框架延后。
+- [CONFIRMED] DB schema and demo data operations use the `pkg/sqlgen` chain API. `cmd/server db` is the explicit database CLI; `initdb`, SQL script bootstrap, and runtime `AutoMigrate` have been removed. Reload does not apply schema changes; production migrations remain a separate confirmed future task.
 - [ACCEPT] 当前 Docker build 和部署制品完成不代表 v1 架构完成；第一版发布前仍需确认完整产品范围、生产迁移、真实环境运行、密钥管理和发布验收清单。
 - [ACCEPT_WITH_RISK] 配置环境变量前缀由 `types/constants.AppPrefix` 动态派生，当前为 `RIN_APP`；字段级环境变量名由 `envname` 标签声明，避免在各模块手写固定前缀或维护重复 env-name 常量。
 
@@ -38,10 +38,10 @@ types/*
 | `cmd/server` | 进程入口、CLI 命令、信号处理 | 检查是否有业务逻辑外溢 | [CONFIRMED] |
 | `internal/app` | 组合根、生命周期、跨层装配 | 生成装配链路清单 | [CONFIRMED] |
 | `internal/config` | 配置加载、`.env` 自动加载、动态环境变量覆盖和热重载配置快照 | [CONFIRMED] TASK-P2-011 已将固定/手写环境变量覆盖收拢为 `AppPrefix` 动态前缀 + `envname` 标签映射；TASK-P2-012 已删除重复 env-name 常量；未加前缀变量保留兼容 fallback | [CONFIRMED] |
-| `internal/transport/http` | HTTP router、middleware、health/ready、API 注册 | [CONFIRMED] health/ready、demo Todo HTTP 集成测试和 app 装配级路径均已补最小测试；TASK-P1-016 覆盖真实 app server/initdb 装配与 reload/config 分发 | [CONFIRMED] |
+| `internal/transport/http` | HTTP router、middleware、health/ready、API 注册 | [CONFIRMED] health/ready、demo Todo HTTP 集成测试和 app 装配级路径均已补最小测试；TASK-P2-014 后 app server 装配与 DB CLI 分开覆盖 | [CONFIRMED] |
 | `internal/modules/demo` | 长期标准示例 | 生成 demo 分层验收和测试路线 | [CONFIRMED] |
 | `pkg/*` | 混合策略 | [CONFIRMED] TASK-P1-007 已逐包分类为公共基础设施 API、公共工具 API 或内部支撑工具包 | [CONFIRMED] |
-| 数据库迁移 | dev-prod 分层 | [CONFIRMED] TASK-P1-005 已明确 demo `AutoMigrate`、`initdb`、reload 职责；生产迁移框架仍延后 | [CONFIRMED] |
+| 数据库 CLI / schema bootstrap | sqlgen toolchain | [CONFIRMED] TASK-P2-014 removes `initdb`/scripts/`AutoMigrate`; demo schema and Todo CRUD are generated through `pkg/sqlgen`; production migration framework remains deferred | [CONFIRMED] |
 | 插件系统 | v1 local/http 保留；注册责任已收拢为被动 registry/runtime；TASK-P2-005 至 TASK-P2-007 已增加 hooks、HTTP server helper 和 `RemoteHook` | [CONFIRMED] rpc/ws/discovery、插件发现和 Go `.so` 插件仍留在 Backlog | [CONFIRMED] |
 | IAM/auth/JWT | `pkg/iam` 公共接口与 memory 实现已完成；JWT 中间件和业务 RBAC 仍不实现 | 后续如需业务登录、HTTP 中间件或数据库版权限，必须单独提升任务 | [CONFIRMED] |
 | CI/CD 与部署 | 先建立非生产质量门禁、手动部署说明、远程部署显式参数契约、手动远程部署 workflow、Docker production 制品和远程 Linux 统一 `deploy.sh` 入口；真实生产运行仍需单独确认 | [CONFIRMED] TASK-P2-001 已新增 CI workflow 和部署说明；TASK-P2-002 已新增 `deploy.sh` / `script/install.sh` 显式参数契约；TASK-P2-003 已新增手动 staging 远程部署 workflow；TASK-P2-004 已补 Dockerfile、production Compose 示例、统一 `deploy.sh` 部署入口、手动 production 闸门并完成 Docker build 验证；镜像发布和真实 production 运行仍需单独确认 | [CONFIRMED] |
@@ -53,7 +53,7 @@ types/*
 |---|---|---|
 | `internal/app` | 装配、reload、mode、lifecycle 边界需形成清单 | TASK-OPT-003 |
 | `internal/config` | 环境覆盖已由动态前缀与 `envname` 标签统一，热更新会重新应用环境变量覆盖 | 后续如新增复杂 slice/map 环境覆盖需单独任务确认 |
-| `internal/transport/http` | health/ready、demo 路由和 app 装配级 server/initdb 路径均已补最小测试 | 继续保持不启动真实 HTTP server 的测试边界 |
+| `internal/transport/http` | health/ready、demo 路由和 app 装配级 server 路径均已补最小测试；DB CLI 单独覆盖 | 继续保持不启动真实 HTTP server 的测试边界 |
 | `internal/modules/demo` | 示例职责与生产约束需分离 | TASK-OPT-003 |
 | `pkg/*` | 公共/内部定位已在 TASK-P1-007 标记，`pkg/sqlgen` unsupported 边界已在 TASK-P1-008 标记 | 后续破坏性重构或新能力实现仍需单独确认 |
 | `types/*` | 跨层公共契约、HTTP/Gin 响应契约和应用层以上契约说明入口 | [ACCEPT] 用户修正 `types/*` 不得聚合 `pkg/*` 基础设施接口；`Crypto` 别名、`CacheInjectable` 和 executor typed constants 已移除或解耦 |

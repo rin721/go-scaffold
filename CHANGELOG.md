@@ -1,5 +1,16 @@
 # CHANGELOG.md
 
+## Latest Addendum
+
+### 2026-05-27 - TASK-P2-015 - DB CLI comments and documentation
+
+- Change: Added concise maintainer comments to `cmd/server/db.go` describing command ownership, parsed options, side-effect-free DDL preview, and printable SQL routing.
+- Change: Added `docs/db-cli.md` with DB CLI overview, quick usage, operation table, flags, layering, extension workflow, forbidden regressions, and verification guidance.
+- Change: Linked the new DB CLI guide from `docs/configuration.md` and `docs/deployment.md`.
+- Scope: Documentation and comments only; no DB behavior, schema, config, production migration, or old `initdb` path changes.
+- Verification: `go test ./cmd/server -count=1`, `go test ./pkg/sqlgen ./cmd/server ./internal/app/dbapp -count=1`, DB docs `rg` scan, and `git diff --check` passed. `git diff --check` emitted only Git LF/CRLF notices.
+- Status: TASK-P2-015 / TS-P2-015 completed; project remains `IN_DEVELOPMENT_NOT_RELEASE_READY`, legal next state is `NONE / NONE / PENDING_USER_CONFIRMATION`.
+
 ## 最新补充
 
 ### 2026-05-27 - TASK-P2-013 - Config documentation
@@ -528,3 +539,9 @@
   - `go test ./pkg/plugin -count=1`：PASS
   - `go test ./... -count=1`：PASS
 - 状态：COMPLETED。
+## 2026-05-27
+
+- Replaced the old database init path with `cmd/server db`, backed by `pkg/sqlgen`.
+- Added sqlgen-generated database DDL, demo schema print/apply, and Todo CRUD operations.
+- Removed `initdb`, InitDB config, SQL bootstrap scripts, demo migration wrappers, and GORM `AutoMigrate` usage from current code/config paths.
+- Updated docs, acceptance, matrix, risk, and handoff records for TASK-P2-014.

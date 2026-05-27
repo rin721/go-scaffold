@@ -36,9 +36,9 @@
 | ID | 范围 | 验证目标 | 建议文件范围 | 验证命令 | 退出条件 | 关联风险 |
 |---|---|---|---|---|---|---|
 | TM-P0-001 | `internal/config` | 配置加载、`${VAR:default}`、环境变量覆盖、无效配置报错 | `internal/config/*_test.go`、必要 testdata、`.env.example` 只在策略任务中改 | `go test ./internal/config -count=1` | 配置测试存在；失败场景有断言；不会依赖真实外部服务 | BC-001、BC-002 |
-| TM-P0-002 | `internal/config.Manager` | `Update`/copy 后不丢 `InitDB`、`Executor`、`Storage`、`CORS`、`Server.Host` 等字段 | `internal/config/*_test.go`、`internal/config/*.go` | `go test ./internal/config -count=1` | 测试能证明字段完整复制；必要修复已完成 | BC-002 |
+| TM-P0-002 | `internal/config.Manager` | `Update`/copy 后不丢 `Executor`、`Storage`、`CORS`、`Server.Host` 等字段；InitDB 字段已移除 | `internal/config/*_test.go`、`internal/config/*.go` | `go test ./internal/config -count=1` | 测试能证明字段完整复制；必要修复已完成 | BC-002 |
 | TM-P0-003 | `internal/transport/http` | `/health`、`/ready` 在数据库正常/缺失/失败时的 HTTP 状态和响应语义 | `internal/transport/http/*_test.go` | `go test ./internal/transport/http -count=1` | [CONFIRMED] TASK-P1-003 已用 `httptest` 覆盖；不启动真实 server | BC-006 |
-| TM-P0-004 | `internal/app` | `app.New` 在 server/initdb 模式的最小装配链路 | `internal/app/**/*_test.go` | `go test ./internal/app/... -count=1` | [CONFIRMED] TASK-P1-016 已使用临时配置和临时 SQLite 覆盖 server/initdb 装配、配置变更 hook、reload 分发；不依赖真实外部服务；资源可关闭 | BC-003、BC-006 |
+| TM-P0-004 | `internal/app` | `app.New` 在 server 模式的最小装配链路；DB CLI 单独覆盖 | `internal/app/**/*_test.go`、`cmd/server/db_test.go` | `go test ./internal/app/... ./cmd/server -count=1` | [CONFIRMED] TASK-P2-014 覆盖 server 装配、db CLI、配置变更 hook、reload 分发；不依赖真实外部服务；资源可关闭 | BC-003、BC-006 |
 | TM-P0-005 | `internal/modules/demo` | demo Todo Create/List/Get/Update/Delete 关键路径 | `internal/modules/demo/**/*_test.go`、`internal/transport/http/*_test.go` | `go test ./internal/modules/demo/... ./internal/transport/http -count=1` | [CONFIRMED] TASK-P1-004 已使用临时 SQLite 覆盖 service/repository 关键行为；TASK-P1-015 已覆盖 handler/router HTTP 集成路径 | BC-003、BC-006 |
 | TM-P0-006 | 全仓库回归 | 每个代码切片完成后确认无全局回归 | 不限制，只读验证 | `go test ./... -count=1` | 全量测试 PASS；新增失败进入修复流程 | FIND-001 |
 
@@ -46,7 +46,7 @@
 
 | ID | 范围 | 验证目标 | 建议文件范围 | 验证命令 | 退出条件 | 关联风险 |
 |---|---|---|---|---|---|---|
-| TM-P1-001 | 迁移策略 | demo `AutoMigrate`、`initdb`、reload 触发边界清晰 | `internal/app/**/*_test.go`、迁移边界文档 | `go test ./internal/app/... -count=1` | [CONFIRMED] TASK-P1-005 已写清 dev/demo 与生产/bootstrap 职责，并验证触发策略 | BC-003 |
+| TM-P1-001 | 数据库策略 | demo schema 通过 sqlgen 生成，`db` CLI 显式应用，reload 跳过 schema 变更 | `internal/app/**/*_test.go`、`internal/app/dbapp/**/*_test.go`、`docs/specs/demo_migration_boundary.md` | `go test ./internal/app/... ./cmd/server ./pkg/sqlgen -count=1` | [CONFIRMED] TASK-P2-014 已写清 sqlgen DB CLI 与生产/bootstrap 职责，并验证触发策略 | BC-003 |
 | TM-P1-002 | `cmd/server` | `tests` 命令语义与实际行为一致 | `cmd/server/*_test.go`、`cmd/server/*.go` | `go test ./cmd/server -count=1` | [CONFIRMED] TASK-P1-006 已改为真实 Go test 入口并补测试 | BC-004 |
 | TM-P1-003 | `pkg/*` API 分类与后续测试缺口 | 先明确公共基础设施 API、公共工具 API、内部支撑工具包边界，再按后续任务补行为测试 | `ARCHITECTURE.md`、`MODULES.md`、`pkg/*/README.md`，后续测试任务再触碰 `pkg/*/*_test.go` | TASK-P1-007：`go test ./... -count=1`；后续行为测试按包执行 | [CONFIRMED] TASK-P1-007 已完成分类；行为测试补齐仍按后续任务或 Backlog 处理 | RISK-004、RISK-008、FIND-001 |
 | TM-P1-004 | `pkg/sqlgen` | 未实现能力显式返回 unsupported 或文档化 | `pkg/sqlgen/*`、包 README | `go test ./pkg/sqlgen -count=1` | TODO 能力不再暗示已支持；测试或文档覆盖 unsupported | BC-005 |
@@ -57,7 +57,7 @@
 | TM-P1-009 | 第三批 `pkg/cache` 隔离行为测试 | 为 `pkg/cache` 补最小包级行为测试，用进程内 Redis 覆盖成功路径和明确错误路径 | `pkg/cache/**/*_test.go`；必要时限当前包实现文件；测试依赖可修改 `go.mod`、`go.sum` | `go test ./pkg/cache -count=1`；`go test ./... -count=1` | [CONFIRMED] `pkg/cache` 已有确定性隔离行为测试；不依赖真实 Redis、数据库、第三方网络服务或生产配置 | BL-020、RISK-008 |
 | TM-P1-010 | `pkg/utils` 内部支撑测试 | 为 `pkg/utils` 补最小确定性行为测试，覆盖 Snowflake、地址校验、端口查找、设备 ID 和 i18n helper 委托 | `pkg/utils/**/*_test.go`；必要时限当前包实现文件 | `go test ./pkg/utils -count=1`；`go test ./... -count=1` | [CONFIRMED] `pkg/utils` 已有最小确定性行为测试；不依赖真实外部网络服务、固定生产端口、数据库或生产配置 | BL-023、RISK-008 |
 | TM-P1-011 | router/middleware/demo HTTP 集成测试 | 用 `httptest` 覆盖 demo Todo HTTP 路由、handler/service/repository 集成，以及 TraceID、CORS、Recovery 中间件链路 | `internal/transport/http/**/*_test.go`、必要时 `internal/middleware/**/*_test.go` 或 `internal/modules/demo/**/*_test.go` | `go test ./internal/transport/http ./internal/middleware ./internal/modules/demo/... -count=1`；`go test ./... -count=1` | [CONFIRMED] TASK-P1-015 已覆盖 demo Todo HTTP CRUD、CORS preflight/actual、TraceID round-trip 和 Recovery trace 响应；不启动真实 HTTP server | BL-002、RISK-008 |
-| TM-P1-012 | app 装配与 reload/config 集成测试 | 用临时配置、临时 SQLite 和 fake 组件覆盖真实 app 装配、配置变更 hook、reload 分发和关闭配置路径 | `internal/app/app_integration_test.go`、`internal/app/reloadapp/reload_test.go` | `go test ./internal/app/... -count=1`；`go test ./... -count=1` | [CONFIRMED] TASK-P1-016 已覆盖 server/initdb 装配、配置 hook、reload 未变化/单组件变化/关闭可选组件/database reload 不隐式迁移；不启动真实 HTTP server | BL-002、RISK-008 |
+| TM-P1-012 | app 装配与 reload/config 集成测试 | 用临时配置、临时 SQLite 和 fake 组件覆盖真实 app 装配、配置变更 hook、reload 分发和关闭配置路径 | `internal/app/app_integration_test.go`、`internal/app/reloadapp/reload_test.go` | `go test ./internal/app/... -count=1`；`go test ./... -count=1` | [CONFIRMED] TASK-P2-014 后覆盖 server 装配、配置 hook、reload 未变化/单组件变化/关闭可选组件/database reload 不隐式 schema apply；DB CLI 单独测试 | BL-002、RISK-008 |
 | TM-P1-013 | `pkg/*` README 第一阶段中文化 | 将包 README 的主要读者文本统一为中文，并同步已完成测试后的明显过期风险描述 | `pkg/*/README.md`、需求/架构/模块和状态文档 | `go test ./... -count=1`；`git diff --check` | [CONFIRMED] TASK-P1-017 已完成第一阶段 `pkg/*/README.md` 中文化；未修改 Go 代码、依赖、配置 schema、HTTP 路由或数据库 schema | BL-006、RISK-005 |
 
 ## P2 正式测试矩阵
@@ -77,7 +77,7 @@
 | TM-P2-011 | reload、lifecycle 与全量验证 | 配置重载先构建新实例再替换，失败保留旧实例；关闭顺序安全；全量回归通过 | `internal/app/**/*`、状态文档 | `go test ./internal/config ./internal/app/... -count=1`；`go test ./... -count=1`；`go build -o <temp> ./cmd/server`；`git diff --check` | [CONFIRMED] TASK-P2-010 已完成 | RISK-020、RISK-021 |
 | TM-P2-012 | 第一版发布验收清单 | 明确 v1 功能范围、真实环境验证、镜像发布、生产迁移、密钥管理、回滚和发布门禁 | 项目状态文档、发布说明、后续任务文档 | 待用户确认后定义 | [NOT_STARTED] 用户已纠正当前项目不应发布第一版；需单独确认后才能提升 | RISK-022 |
 | TM-P2-013 | 配置环境变量动态前缀 | `internal/config` 从 `AppPrefix` 派生环境变量前缀，字段通过 `envname` 自动覆盖，`.env` 自动加载可验证 | `internal/config/**/*`、`cmd/server/**/*`、配置示例和状态文档 | `go test ./internal/config -count=1`；`go test ./cmd/server ./internal/app/... -count=1`；`go test ./... -count=1`；`git diff --check` | [CONFIRMED] TASK-P2-011 已完成 | RISK-011 |
-| TM-P2-014 | 配置 env-name 单一事实源 | 删除 `internal/config` 中重复导出的字段环境变量名常量，测试从 `envname` 标签读取变量名 | `internal/config/constants.go`、`internal/config/manager_test.go`、状态文档 | `rg -n "Env(DB|Redis|Server|Log|I18n|CORS|InitDB|Executor|Storage|Plugin|IAM)" internal cmd types deploy docs .env.example Dockerfile -S`；`go test ./internal/config -count=1`；`go test ./cmd/server ./internal/app/... -count=1`；`go test ./... -count=1`；`git diff --check` | [CONFIRMED] TASK-P2-012 已完成 | RISK-011 |
+| TM-P2-014 | 配置 env-name 单一事实源 | 删除 `internal/config` 中重复导出的字段环境变量名常量，测试从 `envname` 标签读取变量名 | `internal/config/constants.go`、`internal/config/manager_test.go`、状态文档 | `rg -n "Env(DB|Redis|Server|Log|I18n|CORS|Executor|Storage|Plugin|IAM)" internal cmd types deploy docs .env.example Dockerfile -S`；`go test ./internal/config -count=1`；`go test ./cmd/server ./internal/app/... -count=1`；`go test ./... -count=1`；`git diff --check` | [CONFIRMED] TASK-P2-012 已完成；InitDB config 已在 TASK-P2-014 移除 | RISK-011 |
 
 ## P1 优化任务草案
 
@@ -88,7 +88,7 @@
 | TASK-P1-002 | 统一配置环境变量策略 | P1 | 测试+修复+文档 | `internal/config/*`、`.env.example`、配置文档、状态文档 | `go test ./internal/config -count=1`；`go test ./... -count=1` | `.env.example` 与实现一致；前缀策略被记录 | COMPLETED |
 | TASK-P1-003 | 增加 health/ready 与 router smoke test | P1 | 测试 | `internal/transport/http/*_test.go`、状态文档 | `go test ./internal/transport/http -count=1`；`go test ./... -count=1` | `/health`、`/ready` 行为被测试固定 | COMPLETED |
 | TASK-P1-004 | 增加 demo CRUD 测试基线 | P1 | 测试 | `internal/modules/demo/**/*_test.go`、状态文档 | `go test ./internal/modules/demo/... -count=1`；`go test ./... -count=1` | Todo 关键 CRUD 路径被临时 SQLite 测试覆盖 | COMPLETED |
-| TASK-P1-005 | 明确 demo 迁移边界 | P1 | 架构+测试+小修 | `internal/app/**/*`、迁移边界文档、状态文档 | `go test ./internal/app/... -count=1`；`go test ./... -count=1` | server/initdb/reload 迁移职责可解释、可验证 | COMPLETED |
+| TASK-P1-005 | 明确 demo schema 边界 | P1 | 架构+测试+小修 | `internal/app/**/*`、schema 边界文档、状态文档 | `go test ./internal/app/... -count=1`；`go test ./... -count=1` | server-start/db CLI/reload schema 职责可解释、可验证 | SUPERSEDED_BY_TASK-P2-014 |
 | TASK-P1-006 | 收拢 `cmd/server tests` 命令语义 | P1 | CLI 小修+测试 | `cmd/server/*`、CLI 文档、状态文档 | `go test ./cmd/server -count=1`；`go test ./... -count=1` | 命令名、描述或行为与真实用途一致 | COMPLETED |
 | TASK-P1-007 | 完成 `pkg/*` 公共/内部分类 | P1 | 文档 | `ARCHITECTURE.md`、`MODULES.md`、包 README、状态文档 | `go test ./... -count=1` | [CONFIRMED] 每个 `pkg/*` 包定位已标注；破坏性重构仍需单独确认 | COMPLETED |
 | TASK-P1-008 | 标注 `pkg/sqlgen` 未实现能力 | P1 | 文档+测试或小修 | `pkg/sqlgen/*`、包 README、状态文档 | `go test ./pkg/sqlgen -count=1`；`go test ./... -count=1` | [CONFIRMED] TODO/unsupported 边界不再误导使用者 | COMPLETED |
@@ -99,7 +99,7 @@
 | TASK-P1-013 | 补第三批 `pkg/cache` 隔离行为测试 | P1 | 测试 | `pkg/cache/**/*_test.go`、必要时限当前包实现文件、测试依赖、状态文档 | `go test ./pkg/cache -count=1`；`go test ./... -count=1` | [CONFIRMED] `pkg/cache` 有最小隔离行为测试且不依赖真实 Redis | COMPLETED |
 | TASK-P1-014 | 补 `pkg/utils` 内部支撑工具最小行为测试 | P1 | 测试 | `pkg/utils/**/*_test.go`、必要时限当前包实现文件、状态文档 | `go test ./pkg/utils -count=1`；`go test ./... -count=1` | [CONFIRMED] `pkg/utils` 有最小确定性行为测试且不依赖真实外部服务 | COMPLETED |
 | TASK-P1-015 | 补 app/router/middleware 最小集成测试 | P1 | 测试 | `internal/transport/http/**/*_test.go`、必要时 `internal/middleware/**/*_test.go`、`internal/modules/demo/**/*_test.go`、状态文档 | `go test ./internal/transport/http ./internal/middleware ./internal/modules/demo/... -count=1`；`go test ./... -count=1` | [CONFIRMED] demo Todo HTTP 集成和 TraceID/CORS/Recovery 链路有最小测试覆盖 | COMPLETED |
-| TASK-P1-016 | 补 app 装配与 reload/config 剩余集成测试 | P1 | 测试 | `internal/app/app_integration_test.go`、`internal/app/reloadapp/reload_test.go`、必要时 `internal/app/**` 或 `internal/config/**`、状态文档 | `go test ./internal/app/... -count=1`；`go test ./... -count=1` | [CONFIRMED] app.New server/initdb 装配、配置变更 hook 和 reload/config 分发路径有最小测试覆盖 | COMPLETED |
+| TASK-P1-016 | 补 app 装配与 reload/config 剩余集成测试 | P1 | 测试 | `internal/app/app_integration_test.go`、`internal/app/reloadapp/reload_test.go`、必要时 `internal/app/**` 或 `internal/config/**`、状态文档 | `go test ./internal/app/... -count=1`；`go test ./... -count=1` | [CONFIRMED] app.New server 装配、配置变更 hook 和 reload/config 分发路径有最小测试覆盖；DB CLI 在 TASK-P2-014 覆盖 | COMPLETED |
 | TASK-P1-017 | 分阶段中文化 `pkg/*` README | P1 | 文档 | `pkg/*/README.md`、需求/架构/模块和状态文档 | `go test ./... -count=1`；`git diff --check` | [CONFIRMED] 第一阶段包 README 中文化完成，未新增功能承诺或修改代码 | COMPLETED |
 | TASK-P2-001 | 补 CI 质量门禁与部署说明 | P2 | 质量工程+文档 | `.github/workflows/ci.yml`、`docs/deployment.md`、`README.md`、状态文档 | `go test ./... -count=1`；`go build -o <temp> ./cmd/server`；`git diff --check` | [CONFIRMED] CI 只做非生产质量门禁；部署说明记录手动边界和后续真实 CD 非目标 | COMPLETED |
 | TASK-NEXT-SCOPE-010 | 确认真实 CD / 镜像发布 / 远程部署自动化边界 | P2 | 确认 | 项目状态文档 | `git diff --check` | [CONFIRMED] 用户确认远程部署并使用 `.env` 风格配置 | COMPLETED |
@@ -159,3 +159,8 @@
 - [CONFIRMED] 本文不修改 Go 代码、配置结构、数据库结构或 HTTP 路由。
 - [CONFIRMED] 本文当前完成插件钩子运行时与 IAM 公共接口；不提升镜像发布流水线、真实 production 运行、生产迁移、JWT 中间件、数据库版权限、OPA/Casbin、Go `.so` 插件、插件发现或 RPC/WS 传输。
 - [CONFIRMED] 本文不授权发布第一版；v1 发布验收必须单独确认。
+## Current DB Matrix Note
+
+| ID | Scope | Behavior | Files | Verification | Acceptance | Related |
+|---|---|---|---|---|---|---|
+| TM-P2-015 | sqlgen DB CLI | `cmd/server db` generates database DDL, prints/applies sqlgen-generated demo schema, and uses sqlgen for Todo CRUD; `initdb`, scripts, and `AutoMigrate` are removed from current code/config paths | `cmd/server/db.go`, `internal/app/dbapp`, `pkg/sqlgen`, related app/config tests | `rg -n "ModeInitDB|BuildInitDB|InitDB|Initdb|initdb|DemoMigration|MigrateDemo|AutoMigrate|scripts/initdb|init_db|AppInitDB" cmd internal types configs deploy scripts pkg -S`; `go test ./cmd/server ./internal/app/dbapp ./internal/app/initapp ./internal/app/reloadapp ./internal/app ./internal/modules/demo/... ./internal/transport/http ./internal/config ./types/... ./pkg/database ./pkg/sqlgen -count=1`; `go test ./... -count=1`; `git diff --check` | Current DB behavior is generated through the sqlgen toolchain and no removed init path remains in code/config | TASK-P2-014 |

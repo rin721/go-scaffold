@@ -98,59 +98,6 @@ func TestNewServerModeBuildsMinimalApplication(t *testing.T) {
 	}
 }
 
-func TestNewInitDBModeBuildsDatabaseOnly(t *testing.T) {
-	clearAppIntegrationEnv(t)
-
-	configPath := writeAppIntegrationConfig(t, filepath.Join(t.TempDir(), "initdb-mode.db"))
-
-	application, err := New(Options{ConfigPath: configPath, Mode: ModeInitDB})
-	if err != nil {
-		t.Fatalf("new initdb app: %v", err)
-	}
-	defer shutdownApp(t, application)
-
-	if application.Core.Config == nil {
-		t.Fatal("expected core config")
-	}
-	if application.Infra.Database == nil {
-		t.Fatal("expected database infrastructure")
-	}
-	if !application.Infra.Database.DB().Migrator().HasTable(&model.Todo{}) {
-		t.Fatal("expected demo todo schema to be created in initdb mode")
-	}
-
-	if application.Infra.Cache != nil {
-		t.Fatal("expected cache to remain unassembled in initdb mode")
-	}
-	if application.Infra.Executor != nil {
-		t.Fatal("expected executor to remain unassembled in initdb mode")
-	}
-	if application.Infra.Storage != nil {
-		t.Fatal("expected storage to remain unassembled in initdb mode")
-	}
-	if application.Infra.IAM != nil {
-		t.Fatal("expected iam to remain unassembled in initdb mode")
-	}
-	if application.Infra.Plugins != nil {
-		t.Fatal("expected plugin manager to remain unassembled in initdb mode")
-	}
-	if application.Modules.Demo.TodoRepository != nil {
-		t.Fatal("expected demo module to remain unassembled in initdb mode")
-	}
-	if application.Modules.Demo.TodoService != nil {
-		t.Fatal("expected demo service to remain unassembled in initdb mode")
-	}
-	if application.Modules.Demo.TodoHandler != nil {
-		t.Fatal("expected demo handler to remain unassembled in initdb mode")
-	}
-	if application.Transport.Router != nil {
-		t.Fatal("expected router to remain unassembled in initdb mode")
-	}
-	if application.Transport.HTTPServer != nil {
-		t.Fatal("expected HTTP server to remain unassembled in initdb mode")
-	}
-}
-
 func writeAppIntegrationConfig(t *testing.T, dbPath string) string {
 	t.Helper()
 
@@ -205,10 +152,6 @@ i18n:
     - "zh-CN"
     - "en-US"
   messages_dir: %s
-initdb:
-  script_dir: "./scripts/initdb"
-  lock_file: ".initialized"
-  script_file_prefix: "init"
 executor:
   enabled: false
   pools: []

@@ -60,6 +60,39 @@ func TestTable(t *testing.T) {
 	}
 }
 
+func TestTableIfNotExists(t *testing.T) {
+	gen := New(&Config{Dialect: SQLite})
+
+	sql, err := gen.TableIfNotExists(&TestUser{})
+	if err != nil {
+		t.Fatalf("TableIfNotExists() failed: %v", err)
+	}
+
+	if !strings.Contains(sql, "CREATE TABLE IF NOT EXISTS") {
+		t.Fatalf("SQL = %q, want IF NOT EXISTS", sql)
+	}
+	if strings.Contains(sql, "INDEX") {
+		t.Fatalf("SQLite CREATE TABLE should not contain inline INDEX clauses: %q", sql)
+	}
+	if !strings.Contains(sql, `"id" INTEGER PRIMARY KEY AUTOINCREMENT`) {
+		t.Fatalf("SQL = %q, want inline SQLite primary key autoincrement", sql)
+	}
+}
+
+func TestDatabaseIfNotExists(t *testing.T) {
+	gen := New(&Config{Dialect: MySQL})
+
+	sql, err := gen.DatabaseIfNotExists("demo_app")
+	if err != nil {
+		t.Fatalf("DatabaseIfNotExists() failed: %v", err)
+	}
+
+	expected := "CREATE DATABASE IF NOT EXISTS `demo_app`;"
+	if sql != expected {
+		t.Fatalf("SQL = %q, want %q", sql, expected)
+	}
+}
+
 func TestDrop(t *testing.T) {
 	gen := New(&Config{Dialect: MySQL})
 

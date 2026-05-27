@@ -1,5 +1,41 @@
 # TIME_SLICES.md
 
+## Latest Current Time Slice
+
+- TS-P2-015: COMPLETED.
+- Scope completed: maintainer comments for `cmd/server db`, `docs/db-cli.md` overview/usage/extension guide, and discovery links from existing docs.
+- Next legal state: `NONE / NONE / PENDING_USER_CONFIRMATION`.
+
+## Latest Addendum Time Slice
+
+### TS-P2-015: Document DB CLI usage and extension
+
+- Status: COMPLETED
+- Task ID: TASK-P2-015
+- Purpose: Document the sqlgen-backed DB CLI and add concise code comments without changing DB behavior.
+- Inputs:
+  - User request to add `cmd/db` comments and generate overview, usage, and extension documentation.
+  - Existing TASK-P2-014 sqlgen DB CLI implementation.
+- Allowed Files:
+  - `cmd/server/db.go`
+  - `docs/db-cli.md`
+  - `docs/configuration.md`
+  - `docs/deployment.md`
+  - Project status documents.
+- Forbidden:
+  - DB behavior changes.
+  - Old `initdb`, InitDB config, SQL scripts, or `AutoMigrate` restoration.
+  - Production migration execution.
+- Verification Commands:
+  - `go test ./cmd/server -count=1`: PASS
+  - `go test ./pkg/sqlgen ./cmd/server ./internal/app/dbapp -count=1`: PASS
+  - DB docs `rg` scan: PASS
+  - `git diff --check`: PASS, only Git LF/CRLF notices.
+- Acceptance:
+  - [CONFIRMED] `cmd/server/db.go` comments explain command ownership and side-effect-free DDL preview.
+  - [CONFIRMED] `docs/db-cli.md` covers usage, operations, flags, layering, extension workflow, forbidden regressions, and verification.
+  - [CONFIRMED] Existing docs link to `docs/db-cli.md`.
+
 ## 最新补充时间切片
 
 ### TS-P2-013：新增配置文档说明
@@ -1596,3 +1632,18 @@
 
 - Status：COMPLETED
 - Summary：历史切片，确认 v1 local/http 边界；后续扩展留在 Backlog。
+## Current Completed Time Slice
+
+### TS-P2-014: sqlgen DB CLI and old init path removal
+
+- Status: COMPLETED
+- Task: TASK-P2-014
+- Date: 2026-05-27
+- Scope: Replace `initdb`/script/AutoMigrate DB bootstrap with `cmd/server db` backed by `pkg/sqlgen`, including database DDL generation, demo schema, and Todo CRUD; keep production migration framework out of scope.
+- Files Changed: `cmd/server`, `internal/app`, `internal/config`, `internal/modules/demo`, `internal/transport/http` tests, `pkg/database` tests, `pkg/sqlgen`, `types/constants`, config/deploy examples, and project docs/status files.
+- Verification:
+  - Removed-path scan over `cmd internal types configs deploy scripts pkg`: PASS.
+  - Targeted package tests: PASS.
+  - Full `go test ./... -count=1`: PASS.
+  - `git diff --check`: PASS, only Git LF/CRLF notices.
+- Next Legal State: `NONE / NONE / PENDING_USER_CONFIRMATION`.

@@ -13,26 +13,25 @@ import (
 	"gorm.io/gorm"
 )
 
-func TestDemoMigrationPolicyFor(t *testing.T) {
+func TestDemoSchemaPolicyFor(t *testing.T) {
 	tests := []struct {
-		name        string
-		trigger     DemoMigrationTrigger
-		autoMigrate bool
+		name    string
+		trigger DemoSchemaTrigger
+		apply   bool
 	}{
-		{name: "server start migrates demo schema", trigger: DemoMigrationTriggerServerStart, autoMigrate: true},
-		{name: "initdb migrates demo schema", trigger: DemoMigrationTriggerInitDB, autoMigrate: true},
-		{name: "reload skips demo schema migration", trigger: DemoMigrationTriggerReload, autoMigrate: false},
-		{name: "unknown trigger skips migration", trigger: DemoMigrationTrigger("unknown"), autoMigrate: false},
+		{name: "server start applies demo schema", trigger: DemoSchemaTriggerServerStart, apply: true},
+		{name: "reload skips demo schema apply", trigger: DemoSchemaTriggerReload, apply: false},
+		{name: "unknown trigger skips schema apply", trigger: DemoSchemaTrigger("unknown"), apply: false},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			policy := DemoMigrationPolicyFor(tt.trigger)
+			policy := DemoSchemaPolicyFor(tt.trigger)
 			if policy.Trigger != tt.trigger {
 				t.Fatalf("trigger = %q, want %q", policy.Trigger, tt.trigger)
 			}
-			if policy.AutoMigrate != tt.autoMigrate {
-				t.Fatalf("AutoMigrate = %v, want %v", policy.AutoMigrate, tt.autoMigrate)
+			if policy.Apply != tt.apply {
+				t.Fatalf("Apply = %v, want %v", policy.Apply, tt.apply)
 			}
 			if policy.Reason == "" {
 				t.Fatal("Reason must describe why the policy exists")
@@ -41,27 +40,26 @@ func TestDemoMigrationPolicyFor(t *testing.T) {
 	}
 }
 
-func TestMigrateDemoSchemaForTrigger(t *testing.T) {
+func TestApplyDemoSchemaForTrigger(t *testing.T) {
 	tests := []struct {
 		name     string
-		trigger  DemoMigrationTrigger
+		trigger  DemoSchemaTrigger
 		hasTable bool
 	}{
-		{name: "server start creates todo table", trigger: DemoMigrationTriggerServerStart, hasTable: true},
-		{name: "initdb creates todo table", trigger: DemoMigrationTriggerInitDB, hasTable: true},
-		{name: "reload leaves schema untouched", trigger: DemoMigrationTriggerReload, hasTable: false},
+		{name: "server start creates todo table", trigger: DemoSchemaTriggerServerStart, hasTable: true},
+		{name: "reload leaves schema untouched", trigger: DemoSchemaTriggerReload, hasTable: false},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			db := newTestDatabase(t)
 
-			policy, err := MigrateDemoSchemaForTrigger(db, testLogger{}, tt.trigger)
+			policy, err := ApplyDemoSchemaForTrigger(db, string(database.DriverSQLite), testLogger{}, tt.trigger)
 			if err != nil {
-				t.Fatalf("MigrateDemoSchemaForTrigger() error = %v", err)
+				t.Fatalf("ApplyDemoSchemaForTrigger() error = %v", err)
 			}
-			if policy.AutoMigrate != tt.hasTable {
-				t.Fatalf("AutoMigrate = %v, want %v", policy.AutoMigrate, tt.hasTable)
+			if policy.Apply != tt.hasTable {
+				t.Fatalf("Apply = %v, want %v", policy.Apply, tt.hasTable)
 			}
 			if got := db.DB().Migrator().HasTable(&model.Todo{}); got != tt.hasTable {
 				t.Fatalf("HasTable(Todo) = %v, want %v", got, tt.hasTable)
@@ -70,24 +68,24 @@ func TestMigrateDemoSchemaForTrigger(t *testing.T) {
 	}
 }
 
-func TestMigrateDemoSchemaKeepsServerStartDefault(t *testing.T) {
+func TestApplyDemoSchemaKeepsServerStartDefault(t *testing.T) {
 	db := newTestDatabase(t)
 
-	if err := MigrateDemoSchema(db, testLogger{}); err != nil {
-		t.Fatalf("MigrateDemoSchema() error = %v", err)
+	if err := ApplyDemoSchema(db, string(database.DriverSQLite), testLogger{}); err != nil {
+		t.Fatalf("ApplyDemoSchema() error = %v", err)
 	}
 	if !db.DB().Migrator().HasTable(&model.Todo{}) {
-		t.Fatal("MigrateDemoSchema() should create the demo todo table")
+		t.Fatal("ApplyDemoSchema() should create the demo todo table")
 	}
 }
 
-func TestMigrateDemoSchemaForTriggerAllowsMissingDatabase(t *testing.T) {
-	policy, err := MigrateDemoSchemaForTrigger(nil, testLogger{}, DemoMigrationTriggerInitDB)
+func TestApplyDemoSchemaForTriggerAllowsMissingDatabase(t *testing.T) {
+	policy, err := ApplyDemoSchemaForTrigger(nil, string(database.DriverSQLite), testLogger{}, DemoSchemaTriggerServerStart)
 	if err != nil {
-		t.Fatalf("MigrateDemoSchemaForTrigger(nil) error = %v", err)
+		t.Fatalf("ApplyDemoSchemaForTrigger(nil) error = %v", err)
 	}
-	if !policy.AutoMigrate {
-		t.Fatal("initdb policy should still describe an auto-migration trigger")
+	if !policy.Apply {
+		t.Fatal("server-start policy should still describe a schema apply trigger")
 	}
 }
 

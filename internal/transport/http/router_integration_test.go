@@ -1,6 +1,7 @@
 package httptransport
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -11,6 +12,7 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
+	"github.com/rei0721/go-scaffold/internal/app/dbapp"
 	"github.com/rei0721/go-scaffold/internal/middleware"
 	demohandler "github.com/rei0721/go-scaffold/internal/modules/demo/handler"
 	"github.com/rei0721/go-scaffold/internal/modules/demo/model"
@@ -167,9 +169,9 @@ func newDemoIntegrationRouter(t *testing.T) (*gin.Engine, database.Database) {
 	if err != nil {
 		t.Fatalf("create sqlite database: %v", err)
 	}
-	if err := db.DB().AutoMigrate(&model.Todo{}); err != nil {
+	if _, err := dbapp.ApplyDemoSchema(context.Background(), db, string(database.DriverSQLite)); err != nil {
 		_ = db.Close()
-		t.Fatalf("migrate todo schema: %v", err)
+		t.Fatalf("apply todo schema: %v", err)
 	}
 
 	todoService := service.NewTodoService(db, repository.NewTodoRepository())

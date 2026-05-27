@@ -6,14 +6,15 @@ import (
 	"testing"
 	"time"
 
+	"github.com/rei0721/go-scaffold/pkg/sqlgen"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
 
 type txTestUser struct {
-	ID    int64  `gorm:"primaryKey"`
-	Name  string `gorm:"size:100"`
-	Email string `gorm:"size:100;uniqueIndex"`
+	ID    int64  `gorm:"column:id;primaryKey;autoIncrement"`
+	Name  string `gorm:"column:name;size:100"`
+	Email string `gorm:"column:email;size:100;uniqueIndex"`
 }
 
 func setupTxTestDB(t *testing.T) Database {
@@ -22,8 +23,13 @@ func setupTxTestDB(t *testing.T) Database {
 	if err != nil {
 		t.Fatalf("failed to open database: %v", err)
 	}
-	if err := gdb.AutoMigrate(&txTestUser{}); err != nil {
-		t.Fatalf("failed to migrate: %v", err)
+	gen := sqlgen.New(&sqlgen.Config{Dialect: sqlgen.SQLite})
+	schemaSQL, err := gen.TableIfNotExists(&txTestUser{})
+	if err != nil {
+		t.Fatalf("failed to generate schema: %v", err)
+	}
+	if err := gdb.Exec(schemaSQL).Error; err != nil {
+		t.Fatalf("failed to apply schema: %v", err)
 	}
 	sqlDB, err := gdb.DB()
 	if err != nil {

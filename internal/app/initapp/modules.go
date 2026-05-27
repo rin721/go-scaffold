@@ -1,10 +1,11 @@
 package initapp
 
 import (
+	"context"
 	"fmt"
 
+	"github.com/rei0721/go-scaffold/internal/app/dbapp"
 	demohandler "github.com/rei0721/go-scaffold/internal/modules/demo/handler"
-	"github.com/rei0721/go-scaffold/internal/modules/demo/model"
 	demorepository "github.com/rei0721/go-scaffold/internal/modules/demo/repository"
 	demoservice "github.com/rei0721/go-scaffold/internal/modules/demo/service"
 	"github.com/rei0721/go-scaffold/pkg/database"
@@ -12,7 +13,7 @@ import (
 )
 
 func NewModules(core Core, infra Infrastructure) (Modules, error) {
-	if _, err := MigrateDemoSchemaForTrigger(infra.Database, core.Logger, DemoMigrationTriggerServerStart); err != nil {
+	if _, err := ApplyDemoSchemaForTrigger(infra.Database, core.Config.Database.Driver, core.Logger, DemoSchemaTriggerServerStart); err != nil {
 		return Modules{}, err
 	}
 	return Modules{
@@ -20,82 +21,75 @@ func NewModules(core Core, infra Infrastructure) (Modules, error) {
 	}, nil
 }
 
-type DemoMigrationTrigger string
+type DemoSchemaTrigger string
 
 const (
-	DemoMigrationTriggerServerStart DemoMigrationTrigger = "server-start"
-	DemoMigrationTriggerInitDB      DemoMigrationTrigger = "initdb"
-	DemoMigrationTriggerReload      DemoMigrationTrigger = "reload"
+	DemoSchemaTriggerServerStart DemoSchemaTrigger = "server-start"
+	DemoSchemaTriggerReload      DemoSchemaTrigger = "reload"
 )
 
-type DemoMigrationPolicy struct {
-	Trigger     DemoMigrationTrigger
-	AutoMigrate bool
-	Reason      string
+type DemoSchemaPolicy struct {
+	Trigger DemoSchemaTrigger
+	Apply   bool
+	Reason  string
 }
 
-func DemoMigrationPolicyFor(trigger DemoMigrationTrigger) DemoMigrationPolicy {
+func DemoSchemaPolicyFor(trigger DemoSchemaTrigger) DemoSchemaPolicy {
 	switch trigger {
-	case DemoMigrationTriggerServerStart:
-		return DemoMigrationPolicy{
-			Trigger:     trigger,
-			AutoMigrate: true,
-			Reason:      "demo server startup keeps the local development schema ready",
+	case DemoSchemaTriggerServerStart:
+		return DemoSchemaPolicy{
+			Trigger: trigger,
+			Apply:   true,
+			Reason:  "demo server startup keeps the local development schema ready through sqlgen",
 		}
-	case DemoMigrationTriggerInitDB:
-		return DemoMigrationPolicy{
-			Trigger:     trigger,
-			AutoMigrate: true,
-			Reason:      "initdb is the explicit demo bootstrap command",
-		}
-	case DemoMigrationTriggerReload:
-		return DemoMigrationPolicy{
-			Trigger:     trigger,
-			AutoMigrate: false,
-			Reason:      "database reload must not perform implicit schema changes",
+	case DemoSchemaTriggerReload:
+		return DemoSchemaPolicy{
+			Trigger: trigger,
+			Apply:   false,
+			Reason:  "database reload must not perform implicit schema changes",
 		}
 	default:
-		return DemoMigrationPolicy{
-			Trigger:     trigger,
-			AutoMigrate: false,
-			Reason:      "unknown migration trigger requires an explicit policy",
+		return DemoSchemaPolicy{
+			Trigger: trigger,
+			Apply:   false,
+			Reason:  "unknown schema trigger requires an explicit policy",
 		}
 	}
 }
 
-func MigrateDemoSchema(db database.Database, log logger.Logger) error {
-	_, err := MigrateDemoSchemaForTrigger(db, log, DemoMigrationTriggerServerStart)
+func ApplyDemoSchema(db database.Database, driver string, log logger.Logger) error {
+	_, err := ApplyDemoSchemaForTrigger(db, driver, log, DemoSchemaTriggerServerStart)
 	return err
 }
 
-func MigrateDemoSchemaForTrigger(db database.Database, log logger.Logger, trigger DemoMigrationTrigger) (DemoMigrationPolicy, error) {
-	policy := DemoMigrationPolicyFor(trigger)
-	if !policy.AutoMigrate {
-		logDemoMigrationSkipped(log, policy)
+func ApplyDemoSchemaForTrigger(db database.Database, driver string, log logger.Logger, trigger DemoSchemaTrigger) (DemoSchemaPolicy, error) {
+	policy := DemoSchemaPolicyFor(trigger)
+	if !policy.Apply {
+		logDemoSchemaSkipped(log, policy)
 		return policy, nil
 	}
 	if db == nil {
 		return policy, nil
 	}
-	if err := db.DB().AutoMigrate(&model.Todo{}); err != nil {
-		return policy, fmt.Errorf("migrate demo schema: %w", err)
+	if _, err := dbapp.ApplyDemoSchema(context.Background(), db, driver); err != nil {
+		return policy, fmt.Errorf("apply demo schema: %w", err)
 	}
-	logDemoMigrationApplied(log, policy)
+	logDemoSchemaApplied(log, policy)
 	return policy, nil
 }
 
-func logDemoMigrationApplied(log logger.Logger, policy DemoMigrationPolicy) {
+func logDemoSchemaApplied(log logger.Logger, policy DemoSchemaPolicy) {
 	if log == nil {
 		return
 	}
-	log.Info("demo schema migrated", "trigger", policy.Trigger, "reason", policy.Reason)
+	log.Info("demo schema applied", "trigger", policy.Trigger, "reason", policy.Reason)
 }
 
-func logDemoMigrationSkipped(log logger.Logger, policy DemoMigrationPolicy) {
+func logDemoSchemaSkipped(log logger.Logger, policy DemoSchemaPolicy) {
 	if log == nil {
 		return
 	}
-	log.Debug("demo schema migration skipped", "trigger", policy.Trigger, "reason", policy.Reason)
+	log.Debug("demo schema apply skipped", "trigger", policy.Trigger, "reason", policy.Reason)
 }
 
 func NewDemoModule(db database.Database, log logger.Logger) DemoModule {

@@ -11,10 +11,6 @@ func TestApplicationConstants(t *testing.T) {
 		t.Fatalf("AppServerCommandName = %q, want %q", AppServerCommandName, "server")
 	}
 
-	if AppInitDBCommandName != "initdb" {
-		t.Fatalf("AppInitDBCommandName = %q, want %q", AppInitDBCommandName, "initdb")
-	}
-
 	if EnvConfigPathName != "RIN_CONFIG_PATH" {
 		t.Fatalf("EnvConfigPathName = %q, want %q", EnvConfigPathName, "RIN_CONFIG_PATH")
 	}

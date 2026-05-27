@@ -14,7 +14,7 @@
 - [CONFIRMED] 优化路线采用“治理优先”。
 - [CONFIRMED] `pkg/*` 采用混合策略：可复用基础设施包按公共 API 管理，明确项目内部支撑包不承诺外部兼容。
 - [CONFIRMED] demo 模块暂定为长期标准示例，用于展示模块分层和后续测试样板。
-- [CONFIRMED] 迁移策略采用 dev-prod 分层：开发/demo 可使用 `AutoMigrate`，生产/bootstrap 倾向显式 SQL 或迁移流程。
+- [CONFIRMED] 数据库 schema 与 demo CRUD/bootstrap 统一通过 `pkg/sqlgen` 工具链生成 SQL；`cmd/server db` 是显式 DB CLI 入口；`initdb`、SQL 脚本目录和运行期 `AutoMigrate` 已移除；生产迁移框架仍需单独确认。
 - [CONFIRMED] 中文化范围先覆盖根文档和模板；第一阶段包 README 已纳入 TASK-P1-017，历史文档仍分阶段处理。
 - [CONFIRMED] auth/JWT 先延后处理，不在当前 P0/P1 代码实现范围内。
 

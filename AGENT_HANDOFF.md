@@ -1,5 +1,21 @@
 # AGENT_HANDOFF.md
 
+## Latest Current Handoff
+
+- TASK-P2-015 / TS-P2-015: COMPLETED.
+- `cmd/server db` now has maintainer comments, and `docs/db-cli.md` documents DB CLI overview, usage, operations, flags, layering, extension rules, forbidden regressions, and verification guidance.
+- DB behavior remains unchanged and continues to be driven by `pkg/sqlgen`; old init/migration/script/AutoMigrate paths remain out of current code/config.
+- Next legal state: `NONE / NONE / PENDING_USER_CONFIRMATION`.
+
+## Latest Handoff Addendum
+
+- Date: 2026-05-27
+- Task: TASK-P2-015 / TS-P2-015
+- Summary: Added comments to `cmd/server/db.go`, created `docs/db-cli.md`, and linked it from `docs/configuration.md` and `docs/deployment.md`.
+- Files changed in this addendum: `cmd/server/db.go`, `docs/db-cli.md`, `docs/configuration.md`, `docs/deployment.md`, and project status documents.
+- Verification: `go test ./cmd/server -count=1` PASS, `go test ./pkg/sqlgen ./cmd/server ./internal/app/dbapp -count=1` PASS, DB docs `rg` scan PASS, `git diff --check` PASS with only Git LF/CRLF notices.
+- Legal next step remains `NONE / NONE / PENDING_USER_CONFIRMATION`; project remains `IN_DEVELOPMENT_NOT_RELEASE_READY`.
+
 ## Latest Addendum
 
 - Date: 2026-05-27
@@ -106,7 +122,7 @@
 - Task ID: NONE
 - Time Slice ID: NONE
 - Status: PENDING_USER_CONFIRMATION
-- Why: TASK-P2-012 config env-name constants cleanup is complete, TASK-P2-011 dynamic config env prefix correction remains complete, TASK-P2-004 through TASK-P2-010 remain complete and verified, but the project is explicitly not release-ready; current confirmed scope has no automatic next task.
+- Why: TASK-P2-015 DB CLI comments/documentation is complete, TASK-P2-014 sqlgen DB CLI remains complete, and the project is explicitly not release-ready; current confirmed scope has no automatic next task.
 - Entry condition for future work: user must confirm a new scope or first-version release acceptance checklist, and it must be written into `TASKS.md` and `TIME_SLICES.md`.
 - Likely next choices: define v1 acceptance checklist, complete product scope, image publishing pipeline, real staging/production run, production migration framework, complete auth/rbac, plugin discovery, or RPC/WS transport.
 
@@ -129,3 +145,11 @@
 4. Remember `types/*` no longer exposes `Crypto`, `CacheInjectable`, direct imports of `pkg/*`, or `AppTestsCommandName`; do not restore lower-layer aliases, typed constants, or the tests command constant.
 5. Remember config env overrides now use `RIN_APP_*` from `AppPrefix=Rin` and `envname` tags; keep unprefixed variables only as fallback compatibility, and do not reintroduce duplicate env-name constants.
 6. Do not start new implementation or publish v1 until the user confirms a new task or release acceptance checklist and the task/time-slice documents are updated.
+## Latest Handoff: TASK-P2-015
+
+- Date: 2026-05-27
+- Status: COMPLETED
+- Summary: `cmd/server db` now has maintainer comments, and `docs/db-cli.md` documents DB CLI overview, usage, operations, flags, layering, extension rules, forbidden regressions, and verification guidance.
+- Verification completed: `go test ./cmd/server -count=1`, `go test ./pkg/sqlgen ./cmd/server ./internal/app/dbapp -count=1`, DB docs `rg` scan, and `git diff --check` passed. `git diff --check` emitted only Git LF/CRLF notices.
+- Next legal state: `NONE / NONE / PENDING_USER_CONFIRMATION`.
+- Important residual risk: production migration framework is not implemented and must be confirmed as a separate task before production schema changes.

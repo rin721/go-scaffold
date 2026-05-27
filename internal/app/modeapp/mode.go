@@ -9,7 +9,6 @@ type Mode string
 
 const (
 	ModeServer Mode = "server"
-	ModeInitDB Mode = "initdb"
 )
 
 type ConfigChangeHandler = config.HookHandler
@@ -22,8 +21,6 @@ type BuildResult struct {
 
 func Build(mode Mode, core initapp.Core, onConfigChange ConfigChangeHandler) (BuildResult, error) {
 	switch mode {
-	case ModeInitDB:
-		return BuildInitDB(core)
 	case ModeServer:
 		return BuildServer(core, onConfigChange)
 	default:
@@ -55,21 +52,6 @@ func BuildServer(core initapp.Core, onConfigChange ConfigChangeHandler) (BuildRe
 		Modules:   modules,
 		Transport: transport,
 	}, nil
-}
-
-func BuildInitDB(core initapp.Core) (BuildResult, error) {
-	db, err := initapp.NewDatabase(core.Config)
-	if err != nil {
-		return BuildResult{}, err
-	}
-
-	infra := initapp.Infrastructure{Database: db}
-	if _, err := initapp.MigrateDemoSchemaForTrigger(infra.Database, core.Logger, initapp.DemoMigrationTriggerInitDB); err != nil {
-		return BuildResult{}, err
-	}
-
-	core.Logger.Info("database schema initialized")
-	return BuildResult{Infra: infra}, nil
 }
 
 func WatchConfig(core initapp.Core, onConfigChange ConfigChangeHandler) {

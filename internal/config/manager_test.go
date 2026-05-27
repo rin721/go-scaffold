@@ -261,9 +261,6 @@ func TestOverrideWithEnvUsesEnvnameTagsForNonDatabaseConfigs(t *testing.T) {
 	setTaggedEnv(t, I18nConfig{}, "Default", "en-US")
 	setTaggedEnv(t, I18nConfig{}, "Supported", "zh-CN,en-US")
 	setTaggedEnv(t, I18nConfig{}, "MessagesDir", "./locales")
-	setTaggedEnv(t, InitDBConfig{}, "ScriptDir", "./init")
-	setTaggedEnv(t, InitDBConfig{}, "LockFile", ".env-init.lock")
-	setTaggedEnv(t, InitDBConfig{}, "ScriptFilePrefix", "seed_")
 	setTaggedEnv(t, ExecutorConfig{}, "Enabled", "false")
 	setTaggedEnv(t, StorageConfig{}, "Enabled", "false")
 	setTaggedEnv(t, StorageConfig{}, "FSType", "basepath")
@@ -308,9 +305,6 @@ func TestOverrideWithEnvUsesEnvnameTagsForNonDatabaseConfigs(t *testing.T) {
 	if !reflect.DeepEqual(cfg.I18n.Supported, []string{"zh-CN", "en-US"}) ||
 		cfg.I18n.Default != "en-US" || cfg.I18n.MessagesDir != "./locales" {
 		t.Fatalf("I18n override mismatch: %#v", cfg.I18n)
-	}
-	if cfg.InitDB.ScriptDir != "./init" || cfg.InitDB.LockFile != ".env-init.lock" || cfg.InitDB.ScriptFilePrefix != "seed_" {
-		t.Fatalf("InitDB override mismatch: %#v", cfg.InitDB)
 	}
 	if cfg.Executor.Enabled {
 		t.Fatalf("Executor.Enabled = true, want false")
@@ -439,11 +433,6 @@ func testCompleteConfig() *Config {
 			Supported:   []string{"zh-CN", "en-US"},
 			MessagesDir: "./configs/locales",
 		},
-		InitDB: InitDBConfig{
-			ScriptDir:        "./scripts",
-			LockFile:         ".initdb.lock",
-			ScriptFilePrefix: "init_",
-		},
 		Executor: ExecutorConfig{
 			Enabled: true,
 			Pools: []ExecutorPoolConfig{
@@ -546,10 +535,6 @@ i18n:
   supported:
     - zh-CN
   messages_dir: ./configs/locales
-initdb:
-  script_dir: ./scripts
-  lock_file: .initdb.lock
-  script_file_prefix: init_
 executor:
   enabled: false
 storage:

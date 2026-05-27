@@ -80,7 +80,6 @@ const (
 	AppLoggerName   = "logger"
 	AppI18nName     = "i18n"
 	AppExecutorName = "executor"
-	AppInitDBName   = "initdb"
 	AppStorageName  = "storage"
 	AppPluginName   = "plugin"
 	AppIAMName      = "iam"

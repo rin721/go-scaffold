@@ -13,7 +13,7 @@
 | BL-001 | 处理 JWT/auth 示例与 README 范围不一致 | `.env.example`、README | P1 | 需要确认 auth/JWT 范围 | [DEFERRED] |
 | BL-002 | 增加 app/router/demo 集成测试 | 测试风险分析 | P1 | router/middleware/demo HTTP 集成已在 TASK-P1-015 覆盖；app 装配、配置变更 hook 与 reload/config 剩余范围已在 TASK-P1-016 覆盖 | [COMPLETED] |
 | BL-003 | 定义 `pkg/*` API 兼容策略 | 包边界风险 | P1 | 需要架构决策 | [DEFERRED] |
-| BL-004 | 统一 AutoMigrate、initdb、SQL 脚本迁移策略 | 迁移边界风险 | P1 | 需要架构决策 | [DEFERRED] |
+| BL-004 | 统一 AutoMigrate、initdb、SQL 脚本迁移策略 | 迁移边界风险 | P1 | 已由 TASK-P2-014 统一到 sqlgen DB CLI；生产迁移框架另行确认 | [COMPLETED] |
 | BL-005 | 明确 `pkg/sqlgen` 未实现能力的边界 | TODO/unsupported 风险 | P1 | 已提升为 TASK-P1-008 并完成 | [COMPLETED] |
 | BL-006 | 分阶段中文化包 README | 中文项目要求 | P1 | 第一阶段 `pkg/*/README.md` 已由 TASK-P1-017 完成；历史文档更大范围中文化仍需单独确认 | [COMPLETED] |
 | BL-007 | 增加 CI 质量门禁 | 质量工程 | P2 | 已提升为 TASK-P2-001 并完成 | [COMPLETED] |

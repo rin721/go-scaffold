@@ -93,7 +93,7 @@
   - TASK-P1-002 已完成：配置环境变量策略收拢，`.env.example` 与实现对齐。
   - TASK-P1-003 已完成：`/health`、`/ready` router smoke test 已补齐并通过回归。
   - TASK-P1-004 已完成：demo Todo service/repository CRUD 测试基线已补齐并通过回归。
-  - TASK-P1-005 已完成：demo 迁移边界已收拢，server-start/initdb/reload 触发策略可验证。
+  - TASK-P2-014 已完成：demo DB 边界已统一到 sqlgen，server-start/db CLI/reload 触发策略可验证。
   - TASK-P1-006 已完成：`cmd/server tests` 已改为真实 Go test 入口，并补齐最小命令语义测试。
   - TASK-P1-007 已完成：13 个 `pkg/*` 包已完成公共基础设施 API、公共工具 API、内部支撑工具包分类。
   - TASK-P1-008 已完成：`pkg/sqlgen` TODO/unsupported 能力已显式返回错误或文档化 partial 边界。

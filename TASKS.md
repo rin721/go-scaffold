@@ -1,5 +1,44 @@
 # TASKS.md
 
+## Latest Current Task
+
+- TASK-P2-015 / TS-P2-015: COMPLETED.
+- `cmd/server db` now has maintainer comments, and `docs/db-cli.md` documents DB CLI usage, operation semantics, extension rules, and verification guidance.
+- Current legal task after completion: `NONE / NONE / PENDING_USER_CONFIRMATION`.
+
+## Latest Addendum Task
+
+### TASK-P2-015: Document DB CLI usage and extension
+
+- Status: COMPLETED
+- Time Slice: TS-P2-015
+- Source: User request to add comments for `cmd/db` and generate overview, usage, and extension documentation.
+- Review Result: ACCEPT
+- Priority: P2
+- Type: Documentation and maintainability
+- Goal: Make `cmd/server db` easier to maintain and provide a recoverable guide for sqlgen-backed database CLI usage and extension.
+- Allowed Files:
+  - `cmd/server/db.go`
+  - `docs/db-cli.md`
+  - `docs/configuration.md`
+  - `docs/deployment.md`
+  - Project status, acceptance, test report, changelog, issue, and handoff documents.
+- Non-Goals:
+  - No DB behavior changes.
+  - No hand-written SQL script path.
+  - No old `initdb`, InitDB config, SQL script, or `AutoMigrate` restoration.
+  - No production migration execution.
+- Verification:
+  - `go test ./cmd/server -count=1`: PASS
+  - `go test ./pkg/sqlgen ./cmd/server ./internal/app/dbapp -count=1`: PASS
+  - DB docs `rg` scan: PASS
+  - `git diff --check`: PASS, only Git LF/CRLF notices.
+- Exit Conditions:
+  - [CONFIRMED] `cmd/server/db.go` includes concise maintainer comments around command ownership, parsed options, side-effect-free DDL preview, and printable SQL routing.
+  - [CONFIRMED] `docs/db-cli.md` documents purpose, quick usage, operations, flags, layering, extension workflow, forbidden regressions, and verification.
+  - [CONFIRMED] Existing docs link to the new DB CLI guide.
+  - [CONFIRMED] Current legal state returns to `NONE / NONE / PENDING_USER_CONFIRMATION`.
+
 ## 最新补充任务
 
 ### TASK-P2-013：新增配置文档说明
@@ -1477,3 +1516,26 @@
 - Summary：历史任务，v1 local/http API 已接受。
 - Follow-up：
   - rpc/ws/discovery/examples 保留在 Backlog，不属于当前主线。
+## Current Completed Task
+
+### TASK-P2-014: Rebuild DB CLI on sqlgen
+
+- Status: COMPLETED
+- Time Slice: TS-P2-014
+- Source: User goal on 2026-05-27 requiring removal of current init/migration commands and sqlgen-only DB toolchain operations.
+- Priority: P2
+- Type: DB CLI + schema/bootstrap cleanup + tests + docs
+- Goal: Replace the old `initdb`/script/AutoMigrate path with a `cmd/server db` command backed by `pkg/sqlgen`, and ensure database DDL, demo schema, and Todo CRUD SQL are generated through the toolchain.
+- Allowed Files: `cmd/server/*`, `internal/app/**/*`, `internal/config/*`, `internal/modules/demo/**/*`, `internal/transport/http/*_test.go`, `pkg/database/*_test.go`, `pkg/sqlgen/*`, `types/constants/*`, config/deploy examples, and project status/docs.
+- Non-Goals: production migration framework, real deployment, secrets, production DB mutation, new business modules, auth/rbac.
+- Verification:
+  - `rg -n "ModeInitDB|BuildInitDB|InitDB|Initdb|initdb|DemoMigration|MigrateDemo|AutoMigrate|scripts/initdb|init_db|AppInitDB" cmd internal types configs deploy scripts pkg -S`: PASS, no matches.
+  - `go test ./cmd/server ./internal/app/dbapp ./internal/app/initapp ./internal/app/reloadapp ./internal/app ./internal/modules/demo/... ./internal/transport/http ./internal/config ./types/... ./pkg/database ./pkg/sqlgen -count=1`: PASS.
+  - `go test ./... -count=1`: PASS.
+  - `git diff --check`: PASS, only Git LF/CRLF notices.
+- Exit Conditions:
+  - [CONFIRMED] `initdb` command, InitDB config, SQL script bootstrap, demo migration wrappers, and runtime `AutoMigrate` are removed from current code/config paths.
+  - [CONFIRMED] `cmd/server db` supports database DDL generation, schema print/apply, and Todo CRUD operations.
+  - [CONFIRMED] database DDL, schema, and CRUD SQL are generated through `pkg/sqlgen`.
+  - [CONFIRMED] reload skips schema changes.
+  - [CONFIRMED] status, test report, changelog, acceptance, and handoff are updated.

@@ -20,7 +20,31 @@ func (g *Generator) Table(model interface{}) (string, error) {
 		return "", ErrInvalidModel
 	}
 
-	return g.buildCreateTable(g.ctx.TableName, fields), nil
+	return g.buildCreateTable(g.ctx.TableName, fields, false), nil
+}
+
+// TableIfNotExists generates a CREATE TABLE IF NOT EXISTS statement.
+func (g *Generator) TableIfNotExists(model interface{}) (string, error) {
+	if err := g.parseModel(model); err != nil {
+		return "", err
+	}
+
+	fields := parseStructFields(g.ctx.ModelType, g.ctx.ModelValue, g.dialect)
+	if len(fields) == 0 {
+		return "", ErrInvalidModel
+	}
+
+	return g.buildCreateTable(g.ctx.TableName, fields, true), nil
+}
+
+// Database generates a CREATE DATABASE statement.
+func (g *Generator) Database(name string) (string, error) {
+	return g.buildCreateDatabase(name, false)
+}
+
+// DatabaseIfNotExists generates a CREATE DATABASE IF NOT EXISTS statement when supported.
+func (g *Generator) DatabaseIfNotExists(name string) (string, error) {
+	return g.buildCreateDatabase(name, true)
 }
 
 // Drop 生成 DROP TABLE 语句
@@ -48,11 +72,14 @@ func (g *Generator) Migrate(model interface{}) *MigrateBuilder {
 // CREATE TABLE 构建
 // ============================================================================
 
-func (g *Generator) buildCreateTable(tableName string, fields []FieldInfo) string {
+func (g *Generator) buildCreateTable(tableName string, fields []FieldInfo, ifNotExists bool) string {
 	var sb strings.Builder
 	quotedTable := g.dialect.Quote(tableName)
 
 	sb.WriteString("CREATE TABLE ")
+	if ifNotExists {
+		sb.WriteString("IF NOT EXISTS ")
+	}
 	sb.WriteString(quotedTable)
 	sb.WriteString(" (\n")
 
@@ -64,11 +91,11 @@ func (g *Generator) buildCreateTable(tableName string, fields []FieldInfo) strin
 		colDef := g.buildColumnDef(field)
 		columnDefs = append(columnDefs, "  "+colDef)
 
-		if field.Tag.PrimaryKey {
+		if field.Tag.PrimaryKey && !g.isInlineSQLitePrimaryKey(field) {
 			primaryKeys = append(primaryKeys, g.dialect.Quote(field.ColumnName))
 		}
 
-		if field.Tag.Index != "" {
+		if field.Tag.Index != "" && g.supportsInlineIndexes() {
 			indexName := field.Tag.Index
 			if indexName == "" || indexName == "true" {
 				indexName = "idx_" + tableName + "_" + field.ColumnName
@@ -77,7 +104,7 @@ func (g *Generator) buildCreateTable(tableName string, fields []FieldInfo) strin
 				g.dialect.Quote(indexName), g.dialect.Quote(field.ColumnName)))
 		}
 
-		if field.Tag.UniqueIndex != "" {
+		if field.Tag.UniqueIndex != "" && g.supportsInlineIndexes() {
 			indexName := field.Tag.UniqueIndex
 			if indexName == "" || indexName == "true" {
 				indexName = "uk_" + tableName + "_" + field.ColumnName
@@ -125,6 +152,11 @@ func (g *Generator) buildColumnDef(field FieldInfo) string {
 	// 类型
 	parts = append(parts, field.SQLType)
 
+	if g.isInlineSQLitePrimaryKey(field) {
+		parts = append(parts, "PRIMARY KEY", g.dialect.AutoIncrementKeyword())
+		return strings.Join(parts, " ")
+	}
+
 	// NOT NULL
 	if field.Tag.NotNull || field.Tag.PrimaryKey {
 		parts = append(parts, "NOT NULL")
@@ -149,6 +181,41 @@ func (g *Generator) buildColumnDef(field FieldInfo) string {
 	}
 
 	return strings.Join(parts, " ")
+}
+
+func (g *Generator) isInlineSQLitePrimaryKey(field FieldInfo) bool {
+	return g.dialect.Name() == SQLite && field.Tag.PrimaryKey && field.Tag.AutoIncrement
+}
+
+func (g *Generator) supportsInlineIndexes() bool {
+	return g.dialect.Name() == MySQL
+}
+
+func (g *Generator) buildCreateDatabase(name string, ifNotExists bool) (string, error) {
+	name = strings.TrimSpace(name)
+	if name == "" {
+		return "", NewError(ErrCodeInvalidSQL, "database name is required")
+	}
+	if g.dialect.Name() == SQLite {
+		return "", NewUnsupportedError("create database")
+	}
+	if ifNotExists && g.dialect.Name() == PostgreSQL {
+		return "", NewUnsupportedError("create database if not exists")
+	}
+
+	quotedName := g.dialect.Quote(name)
+	if ifNotExists && g.dialect.Name() == SQLServer {
+		return fmt.Sprintf("IF DB_ID(N'%s') IS NULL CREATE DATABASE %s;", escapeString(name), quotedName), nil
+	}
+
+	var sb strings.Builder
+	sb.WriteString("CREATE DATABASE ")
+	if ifNotExists {
+		sb.WriteString("IF NOT EXISTS ")
+	}
+	sb.WriteString(quotedName)
+	sb.WriteString(";")
+	return sb.String(), nil
 }
 
 // ============================================================================

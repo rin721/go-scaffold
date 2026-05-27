@@ -1,5 +1,13 @@
 # STATUS.md
 
+## Latest Current Slice
+
+- 2026-05-27: TASK-P2-015 / TS-P2-015 COMPLETED.
+- Added maintainer comments for `cmd/server db` and created `docs/db-cli.md` with DB CLI overview, usage, extension rules, and verification guidance.
+- Existing DB CLI behavior remains unchanged: database DDL, demo schema, and Todo CRUD SQL stay backed by `pkg/sqlgen`.
+- Verification: `go test ./cmd/server -count=1`, `go test ./pkg/sqlgen ./cmd/server ./internal/app/dbapp -count=1`, DB docs `rg` scan, and `git diff --check` passed. `git diff --check` emitted only Git LF/CRLF notices.
+- Current legal work after completion: `NONE / NONE / PENDING_USER_CONFIRMATION`.
+
 ## 最新补充
 
 - 2026-05-27 已完成 TASK-P2-013 / TS-P2-013：新增 `docs/configuration.md` 配置文档说明，补充配置入口、`.env` 自动加载、`RIN_APP_*` 动态前缀、`RIN_CONFIG_PATH`、`envname` 单一事实源、常用变量和新增配置字段流程。
@@ -138,3 +146,21 @@
 - 合法下一步：当前无自动下一实现任务；项目未达发布条件。如需继续，必须由用户确认新的开发范围或第一版发布验收清单，并拆分任务/时间切片。
 - 可选后续方向：镜像发布流水线、真实 staging/production 运行、生产迁移框架、完整 auth/rbac、插件发现或 RPC/WS 传输。
 - 非目标保持：JWT 中间件、数据库版权限、OPA/Casbin、Go `.so` 插件、插件发现、RPC/WS 传输、生产部署、镜像发布和密钥管理仍不属于本轮完成范围。
+## Current Update: TASK-P2-015 / TS-P2-015
+
+- Date: 2026-05-27
+- Status: COMPLETED
+- Current legal work after this slice: `NONE / NONE / PENDING_USER_CONFIRMATION`
+- User goal: add comments for `cmd/db` and generate overview, usage, and extension documentation.
+- Result: `cmd/server/db.go` now includes concise maintainer comments; `docs/db-cli.md` documents DB CLI overview, quick usage, operation semantics, flags, layering, extension workflow, forbidden regressions, and verification guidance; `docs/configuration.md` and `docs/deployment.md` link to it.
+- Verification: `go test ./cmd/server -count=1` PASS; `go test ./pkg/sqlgen ./cmd/server ./internal/app/dbapp -count=1` PASS; DB docs `rg` scan PASS; `git diff --check` PASS with only Git LF/CRLF notices.
+- No DB behavior, schema, production migration, old `initdb`, InitDB config, SQL script, or `AutoMigrate` path was changed.
+
+## Current Update: TASK-P2-014 / TS-P2-014
+
+- Date: 2026-05-27
+- Status: COMPLETED
+- Current legal work after this slice: `NONE / NONE / PENDING_USER_CONFIRMATION`
+- User goal: remove current init/migration commands and reimplement DB operations through the sqlgen toolchain; table/database creation and CRUD data operations must use tool-chain style programming, not hand-written scripts.
+- Result: `cmd/server db` is now the explicit DB CLI. It can generate database DDL, print/apply sqlgen-generated demo schema, and run Todo CRUD operations through sqlgen-generated SQL. `initdb`, InitDB config, SQL bootstrap scripts, demo migration wrappers, and GORM `AutoMigrate` were removed from current code/config paths.
+- Verification: code/config removed-path scan passed; targeted package tests passed; `go test ./... -count=1` passed; `git diff --check` passed with only Git LF/CRLF notices.

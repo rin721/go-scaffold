@@ -32,11 +32,11 @@ types/*
 
 | 模块 | 当前职责 | 边界定位 | 测试状态 | 主要风险 |
 |---|---|---|---|---|
-| `cmd/server` | CLI 入口、server/initdb/tests 命令、信号处理 | 进程入口 | tests 命令语义测试已补 | `runApp` 内部 `os.Exit` 仍需后续隔离才能测试启动失败路径 |
+| `cmd/server` | CLI 入口、server/db/tests 命令、信号处理 | 进程入口 | db 与 tests 命令语义测试已补 | `runApp` 内部 `os.Exit` 仍需后续隔离才能测试启动失败路径 |
 | `internal/app` | 组合根、启动模式、生命周期、热重载 | 应用装配层 | demo 迁移策略测试、真实 app 装配测试和 reload/config 分发测试已补 | 更大范围端到端启动仍需单独确认 |
 | `internal/config` | 配置结构、加载、环境变量覆盖、热重载 | 配置边界 | 有测试 | TASK-P1-001、TASK-P1-002 和 TASK-P1-016 已收拢 copy/update、环境变量策略和配置变更 hook/reload 分发 |
 | `internal/middleware` | Gin 中间件：i18n、CORS、logger、recovery、traceid | HTTP 横切层 | router 级 TraceID/CORS/Recovery 集成测试已补 | i18n/logger 细粒度行为仍可后续增强 |
-| `internal/transport/http` | Gin router、health/ready、demo API 注册 | 传输层 | health/ready smoke test、demo HTTP 集成测试和 app 装配级 server/initdb 测试已补 | 真实 HTTP server 启动仍非当前测试目标 |
+| `internal/transport/http` | Gin router、health/ready、demo API 注册 | 传输层 | health/ready smoke test、demo HTTP 集成测试和 app 装配级 server 测试已补；DB CLI 单独覆盖 | 真实 HTTP server 启动仍非当前测试目标 |
 | `internal/modules/demo` | Todo 示例业务模块 | 标准示例模块 | service/repository CRUD 基线和 handler/router HTTP 集成已补 | 示例与生产约束需继续保持分离 |
 | `pkg/*` | 可复用基础设施、公共工具和内部支撑工具 | 混合 API | 主要公共包与内部支撑路径已有最小测试 | [CONFIRMED] TASK-P1-017 已完成第一阶段包 README 中文化 |
 | `types/*` | 应用层以上常量、错误码、HTTP 响应结构 | 跨层契约和 HTTP/Gin 响应契约 | `types/constants`、`types/errors`、`types/result` 有测试 | auth 错误码仅为预留契约，auth/rbac 不在当前功能范围；`types/*` 不聚合 `pkg/*` 基础设施接口 |
@@ -45,9 +45,9 @@ types/*
 
 ### 当前职责
 
-- [CONFIRMED] `main.go` 注册 `server`、`initdb`、`tests` 三个 CLI 命令。
+- [CONFIRMED] `main.go` 注册 `server`、`db`、`tests` 三个 CLI 命令。
 - [CONFIRMED] `server` 命令读取配置路径并启动应用。
-- [CONFIRMED] `initdb` 命令以 `ModeInitDB` 初始化应用并执行 demo schema 初始化。
+- [CONFIRMED] `db` 命令通过 `pkg/sqlgen` 生成 demo schema 和 Todo CRUD SQL；`initdb` 命令和 `ModeInitDB` 已移除。
 - [CONFIRMED] `run.go` 处理 SIGINT/SIGTERM，并在退出时调用应用 shutdown。
 
 ### 优势
@@ -71,7 +71,7 @@ types/*
 ### 当前职责
 
 - [CONFIRMED] `app.New` 负责加载 core、注册 logger handler、按模式构建 infra/modules/transport。
-- [CONFIRMED] `modeapp` 支持 `server` 和 `initdb` 两种模式。
+- [CONFIRMED] `modeapp` 当前仅支持 `server` 模式；数据库操作通过独立 `db` CLI 完成。
 - [CONFIRMED] `initapp` 负责配置、日志、i18n、数据库、缓存、executor、storage、demo 模块和 HTTP server 构建。
 - [CONFIRMED] `reloadapp` 响应配置变更并重载 cache、database、logger、executor、HTTP server、storage。
 - [CONFIRMED] `lifecycleapp` 负责 HTTP server、storage、executor、cache、database、logger 的关闭顺序。
@@ -84,22 +84,22 @@ types/*
 
 ### 问题和风险
 
-- [CONFIRMED] demo schema 迁移触发策略已在 TASK-P1-005 收拢：server-start/initdb 执行，reload 跳过。
-- [CONFIRMED] `ModeInitDB` 明确作为 demo schema bootstrap 入口；生产/bootstrap 迁移框架仍延后。
+- [CONFIRMED] demo schema bootstrap 已在 TASK-P2-014 改为 sqlgen：server-start 和显式 `db --operation=schema --apply` 可执行，reload 跳过。
+- [CONFIRMED] `ModeInitDB`、`initdb` 命令、脚本 bootstrap 和 GORM `AutoMigrate` 已移除；生产/bootstrap 迁移框架仍延后。
 - [CONFIRMED] reload/config 分发路径已在 TASK-P1-016 使用 fake 组件覆盖未变化、单组件变化、可选组件关闭和 database reload 不隐式迁移。
 - [RISK] `initapp` 同时负责大量映射和构建逻辑，后续新增模块时容易膨胀。
 
 ### 优化候选
 
-- [CONFIRMED] TASK-P1-016 已建立 app 装配链路测试，覆盖 server/initdb 模式。
-- [CONFIRMED] 将 demo schema 自动迁移标注为 dev/demo 策略，并与 `initdb`/SQL 脚本分层。
+- [CONFIRMED] TASK-P1-016 已建立 app 装配链路测试；TASK-P2-014 后覆盖 server 模式并由 DB CLI 测试单独覆盖数据库入口。
+- [CONFIRMED] 将 demo schema bootstrap 收拢为 sqlgen 工具链策略，并移除 `initdb`/SQL 脚本路径。
 - [CONFIRMED] TASK-P1-016 已为 reload 路径增加配置变更和分发集成测试。
 
 ## `internal/config`
 
 ### 当前职责
 
-- [CONFIRMED] 定义顶层 `Config` 和 server/database/redis/logger/i18n/initdb/executor/storage/cors 子配置。
+- [CONFIRMED] 定义顶层 `Config` 和 server/database/redis/logger/i18n/executor/storage/cors/plugin/iam 子配置；InitDB 子配置已移除。
 - [CONFIRMED] 使用 Viper 加载配置，支持 `${VAR:default}` 替换、`.env` 加载、环境变量覆盖和 fsnotify 监听。
 - [CONFIRMED] `Manager` 使用 `atomic.Pointer` 存储配置快照。
 
@@ -242,7 +242,7 @@ types/*
 |---|---|---|---|
 | BC-001 | 环境变量文档与实现曾在 `DB_*`、固定 `REI_APP_*`、模块手写 override 和重复 env-name 常量间漂移 | 配置覆盖可能在本地、部署和 reload 路径表现不一致 | [CONFIRMED] TASK-P2-011 已统一为 `AppPrefix` 动态前缀 + `envname` 标签；TASK-P2-012 已删除重复常量；未加前缀变量兼容 |
 | BC-002 | `copyConfig` 未覆盖完整配置字段 | 配置 Update/热更新可能丢字段 | [CONFIRMED] TASK-P1-001 已修复并补测试 |
-| BC-003 | demo schema 在 server/initdb/reload 路径自动迁移 | dev/prod 迁移职责混乱 | [CONFIRMED] TASK-P1-005 已明确 server-start/initdb 执行、reload 跳过 |
+| BC-003 | demo schema bootstrap 与运行期 reload 边界 | dev/prod 迁移职责混乱 | [CONFIRMED] TASK-P2-014 改为 sqlgen；server-start/显式 db apply 可执行，reload 跳过 |
 | BC-004 | `cmd/server tests` 不运行测试 | CLI 语义误导 | [CONFIRMED] TASK-P1-006 已改为真实测试入口 |
 | BC-005 | `pkg/sqlgen` README/代码存在未实现能力 | 公共工具 API 期望不稳定 | [CONFIRMED] TASK-P1-008 已显式 unsupported 或文档化 partial 能力 |
 | BC-006 | 多个关键路径无测试 | 后续重构回归风险高 | [CONFIRMED] P1 已补配置、router、demo、app 装配、reload/config 和主要 `pkg/*` 最小测试 |
@@ -256,8 +256,8 @@ types/*
 | TM-003 | health/ready | 使用 `httptest` 验证 `/health`、数据库正常/缺失/失败时 `/ready` | P0 | [CONFIRMED] TASK-P1-003 已覆盖 |
 | TM-004 | demo CRUD | 使用 SQLite 临时库跑 Create/List/Get/Update/Delete | P0 | [CONFIRMED] TASK-P1-004 已覆盖 service/repository 基线；TASK-P1-015 已覆盖 HTTP handler/router 集成 |
 | TM-005 | config load/override | 验证 YAML、`${VAR:default}`、环境变量覆盖、无效配置报错 | P0 | [CONFIRMED] 环境覆盖已补测试 |
-| TM-006 | config update/copy | 验证 `Update` 后不丢失 InitDB/Executor/Storage/CORS 等字段 | P0 | [CONFIRMED] TASK-P1-001 已覆盖 |
-| TM-007 | migration boundary | 验证 server/initdb/reload 对 demo schema 的触发策略 | P1 | [CONFIRMED] TASK-P1-005 已覆盖 |
+| TM-006 | config update/copy | 验证 `Update` 后不丢失 Executor/Storage/CORS 等字段 | P0 | [CONFIRMED] TASK-P1-001 已覆盖；InitDB 字段已移除 |
+| TM-007 | db schema boundary | 验证 server-start/db CLI/reload 对 demo schema 的触发策略 | P1 | [CONFIRMED] TASK-P2-014 已覆盖 |
 | TM-008 | pkg API | 为无测试的公共包补最小行为测试 | P1 | [CONFIRMED] `BL-020` 首批 TASK-P1-011、第二批 TASK-P1-012 和第三批 TASK-P1-013 已覆盖公共 `pkg/*` 行为测试；`pkg/utils` 内部支撑测试已由 TASK-P1-014 覆盖 |
 
 ## P1 优化候选项
@@ -267,7 +267,7 @@ types/*
 | OPT-P1-001 | 建立 app/router/demo/config 测试矩阵 | 多个关键路径无测试 | 生成测试任务和时间切片 |
 | OPT-P1-002 | 统一配置环境变量策略 | `.env.example` 与实现不一致 | [CONFIRMED] 已完成 |
 | OPT-P1-003 | 修复 `copyConfig` 字段覆盖 | 热更新可能丢配置 | [CONFIRMED] 已完成 |
-| OPT-P1-004 | 明确迁移策略 | `AutoMigrate`、`initdb`、SQL 脚本职责冲突 | [CONFIRMED] 已编写迁移边界文档和测试 |
+| OPT-P1-004 | 明确数据库策略 | `AutoMigrate`、`initdb`、SQL 脚本职责冲突 | [CONFIRMED] TASK-P2-014 已统一到 sqlgen DB CLI 和工具链生成 SQL |
 | OPT-P1-005 | 处理 `cmd/server tests` 命令语义 | 命令名与行为不符 | [CONFIRMED] 已改造为真实测试入口 |
 | OPT-P1-006 | 为 `pkg/*` 完成公共/内部分类 | 混合 API 策略需要落地 | [CONFIRMED] 已更新包级 README、`ARCHITECTURE.md` 和本文 |
 | OPT-P1-007 | 标注 `pkg/sqlgen` 未实现能力 | TODO/unsupported 边界不清 | [CONFIRMED] 已完成 |
@@ -288,3 +288,9 @@ types/*
 - [CONFIRMED] 用户已选择 A，`BL-020` 首批 `pkg/*` 行为测试已完成 TASK-P1-011 / TS-P1-011，第二批已完成 TASK-P1-012 / TS-P1-012，第三批 `pkg/cache` 已完成 TASK-P1-013 / TS-P1-013。
 - [CONFIRMED] 用户选择 A，`BL-006` 第一阶段包 README 中文化已完成 TASK-P1-017 / TS-P1-017。
 - [ACCEPT] 用户纠正当前项目还未开发完整，不应发布第一版；本文的模块边界和切片完成证据不构成 v1 发布验收。
+## Current DB Toolchain Note
+
+- As of TASK-P2-014, CLI commands are `server`, `db`, and `tests`.
+- `db` delegates schema and Todo CRUD SQL generation to `pkg/sqlgen`.
+- `initdb`, InitDB config, SQL bootstrap scripts, and GORM `AutoMigrate` are removed from current code paths.
+- Reload does not apply schema changes.

@@ -1,5 +1,12 @@
 # ISSUES.md
 
+## Latest Issue Review: TASK-P2-015
+
+- Date: 2026-05-27
+- Result: No new blocking issue.
+- Note: This slice only added DB CLI comments and documentation. It did not change DB behavior, execute schema changes, restore old init paths, or touch production migration flow.
+- Verification: `go test ./cmd/server -count=1`, `go test ./pkg/sqlgen ./cmd/server ./internal/app/dbapp -count=1`, DB docs `rg` scan, and `git diff --check` passed. `git diff --check` emitted only Git LF/CRLF notices.
+
 ## 最新补充
 
 - ISSUE-CONFIG-DOCS-001：无新增失败项。TASK-P2-013 仅新增配置文档说明和入口，未修改 Go 实现、真实 `.env`、密钥、数据库 schema、HTTP 路由、业务模块或生产部署配置；关键文档检索、`go test ./internal/config -count=1`、`go test ./... -count=1` 和 `git diff --check` 均通过。
@@ -93,3 +100,8 @@
 - 2026-05-27：记录 `internal/config` 重复 env-name 常量清理，无新增失败项；`envname` 标签成为字段环境变量名唯一事实源。
 - 2026-05-25：记录并关闭 `AGENTS.md` 缺失导致的 Agent 入口冲突。
 - 2026-05-25：创建 `ISSUES.md`，补齐 `docs/ai/prompt.md` 要求的项目问题记录入口。
+## Latest Issue Review: TASK-P2-014
+
+- Date: 2026-05-27
+- Result: No new blocking issue.
+- Note: Production migration framework remains intentionally out of scope and must be separately confirmed before real production schema changes.

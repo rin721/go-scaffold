@@ -1,14 +1,21 @@
 # 配置文档说明
 
+## Current DB CLI Note
+
+As of 2026-05-27, database DDL, demo schema, and demo Todo CRUD are generated through `pkg/sqlgen` and exposed through `cmd/server db`. The removed `initdb` command and InitDB config section must not be restored without a new confirmed task.
+
+DB CLI usage and extension notes live in [`db-cli.md`](db-cli.md).
+
 本文说明当前项目的配置加载顺序、动态环境变量前缀、`.env` 自动加载规则，以及新增配置字段时应如何维护 `envname`。
 
 ## 配置入口
 
-应用默认读取 `configs/config.yaml`。`server` 和 `initdb` 命令都支持显式传入配置文件：
+应用默认读取 `configs/config.yaml`。`server` 和 `db` 命令都支持显式传入配置文件：
 
 ```bash
 go run ./cmd/server server --config=configs/config.yaml
-go run ./cmd/server initdb --config=configs/config.yaml
+go run ./cmd/server db --config=configs/config.yaml --operation=schema
+go run ./cmd/server db --config=configs/config.yaml --operation=schema --apply
 ```
 
 也可以通过配置路径环境变量指定：
@@ -107,7 +114,6 @@ DB_HOST
 | Redis | `RIN_APP_REDIS_ENABLED`, `RIN_APP_REDIS_HOST`, `RIN_APP_REDIS_PORT`, `RIN_APP_REDIS_PASSWORD`, `RIN_APP_REDIS_DB`, `RIN_APP_REDIS_POOL_SIZE` |
 | Logger | `RIN_APP_LOG_LEVEL`, `RIN_APP_LOG_FORMAT`, `RIN_APP_LOG_OUTPUT`, `RIN_APP_LOG_FILE_PATH`, `RIN_APP_LOG_MAX_SIZE`, `RIN_APP_LOG_MAX_BACKUPS`, `RIN_APP_LOG_MAX_AGE` |
 | I18n | `RIN_APP_I18N_DEFAULT`, `RIN_APP_I18N_SUPPORTED`, `RIN_APP_I18N_MESSAGES_DIR` |
-| InitDB | `RIN_APP_INITDB_SCRIPT_DIR`, `RIN_APP_INITDB_LOCK_FILE`, `RIN_APP_INITDB_SCRIPT_FILE_PREFIX` |
 | Executor | `RIN_APP_EXECUTOR_ENABLED` |
 | Storage | `RIN_APP_STORAGE_ENABLED`, `RIN_APP_STORAGE_FS_TYPE`, `RIN_APP_STORAGE_BASE_PATH`, `RIN_APP_STORAGE_ENABLE_WATCH`, `RIN_APP_STORAGE_WATCH_BUFFER_SIZE` |
 | Plugin | `RIN_APP_PLUGIN_ENABLED`, `RIN_APP_PLUGIN_DEFAULT_TIMEOUT`, `RIN_APP_PLUGIN_MAX_RESPONSE_BYTES` |

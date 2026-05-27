@@ -1,5 +1,15 @@
 # ACCEPTANCE.md
 
+## TASK-P2-015 Acceptance
+
+| ID | Acceptance Item | Method | Required | Status |
+|---|---|---|---|---|
+| ACC-P2-056 | `cmd/server/db.go` has concise maintainer comments for command ownership and DDL preview behavior | Code review | Yes | [CONFIRMED] |
+| ACC-P2-057 | `docs/db-cli.md` documents DB CLI overview, usage, operations, flags, layering, extension workflow, forbidden regressions, and verification | Manual review and `rg` scan | Yes | [CONFIRMED] |
+| ACC-P2-058 | Existing docs link to the new DB CLI guide | Check `docs/configuration.md` and `docs/deployment.md` | Yes | [CONFIRMED] |
+| ACC-P2-059 | No DB behavior, schema, production migration, or old init path changes were introduced | Scope review and tests | Yes | [CONFIRMED] |
+| ACC-P2-060 | DB CLI related tests and whitespace check pass | `go test ./pkg/sqlgen ./cmd/server ./internal/app/dbapp -count=1`; `git diff --check` | Yes | [CONFIRMED] |
+
 ## TASK-P2-013 验收
 
 | ID | 验收项 | 方法 | 必须 | 状态 |
@@ -178,7 +188,7 @@
 
 | ID | 验收项 | 方法 | 必须 | 状态 |
 |---|---|---|---|---|
-| ACC-P2-046 | `internal/config/constants.go` 不再定义字段 env-name 镜像常量 | `rg -n "Env(DB|Redis|Server|Log|I18n|CORS|InitDB|Executor|Storage|Plugin|IAM)" internal cmd types deploy docs .env.example Dockerfile -S` | 是 | [CONFIRMED] |
+| ACC-P2-046 | `internal/config/constants.go` 不再定义字段 env-name 镜像常量 | `rg -n "Env(DB|Redis|Server|Log|I18n|CORS|Executor|Storage|Plugin|IAM)" internal cmd types deploy docs .env.example Dockerfile -S` | 是 | [CONFIRMED] |
 | ACC-P2-047 | 配置测试从结构体 `envname` 标签读取环境变量名 | `go test ./internal/config -count=1` | 是 | [CONFIRMED] |
 | ACC-P2-048 | 动态前缀、未加前缀 fallback 和 `.env` 自动加载不回归 | `go test ./internal/config -count=1` | 是 | [CONFIRMED] |
 | ACC-P2-049 | cmd/app 相关配置集成不回归 | `go test ./cmd/server ./internal/app/... -count=1` | 是 | [CONFIRMED] |
@@ -208,9 +218,9 @@
 
 | ID | 验收项 | 方法 | 必须 | 状态 |
 |---|---|---|---|---|
-| ACC-P1-020 | server-start 触发点会执行 demo `AutoMigrate` | `go test ./internal/app/... -count=1` | 是 | [CONFIRMED] |
-| ACC-P1-021 | `initdb` 触发点会执行 demo `AutoMigrate` | `go test ./internal/app/... -count=1` | 是 | [CONFIRMED] |
-| ACC-P1-022 | reload 触发点不会隐式执行 demo `AutoMigrate` | `go test ./internal/app/... -count=1` | 是 | [CONFIRMED] |
+| ACC-P1-020 | server-start 触发点会执行 sqlgen 生成的 demo schema | `go test ./internal/app/initapp ./internal/app/dbapp -count=1` | 是 | [CONFIRMED] |
+| ACC-P1-021 | `cmd/server db --operation=schema --apply` 是显式 demo schema bootstrap 入口 | `go test ./cmd/server ./internal/app/dbapp -count=1` | 是 | [CONFIRMED] |
+| ACC-P1-022 | reload 触发点不会隐式执行 demo schema apply | `go test ./internal/app/reloadapp ./internal/app/initapp -count=1` | 是 | [CONFIRMED] |
 | ACC-P1-023 | dev/demo 与生产/bootstrap 迁移职责已记录 | 检查 `docs/specs/demo_migration_boundary.md` | 是 | [CONFIRMED] |
 | ACC-P1-024 | 全量回归通过 | `go test ./... -count=1` | 是 | [CONFIRMED] |
 
@@ -381,7 +391,7 @@
 | ID | 验收项 | 方法 | 必须 | 状态 |
 |---|---|---|---|---|
 | ACC-P1-075 | server 模式真实 app 装配链路被覆盖 | `go test ./internal/app/... -count=1` | 是 | [CONFIRMED] |
-| ACC-P1-076 | initdb 模式仅初始化数据库并创建 demo schema，不装配 HTTP transport | `go test ./internal/app/... -count=1` | 是 | [CONFIRMED] |
+| ACC-P1-076 | db CLI 仅执行显式数据库操作，不装配 HTTP transport | `go test ./cmd/server ./internal/app/dbapp -count=1` | 是 | [CONFIRMED] |
 | ACC-P1-077 | `ConfigManager.Update` 触发 app hook 并更新 `Core.Config`，不启动真实 server | `go test ./internal/app/... -count=1` | 是 | [CONFIRMED] |
 | ACC-P1-078 | reload 分发覆盖未变化、单组件变化和 Redis/executor/storage 关闭置空路径 | `go test ./internal/app/... -count=1` | 是 | [CONFIRMED] |
 | ACC-P1-079 | database reload 不触发 demo schema 隐式迁移路径 | `go test ./internal/app/... -count=1` | 是 | [CONFIRMED] |
@@ -404,7 +414,7 @@
 |---|---|---|---|---|
 | ACC-P2-001 | CI workflow 已新增且不使用 secrets | 检查 `.github/workflows/ci.yml` | 是 | [CONFIRMED] |
 | ACC-P2-002 | CI 包含 gofmt 漂移报告、全量测试、server 构建和空白检查 | 检查 `.github/workflows/ci.yml` | 是 | [CONFIRMED] |
-| ACC-P2-003 | 部署说明记录配置入口、手动运行和 initdb 边界 | 检查 `docs/deployment.md` | 是 | [CONFIRMED] |
+| ACC-P2-003 | 部署说明记录配置入口、手动运行和 db CLI 边界 | 检查 `docs/deployment.md` | 是 | [CONFIRMED] |
 | ACC-P2-004 | README 有 CI 与部署说明入口 | 检查 `README.md` | 是 | [CONFIRMED] |
 | ACC-P2-005 | 未执行真实部署、未推送镜像、未写入密钥 | 核对变更范围 | 是 | [CONFIRMED] |
 | ACC-P2-006 | 全量回归通过 | `go test ./... -count=1` | 是 | [CONFIRMED] |
@@ -472,3 +482,11 @@
 | ACC-P2-043 | reload 先构建新 IAM/plugin 基础设施再替换，失败保留旧实例；关闭顺序在 HTTP server 后、cache/database 前关闭插件管理器 | `go test ./internal/config ./internal/app/... -count=1` | 是 | [CONFIRMED] |
 | ACC-P2-044 | 全量回归、server build 和 diff 空白检查通过 | `go test ./... -count=1`；`go build -o <temp> ./cmd/server`；`git diff --check` | 是 | [CONFIRMED] |
 | ACC-P2-045 | 本轮未实现 JWT 中间件、数据库版权限、OPA/Casbin、Go `.so` 插件、插件发现、RPC/WS、生产部署、镜像发布或密钥管理 | 核对变更范围 | 是 | [CONFIRMED] |
+## Current DB Acceptance
+
+| ID | Acceptance | Verification | Required | Status |
+|---|---|---|---|---|
+| ACC-P2-047 | `cmd/server db` exists and supports database DDL generation, schema print/apply, and Todo CRUD operations | `go test ./cmd/server ./internal/app/dbapp -count=1` | Yes | [CONFIRMED] |
+| ACC-P2-048 | Demo schema DDL is generated through `pkg/sqlgen.TableIfNotExists` | `go test ./pkg/sqlgen ./internal/app/dbapp -count=1` | Yes | [CONFIRMED] |
+| ACC-P2-049 | Current code/config paths contain no `initdb`, InitDB config, SQL bootstrap script, demo migration wrapper, or `AutoMigrate` | `rg -n "ModeInitDB|BuildInitDB|InitDB|Initdb|initdb|DemoMigration|MigrateDemo|AutoMigrate|scripts/initdb|init_db|AppInitDB" cmd internal types configs deploy scripts pkg -S` | Yes | [CONFIRMED] |
+| ACC-P2-050 | Reload does not implicitly apply schema changes | `go test ./internal/app/reloadapp ./internal/app/initapp -count=1` | Yes | [CONFIRMED] |

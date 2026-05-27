@@ -27,11 +27,6 @@ i18n:
     - en-US
   messages_dir: ./configs/locales
 
-initdb:
-  script_dir: ./scripts/initdb
-  lock_file: .initialized
-  script_file_prefix: initdb
-
 executor:
   enabled: true
   pools:

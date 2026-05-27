@@ -39,8 +39,8 @@
 - Severity：High
 - Probability：Medium
 - Impact：开发态、测试态和生产态数据库初始化职责混乱。
-- Trigger：demo `AutoMigrate`、`initdb` 命令、SQL 脚本并存但无统一策略。
-- Mitigation：TASK-P1-005 已将 demo 迁移触发策略显式化：server-start/initdb 允许 demo `AutoMigrate`，reload 跳过隐式 schema 变更；生产迁移框架仍延后。
+- Trigger：历史上 demo `AutoMigrate`、`initdb` 命令、SQL 脚本并存但无统一策略。
+- Mitigation：TASK-P2-014 已将当前 DB bootstrap/CLI 统一到 `pkg/sqlgen` 工具链：server-start 和显式 `cmd/server db --operation=schema --apply` 可应用生成的 demo schema，reload 跳过隐式 schema 变更；生产迁移框架仍延后。
 - Owner：User/Agent
 - Status：[CONFIRMED] 触发边界已收拢；生产迁移框架仍延后
 - Blocking：No。
