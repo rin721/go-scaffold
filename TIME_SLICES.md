@@ -2,9 +2,61 @@
 
 ## Latest Current Time Slice
 
+- TS-P2-016: COMPLETED.
+- Scope: host HTTP remote plugin registration, safe IAM hook context injection, and independent `remote_plugins/blog` sample service.
+- Verification: host/plugin/app/router/IAM target tests, root `go test ./...`, Blog module `go test ./...`, and `git diff --check` passed.
+- Next legal state: `NONE / NONE / PENDING_USER_CONFIRMATION`.
+- Strict non-goals: real WS/RPC adapter, automatic discovery daemon, JWT/login flow, database-backed IAM, production deployment, real secrets, and unrelated `cmd/*` rewrites.
+
 - TS-P2-015: COMPLETED.
 - Scope completed: maintainer comments for `cmd/server db`, `docs/db-cli.md` overview/usage/extension guide, and discovery links from existing docs.
 - Next legal state: `NONE / NONE / PENDING_USER_CONFIRMATION`.
+
+## Current Addendum Time Slice
+
+### TS-P2-016: Remote plugin registration and Blog sample
+
+- Status: COMPLETED
+- Task ID: TASK-P2-016
+- Purpose: Implement the smallest end-to-end remote plugin path requested by the user: host receives registration, host creates an HTTP plugin adapter, hook JSON events include safe IAM principal context, and an independently deployable Blog plugin demonstrates the flow.
+- Inputs:
+  - User `/goal` on 2026-05-28.
+  - Existing `pkg/plugin` HTTP JSON protocol and `RemoteHook`.
+  - Existing `pkg/iam` memory service and app-level IAM authorization hook.
+- Allowed Files:
+  - `pkg/plugin/**/*`
+  - `pkg/plugin/hooks/**/*`
+  - `internal/config/**/*`
+  - `internal/app/initapp/**/*`
+  - `internal/transport/http/**/*`
+  - `configs/config.example.yaml`
+  - `.env.example`
+  - `remote_plugins/blog/**/*`
+  - Project status documents.
+- Forbidden:
+  - Real secrets or production config values.
+  - Production deployment, workflow triggering, image publishing, or irreversible migration.
+  - JWT/login, database-backed IAM, OPA/Casbin, Go `.so`, or real WS/RPC transport.
+  - Reverting existing user or prior-agent workspace changes.
+- Execution Steps:
+  1. Add plugin registration protocol types and HTTP registration handler.
+  2. Add hook event IAM identity fields and manager event enrichment without making `pkg/plugin` import `pkg/iam`.
+  3. Wire host router/app/config to expose the registration endpoint when configured.
+  4. Add `remote_plugins/blog` independent Go module with config, invoke handler, startup registration client, README, and tests.
+  5. Run target and full verification; update status, tests, changelog, issues, and handoff.
+- Verification Commands:
+  - `go test ./pkg/plugin/... -count=1`: PASS
+  - `go test ./internal/config ./internal/app/... ./internal/transport/http -count=1`: PASS
+  - `go test ./pkg/iam/... -count=1`: PASS
+  - `go test ./... -count=1`: PASS
+  - `go test ./... -count=1` inside `remote_plugins/blog`: PASS
+  - `git diff --check`: PASS, only Git LF/CRLF notices
+- Acceptance:
+  - [CONFIRMED] Main service registration endpoint validates a shared token when configured and registers HTTP plugin definitions from JSON.
+  - [CONFIRMED] Registered remote hooks use the existing `hooks.execute` JSON protocol.
+  - [CONFIRMED] IAM principal data is injected as safe structured hook event identity data; IAM tokens, policies, and secrets are not sent to plugins.
+  - [CONFIRMED] Blog plugin service exposes standard invoke operations and posts a registration request to the host on startup.
+  - [CONFIRMED] Documentation and examples use placeholders only.
 
 ## Latest Addendum Time Slice
 

@@ -9,6 +9,30 @@
 
 ## 风险列表
 
+### RISK-023：远程插件注册入口成为未授权控制面
+
+- Type：Security/Plugin
+- Severity：High
+- Probability：Medium
+- Impact：如果主服务注册端点无鉴权或误用真实密钥，远程服务可能注册未授权插件并影响 hook 调用链。
+- Trigger：TASK-P2-016 新增远程插件主动注册入口。
+- Mitigation：注册入口默认关闭；启用时支持共享 registration token；示例和文档只使用占位值；本切片不写真实 secret、不实现生产密钥管理。
+- Owner：User/Agent
+- Status：[RISK]
+- Blocking：No，但阻塞把该能力宣称为生产级插件发现或密钥管理。
+
+### RISK-024：IAM 数据注入泄露敏感授权配置
+
+- Type：Security/IAM
+- Severity：High
+- Probability：Medium
+- Impact：如果把 token、policy 或完整 IAM service 内部状态发给远程插件，会造成权限数据泄露。
+- Trigger：用户要求将 IAM 服务数据注入插件钩子 JSON 协议。
+- Mitigation：本切片只注入安全 principal 上下文：ID、name、roles、attributes。不得发送 token、policy、secret、credential 或完整 IAM service 对象。
+- Owner：Agent
+- Status：[RISK]
+- Blocking：No；阻塞任何“完整 IAM 数据下发到插件”的实现。
+
 ### RISK-001：范围膨胀成全量重写
 
 - Type：Scope

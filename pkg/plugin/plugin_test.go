@@ -1,6 +1,7 @@
 package plugin
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -244,6 +245,50 @@ func TestManagerInvokeHooks(t *testing.T) {
 	}
 }
 
+func TestManagerHookEventEnricherAddsIdentity(t *testing.T) {
+	mgr := NewManager(WithHookEventEnricher(func(ctx context.Context, event hooks.Event) hooks.Event {
+		event.Identity = &hooks.Identity{Principal: hooks.Principal{
+			ID:    "admin",
+			Name:  "Ada",
+			Roles: []string{"maintainer"},
+			Attributes: map[string]string{
+				"team": "platform",
+			},
+		}}
+		return event
+	}))
+	if err := mgr.RegisterHook(HookBeforeInvoke, hooks.HandlerFunc(func(ctx context.Context, event hooks.Event) (hooks.Result, error) {
+		if event.Identity == nil {
+			t.Fatal("expected identity on hook event")
+		}
+		if event.Identity.Principal.ID != "admin" {
+			t.Fatalf("principal id = %q, want admin", event.Identity.Principal.ID)
+		}
+		if event.Identity.Principal.Roles[0] != "maintainer" {
+			t.Fatalf("principal roles = %#v", event.Identity.Principal.Roles)
+		}
+		if event.Identity.Principal.Attributes["team"] != "platform" {
+			t.Fatalf("principal attributes = %#v", event.Identity.Principal.Attributes)
+		}
+		return hooks.Result{}, nil
+	})); err != nil {
+		t.Fatalf("RegisterHook() error = %v", err)
+	}
+	echo, err := NewLocal(Metadata{Name: "echo", Protocol: ProtocolLocal}, func(ctx context.Context, req Request) (*Response, error) {
+		return NewResponse(map[string]string{"ok": "true"})
+	})
+	if err != nil {
+		t.Fatalf("NewLocal() error = %v", err)
+	}
+	if err := mgr.Register(echo); err != nil {
+		t.Fatalf("Register() error = %v", err)
+	}
+
+	if _, err := mgr.Invoke(context.Background(), "echo", MustNewRequest("run", nil)); err != nil {
+		t.Fatalf("Invoke() error = %v", err)
+	}
+}
+
 func TestManagerBeforeInvokeHookCanStop(t *testing.T) {
 	mgr := NewManager()
 	called := false
@@ -398,5 +443,91 @@ func TestRemoteHookInvokesHooksExecute(t *testing.T) {
 	}
 	if got["point"] != string(HookBeforeInvoke) {
 		t.Fatalf("result payload = %#v", got)
+	}
+}
+
+func TestHTTPRegistrationHandlerRegistersRemotePluginAndHook(t *testing.T) {
+	hookCalls := 0
+	remote, err := NewLocal(Metadata{Name: "blog", Protocol: ProtocolLocal}, func(ctx context.Context, req Request) (*Response, error) {
+		if req.Operation == OperationHooksExecute {
+			hookCalls++
+			var event hooks.Event
+			if err := req.DecodePayload(&event); err != nil {
+				t.Fatalf("DecodePayload(event): %v", err)
+			}
+			result, err := hooks.NewResult(map[string]string{"point": string(event.Point)})
+			if err != nil {
+				return nil, err
+			}
+			return NewResponse(result)
+		}
+		return NewResponse(map[string]string{"operation": req.Operation})
+	})
+	if err != nil {
+		t.Fatalf("NewLocal(blog): %v", err)
+	}
+	remoteServer := httptest.NewServer(NewHTTPServer(remote))
+	defer remoteServer.Close()
+
+	hostManager := NewManager()
+	registrationServer := httptest.NewServer(NewHTTPRegistrationHandler(hostManager, WithRegistrationToken("register-secret")))
+	defer registrationServer.Close()
+
+	body, err := json.Marshal(RegistrationRequest{
+		Plugin: Definition{
+			Name:     "blog",
+			Protocol: ProtocolHTTP,
+			Endpoint: remoteServer.URL + HTTPInvokePath,
+		},
+		Hooks: []HookBinding{
+			{Point: HookAfterInvoke, Plugin: "blog", Name: "blog-after", Priority: 10},
+		},
+	})
+	if err != nil {
+		t.Fatalf("Marshal registration: %v", err)
+	}
+	req, err := http.NewRequest(http.MethodPost, registrationServer.URL+HTTPRegisterPath, bytes.NewReader(body))
+	if err != nil {
+		t.Fatalf("NewRequest: %v", err)
+	}
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer register-secret")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatalf("register request: %v", err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusCreated {
+		t.Fatalf("register status = %d, want 201", resp.StatusCode)
+	}
+
+	pluginResp, err := hostManager.Invoke(context.Background(), "blog", MustNewRequest("blog.list", nil))
+	if err != nil {
+		t.Fatalf("Invoke(blog): %v", err)
+	}
+	var got map[string]string
+	if err := pluginResp.DecodePayload(&got); err != nil {
+		t.Fatalf("DecodePayload(pluginResp): %v", err)
+	}
+	if got["operation"] != "blog.list" {
+		t.Fatalf("plugin response = %#v", got)
+	}
+	if hookCalls != 1 {
+		t.Fatalf("hookCalls = %d, want 1", hookCalls)
+	}
+}
+
+func TestHTTPRegistrationHandlerRequiresToken(t *testing.T) {
+	server := httptest.NewServer(NewHTTPRegistrationHandler(NewManager(), WithRegistrationToken("secret")))
+	defer server.Close()
+
+	resp, err := http.Post(server.URL+HTTPRegisterPath, "application/json", strings.NewReader(`{}`))
+	if err != nil {
+		t.Fatalf("POST registration: %v", err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusUnauthorized {
+		t.Fatalf("status = %d, want 401", resp.StatusCode)
 	}
 }

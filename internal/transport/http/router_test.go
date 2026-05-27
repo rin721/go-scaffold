@@ -1,6 +1,7 @@
 package httptransport
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -10,6 +11,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/rei0721/go-scaffold/pkg/database"
+	"github.com/rei0721/go-scaffold/pkg/plugin"
 	"gorm.io/gorm"
 )
 
@@ -107,6 +109,46 @@ func TestNewRouterReadyEndpoint(t *testing.T) {
 			}
 			assertDataValue(t, checks, "database", tt.wantDBCheck)
 		})
+	}
+}
+
+func TestNewRouterPluginRegistrationEndpoint(t *testing.T) {
+	remote, err := plugin.NewLocal(plugin.Metadata{Name: "blog", Protocol: plugin.ProtocolLocal}, func(ctx context.Context, req plugin.Request) (*plugin.Response, error) {
+		return plugin.NewResponse(map[string]string{"operation": req.Operation})
+	})
+	if err != nil {
+		t.Fatalf("NewLocal(blog): %v", err)
+	}
+	remoteServer := httptest.NewServer(plugin.NewHTTPServer(remote))
+	defer remoteServer.Close()
+
+	manager := plugin.NewManager()
+	router := newTestRouter(RouterDeps{
+		PluginRegistration: plugin.NewHTTPRegistrationHandler(manager, plugin.WithRegistrationToken("secret")),
+	})
+
+	body, err := json.Marshal(plugin.RegistrationRequest{
+		Plugin: plugin.Definition{
+			Name:     "blog",
+			Protocol: plugin.ProtocolHTTP,
+			Endpoint: remoteServer.URL + plugin.HTTPInvokePath,
+		},
+	})
+	if err != nil {
+		t.Fatalf("Marshal registration: %v", err)
+	}
+	request := httptest.NewRequest(http.MethodPost, plugin.HTTPRegisterPath, bytes.NewReader(body))
+	request.Header.Set("Content-Type", "application/json")
+	request.Header.Set("Authorization", "Bearer secret")
+	recorder := httptest.NewRecorder()
+
+	router.ServeHTTP(recorder, request)
+
+	if recorder.Code != http.StatusCreated {
+		t.Fatalf("registration status = %d, want 201 with body %s", recorder.Code, recorder.Body.String())
+	}
+	if _, ok := manager.Get("blog"); !ok {
+		t.Fatal("registered plugin not found in manager")
 	}
 }
 

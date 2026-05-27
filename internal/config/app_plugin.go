@@ -9,8 +9,14 @@ type PluginConfig struct {
 	Enabled          bool                      `mapstructure:"enabled" envname:"PLUGIN_ENABLED" json:"enabled" yaml:"enabled" toml:"enabled"`
 	DefaultTimeout   int                       `mapstructure:"default_timeout" envname:"PLUGIN_DEFAULT_TIMEOUT" json:"default_timeout" yaml:"default_timeout" toml:"default_timeout"`
 	MaxResponseBytes int64                     `mapstructure:"max_response_bytes" envname:"PLUGIN_MAX_RESPONSE_BYTES" json:"max_response_bytes" yaml:"max_response_bytes" toml:"max_response_bytes"`
+	Registration     PluginRegistrationConfig  `mapstructure:"registration" json:"registration" yaml:"registration" toml:"registration"`
 	Plugins          []PluginDefinitionConfig  `mapstructure:"plugins" json:"plugins" yaml:"plugins" toml:"plugins"`
 	Hooks            []PluginHookBindingConfig `mapstructure:"hooks" json:"hooks" yaml:"hooks" toml:"hooks"`
+}
+
+type PluginRegistrationConfig struct {
+	Enabled bool   `mapstructure:"enabled" envname:"PLUGIN_REGISTRATION_ENABLED" json:"enabled" yaml:"enabled" toml:"enabled"`
+	Token   string `mapstructure:"token" envname:"PLUGIN_REGISTRATION_TOKEN" json:"token" yaml:"token" toml:"token"`
 }
 
 type PluginDefinitionConfig struct {
@@ -47,8 +53,14 @@ func (c *PluginConfig) Validate() error {
 	if c.MaxResponseBytes < 0 {
 		return fmt.Errorf("plugin: max_response_bytes must be non-negative")
 	}
+	if c.Registration.Enabled && !c.Enabled {
+		return fmt.Errorf("plugin: registration requires plugin manager to be enabled")
+	}
 	if !c.Enabled {
 		return nil
+	}
+	if c.Registration.Enabled && c.Registration.Token == "" {
+		return fmt.Errorf("plugin: registration token is required when registration is enabled")
 	}
 	pluginNames := make(map[string]bool, len(c.Plugins))
 	for i, def := range c.Plugins {

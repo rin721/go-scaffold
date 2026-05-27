@@ -10,6 +10,10 @@ import (
 
 type AppCommand struct{}
 
+func NewAppCommand() *AppCommand {
+	return &AppCommand{}
+}
+
 func (c *AppCommand) Name() string {
 	return constants.AppServerCommandName
 }

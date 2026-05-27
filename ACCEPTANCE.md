@@ -1,5 +1,15 @@
 # ACCEPTANCE.md
 
+## TASK-P2-016 Acceptance
+
+| ID | Acceptance Item | Method | Required | Status |
+|---|---|---|---|---|
+| ACC-P2-061 | Host registration endpoint accepts authenticated explicit remote plugin registration and creates HTTP plugin adapters | `go test ./pkg/plugin/... ./internal/transport/http ./internal/app/... -count=1` | Yes | [CONFIRMED] |
+| ACC-P2-062 | Hook JSON events include safe IAM principal context when context contains a principal | `go test ./pkg/plugin/... ./internal/app/... -count=1` | Yes | [CONFIRMED] |
+| ACC-P2-063 | IAM secrets, tokens, and policies are not sent to hook JSON events | Code review and tests | Yes | [CONFIRMED] |
+| ACC-P2-064 | `remote_plugins/blog` is an independent service with config, invoke endpoint, startup registration client, README, and tests | `go test ./... -count=1` in `remote_plugins/blog` | Yes | [CONFIRMED] |
+| ACC-P2-065 | Scope does not implement real WS/RPC, JWT/login, database-backed IAM, production deployment, or real secrets | Scope review and `git diff --check` | Yes | [CONFIRMED] |
+
 ## TASK-P2-015 Acceptance
 
 | ID | Acceptance Item | Method | Required | Status |

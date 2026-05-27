@@ -20,7 +20,11 @@ func NewPluginManager(cfg *config.Config, log logger.Logger, iamService iam.Serv
 		return nil, nil
 	}
 
-	mgr := plugin.NewManager()
+	var opts []plugin.ManagerOption
+	if iamService != nil {
+		opts = append(opts, plugin.WithHookEventEnricher(IAMHookEventEnricher))
+	}
+	mgr := plugin.NewManager(opts...)
 	if err := RegisterPluginLogHooks(mgr, log); err != nil {
 		return nil, err
 	}
@@ -52,6 +56,24 @@ func NewPluginManager(cfg *config.Config, log logger.Logger, iamService iam.Serv
 		log.Info("plugin manager initialized", "plugins", len(cfg.Plugin.Plugins), "hooks", len(cfg.Plugin.Hooks))
 	}
 	return mgr, nil
+}
+
+func IAMHookEventEnricher(ctx context.Context, event hooks.Event) hooks.Event {
+	principal, ok := iam.PrincipalFromContext(ctx)
+	if !ok || principal.ID == "" {
+		return event
+	}
+	event.Identity = &hooks.Identity{Principal: hooks.Principal{
+		ID:         principal.ID,
+		Name:       principal.Name,
+		Roles:      append([]string(nil), principal.Roles...),
+		Attributes: copyStringMap(principal.Attributes),
+	}}
+	if event.Metadata == nil {
+		event.Metadata = make(map[string]string)
+	}
+	event.Metadata["iam.principal.id"] = principal.ID
+	return event
 }
 
 func PluginDefinition(def config.PluginDefinitionConfig) plugin.Definition {

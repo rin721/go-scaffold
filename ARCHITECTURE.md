@@ -44,6 +44,7 @@ types/*
 | 数据库 CLI / schema bootstrap | sqlgen toolchain | [CONFIRMED] TASK-P2-014 removes `initdb`/scripts/`AutoMigrate`; demo schema and Todo CRUD are generated through `pkg/sqlgen`; production migration framework remains deferred | [CONFIRMED] |
 | 插件系统 | v1 local/http 保留；注册责任已收拢为被动 registry/runtime；TASK-P2-005 至 TASK-P2-007 已增加 hooks、HTTP server helper 和 `RemoteHook` | [CONFIRMED] rpc/ws/discovery、插件发现和 Go `.so` 插件仍留在 Backlog | [CONFIRMED] |
 | IAM/auth/JWT | `pkg/iam` 公共接口与 memory 实现已完成；JWT 中间件和业务 RBAC 仍不实现 | 后续如需业务登录、HTTP 中间件或数据库版权限，必须单独提升任务 | [CONFIRMED] |
+| 远程插件注册与 Blog 示例 | [CONFIRMED] 主服务新增显式 HTTP 注册入口，由远程插件服务主动上报 HTTP invoke endpoint；host 创建 HTTP adapter 并继续使用被动 `Manager.Register`。Hook JSON event 可携带安全 IAM principal 上下文。 | TASK-P2-016 已完成 HTTP 注册和 Blog 示例；真实 WS/RPC transport、自动发现服务、持久注册表、JWT/login 和生产密钥管理仍延后 | [CONFIRMED] |
 | CI/CD 与部署 | 先建立非生产质量门禁、手动部署说明、远程部署显式参数契约、手动远程部署 workflow、Docker production 制品和远程 Linux 统一 `deploy.sh` 入口；真实生产运行仍需单独确认 | [CONFIRMED] TASK-P2-001 已新增 CI workflow 和部署说明；TASK-P2-002 已新增 `deploy.sh` / `script/install.sh` 显式参数契约；TASK-P2-003 已新增手动 staging 远程部署 workflow；TASK-P2-004 已补 Dockerfile、production Compose 示例、统一 `deploy.sh` 部署入口、手动 production 闸门并完成 Docker build 验证；镜像发布和真实 production 运行仍需单独确认 | [CONFIRMED] |
 | 第一版发布 | 当前项目仍在开发中，不应发布第一版 | 需先确认 v1 功能范围、发布验收清单、真实运行、迁移、密钥管理和回滚策略，再拆分任务 | [NOT_RELEASE_READY] |
 

@@ -2,9 +2,59 @@
 
 ## Latest Current Task
 
+- TASK-P2-016 / TS-P2-016: COMPLETED.
+- Source: user `/goal` requesting IAM service implementation, IAM data injection into plugin hook JSON protocol, and a remote Blog plugin service under `remote_plugins`.
+- Review Result: ACCEPT_WITH_RISK.
+- Current legal task after completion: `NONE / NONE / PENDING_USER_CONFIRMATION`.
+
 - TASK-P2-015 / TS-P2-015: COMPLETED.
 - `cmd/server db` now has maintainer comments, and `docs/db-cli.md` documents DB CLI usage, operation semantics, extension rules, and verification guidance.
 - Current legal task after completion: `NONE / NONE / PENDING_USER_CONFIRMATION`.
+
+## Current Addendum Task
+
+### TASK-P2-016: Remote plugin registration, IAM hook context, and Blog sample
+
+- Status: COMPLETED
+- Time Slice: TS-P2-016
+- Source: User `/goal` on 2026-05-28.
+- Review Result: ACCEPT_WITH_RISK
+- Priority: P2
+- Type: Plugin/IAM infrastructure + remote plugin example
+- Goal: Let the host service accept explicit remote plugin registration, create HTTP plugin adapters from the registered endpoint, inject safe IAM principal context into hook JSON events, and provide `remote_plugins/blog` as an independent remote Blog plugin service example.
+- Allowed Files:
+  - `pkg/plugin/**/*`
+  - `pkg/plugin/hooks/**/*`
+  - `internal/config/**/*`
+  - `internal/app/initapp/**/*`
+  - `internal/transport/http/**/*`
+  - `configs/config.example.yaml`
+  - `.env.example`
+  - `remote_plugins/blog/**/*`
+  - Project status, requirements, architecture, acceptance, risk, changelog, issue, test report, and handoff documents.
+- Forbidden Files:
+  - Real `.env`, secrets, passwords, tokens, SSH keys, or production host values.
+  - Production deployment execution, workflow triggering, image publishing, or irreversible database migration.
+  - JWT/login flow, database-backed IAM, OPA/Casbin, Go `.so` plugins, and real WS/RPC adapter implementation.
+  - Unrelated `cmd/*` rewrites; existing dirty `cmd/server` -> `cmd/main` workspace changes must not be reverted.
+- Non-Goals:
+  - No automatic plugin discovery beyond explicit registration request.
+  - No persistent plugin registry storage.
+  - No production-grade secret management.
+  - No claim that IAM is complete auth/RBAC.
+- Verification:
+  - `go test ./pkg/plugin/... -count=1`: PASS
+  - `go test ./internal/config ./internal/app/... ./internal/transport/http -count=1`: PASS
+  - `go test ./pkg/iam/... -count=1`: PASS
+  - `go test ./... -count=1`: PASS
+  - `go test ./... -count=1` inside `remote_plugins/blog`: PASS
+  - `git diff --check`: PASS, only Git LF/CRLF notices
+- Exit Conditions:
+  - [CONFIRMED] Host-side registration endpoint accepts authenticated explicit remote plugin registration and registers HTTP plugins.
+  - [CONFIRMED] Hook JSON events sent through `hooks.execute` include safe IAM principal context when a principal is present in context.
+  - [CONFIRMED] `remote_plugins/blog` can start as an independent service, expose the standard plugin invoke endpoint, and register itself with the host HTTP registration endpoint.
+  - [CONFIRMED] Blog sample documents HTTP and reserved WS main-service addresses, shared registration token placeholders, and no real secret values.
+  - [CONFIRMED] Tests and status documents are updated.
 
 ## Latest Addendum Task
 

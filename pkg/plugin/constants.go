@@ -35,6 +35,7 @@ const (
 )
 
 const HTTPInvokePath = "/plugin/v1/invoke"
+const HTTPRegisterPath = "/plugin/v1/register"
 
 const (
 	HookBeforeRegister hooks.Point = "plugin.before_register"

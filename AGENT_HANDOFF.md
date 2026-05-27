@@ -2,12 +2,22 @@
 
 ## Latest Current Handoff
 
-- TASK-P2-015 / TS-P2-015: COMPLETED.
-- `cmd/server db` now has maintainer comments, and `docs/db-cli.md` documents DB CLI overview, usage, operations, flags, layering, extension rules, forbidden regressions, and verification guidance.
-- DB behavior remains unchanged and continues to be driven by `pkg/sqlgen`; old init/migration/script/AutoMigrate paths remain out of current code/config.
+- TASK-P2-016 / TS-P2-016: COMPLETED.
+- Host now exposes explicit remote plugin registration through `POST /plugin/v1/register` when plugin registration is enabled and a registration token is configured.
+- Hook JSON events can include safe IAM principal context at `identity.principal`; tokens, policies, credentials, secrets, and IAM service internals are not sent to plugins.
+- `remote_plugins/blog` is an independent Go module sample with config, standard plugin invoke endpoint, startup registration client, README, and tests.
+- Real WS/RPC transport, automatic discovery daemon, JWT/login, database-backed IAM, production deployment, and real secrets remain out of scope.
+- Verification completed: plugin/app/router/IAM target tests, root `go test ./...`, Blog module `go test ./...`, and `git diff --check` passed. `git diff --check` emitted only Git LF/CRLF notices.
 - Next legal state: `NONE / NONE / PENDING_USER_CONFIRMATION`.
 
 ## Latest Handoff Addendum
+
+- Date: 2026-05-28
+- Task: TASK-P2-016 / TS-P2-016
+- Summary: Added host remote plugin registration, IAM principal hook JSON enrichment, config/examples, and the independent Blog remote plugin sample under `remote_plugins/blog`.
+- Files changed in this addendum: `pkg/plugin`, `pkg/plugin/hooks`, `internal/config`, `internal/app/initapp`, `internal/transport/http`, `.env.example`, `configs/config.example.yaml`, `remote_plugins/blog`, and project status documents.
+- Verification: `go test ./pkg/plugin/... -count=1` PASS, `go test ./internal/config ./internal/app/... ./internal/transport/http -count=1` PASS, `go test ./pkg/iam/... -count=1` PASS, `go test ./... -count=1` PASS, Blog module `go test ./... -count=1` PASS, `git diff --check` PASS with only Git LF/CRLF notices.
+- Legal next step returns to `NONE / NONE / PENDING_USER_CONFIRMATION`; project remains `IN_DEVELOPMENT_NOT_RELEASE_READY`.
 
 - Date: 2026-05-27
 - Task: TASK-P2-015 / TS-P2-015

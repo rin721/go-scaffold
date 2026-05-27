@@ -10,15 +10,17 @@ import (
 	"github.com/rei0721/go-scaffold/pkg/database"
 	"github.com/rei0721/go-scaffold/pkg/i18n"
 	"github.com/rei0721/go-scaffold/pkg/logger"
+	"github.com/rei0721/go-scaffold/pkg/plugin"
 	"github.com/rei0721/go-scaffold/types/result"
 )
 
 type RouterDeps struct {
-	Logger      logger.Logger
-	I18n        i18n.I18n
-	Database    database.Database
-	Middleware  middleware.MiddlewareConfig
-	TodoHandler *demohandler.TodoHandler
+	Logger             logger.Logger
+	I18n               i18n.I18n
+	Database           database.Database
+	Middleware         middleware.MiddlewareConfig
+	TodoHandler        *demohandler.TodoHandler
+	PluginRegistration http.Handler
 }
 
 func NewRouter(deps RouterDeps) *gin.Engine {
@@ -38,6 +40,9 @@ func NewRouter(deps RouterDeps) *gin.Engine {
 
 	r.GET("/health", health)
 	r.GET("/ready", ready(deps.Database))
+	if deps.PluginRegistration != nil {
+		r.Any(plugin.HTTPRegisterPath, gin.WrapH(deps.PluginRegistration))
+	}
 
 	v1 := r.Group("/api/v1")
 	demo := v1.Group("/demo")

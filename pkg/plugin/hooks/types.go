@@ -16,7 +16,24 @@ type Event struct {
 	Operation string            `json:"operation,omitempty"`
 	Payload   json.RawMessage   `json:"payload,omitempty"`
 	Metadata  map[string]string `json:"metadata,omitempty"`
+	Identity  *Identity         `json:"identity,omitempty"`
 	CreatedAt time.Time         `json:"created_at"`
+}
+
+// Identity carries safe caller context for hook handlers.
+//
+// It must not contain credentials, policy definitions, tokens, or service
+// internals; remote hooks receive this structure through JSON.
+type Identity struct {
+	Principal Principal `json:"principal"`
+}
+
+// Principal is a protocol-safe identity snapshot for hook events.
+type Principal struct {
+	ID         string            `json:"id"`
+	Name       string            `json:"name,omitempty"`
+	Roles      []string          `json:"roles,omitempty"`
+	Attributes map[string]string `json:"attributes,omitempty"`
 }
 
 // NewEvent creates an Event and marshals payload into JSON.

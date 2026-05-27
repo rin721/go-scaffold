@@ -1,5 +1,13 @@
 # ISSUES.md
 
+## Latest Issue Review: TASK-P2-016
+
+- Date: 2026-05-28
+- Result: No new blocking issue.
+- Note: Existing workspace had pre-existing `cmd/server` deletion and `cmd/main` addition before this slice; this slice did not revert or modify that move. Full root regression passed against the current workspace layout.
+- Verification: plugin/app/router/IAM target tests, root `go test ./...`, Blog module `go test ./...`, and `git diff --check` passed. `git diff --check` emitted only Git LF/CRLF notices.
+- Residual risks: real WS/RPC transport, plugin heartbeat/persistent discovery, JWT/login, database-backed IAM, production deployment, and real secret management remain out of scope.
+
 ## Latest Issue Review: TASK-P2-015
 
 - Date: 2026-05-27

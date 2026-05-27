@@ -25,13 +25,17 @@ type Manager interface {
 }
 
 type manager struct {
-	mu      sync.RWMutex
-	plugins map[string]Plugin
-	hooks   hooks.Registry
+	mu                sync.RWMutex
+	plugins           map[string]Plugin
+	hooks             hooks.Registry
+	hookEventEnricher HookEventEnricher
 }
 
 // ManagerOption configures a plugin manager.
 type ManagerOption func(*manager)
+
+// HookEventEnricher can add host-owned context to hook events.
+type HookEventEnricher func(ctx context.Context, event hooks.Event) hooks.Event
 
 // WithHooks sets the hook registry used by a manager.
 func WithHooks(registry hooks.Registry) ManagerOption {
@@ -39,6 +43,14 @@ func WithHooks(registry hooks.Registry) ManagerOption {
 		if registry != nil {
 			m.hooks = registry
 		}
+	}
+}
+
+// WithHookEventEnricher configures a function that enriches every hook event
+// before handlers receive it.
+func WithHookEventEnricher(enricher HookEventEnricher) ManagerOption {
+	return func(m *manager) {
+		m.hookEventEnricher = enricher
 	}
 }
 
@@ -202,6 +214,9 @@ func (m *manager) emitHook(ctx context.Context, point hooks.Point, pluginName, o
 			return hooks.Result{}, err
 		}
 		event.Payload = data
+	}
+	if m.hookEventEnricher != nil {
+		event = m.hookEventEnricher(ctx, event)
 	}
 	return m.hooks.Emit(ctx, event)
 }

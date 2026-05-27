@@ -2,6 +2,42 @@
 
 ## Latest Current Verification
 
+- TASK-P2-016: PASS.
+- Commands: `go test ./pkg/plugin/... -count=1`, `go test ./internal/config ./internal/app/... ./internal/transport/http -count=1`, `go test ./pkg/iam/... -count=1`, `go test ./... -count=1`, `go test ./... -count=1` inside `remote_plugins/blog`, and `git diff --check`.
+- Note: `git diff --check` emitted only Git LF/CRLF notices.
+
+## Latest Verification Addendum
+
+- Date: 2026-05-28
+- Task ID: TASK-P2-016
+- Time Slice ID: TS-P2-016
+- Status: COMPLETED
+- Scope: Host remote plugin registration endpoint, IAM principal injection into hook JSON events, config/examples, and independent Blog remote plugin sample.
+
+| Command | Result | Notes |
+|---|---|---|
+| Required file reads | PASS | Agent driver documents and relevant skills were reviewed before implementation. |
+| User correction review | ACCEPT_WITH_RISK | New scope promoted deferred plugin/IAM example work, with WS/RPC, production deployment, JWT/login, DB IAM, and real secrets kept out of scope. |
+| `gofmt -w ...` | PASS | Modified Go files in host and Blog sample were formatted. |
+| `go test ./pkg/plugin/... -count=1` | PASS | Plugin runtime, hook event enrichment, and registration handler tests passed. |
+| `go test ./internal/config ./internal/app/... ./internal/transport/http -count=1` | PASS | Config, app wiring, and router registration endpoint tests passed. |
+| `go test ./pkg/iam/... -count=1` | PASS | IAM package and memory implementation tests passed. |
+| `go test ./... -count=1` | PASS | Full root module regression passed; current workspace uses `cmd/main` from pre-existing changes. |
+| `go test ./... -count=1` in `remote_plugins/blog` | PASS | Independent Blog plugin module tests passed. |
+| `git diff --check` | PASS | Only Git LF/CRLF notices, no whitespace errors. |
+
+Result:
+
+- [CONFIRMED] TASK-P2-016 / TS-P2-016 completed.
+- [CONFIRMED] Hook JSON event identity contains safe principal data only.
+- [CONFIRMED] No real secret, production deployment, WS/RPC adapter, JWT/login flow, or database-backed IAM was implemented.
+
+- TASK-P2-015: PASS.
+- Commands: `go test ./cmd/server -count=1`, `go test ./pkg/sqlgen ./cmd/server ./internal/app/dbapp -count=1`, DB docs `rg` scan, and `git diff --check`.
+- Note: `git diff --check` emitted only Git LF/CRLF notices.
+
+## Previous Current Verification
+
 - TASK-P2-015: PASS.
 - Commands: `go test ./cmd/server -count=1`, `go test ./pkg/sqlgen ./cmd/server ./internal/app/dbapp -count=1`, DB docs `rg` scan, and `git diff --check`.
 - Note: `git diff --check` emitted only Git LF/CRLF notices.

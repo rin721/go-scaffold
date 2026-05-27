@@ -2,6 +2,18 @@
 
 ## Latest Addendum
 
+### 2026-05-28 - TASK-P2-016 - Remote plugin registration and Blog sample
+
+- Change: Added host-side remote plugin registration protocol and `POST /plugin/v1/register` HTTP handler with optional shared registration token validation.
+- Change: Hook JSON events now support safe `identity.principal` data, injected by the host through a plugin manager event enricher without making `pkg/plugin` import `pkg/iam`.
+- Change: Wired plugin registration config into `internal/config`, `internal/app/initapp`, and `internal/transport/http`; updated `.env.example` and `configs/config.example.yaml`.
+- Change: Added `remote_plugins/blog` as an independent Go module with config loading, standard `/plugin/v1/invoke` service, startup host registration client, Blog operations, hook handling, README, and tests.
+- Scope: No real WS/RPC adapter, automatic discovery daemon, JWT/login flow, database-backed IAM, production deployment, real secrets, or irreversible migrations.
+- Verification: `go test ./pkg/plugin/... -count=1`; `go test ./internal/config ./internal/app/... ./internal/transport/http -count=1`; `go test ./pkg/iam/... -count=1`; `go test ./... -count=1`; `go test ./... -count=1` inside `remote_plugins/blog`; `git diff --check` passed with only Git LF/CRLF notices.
+- Status: TASK-P2-016 / TS-P2-016 completed; project remains `IN_DEVELOPMENT_NOT_RELEASE_READY`, legal next state is `NONE / NONE / PENDING_USER_CONFIRMATION`.
+
+## Latest Addendum
+
 ### 2026-05-27 - TASK-P2-015 - DB CLI comments and documentation
 
 - Change: Added concise maintainer comments to `cmd/server/db.go` describing command ownership, parsed options, side-effect-free DDL preview, and printable SQL routing.

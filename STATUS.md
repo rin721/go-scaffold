@@ -2,6 +2,13 @@
 
 ## Latest Current Slice
 
+- 2026-05-28: TASK-P2-016 / TS-P2-016 COMPLETED.
+- User goal accepted with risk: implement a host-side remote plugin registration loop, inject safe IAM principal data into the plugin hook JSON event protocol, and add `remote_plugins/blog` as an independently deployable remote Blog plugin sample.
+- Implemented `POST /plugin/v1/register`, host config for registration token gating, IAM principal injection into `hooks.Event.identity`, and a standalone `remote_plugins/blog` module with registration client, invoke endpoint, README, and tests.
+- Verification: `go test ./pkg/plugin/... -count=1`, `go test ./internal/config ./internal/app/... ./internal/transport/http -count=1`, `go test ./pkg/iam/... -count=1`, `go test ./... -count=1`, `go test ./... -count=1` in `remote_plugins/blog`, and `git diff --check` passed. `git diff --check` emitted only Git LF/CRLF notices.
+- Current legal work after completion: `NONE / NONE / PENDING_USER_CONFIRMATION`.
+- Non-goals: real WebSocket/RPC transport, plugin discovery service beyond explicit registration, JWT/login flow, database-backed IAM, production deployment, real secrets, and irreversible migrations.
+
 - 2026-05-27: TASK-P2-015 / TS-P2-015 COMPLETED.
 - Added maintainer comments for `cmd/server db` and created `docs/db-cli.md` with DB CLI overview, usage, extension rules, and verification guidance.
 - Existing DB CLI behavior remains unchanged: database DDL, demo schema, and Todo CRUD SQL stay backed by `pkg/sqlgen`.
@@ -30,7 +37,7 @@
 - 当前任务 ID：NONE
 - 当前时间切片 ID：NONE
 - 当前状态：PENDING_USER_CONFIRMATION
-- 为什么这是当前唯一合法状态：[ACCEPT] 用户确认 `EnvDB*`、`EnvRedis*` 等环境变量名常量已无存在必要；本轮已完成 TASK-P2-012 / TS-P2-012，删除重复 env-name 常量并让测试从 `envname` 标签读取变量名。项目仍未达第一版发布条件；当前没有自动下一实现任务，后续必须先由用户确认新的开发范围或第一版发布验收清单，再拆分任务/时间切片。
+- 为什么这是当前唯一合法状态：[CONFIRMED] TASK-P2-016 / TS-P2-016 已完成：主服务可通过 `POST /plugin/v1/register` 接收显式远程插件注册并创建 HTTP adapter，插件 hook JSON event 会注入安全 IAM principal 上下文，`remote_plugins/blog` 已作为独立远程 Blog 插件示例。项目仍未达第一版发布条件；真实 WS/RPC 常连接、插件心跳/持久发现、JWT/login、数据库版权限、生产部署和真实密钥管理均需单独确认后再拆分任务。
 
 ## 阶段状态
 

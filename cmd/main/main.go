@@ -14,9 +14,8 @@ func main() {
 	app.SetVersion(constants.AppVersion)
 	app.SetDescription(constants.AppDescription)
 
-	app.AddCommand(&AppCommand{})
+	app.AddCommand(NewAppCommand())
 	app.AddCommand(NewDBCommand())
-	app.AddCommand(NewTestsCommand())
 
 	if err := app.Run(os.Args[1:]); err != nil {
 		fmt.Fprintln(os.Stderr, err)

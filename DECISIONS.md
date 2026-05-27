@@ -2,6 +2,17 @@
 
 ## 决策记录
 
+### DEC-037：远程插件使用显式 HTTP 注册，Hook JSON 注入安全 IAM 主体上下文
+
+- Date：2026-05-28
+- Status：ACCEPTED_WITH_RISK
+- Context：用户要求实现 IAM 服务，将 IAM 服务数据注入插件钩子 JSON 协议接口，并在 `remote_plugins` 下提供独立部署的 Blog 远程插件服务示例。既有架构已完成 `pkg/plugin` hooks、HTTP transport、`RemoteHook` 和 `pkg/iam` memory 基础接口，但未提供远程插件主动注册入口或示例服务。
+- Decision：本切片新增显式 HTTP 远程插件注册协议：远程插件服务启动后向主服务 HTTP 注册端点上报自身 invoke endpoint，主服务创建 HTTP adapter 并通过既有被动 `Manager.Register` 注册。Hook JSON event 只注入安全 IAM principal 上下文，不发送 token、policy、secret 或完整 IAM service 内部数据。`remote_plugins/blog` 作为独立 Go module 示例，展示配置主服务 HTTP/预留 WS 地址、注册 token 占位和标准 invoke endpoint。
+- Alternatives：继续要求主服务静态配置所有远程插件；直接实现 WS/RPC 常连接和发现服务；把完整 IAM service/config 传给插件；直接实现生产级密钥管理。
+- Reason：显式 HTTP 注册能满足当前启动流程且风险可控，复用现有 JSON 协议和被动 registry 边界；真实 WS/RPC、自动发现和完整 IAM/RBAC 均需要更大架构确认。
+- Consequences：主服务新增注册入口必须可关闭并支持共享 token；Blog 示例只能使用占位 secret。后续如需 WS 常连接、持久注册表、自动重连、插件心跳或数据库 IAM，需要单独任务。
+- Related Tasks：TASK-P2-016
+
 ### DEC-030：配置字段环境变量名以 `envname` 标签为唯一事实源
 
 - Date：2026-05-27

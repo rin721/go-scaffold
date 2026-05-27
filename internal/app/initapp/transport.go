@@ -2,6 +2,7 @@ package initapp
 
 import (
 	"fmt"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rei0721/go-scaffold/internal/config"
@@ -12,6 +13,7 @@ import (
 	"github.com/rei0721/go-scaffold/pkg/httpserver"
 	"github.com/rei0721/go-scaffold/pkg/i18n"
 	"github.com/rei0721/go-scaffold/pkg/logger"
+	"github.com/rei0721/go-scaffold/pkg/plugin"
 )
 
 func NewTransport(core Core, infra Infrastructure, modules Modules) (Transport, error) {
@@ -26,6 +28,7 @@ func NewTransport(core Core, infra Infrastructure, modules Modules) (Transport, 
 		core.I18n,
 		infra.Database,
 		corsConfig,
+		infra.Plugins,
 		modules.Demo.TodoHandler,
 	)
 	if err != nil {
@@ -75,6 +78,7 @@ func NewHTTPServer(
 	i18nApp i18n.I18n,
 	db database.Database,
 	corsConfig middleware.CORSConfig,
+	plugins plugin.Manager,
 	todoHandler *demohandler.TodoHandler,
 ) (*gin.Engine, httpserver.HTTPServer, error) {
 	gin.SetMode(cfg.Server.Mode)
@@ -88,6 +92,10 @@ func NewHTTPServer(
 		Database:    db,
 		Middleware:  middlewareCfg,
 		TodoHandler: todoHandler,
+		PluginRegistration: NewPluginRegistrationHandler(
+			cfg,
+			plugins,
+		),
 	})
 
 	server, err := httpserver.New(router, HTTPServerConfig(cfg), log)
@@ -96,4 +104,15 @@ func NewHTTPServer(
 	}
 
 	return router, server, nil
+}
+
+func NewPluginRegistrationHandler(cfg *config.Config, plugins plugin.Manager) http.Handler {
+	if cfg == nil || plugins == nil || !cfg.Plugin.Enabled || !cfg.Plugin.Registration.Enabled {
+		return nil
+	}
+	return plugin.NewHTTPRegistrationHandler(
+		plugins,
+		plugin.WithRegistrationToken(cfg.Plugin.Registration.Token),
+		plugin.WithRegistrationHTTPOptions(pluginHTTPOptions(cfg)...),
+	)
 }
