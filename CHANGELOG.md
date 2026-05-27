@@ -1,6 +1,13 @@
 # CHANGELOG.md
 
 ## 最新变更
+
+### 2026-05-27 - TASK-P2-004 - TS-P2-004 blocked verification
+
+- 变更：用户发送“下一步”后，按协议处理剩余 Docker build 验证项，不推进新功能。
+- 验证：`docker version` 失败；`docker`、`podman`、`nerdctl`、`docker.exe` 均不可用；`docker build -t go-scaffold:local .` 因前置 Docker CLI/daemon 缺失未执行。
+- 状态：TASK-P2-004 / TS-P2-004 记录为 `BLOCKED`，`ISSUE-P2-005` 保持 OPEN；TASK-P2-005 至 TASK-P2-010 插件/IAM 主线仍保持 `COMPLETED`。
+
 ### 2026-05-27 - TASK-P2-005 至 TASK-P2-010 - TS-P2-005 至 TS-P2-010
 
 - 变更：按 `dev.tmp/new-plugin.md` 设计完成插件钩子运行时、HTTP 远程插件传输、独立 IAM 公共接口和 app 组合层接入；原 `dev.tmp/new-pllugin.md` 视为笔误。

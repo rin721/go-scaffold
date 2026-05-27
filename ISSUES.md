@@ -10,11 +10,11 @@
 
 | ID | Linked Task | Severity | Status | Summary | Next Action |
 |---|---|---|---|---|---|
-| ISSUE-P2-005 | TASK-P2-004 | Medium | OPEN | 当前环境未安装 Docker CLI，无法验证 `Dockerfile` 镜像构建 | 在具备 Docker CLI/daemon 的 Linux 或 Docker Desktop 环境运行 `docker build -t go-scaffold:local .` |
+| ISSUE-P2-005 | TASK-P2-004 | Medium | OPEN | 当前环境未安装 Docker 兼容 CLI，无法验证 `Dockerfile` 镜像构建 | 在具备 Docker CLI/daemon 的 Linux 或 Docker Desktop 环境运行 `docker build -t go-scaffold:local .` |
 
 ## Issue Details
 
-- ISSUE-P2-005：TASK-P2-004 已补齐 Dockerfile、production Compose 示例、production 配置样例、统一 `deploy.sh` 部署入口和手动 production workflow 闸门；shfmt Bash parser、临时 Go YAML 解析、actionlint、旧引用 `rg` 检查、全量 Go 回归、server build 和 `git diff --check` 均通过。但当前本机缺少 `docker`，因此 `docker build -t go-scaffold:local .` 无法执行。任务保持 `PENDING_VERIFICATION`，待 Docker 环境补跑构建。
+- ISSUE-P2-005：TASK-P2-004 已补齐 Dockerfile、production Compose 示例、production 配置样例、统一 `deploy.sh` 部署入口和手动 production workflow 闸门；shfmt Bash parser、临时 Go YAML 解析、actionlint、旧引用 `rg` 检查、全量 Go 回归、server build 和 `git diff --check` 均通过。2026-05-27 用户发送“下一步”后再次执行 `docker version` 并检查 `docker`、`podman`、`nerdctl`、`docker.exe`，当前环境仍无可用 Docker 兼容 CLI，因此 `docker build -t go-scaffold:local .` 无法执行。任务保持 `BLOCKED`，待 Docker 环境补跑构建。
 - ISSUE-P2-006：无新增失败项。TASK-P2-005 至 TASK-P2-010 已完成插件钩子运行时、HTTP 远程插件传输、IAM 公共接口、配置/app/reload/lifecycle 接入；`go test ./pkg/plugin/... -count=1`、`go test ./pkg/iam/... -count=1`、`go test ./internal/config ./internal/app/... -count=1`、`go test ./... -count=1`、server build 和 `git diff --check` 均通过。
 - ISSUE-INFRA-002：`AGENTS.md` 缺失但状态文件声称已补齐。已在 TASK-INFRA-002 中修复，诊断报告见 `docs/reports/status_diagnostics/2026-05-25-task-infra-002-agents-md-missing.md`。
 - ISSUE-P1-002：`.env.example` 与数据库环境变量前缀不一致，且 JWT 示例暗示未实现能力。已在 TASK-P1-002 中修复，相关测试通过。
@@ -73,6 +73,7 @@
 - 2026-05-26：记录 TASK-P2-001 无未解决失败项，CI 质量门禁和部署说明首切片完成。
 - 2026-05-26：记录 TASK-P2-003 无新增失败项，手动 staging 远程部署 workflow 通过静态验证。
 - 2026-05-27：记录 TASK-P2-004 部署流程重构后的环境待验证项，当前机器无 Docker CLI，Docker build 待补跑；其他静态验证和 Go 回归通过。
+- 2026-05-27：用户发送“下一步”后复验 TASK-P2-004 Docker build 阻塞；`docker version` 失败，`docker`、`podman`、`nerdctl`、`docker.exe` 均不可用，`ISSUE-P2-005` 保持 OPEN，TASK-P2-004 / TS-P2-004 记录为 BLOCKED。
 - 2026-05-27：记录 TASK-P2-005 至 TASK-P2-010 无新增失败项，插件钩子运行时、远程插件传输、IAM 公共接口和 app 组合层接入已通过验证。
 - 2026-05-25：记录并关闭 `AGENTS.md` 缺失导致的 Agent 入口冲突。
 - 2026-05-25：创建 `ISSUES.md`，补齐 `docs/ai/prompt.md` 要求的项目问题记录入口。

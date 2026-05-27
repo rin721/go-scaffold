@@ -9,19 +9,19 @@
 ## Project Snapshot
 
 - Project: go-scaffold
-- Phase: P2 插件钩子运行时与 IAM 公共接口完成
+- Phase: P2 Linux Docker production 部署制品验证阻塞
 - Module: 项目优化路线
-- Current Task: NONE
-- Current Time Slice: NONE
-- Overall Status: COMPLETED
+- Current Task: TASK-P2-004
+- Current Time Slice: TS-P2-004
+- Overall Status: BLOCKED
 
 ## What Was Done Last
 
-- 用户要求实现 `dev.tmp/new-plugin.md` 设计，原路径 `dev.tmp/new-pllugin.md` 视为笔误；审查结论沿用 `ACCEPT_WITH_RISK`。
-- TASK-P2-004 / TS-P2-004 未标记完成，Docker build 验证仍因当前环境缺少 Docker CLI 保持 `ISSUE-P2-005` 打开。
-- 完成 TASK-P2-005 至 TASK-P2-010：插件钩子运行时、HTTP 远程插件传输、独立 IAM 公共接口、配置接入、app 装配、reload 和 lifecycle。
-- `pkg/plugin` 保持独立基础设施包，不导入 `pkg/iam`、日志、配置或 `internal/*`；`pkg/iam` 不导入 `pkg/plugin`；IAM 权限钩子只在 `internal/app` 注册。
-- 本轮未实现 JWT 中间件、数据库版权限、OPA/Casbin、Go `.so` 插件、插件发现、RPC/WS 传输、生产部署、镜像发布或密钥管理。
+- 用户发送“下一步”后，按协议处理当前唯一未关闭事项：TASK-P2-004 / TS-P2-004 Docker image build 验证。
+- 已执行 `docker version`，当前环境未安装 Docker CLI；已检查 `docker`、`podman`、`nerdctl`、`docker.exe`，均不可用。
+- `docker build -t go-scaffold:local .` 因前置 Docker CLI/daemon 缺失未执行，TASK-P2-004 / TS-P2-004 已记录为 `BLOCKED`，`ISSUE-P2-005` 保持打开。
+- TASK-P2-005 至 TASK-P2-010 插件钩子运行时、HTTP 远程插件传输、独立 IAM 公共接口、配置接入、app 装配、reload 和 lifecycle 仍保持 `COMPLETED`。
+- 本轮未触发 workflow、未连接远程服务器、未推送镜像、未执行真实 production、未写入真实密钥。
 
 ## Files Changed Last
 
@@ -36,36 +36,30 @@
 | `internal/app/initapp/*` | Updated | Infrastructure 新增 IAM/Plugins，server 模式装配和 app 层 hook 注册 |
 | `internal/app/reloadapp/reload.go` | Updated | 配置重载先构建新 IAM/plugin 实例再替换，失败保留旧实例 |
 | `internal/app/lifecycleapp/lifecycle.go` | Updated | HTTP server 停止后、cache/database 前关闭插件管理器 |
-| Project status docs | Updated | 记录 TASK-P2-005 至 TASK-P2-010 完成，并保留 TASK-P2-004 Docker 验证阻塞 |
+| Project status docs | Updated | 记录用户“下一步”后的 Docker 复验结果；TASK-P2-004 / TS-P2-004 为 BLOCKED，TASK-P2-005 至 TASK-P2-010 保持完成 |
 
 ## Commands Run Last
 
 | Command | Result |
 |---|---|
 | Required file reads | PASS |
-| User correction review | ACCEPTED_WITH_RISK |
-| `gofmt -w ...` | PASS |
-| `go test ./pkg/plugin/... -count=1` | PASS |
-| `go test ./pkg/iam/... -count=1` | PASS |
-| `go test ./internal/config ./internal/app/... -count=1` | PASS |
-| `go test ./... -count=1` | PASS |
-| `go build -o <temp> ./cmd/server` | PASS |
+| `docker version` | FAIL_ENV |
+| `Get-Command docker,podman,nerdctl,docker.exe -ErrorAction SilentlyContinue` | NOT_AVAILABLE |
+| `docker build -t go-scaffold:local .` | NOT_RUN，Docker CLI/daemon 不可用 |
 | `git diff --check` | PASS |
 
 ## Test Status
 
-- `pkg/plugin` and `pkg/plugin/hooks`: PASS.
-- `pkg/iam` and `pkg/iam/memory`: PASS.
-- `internal/config` and `internal/app/...`: PASS.
-- Full regression: PASS.
-- Server build: PASS.
-- Diff whitespace check: PASS.
-- Docker image build: still PENDING_VERIFICATION for TASK-P2-004 because Docker CLI/daemon is unavailable in the current environment.
+- Docker image build: BLOCKED for TASK-P2-004 because Docker CLI/daemon is unavailable in the current environment.
+- `pkg/plugin` and `pkg/plugin/hooks`: PASS in the previous TASK-P2-005 to TASK-P2-010 verification.
+- `pkg/iam` and `pkg/iam/memory`: PASS in the previous TASK-P2-005 to TASK-P2-010 verification.
+- `internal/config` and `internal/app/...`: PASS in the previous TASK-P2-005 to TASK-P2-010 verification.
+- Full regression and server build: PASS in the previous TASK-P2-005 to TASK-P2-010 verification.
+- Diff whitespace check: PASS after this status update.
 
 ## Current Blockers
 
-- No blocker for TASK-P2-005 至 TASK-P2-010.
-- `ISSUE-P2-005` remains open for TASK-P2-004: run `docker build -t go-scaffold:local .` in a Docker-enabled environment before closing that older deployment task.
+- `ISSUE-P2-005` remains open for TASK-P2-004: run `docker build -t go-scaffold:local .` in a Docker-enabled environment before closing that deployment task.
 
 ## Important Decisions
 
@@ -82,16 +76,17 @@
 - Plugin hooks can become a hidden control plane if future work registers broad handlers without tests; keep hook points explicit and covered.
 - IAM memory service is infrastructure only, not business login/RBAC; do not market it as complete authentication.
 - Remote hook calls use the plugin invoke path; keep `hooks.execute` isolated from manager hook emission to avoid recursion.
-- Docker build remains unverified until run in a Docker-enabled environment.
+- Docker build remains blocked until run in a Docker-enabled environment.
 
 ## Legal Next Step
 
-- Task ID: NONE
-- Time Slice ID: NONE
-- Status: COMPLETED
-- Why: TASK-P2-005 至 TASK-P2-010 are implemented and verified.
-- Outstanding external verification: TASK-P2-004 / ISSUE-P2-005 still requires `docker build -t go-scaffold:local .` in a Docker-enabled environment.
-- Any new feature work must be confirmed by the user and written as a new task/time slice before implementation.
+- Task ID: TASK-P2-004
+- Time Slice ID: TS-P2-004
+- Status: BLOCKED
+- Why: TASK-P2-004 Docker image build cannot run in the current environment because no Docker-compatible CLI is available.
+- Entry condition: switch to a Docker-enabled Linux or Docker Desktop environment.
+- Required command: `docker build -t go-scaffold:local .`.
+- After a passing Docker build, update `STATUS.md`, `TASKS.md`, `TIME_SLICES.md`, `ACCEPTANCE.md`, `TEST_REPORT.md`, `CHANGELOG.md`, `ISSUES.md` and `AGENT_HANDOFF.md` before closing TASK-P2-004.
 
 ## Do Not Do
 
@@ -109,5 +104,5 @@
 
 1. Read `AGENTS.md`.
 2. Read `STATUS.md`, `TASKS.md`, and `TIME_SLICES.md`.
-3. Confirm current state is `NONE / COMPLETED` for the plugin/IAM mainline.
-4. If the user wants to close TASK-P2-004, run `docker build -t go-scaffold:local .` only in a Docker-enabled environment and update project status based on the result.
+3. Confirm current state is `TASK-P2-004 / TS-P2-004 / BLOCKED`.
+4. Run `docker build -t go-scaffold:local .` only in a Docker-enabled environment and update project status based on the result.

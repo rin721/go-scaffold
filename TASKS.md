@@ -2,10 +2,10 @@
 
 ## 当前合法任务
 
-- Task ID：NONE
-- Status：COMPLETED
-- Time Slice：NONE
-- Summary：`dev.tmp/new-plugin.md` 设计已完成。TASK-P2-005 至 TASK-P2-010 已实现插件钩子运行时、HTTP 远程插件传输、独立 IAM 公共接口、配置/app 装配、reload 和 lifecycle；Docker build 验证仍独立保留为 `ISSUE-P2-005`。
+- Task ID：TASK-P2-004
+- Status：BLOCKED
+- Time Slice：TS-P2-004
+- Summary：`dev.tmp/new-plugin.md` 设计已完成。当前唯一未关闭事项是 TASK-P2-004 的 Docker build 验证；2026-05-27 再次检查后当前环境仍无 Docker 兼容 CLI，任务受环境缺失阻塞，`ISSUE-P2-005` 保持打开。
 
 ## 任务列表
 
@@ -1189,7 +1189,7 @@
 
 ### TASK-P2-004：补 Linux Docker production 部署制品
 
-- Status：PENDING_VERIFICATION
+- Status：BLOCKED
 - Time Slice：TS-P2-004
 - Matrix：BL-024、TM-P2-005、RISK-016、RISK-017、RISK-018
 - Source：用户要求“开始，linux、docker、production -> 部署”。
@@ -1220,7 +1220,7 @@
   - 不新增业务功能或修改 Go API。
   - 不引入 Kubernetes、systemd 或云平台模板。
 - Verification：
-  - `docker build -t go-scaffold:local .`：PENDING，当前本机未安装 Docker CLI。
+  - `docker build -t go-scaffold:local .`：BLOCKED，当前本机未安装 Docker CLI；2026-05-27 复验 `docker version` 失败，`docker`、`podman`、`nerdctl`、`docker.exe` 均不可用。
   - 临时 Go YAML 解析：PASS。
   - `go run github.com/rhysd/actionlint/cmd/actionlint@latest .github/workflows/ci.yml .github/workflows/deploy-remote.yml`：PASS。
   - `bash -n deploy.sh`：FAIL_ENV，本机无可用 bash，WSL 未安装 Linux 发行版。
@@ -1229,7 +1229,7 @@
   - `go build -o <temp> ./cmd/server`：PASS。
   - `git diff --check`：PASS，仅有 Windows LF/CRLF 转换警告。
 - Exit Conditions：
-  - [PENDING_VERIFICATION] Dockerfile 镜像构建待具备 Docker 的环境验证。
+  - [BLOCKED] Dockerfile 镜像构建待具备 Docker 的环境验证。
   - [CONFIRMED] production Compose 示例使用 `DEPLOY_IMAGE`、只挂载示例路径，并包含 healthcheck。
   - [CONFIRMED] production 配置样例绑定 `0.0.0.0:9999`，不包含真实密钥。
   - [CONFIRMED] 远程 Linux 部署脚本会按参数/环境变量动态生成 `运行期显式部署参数`，不要求提交真实 显式部署参数。
@@ -1239,9 +1239,9 @@
   - [CONFIRMED] 除 Docker build 与本机 `bash -n` 外的验证命令已通过；Docker build 和 `bash -n` 不可执行原因已记录，脚本已通过 Bash 语法解析。
 - Evidence：
   - 修改文件：`Dockerfile`、`.dockerignore`、`deploy/docker-compose.production.example.yml`、`deploy/config.production.example.yaml`、`deploy.sh`、`.github/workflows/deploy-remote.yml`、`deploy.sh` / `script/install.sh` 显式参数契约、README、部署说明和项目状态文档。
-  - Docker build：未执行，原因是当前环境 `docker`、`podman`、`nerdctl` 均不可用。
+  - Docker build：未执行，原因是当前环境 `docker`、`podman`、`nerdctl`、`docker.exe` 均不可用。
   - 其他验证：脚本 Bash 语法解析 PASS；YAML 解析 PASS；actionlint PASS；`go test ./... -count=1` PASS；server build PASS；`git diff --check` PASS。
-  - Next Task：补跑 Docker build；真实 production 运行、镜像发布流水线和生产迁移框架仍需单独确认。
+  - Next Task：受环境阻塞；切换到具备 Docker CLI/daemon 的环境后补跑 Docker build。真实 production 运行、镜像发布流水线和生产迁移框架仍需单独确认。
 
 ### TASK-P2-005：实现 `pkg/plugin/hooks` 独立钩子引擎
 

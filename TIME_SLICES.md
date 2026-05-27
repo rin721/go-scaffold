@@ -2,10 +2,10 @@
 
 ## 当前合法时间切片
 
-- Time Slice ID：NONE
-- Task ID：NONE
-- Status：COMPLETED
-- Summary：`dev.tmp/new-plugin.md` 主线已完成；TASK-P2-005 至 TASK-P2-010 均已通过验证。TASK-P2-004 Docker build 验证因缺少 Docker CLI 保留为 `ISSUE-P2-005`。
+- Time Slice ID：TS-P2-004
+- Task ID：TASK-P2-004
+- Status：BLOCKED
+- Summary：`dev.tmp/new-plugin.md` 主线已完成；TASK-P2-005 至 TASK-P2-010 均已通过验证。当前唯一未关闭事项是 TASK-P2-004 Docker build，2026-05-27 再次检查后当前环境仍无 Docker 兼容 CLI，`ISSUE-P2-005` 保持打开。
 
 ## 时间切片列表
 
@@ -1294,7 +1294,7 @@
 
 ### TS-P2-004：Linux Docker production 部署制品
 
-- Status：PENDING_VERIFICATION
+- Status：BLOCKED
 - Task ID：TASK-P2-004
 - Matrix：BL-024、TM-P2-005、RISK-016、RISK-017、RISK-018
 - Purpose：为 Linux Docker production 远程部署补齐可提交运行制品、production Compose 示例、统一 `deploy.sh` 部署入口和受控手动 workflow 闸门。
@@ -1333,7 +1333,7 @@
   5. 更新 显式参数部署入口、部署说明、README 和状态文档。
   6. 运行 Docker/Workflow/Go/脚本语法验证和 diff 检查。
 - Verification Commands：
-  - `docker build -t go-scaffold:local .`：PENDING，当前本机未安装 Docker CLI；`docker`、`podman`、`nerdctl` 均不可用。
+  - `docker build -t go-scaffold:local .`：BLOCKED，当前本机未安装 Docker CLI；2026-05-27 复验 `docker version` 失败，`docker`、`podman`、`nerdctl`、`docker.exe` 均不可用。
   - 临时 Go YAML 解析：PASS。
   - `go run github.com/rhysd/actionlint/cmd/actionlint@latest .github/workflows/ci.yml .github/workflows/deploy-remote.yml`：PASS。
   - `bash -n deploy.sh`：FAIL_ENV，本机无可用 bash，WSL 未安装 Linux 发行版。
@@ -1342,7 +1342,7 @@
   - `go build -o <temp> ./cmd/server`：PASS。
   - `git diff --check`：PASS，仅有 Windows LF/CRLF 转换警告。
 - Acceptance：
-  - [PENDING_VERIFICATION] Dockerfile 已存在并配置非 root 用户运行 server；镜像构建待具备 Docker 的环境验证。
+  - [BLOCKED] Dockerfile 已存在并配置非 root 用户运行 server；镜像构建待具备 Docker 的环境验证。
   - [CONFIRMED] Compose 示例适合 Linux Docker production 远程主机，并保留真实配置外置挂载。
   - [CONFIRMED] production 配置样例绑定 `0.0.0.0:9999`，不包含真实密钥。
   - [CONFIRMED] 远程 Linux 部署脚本会按显式参数注入运行环境，脚本不打印 password/token/secret 值。
@@ -1350,12 +1350,12 @@
   - [CONFIRMED] 文档说明 production Secrets、GitHub Environment 审批、远程目录权限和不执行真实部署边界。
 - Exit Conditions：
   - [CONFIRMED] 制品和文档完成。
-  - [PENDING_VERIFICATION] Docker build 不可执行原因已记录，仍需补跑。
+  - [BLOCKED] Docker build 不可执行原因已记录，仍需补跑。
   - [CONFIRMED] 状态文档、测试报告和交接说明已更新。
 - Evidence：
   - 修改文件：`Dockerfile`、`.dockerignore`、`deploy/docker-compose.production.example.yml`、`deploy/config.production.example.yaml`、`deploy.sh`、`.github/workflows/deploy-remote.yml`、`deploy.sh` / `script/install.sh` 显式参数契约、`README.md`、`docs/deployment.md` 和项目状态文档。
   - 未执行真实部署、未触发 GitHub workflow、未连接远程服务器、未推送镜像、未写入真实 `.env` 或 secrets。
-  - 下一步：在具备 Docker CLI/daemon 的 Linux 或 Docker Desktop 环境执行 `docker build -t go-scaffold:local .`。
+  - 下一步：受环境阻塞；在具备 Docker CLI/daemon 的 Linux 或 Docker Desktop 环境执行 `docker build -t go-scaffold:local .`。
 
 ### TS-P2-005：`pkg/plugin/hooks` 独立钩子引擎
 

@@ -3,8 +3,8 @@
 ## 项目状态
 
 - 项目：go-scaffold
-- 当前阶段：P2 插件钩子运行时与 IAM 公共接口完成
-- 总体状态：COMPLETED
+- 当前阶段：P2 Linux Docker production 部署制品验证阻塞
+- 总体状态：BLOCKED
 - 最后更新：2026-05-27
 - 最近 Agent：Codex
 - 最近工具：Codex Desktop
@@ -12,10 +12,10 @@
 ## 当前合法工作
 
 - 当前模块：项目优化路线
-- 当前任务 ID：NONE
-- 当前时间切片 ID：NONE
-- 当前状态：COMPLETED
-- 为什么这是当前唯一合法状态：[CONFIRMED] 用户要求实现 `dev.tmp/new-plugin.md` 设计，已按 `ACCEPT_WITH_RISK` 主线修正完成 TASK-P2-005 至 TASK-P2-010。`pkg/plugin/hooks`、hook-aware `plugin.Manager`、HTTP 远程插件服务端、`RemoteHook`、`pkg/iam` memory 实现、配置接入、app 装配、reload 和 lifecycle 均已实现并通过验证。TASK-P2-004 的 Docker build 验证仍因本机缺少 Docker CLI 保留为 `ISSUE-P2-005`，不标记完成。
+- 当前任务 ID：TASK-P2-004
+- 当前时间切片 ID：TS-P2-004
+- 当前状态：BLOCKED
+- 为什么这是当前唯一合法状态：[CONFIRMED] 用户发送“下一步”后按协议处理剩余待验证项。TASK-P2-005 至 TASK-P2-010 已完成并验证；当前唯一未关闭事项是 TASK-P2-004 的 Docker image build。2026-05-27 再次执行 `docker version` 并检查 `docker`、`podman`、`nerdctl`、`docker.exe`，当前环境仍无可用 Docker 兼容 CLI，因此 TASK-P2-004 受环境缺失阻塞，`ISSUE-P2-005` 保持打开。
 
 ## 阶段状态
 
@@ -52,11 +52,11 @@
 | 真实 CD 范围确认 | COMPLETED | 用户选择 C、确认使用远程部署，并进一步确认用 `.env` 风格文件配置；TASK-P2-002 已新增远程部署变量模板 |
 | 显式参数部署入口 | COMPLETED | `deploy.sh` 和 `script/install.sh` 已新增，旧本地部署 env 文件已删除，部署说明已同步 |
 | 远程部署 workflow | COMPLETED | TASK-P2-003 已新增手动 staging workflow、Secrets 配置说明和远程主机前置条件；未执行真实部署 |
-| Linux Docker production 部署制品 | PENDING_VERIFICATION | TASK-P2-004 / TS-P2-004 已实现 Dockerfile、production Compose 示例、手动 production workflow 闸门和统一 `deploy.sh` 部署入口；Docker 构建待验证 |
+| Linux Docker production 部署制品 | BLOCKED | TASK-P2-004 / TS-P2-004 已实现 Dockerfile、production Compose 示例、手动 production workflow 闸门和统一 `deploy.sh` 部署入口；Docker 构建因当前环境无 Docker CLI 阻塞 |
 | 插件钩子运行时与 IAM 公共接口 | COMPLETED | TASK-P2-005 至 TASK-P2-010 已完成；`go test ./pkg/plugin/... -count=1`、`go test ./pkg/iam/... -count=1`、`go test ./internal/config ./internal/app/... -count=1`、`go test ./... -count=1`、server build 和 `git diff --check` 均通过 |
 | 部署实现 | COMPLETED | TASK-P2-004 已补齐 Dockerfile、production Compose 示例、production 配置样例、统一 `deploy.sh` 部署入口和手动 production workflow 闸门 |
-| 部署验证 | PENDING_VERIFICATION | 脚本 Bash 语法解析、YAML 解析、actionlint、`go test ./... -count=1`、server build 和 `git diff --check` 均通过；Docker build 因本机缺少 Docker CLI 待补跑 |
-| 交接 | COMPLETED | `AGENT_HANDOFF.md` 已更新到 TASK-P2-005 至 TASK-P2-010 完成状态，并保留 TASK-P2-004 Docker 待验证项 |
+| 部署验证 | BLOCKED | 脚本 Bash 语法解析、YAML 解析、actionlint、`go test ./... -count=1`、server build 和 `git diff --check` 均通过；Docker build 因本机缺少 Docker CLI 阻塞 |
+| 交接 | COMPLETED | `AGENT_HANDOFF.md` 已更新到 TASK-P2-004 / TS-P2-004 阻塞状态，并保留 TASK-P2-005 至 TASK-P2-010 完成验证记录 |
 | Phase 6 收尾 | COMPLETED | 用户选择 A 后已完成 TASK-PHASE6-001；最终回归和交接文档已更新 |
 
 ## 当前关键发现
@@ -75,7 +75,7 @@
 | FIND-014 | 背景文档保留 TASK-P1-016 前旧状态 | `ARCHITECTURE.md`、`MODULES.md`、`PROJECT_BRIEF.md`、`ROADMAP.md`；TASK-INFRA-003 已修复 | [CONFIRMED] 已处理 |
 | FIND-015 | CI/CD 与部署缺少首个安全边界 | `REQ-OPT-P2-003`、`BL-007`、`BL-008`；用户选择 D | [CONFIRMED] TASK-P2-001 已处理非生产 CI 门禁和部署说明 |
 | FIND-016 | 真实 CD 自动化缺少环境与密钥决策 | `BL-024`；用户选择 C、确认远程部署，并确认使用 `.env` 风格配置和实现 workflow | [CONFIRMED] 手动 staging 远程部署 workflow 已补；镜像发布、production 和真实运行仍需单独确认 |
-| FIND-017 | production Docker 部署缺少可提交制品 | 用户要求“linux、docker、production -> 部署”；用户修正“环境变量在部署脚本上动态配置”；`BL-024` 剩余范围 | [PENDING_VERIFICATION] 制品和统一 `deploy.sh` 入口已补；Docker CLI 缺失导致镜像构建待验证，真实 production 运行仍不在当前会话执行 |
+| FIND-017 | production Docker 部署缺少可提交制品 | 用户要求“linux、docker、production -> 部署”；用户修正“环境变量在部署脚本上动态配置”；`BL-024` 剩余范围 | [BLOCKED] 制品和统一 `deploy.sh` 入口已补；Docker CLI 缺失导致镜像构建阻塞，真实 production 运行仍不在当前会话执行 |
 | FIND-006 | P1 执行顺序尚未确认 | `TEST_MATRIX.md`、`RISK_REGISTER.md` RISK-009；用户再次发送“下一步” | [CONFIRMED] 已确认 |
 | FIND-007 | `AGENTS.md` 被状态文件声明已补齐但实际缺失 | `Test-Path AGENTS.md`、`docs/reports/status_diagnostics/2026-05-25-task-infra-002-agents-md-missing.md` | [CONFIRMED] 已修复 |
 | FIND-008 | `/health`、`/ready` 路由缺少 smoke test | `TEST_MATRIX.md` TM-P0-003；TASK-P1-003 已补测试 | [CONFIRMED] 已处理 |
@@ -95,13 +95,13 @@
 | CONFIRM-NEXT-008 | 选择 app/router/middleware 集成测试完成后的后续范围 | 已确认：用户选择 A，进入 Phase 6 收尾 | A: 进入 Phase 6 收尾；B: 继续 app 装配/reload/config 等剩余集成测试；C: 结束本轮 | COMPLETED |
 | CONFIRM-NEXT-009 | 选择 TASK-INFRA-003 后的后续方向 | 已确认：用户选择 D，进入 CI/CD 与部署方向首切片 | D: CI/CD 与部署；首切片限定 CI 质量门禁与部署说明 | COMPLETED |
 | CONFIRM-NEXT-010 | 确认真实 CD / 镜像发布 / 远程部署自动化边界 | 已确认：用户选择 C、使用远程部署、通过 `.env` 风格模板配置，并明确确认实现远程部署 workflow | TASK-P2-003 已完成 | COMPLETED |
-| CONFIRM-NEXT-011 | 确认 Linux/Docker/production 部署制品 | 已确认：用户要求“开始，linux、docker、production -> 部署” | TASK-P2-004 已进入待验证 | COMPLETED |
+| CONFIRM-NEXT-011 | 确认 Linux/Docker/production 部署制品 | 已确认：用户要求“开始，linux、docker、production -> 部署” | TASK-P2-004 已进入环境阻塞，待 Docker 环境补跑构建 | COMPLETED |
 
 ## 待验证
 
 | ID | 任务 | 需要验证内容 | 命令/方法 |
 |---|---|---|---|
-| VERIFY-P2-004 | TASK-P2-004 | Dockerfile 镜像构建 | 在安装 Docker 的 Linux 或 Docker Desktop 环境运行 `docker build -t go-scaffold:local .` |
+| VERIFY-P2-004 | TASK-P2-004 | Dockerfile 镜像构建 | [BLOCKED] 当前环境无 `docker`、`podman`、`nerdctl` 或 `docker.exe`；需在安装 Docker 的 Linux 或 Docker Desktop 环境运行 `docker build -t go-scaffold:local .` |
 | VERIFY-P2-005 | TASK-P2-005 至 TASK-P2-010 | 插件钩子运行时、远程插件传输、IAM 公共接口和 app 装配 | [CONFIRMED] `go test ./pkg/plugin/... -count=1`；`go test ./pkg/iam/... -count=1`；`go test ./internal/config ./internal/app/... -count=1`；`go test ./... -count=1`；`go build -o <temp> ./cmd/server`；`git diff --check` |
 
 ## 需要返工
@@ -112,14 +112,14 @@
 
 ## 最近执行
 
-- 摘要：已实现 `dev.tmp/new-plugin.md` 设计主线；TASK-P2-004 Docker build 验证保持环境阻塞记录，不标记完成。
-- 变更文件：新增 `pkg/plugin/hooks`、`pkg/iam`、HTTP 远程插件服务端和 `RemoteHook`；扩展 `pkg/plugin.Manager`、`internal/config`、`internal/app/initapp`、`reloadapp`、`lifecycleapp` 与相关测试。
-- 执行命令：必读文件读取；项目技能读取；用户修正审查结论沿用 `ACCEPT_WITH_RISK`；目标包测试、全量回归、server build 和 diff 空白检查。
-- 测试结果：VERIFY-P2-005 全部通过；Docker build 仍独立保留在 VERIFY-P2-004。
-- 完成判断：COMPLETED。
+- 摘要：用户发送“下一步”后，按协议尝试处理 TASK-P2-004 Docker build 待验证项；当前环境仍无 Docker 兼容 CLI，任务保持阻塞，不标记完成。
+- 变更文件：更新项目状态、验收、问题、测试报告、变更记录和交接文档；插件/IAM 代码实现保持上一轮已验证状态。
+- 执行命令：必读文件读取；`docker version`；`Get-Command docker,podman,nerdctl,docker.exe -ErrorAction SilentlyContinue`。
+- 测试结果：Docker build 未执行，原因是当前环境缺少 Docker 兼容 CLI；VERIFY-P2-005 仍保持已通过。
+- 完成判断：BLOCKED。
 
 ## 下一步
 
-- 合法下一步：NONE；后续新功能需用户重新确认并建立任务/时间切片。
-- 保留待验证：TASK-P2-004 / VERIFY-P2-004 仍需在具备 Docker CLI/daemon 的环境补跑 `docker build -t go-scaffold:local .`。
+- 合法下一步：TASK-P2-004 / TS-P2-004 处于 BLOCKED；需切换到具备 Docker CLI/daemon 的环境后补跑 `docker build -t go-scaffold:local .`。
+- 解除阻塞条件：Docker build 通过后，更新 `STATUS.md`、`TASKS.md`、`TIME_SLICES.md`、`ACCEPTANCE.md`、`TEST_REPORT.md`、`CHANGELOG.md`、`ISSUES.md` 和 `AGENT_HANDOFF.md`，再关闭 TASK-P2-004。
 - 非目标保持：JWT 中间件、数据库版权限、OPA/Casbin、Go `.so` 插件、插件发现、RPC/WS 传输、生产部署、镜像发布和密钥管理仍不属于本轮完成范围。

@@ -3,47 +3,47 @@
 ## 最新验证
 
 - 日期：2026-05-27
-- 任务 ID：TASK-P2-005 至 TASK-P2-010
-- 时间切片 ID：TS-P2-005 至 TS-P2-010
-- 状态：COMPLETED
-- 范围：实现 `dev.tmp/new-plugin.md` 设计主线，包括 `pkg/plugin/hooks`、hook-aware `plugin.Manager`、HTTP 远程插件服务端、`RemoteHook`、独立 `pkg/iam` 公共 API、memory 实现、`plugin` / `iam` 配置、app 装配、reload 和 lifecycle 接入；不实现 JWT 中间件、数据库版权限、OPA/Casbin、Go `.so` 插件、插件发现、RPC/WS 传输、生产部署、镜像发布或密钥管理。
+- 任务 ID：TASK-P2-004
+- 时间切片 ID：TS-P2-004
+- 状态：BLOCKED
+- 范围：用户发送“下一步”后按协议处理剩余待验证项；TASK-P2-005 至 TASK-P2-010 插件/IAM 主线已完成并验证，当前唯一未关闭事项是 TASK-P2-004 的 Docker image build 验证。
 
 ## 执行命令
 
 | 命令 | 结果 | 备注 |
 |---|---|---|
 | 必读文件读取 | PASS | 已读取 `AGENTS.md`、Agent 规则、状态、任务、切片、需求、架构、验收、问题、测试报告和交接文档 |
-| 用户修正审查 | ACCEPTED_WITH_RISK | 将 `dev.tmp/new-pllugin.md` 视为笔误，实际设计为 `dev.tmp/new-plugin.md`；TASK-P2-004 Docker 验证保持阻塞，不标记完成 |
-| `go test ./pkg/plugin/... -count=1` | PASS | 插件钩子、manager hook、HTTP server helper 和 `RemoteHook` 测试通过 |
-| `go test ./pkg/iam/... -count=1` | PASS | IAM 公共 API 和 memory 实现测试通过 |
-| `go test ./internal/config ./internal/app/... -count=1` | PASS | 配置、app 装配、reload 和 lifecycle 相关测试通过 |
-| `go test ./... -count=1` | PASS | 全量 Go 回归通过 |
-| `go build -o <temp> ./cmd/server` | PASS | server 二进制构建通过 |
-| `git diff --check` | PASS | 空白检查通过 |
+| `docker version` | FAIL_ENV | 当前环境未安装 Docker CLI，命令不可用 |
+| `Get-Command docker,podman,nerdctl,docker.exe -ErrorAction SilentlyContinue` | NOT_AVAILABLE | 未发现 Docker 兼容 CLI |
+| `docker build -t go-scaffold:local .` | NOT_RUN | 前置 Docker CLI/daemon 不可用，不能执行镜像构建 |
+| `git diff --check` | PASS | 文档状态更新后的空白检查通过 |
 
 ## 结果
 
-- [CONFIRMED] `pkg/plugin/hooks` 已新增，提供 `Point`、`Event`、`Result`、`Handler`、`HandlerFunc`、`Registry` 和服务查找能力。
-- [CONFIRMED] `pkg/plugin.Manager` 已新增 `Hooks()`、`RegisterHook`、`WithHooks` 和标准钩子点，保留被动注册模型。
-- [CONFIRMED] HTTP 远程插件服务端与 `RemoteHook` 已实现，沿用 JSON `Request` / `Response` 协议。
-- [CONFIRMED] `pkg/iam` 与 `pkg/iam/memory` 已新增，覆盖 token 凭证、策略授权、拒绝优先、通配和过期。
-- [CONFIRMED] `plugin` 和 `iam` 配置已接入，默认 disabled；`internal/app/initapp.Infrastructure` 已包含 IAM 和 Plugins。
-- [CONFIRMED] reload 成功后替换 IAM/plugin 新实例，失败保留旧实例；关闭顺序已接入插件 manager。
-- [CONFIRMED] `pkg/plugin` 不导入 `pkg/iam`、日志、配置或 `internal/*`；`pkg/iam` 不导入 `pkg/plugin`；IAM 权限钩子只在 `internal/app` 注册。
-- [CONFIRMED] TASK-P2-004 Docker build 验证仍独立保留为 `ISSUE-P2-005`。
+- [BLOCKED] TASK-P2-004 的 `docker build -t go-scaffold:local .` 仍无法执行，原因是当前环境缺少 `docker`、`podman`、`nerdctl`、`docker.exe`。
+- [CONFIRMED] ISSUE-P2-005 保持 OPEN；不能把 TASK-P2-004 / TS-P2-004 标记为 COMPLETED。
+- [CONFIRMED] TASK-P2-005 至 TASK-P2-010 插件钩子运行时、HTTP 远程插件传输、IAM 公共接口、配置/app/reload/lifecycle 接入已在上一轮验证通过。
 
 ## 失败项
 
-- 无新增失败项。
-- 环境待验证项仍存在：当前本机缺少 Docker CLI，无法运行 TASK-P2-004 的 `docker build -t go-scaffold:local .`。该问题已记录到 `ISSUES.md`，不代表本轮插件/IAM 实现失败。
+- 无代码失败项。
+- 环境阻塞项仍存在：当前本机缺少 Docker 兼容 CLI，无法运行 TASK-P2-004 的 `docker build -t go-scaffold:local .`。该问题已记录到 `ISSUES.md`，不代表插件/IAM 主线失败。
 
 ## 验证结论
 
-- TASK-P2-005 至 TASK-P2-010 标记为 `COMPLETED`。
-- 当前无自动下一实现任务；后续新范围需用户重新确认。
-- TASK-P2-004 仍保持 `PENDING_VERIFICATION`，需要在安装 Docker CLI/daemon 的 Linux 或 Docker Desktop 环境补跑 `docker build -t go-scaffold:local .`。
+- TASK-P2-004 / TS-P2-004 标记为 `BLOCKED`。
+- 解除阻塞条件：在安装 Docker CLI/daemon 的 Linux 或 Docker Desktop 环境运行 `docker build -t go-scaffold:local .` 并通过。
+- TASK-P2-005 至 TASK-P2-010 保持 `COMPLETED`；后续新范围仍需用户重新确认。
 
 ## 历史报告
+
+### 2026-05-27 TASK-P2-004 TS-P2-004 blocked verification
+
+- 用户发送“下一步”后按协议处理剩余 Docker build 验证项。
+- `docker version`：FAIL_ENV，当前环境未安装 Docker CLI。
+- `Get-Command docker,podman,nerdctl,docker.exe -ErrorAction SilentlyContinue`：NOT_AVAILABLE，未发现 Docker 兼容 CLI。
+- `docker build -t go-scaffold:local .`：NOT_RUN，前置 Docker CLI/daemon 不可用。
+- 结论：TASK-P2-004 / TS-P2-004 进入 `BLOCKED`，`ISSUE-P2-005` 保持 OPEN；插件/IAM 主线不受该环境阻塞影响。
 
 ### 2026-05-27 TASK-P2-005 至 TASK-P2-010
 
