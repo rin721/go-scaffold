@@ -47,6 +47,17 @@ func Shutdown(ctx context.Context, core initapp.Core, infra initapp.Infrastructu
 		}
 	}
 
+	if infra.Plugins != nil {
+		if err := infra.Plugins.Close(ctx); err != nil {
+			errs = append(errs, fmt.Errorf("plugin manager close: %w", err))
+			if log != nil {
+				log.Error("failed to close plugin manager", "error", err)
+			}
+		} else if log != nil {
+			log.Info("plugin manager closed")
+		}
+	}
+
 	if infra.Executor != nil {
 		infra.Executor.Shutdown()
 		if log != nil {

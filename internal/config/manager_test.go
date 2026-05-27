@@ -18,6 +18,13 @@ func TestCopyConfigCoversAllFieldsAndDeepCopiesSlices(t *testing.T) {
 
 	got.I18n.Supported[0] = "ja-JP"
 	got.Executor.Pools[0].Name = "changed"
+	got.Plugin.Plugins[0].Headers["X-Test"] = "changed"
+	got.Plugin.Plugins[0].Capabilities[0] = "changed"
+	got.Plugin.Hooks[0].Point = "changed"
+	got.IAM.Tokens[0].Principal.Roles[0] = "changed"
+	got.IAM.Tokens[0].Principal.Attributes["team"] = "changed"
+	got.IAM.Policies[0].Action = "changed"
+	*got.IAM.DefaultDeny = false
 	got.CORS.AllowOrigins[0] = "https://changed.example.com"
 	got.CORS.AllowMethods[0] = "PATCH"
 	got.CORS.AllowHeaders[0] = "X-Changed"
@@ -28,6 +35,27 @@ func TestCopyConfigCoversAllFieldsAndDeepCopiesSlices(t *testing.T) {
 	}
 	if src.Executor.Pools[0].Name == got.Executor.Pools[0].Name {
 		t.Fatal("copyConfig() shares Executor.Pools slice with source")
+	}
+	if src.Plugin.Plugins[0].Headers["X-Test"] == got.Plugin.Plugins[0].Headers["X-Test"] {
+		t.Fatal("copyConfig() shares Plugin.Plugins headers map with source")
+	}
+	if src.Plugin.Plugins[0].Capabilities[0] == got.Plugin.Plugins[0].Capabilities[0] {
+		t.Fatal("copyConfig() shares Plugin.Plugins capabilities slice with source")
+	}
+	if src.Plugin.Hooks[0].Point == got.Plugin.Hooks[0].Point {
+		t.Fatal("copyConfig() shares Plugin.Hooks slice with source")
+	}
+	if src.IAM.Tokens[0].Principal.Roles[0] == got.IAM.Tokens[0].Principal.Roles[0] {
+		t.Fatal("copyConfig() shares IAM token roles slice with source")
+	}
+	if src.IAM.Tokens[0].Principal.Attributes["team"] == got.IAM.Tokens[0].Principal.Attributes["team"] {
+		t.Fatal("copyConfig() shares IAM token attributes map with source")
+	}
+	if src.IAM.Policies[0].Action == got.IAM.Policies[0].Action {
+		t.Fatal("copyConfig() shares IAM.Policies slice with source")
+	}
+	if *src.IAM.DefaultDeny == *got.IAM.DefaultDeny {
+		t.Fatal("copyConfig() shares IAM.DefaultDeny pointer with source")
 	}
 	if src.CORS.AllowOrigins[0] == got.CORS.AllowOrigins[0] {
 		t.Fatal("copyConfig() shares CORS.AllowOrigins slice with source")
@@ -173,6 +201,12 @@ func TestOverrideWithEnvUsesDocumentedNonDatabaseNames(t *testing.T) {
 	t.Setenv(EnvLogOutput, "stdout")
 	t.Setenv(EnvI18nDefault, "en-US")
 	t.Setenv(EnvI18nSupported, "zh-CN,en-US")
+	t.Setenv(EnvPluginEnabled, "true")
+	t.Setenv(EnvPluginDefaultTimeout, "15")
+	t.Setenv(EnvPluginMaxResponseBytes, "2048")
+	t.Setenv(EnvIAMEnabled, "true")
+	t.Setenv(EnvIAMMode, "memory")
+	t.Setenv(EnvIAMDefaultDeny, "false")
 
 	OverrideWithEnv(cfg)
 
@@ -194,6 +228,12 @@ func TestOverrideWithEnvUsesDocumentedNonDatabaseNames(t *testing.T) {
 	}
 	if !reflect.DeepEqual(cfg.I18n.Supported, []string{"zh-CN", "en-US"}) || cfg.I18n.Default != "en-US" {
 		t.Fatalf("I18n override mismatch: %#v", cfg.I18n)
+	}
+	if !cfg.Plugin.Enabled || cfg.Plugin.DefaultTimeout != 15 || cfg.Plugin.MaxResponseBytes != 2048 {
+		t.Fatalf("Plugin override mismatch: %#v", cfg.Plugin)
+	}
+	if !cfg.IAM.Enabled || cfg.IAM.Mode != "memory" || cfg.IAM.DefaultDenyEnabled() {
+		t.Fatalf("IAM override mismatch: %#v", cfg.IAM)
 	}
 }
 
@@ -269,6 +309,43 @@ func testCompleteConfig() *Config {
 			EnableWatch:     true,
 			WatchBufferSize: 16,
 		},
+		Plugin: PluginConfig{
+			Enabled:          true,
+			DefaultTimeout:   10,
+			MaxResponseBytes: 1024,
+			Plugins: []PluginDefinitionConfig{
+				{
+					Name:         "remote",
+					Protocol:     "http",
+					Endpoint:     "http://127.0.0.1:18090/plugin/v1/invoke",
+					Timeout:      5,
+					Headers:      map[string]string{"X-Test": "original"},
+					Capabilities: []string{"hooks"},
+					Labels:       map[string]string{"env": "test"},
+				},
+			},
+			Hooks: []PluginHookBindingConfig{
+				{Point: "plugin.after_invoke", Plugin: "remote", Name: "audit", Priority: 1},
+			},
+		},
+		IAM: IAMConfig{
+			Enabled:     true,
+			Mode:        "memory",
+			DefaultDeny: boolPtr(true),
+			Tokens: []IAMTokenConfig{
+				{
+					Token: "admin-token",
+					Principal: IAMPrincipalConfig{
+						ID:         "admin",
+						Roles:      []string{"admin"},
+						Attributes: map[string]string{"team": "platform"},
+					},
+				},
+			},
+			Policies: []IAMPolicyConfig{
+				{Subject: "admin", Action: "read", Resource: "*", Effect: "allow"},
+			},
+		},
 		CORS: CORSConfig{
 			Enabled:          true,
 			AllowOrigins:     []string{"https://example.com"},
@@ -279,4 +356,8 @@ func testCompleteConfig() *Config {
 			MaxAge:           3600,
 		},
 	}
+}
+
+func boolPtr(value bool) *bool {
+	return &value
 }

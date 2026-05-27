@@ -2,10 +2,10 @@
 
 ## 当前合法任务
 
-- Task ID：TASK-P2-004
-- Status：PENDING_VERIFICATION
-- Time Slice：TS-P2-004
-- Summary：Linux/Docker/production 部署制品和统一 `deploy.sh` 部署入口已实现；由于本机缺少 Docker CLI，Docker 镜像构建仍待具备 Docker 的环境验证。
+- Task ID：NONE
+- Status：COMPLETED
+- Time Slice：NONE
+- Summary：`dev.tmp/new-plugin.md` 设计已完成。TASK-P2-005 至 TASK-P2-010 已实现插件钩子运行时、HTTP 远程插件传输、独立 IAM 公共接口、配置/app 装配、reload 和 lifecycle；Docker build 验证仍独立保留为 `ISSUE-P2-005`。
 
 ## 任务列表
 
@@ -1242,6 +1242,70 @@
   - Docker build：未执行，原因是当前环境 `docker`、`podman`、`nerdctl` 均不可用。
   - 其他验证：脚本 Bash 语法解析 PASS；YAML 解析 PASS；actionlint PASS；`go test ./... -count=1` PASS；server build PASS；`git diff --check` PASS。
   - Next Task：补跑 Docker build；真实 production 运行、镜像发布流水线和生产迁移框架仍需单独确认。
+
+### TASK-P2-005：实现 `pkg/plugin/hooks` 独立钩子引擎
+
+- Status：COMPLETED
+- Time Slice：TS-P2-005
+- Source：用户要求实现 `dev.tmp/new-plugin.md` 设计；用户修正审查结论为 `ACCEPT_WITH_RISK`。
+- Priority：P2
+- Type：公共基础设施 API + 测试
+- Goal：新增不依赖 logger/config/IAM/internal 的可复用钩子引擎，为插件运行时、远程钩子和 app 组合根接入提供基础。
+- Allowed Files：`pkg/plugin/hooks/**/*`、`pkg/plugin/hooks/*`、项目状态文档。
+- Forbidden Files：真实 `.env`、密钥、部署凭据、数据库 schema、JWT 中间件、生产权限系统。
+- Verification：`go test ./pkg/plugin/hooks -count=1`；`go test ./pkg/plugin/... -count=1`。
+- Exit Conditions：处理器按优先级从高到低执行；执行前复制处理器列表；每个处理器前检查 context；支持停止语义；拒绝 nil handler。
+- Evidence：新增 `pkg/plugin/hooks`，包含 `Point`、`Event`、`Result`、`Handler`、`HandlerFunc`、`Registry` 和服务查找能力；相关测试通过。
+
+### TASK-P2-006：让 `pkg/plugin.Manager` 支持钩子
+
+- Status：COMPLETED
+- Time Slice：TS-P2-006
+- Goal：扩展 manager 钩子 API，同时保持被动注册边界和既有 `NewManager()` 兼容。
+- Allowed Files：`pkg/plugin/**/*`、项目状态文档。
+- Verification：`go test ./pkg/plugin/... -count=1`。
+- Exit Conditions：`before_invoke` 可阻止插件调用；`invoke_error` 不覆盖原错误；`after_invoke` 错误以包装错误返回；`pkg/plugin` 不导入 `pkg/iam` 或 `internal/*`。
+- Evidence：`Manager` 新增 `Hooks()`、`RegisterHook` 和 `WithHooks`；标准钩子点已加入，调用错误钩子按尽力通知处理，包边界保持与 IAM/internal 解耦。
+
+### TASK-P2-007：实现 HTTP 远程插件服务端和 `RemoteHook`
+
+- Status：COMPLETED
+- Time Slice：TS-P2-007
+- Goal：沿用现有 JSON `Request`/`Response` 协议，新增 HTTP server helper、标准操作和远程钩子适配器。
+- Allowed Files：`pkg/plugin/**/*`、项目状态文档。
+- Verification：`go test ./pkg/plugin/... -count=1`。
+- Exit Conditions：只接受 `POST /plugin/v1/invoke`；非法请求、插件错误和响应大小限制有测试；`hooks.execute` 可解码为 `hooks.Result`。
+- Evidence：新增 `NewHTTPServer(plugin Plugin) http.Handler`、`OperationHooksExecute` 和 `RemoteHook`；沿用 JSON `Request`/`Response` 协议并覆盖错误路径。
+
+### TASK-P2-008：实现 `pkg/iam` 与内存实现
+
+- Status：COMPLETED
+- Time Slice：TS-P2-008
+- Goal：新增独立 IAM 公共 API，覆盖主体、凭证、策略、认证、授权、上下文和 memory service。
+- Allowed Files：`pkg/iam/**/*`、项目状态文档。
+- Verification：`go test ./pkg/iam/... -count=1`。
+- Exit Conditions：内存实现支持 token 凭证、精确和 `*` 通配策略、拒绝优先、过期检查、启用后默认拒绝。
+- Evidence：新增 `pkg/iam` 公共类型、上下文 helper 与 `pkg/iam/memory`；memory 测试覆盖 token、通配、拒绝优先、过期和默认拒绝。
+
+### TASK-P2-009：接入配置与应用组装
+
+- Status：COMPLETED
+- Time Slice：TS-P2-009
+- Goal：新增 `plugin`、`iam` 配置，server 模式装配 IAM 和插件管理器，配置创建的插件仅为 HTTP 适配器。
+- Allowed Files：`internal/config/**/*`、`internal/app/**/*`、`pkg/plugin/**/*`、`pkg/iam/**/*`、项目状态文档。
+- Verification：`go test ./internal/config ./internal/app/... ./pkg/plugin/... ./pkg/iam/... -count=1`。
+- Exit Conditions：本地插件仍由代码显式注册；钩子绑定创建 `RemoteHook`；权限检查钩子只在 `internal/app` 注册。
+- Evidence：配置新增 `plugin` 与 `iam`，默认 disabled；`internal/app/initapp.Infrastructure` 新增 `IAM` 与 `Plugins`，配置插件仅创建 HTTP adapter，IAM 授权钩子只在 app 组合层注册。
+
+### TASK-P2-010：实现 reload、生命周期与收尾验证
+
+- Status：COMPLETED
+- Time Slice：TS-P2-010
+- Goal：在配置重载和应用关闭中安全处理 IAM/plugin 基础设施，并完成全量验证和交接。
+- Allowed Files：`internal/app/**/*`、项目状态文档、必要文档。
+- Verification：`go test ./internal/config ./internal/app/... -count=1`；`go test ./... -count=1`；`go build -o <temp> ./cmd/server`；`git diff --check`。
+- Exit Conditions：重载先构建新实例再替换，失败保留旧实例；关闭时 HTTP server 停止后、cache/database 前关闭插件管理器；最终状态和交接文档一致。
+- Evidence：reload 先构建新 IAM/plugin 基础设施再替换；关闭顺序已在 HTTP server 后、cache/database 前关闭插件管理器；目标包测试、全量回归、server build 和 diff 检查通过。
 
 ## 历史任务
 

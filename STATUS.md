@@ -3,8 +3,8 @@
 ## 项目状态
 
 - 项目：go-scaffold
-- 当前阶段：P2 Linux Docker production 部署制品与远程 Linux 脚本待验证
-- 总体状态：PENDING_VERIFICATION
+- 当前阶段：P2 插件钩子运行时与 IAM 公共接口完成
+- 总体状态：COMPLETED
 - 最后更新：2026-05-27
 - 最近 Agent：Codex
 - 最近工具：Codex Desktop
@@ -12,10 +12,10 @@
 ## 当前合法工作
 
 - 当前模块：项目优化路线
-- 当前任务 ID：TASK-P2-004
-- 当前时间切片 ID：TS-P2-004
-- 当前状态：PENDING_VERIFICATION
-- 为什么这是当前唯一合法状态：[CONFIRMED] 用户要求“开始，linux、docker、production -> 部署”，并修正为“环境变量在部署脚本上动态配置”；已提升 `BL-024` 中 production Docker 远程部署剩余范围。Dockerfile、production Compose 示例、production 配置样例、手动 production workflow 闸门和统一 `deploy.sh` 部署入口已实现，但本机缺少 Docker CLI，`docker build -t go-scaffold:local .` 尚待具备 Docker 的环境验证。
+- 当前任务 ID：NONE
+- 当前时间切片 ID：NONE
+- 当前状态：COMPLETED
+- 为什么这是当前唯一合法状态：[CONFIRMED] 用户要求实现 `dev.tmp/new-plugin.md` 设计，已按 `ACCEPT_WITH_RISK` 主线修正完成 TASK-P2-005 至 TASK-P2-010。`pkg/plugin/hooks`、hook-aware `plugin.Manager`、HTTP 远程插件服务端、`RemoteHook`、`pkg/iam` memory 实现、配置接入、app 装配、reload 和 lifecycle 均已实现并通过验证。TASK-P2-004 的 Docker build 验证仍因本机缺少 Docker CLI 保留为 `ISSUE-P2-005`，不标记完成。
 
 ## 阶段状态
 
@@ -53,9 +53,10 @@
 | 显式参数部署入口 | COMPLETED | `deploy.sh` 和 `script/install.sh` 已新增，旧本地部署 env 文件已删除，部署说明已同步 |
 | 远程部署 workflow | COMPLETED | TASK-P2-003 已新增手动 staging workflow、Secrets 配置说明和远程主机前置条件；未执行真实部署 |
 | Linux Docker production 部署制品 | PENDING_VERIFICATION | TASK-P2-004 / TS-P2-004 已实现 Dockerfile、production Compose 示例、手动 production workflow 闸门和统一 `deploy.sh` 部署入口；Docker 构建待验证 |
-| 实现 | COMPLETED | TASK-P2-004 已补齐 Dockerfile、production Compose 示例、production 配置样例、统一 `deploy.sh` 部署入口和手动 production workflow 闸门 |
-| 验证 | PENDING_VERIFICATION | 脚本 Bash 语法解析、YAML 解析、actionlint、`go test ./... -count=1`、server build 和 `git diff --check` 均通过；Docker build 因本机缺少 Docker CLI 待补跑 |
-| 交接 | COMPLETED | `AGENT_HANDOFF.md` 已更新到 TASK-P2-004 待验证状态 |
+| 插件钩子运行时与 IAM 公共接口 | COMPLETED | TASK-P2-005 至 TASK-P2-010 已完成；`go test ./pkg/plugin/... -count=1`、`go test ./pkg/iam/... -count=1`、`go test ./internal/config ./internal/app/... -count=1`、`go test ./... -count=1`、server build 和 `git diff --check` 均通过 |
+| 部署实现 | COMPLETED | TASK-P2-004 已补齐 Dockerfile、production Compose 示例、production 配置样例、统一 `deploy.sh` 部署入口和手动 production workflow 闸门 |
+| 部署验证 | PENDING_VERIFICATION | 脚本 Bash 语法解析、YAML 解析、actionlint、`go test ./... -count=1`、server build 和 `git diff --check` 均通过；Docker build 因本机缺少 Docker CLI 待补跑 |
+| 交接 | COMPLETED | `AGENT_HANDOFF.md` 已更新到 TASK-P2-005 至 TASK-P2-010 完成状态，并保留 TASK-P2-004 Docker 待验证项 |
 | Phase 6 收尾 | COMPLETED | 用户选择 A 后已完成 TASK-PHASE6-001；最终回归和交接文档已更新 |
 
 ## 当前关键发现
@@ -101,6 +102,7 @@
 | ID | 任务 | 需要验证内容 | 命令/方法 |
 |---|---|---|---|
 | VERIFY-P2-004 | TASK-P2-004 | Dockerfile 镜像构建 | 在安装 Docker 的 Linux 或 Docker Desktop 环境运行 `docker build -t go-scaffold:local .` |
+| VERIFY-P2-005 | TASK-P2-005 至 TASK-P2-010 | 插件钩子运行时、远程插件传输、IAM 公共接口和 app 装配 | [CONFIRMED] `go test ./pkg/plugin/... -count=1`；`go test ./pkg/iam/... -count=1`；`go test ./internal/config ./internal/app/... -count=1`；`go test ./... -count=1`；`go build -o <temp> ./cmd/server`；`git diff --check` |
 
 ## 需要返工
 
@@ -110,14 +112,14 @@
 
 ## 最近执行
 
-- 摘要：用户确认进入 Linux/Docker/production 部署方向，并修正远程部署环境变量应由部署脚本动态配置；TASK-P2-004 / TS-P2-004 已实现，等待 Docker 构建验证。
-- 变更文件：新增 `deploy.sh`、`script/install.sh`；删除旧部署 env 示例和旧远程 Linux 脚本；更新远程部署 workflow、Compose 示例、README、部署说明和状态文档。
-- 执行命令：必读文件读取；用户修正审查；`docker version`；`shfmt` Bash 语法解析；临时 Go YAML 解析；`actionlint`；旧引用 `rg` 检查；`go test ./... -count=1`；`go build -o <temp> ./cmd/server`；`git diff --check`。
-- 测试结果：脚本 Bash 语法解析 PASS；YAML 解析 PASS；actionlint PASS；全量 Go 回归 PASS；server build PASS；diff 检查 PASS；Docker CLI 不存在，Docker build 未执行；本机无 bash 且 WSL 未安装 Linux 发行版，`bash -n` 未执行。
-- 完成判断：PENDING_VERIFICATION。
+- 摘要：已实现 `dev.tmp/new-plugin.md` 设计主线；TASK-P2-004 Docker build 验证保持环境阻塞记录，不标记完成。
+- 变更文件：新增 `pkg/plugin/hooks`、`pkg/iam`、HTTP 远程插件服务端和 `RemoteHook`；扩展 `pkg/plugin.Manager`、`internal/config`、`internal/app/initapp`、`reloadapp`、`lifecycleapp` 与相关测试。
+- 执行命令：必读文件读取；项目技能读取；用户修正审查结论沿用 `ACCEPT_WITH_RISK`；目标包测试、全量回归、server build 和 diff 空白检查。
+- 测试结果：VERIFY-P2-005 全部通过；Docker build 仍独立保留在 VERIFY-P2-004。
+- 完成判断：COMPLETED。
 
 ## 下一步
 
-- 合法下一步：补跑 `docker build -t go-scaffold:local .`。
-- 进入条件：在安装 Docker CLI/daemon 的环境中执行。
-- 完成后状态：Docker build 通过后可将 TASK-P2-004 / TS-P2-004 标记为 `COMPLETED` 并回到 `NONE / COMPLETED`；真实 production 运行、镜像发布流水线和生产迁移框架仍需单独确认。
+- 合法下一步：NONE；后续新功能需用户重新确认并建立任务/时间切片。
+- 保留待验证：TASK-P2-004 / VERIFY-P2-004 仍需在具备 Docker CLI/daemon 的环境补跑 `docker build -t go-scaffold:local .`。
+- 非目标保持：JWT 中间件、数据库版权限、OPA/Casbin、Go `.so` 插件、插件发现、RPC/WS 传输、生产部署、镜像发布和密钥管理仍不属于本轮完成范围。

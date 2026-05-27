@@ -29,6 +29,11 @@ func Reload(core *initapp.Core, infra *initapp.Infrastructure, transport *initap
 	if initapp.IsStorageConfigChanged(old, new) {
 		reloadStorage(core, infra, new)
 	}
+	iamChanged := initapp.IsIAMConfigChanged(old, new)
+	pluginChanged := initapp.IsPluginConfigChanged(old, new)
+	if iamChanged || pluginChanged {
+		reloadIAMAndPlugins(core, infra, new, iamChanged)
+	}
 }
 
 func reloadCache(core *initapp.Core, infra *initapp.Infrastructure, cfg *config.Config) {
@@ -170,4 +175,43 @@ func reloadStorage(core *initapp.Core, infra *initapp.Infrastructure, cfg *confi
 		return
 	}
 	core.Logger.Info("storage reloaded")
+}
+
+func reloadIAMAndPlugins(core *initapp.Core, infra *initapp.Infrastructure, cfg *config.Config, iamChanged bool) {
+	newIAM := infra.IAM
+	if iamChanged {
+		service, err := initapp.NewIAM(cfg, core.Logger)
+		if err != nil {
+			core.Logger.Error("failed to reload iam", "error", err)
+			return
+		}
+		newIAM = service
+	}
+
+	newManager, err := initapp.NewPluginManager(cfg, core.Logger, newIAM)
+	if err != nil {
+		core.Logger.Error("failed to reload plugin manager", "error", err)
+		return
+	}
+	oldManager := infra.Plugins
+	infra.IAM = newIAM
+	infra.Plugins = newManager
+	if oldManager == nil {
+		if iamChanged {
+			core.Logger.Info("iam reloaded", "enabled", cfg.IAM.Enabled)
+		}
+		core.Logger.Info("plugin manager reloaded", "enabled", cfg.Plugin.Enabled)
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	if err := oldManager.Close(ctx); err != nil {
+		core.Logger.Error("failed to close previous plugin manager", "error", err)
+		return
+	}
+	if iamChanged {
+		core.Logger.Info("iam reloaded", "enabled", cfg.IAM.Enabled)
+	}
+	core.Logger.Info("plugin manager reloaded", "enabled", cfg.Plugin.Enabled)
 }

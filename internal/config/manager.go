@@ -427,6 +427,14 @@ func (m *manager) copyConfig(src *Config) *Config {
 	dst := *src
 	dst.I18n.Supported = append([]string(nil), src.I18n.Supported...)
 	dst.Executor.Pools = append([]ExecutorPoolConfig(nil), src.Executor.Pools...)
+	dst.Plugin.Plugins = copyPluginDefinitions(src.Plugin.Plugins)
+	dst.Plugin.Hooks = append([]PluginHookBindingConfig(nil), src.Plugin.Hooks...)
+	dst.IAM.Tokens = copyIAMTokens(src.IAM.Tokens)
+	dst.IAM.Policies = append([]IAMPolicyConfig(nil), src.IAM.Policies...)
+	if src.IAM.DefaultDeny != nil {
+		value := *src.IAM.DefaultDeny
+		dst.IAM.DefaultDeny = &value
+	}
 	dst.CORS.AllowOrigins = append([]string(nil), src.CORS.AllowOrigins...)
 	dst.CORS.AllowMethods = append([]string(nil), src.CORS.AllowMethods...)
 	dst.CORS.AllowHeaders = append([]string(nil), src.CORS.AllowHeaders...)

@@ -3,8 +3,8 @@
 ## 风险登记状态
 
 - Project：go-scaffold
-- Phase：P2 Linux Docker production 部署制品与远程 Linux 统一 `deploy.sh` 入口
-- Status：PENDING_VERIFICATION
+- Phase：P2 插件钩子运行时与 IAM 公共接口
+- Status：COMPLETED
 - Last Updated：2026-05-27
 
 ## 风险列表
@@ -232,6 +232,30 @@
 - Status：[RISK] 制品已补齐，Docker build 待验证；不得宣称真实 production 已上线
 - Blocking：No；但阻塞把本切片结果宣称为真实 production 已上线。
 
+### RISK-020：插件钩子成为隐式控制平面
+
+- Type：Architecture/API
+- Severity：Medium
+- Probability：Medium
+- Impact：如果后续在 app 层注册宽泛钩子但缺少测试，插件调用链可能出现难以排查的阻断、递归或错误覆盖。
+- Trigger：新增 hook-aware `plugin.Manager`、远程 `RemoteHook` 和标准钩子点。
+- Mitigation：TASK-P2-005 至 TASK-P2-007 已测试优先级、复制快照、context 取消、停止语义、`invoke_error` 尽力通知、`after_invoke` 错误包装和 `hooks.execute` 跳过 manager hook 发射，降低递归风险。
+- Owner：Agent
+- Status：[CONFIRMED] 基础语义已测试；后续新增钩子必须补对应测试
+- Blocking：No。
+
+### RISK-021：IAM 公共接口被误解为完整生产登录/RBAC
+
+- Type：Security/Scope
+- Severity：High
+- Probability：Medium
+- Impact：使用者可能把 `pkg/iam` memory service 误认为完整业务登录、JWT 中间件或生产权限系统，导致认证授权边界误用。
+- Trigger：新增 `pkg/iam` 公共 API、memory token 凭证和策略授权。
+- Mitigation：本轮明确 `pkg/iam` 是公共基础设施接口和内存实现；JWT 中间件、数据库版权限、OPA/Casbin、密钥管理和业务 RBAC 均为非目标。IAM 权限检查钩子只在 `internal/app` 注册，`pkg/plugin` 与 `pkg/iam` 保持解耦。
+- Owner：User/Agent
+- Status：[CONFIRMED] 非目标已记录；生产权限能力仍需单独确认
+- Blocking：No；会阻塞把当前 IAM 直接宣称为完整生产 auth/rbac。
+
 ## 决策状态
 
 | ID | 决策 | 阻塞内容 | 状态 |
@@ -247,3 +271,4 @@
 | RD-009 | 确认 CI/CD 与部署首切片 | 仅新增 CI 质量门禁和部署说明，不做真实 CD | [CONFIRMED] |
 | RD-010 | 确认真实 CD / 镜像发布 / 远程部署自动化边界 | 用户选择 C 并确认远程部署；env 模板和手动 staging workflow 已完成，production 与镜像发布仍需确认 | [CONFIRMED] |
 | RD-011 | 确认 Linux Docker production 部署制品 | 用户确认 production 部署方向；本切片只补制品和手动闸门，不执行真实 production | [CONFIRMED] |
+| RD-012 | 确认插件钩子运行时与 IAM 公共接口主线 | 用户确认 `dev.tmp/new-plugin.md` 设计；TASK-P2-005 至 TASK-P2-010 已实现并验证，Docker build 阻塞仍保留在 TASK-P2-004 | [CONFIRMED] |

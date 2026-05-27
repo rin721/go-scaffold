@@ -62,6 +62,12 @@ type Config struct {
 	// 提供统一的文件操作API
 	Storage StorageConfig `mapstructure:"storage"`
 
+	// Plugin 插件运行时配置
+	Plugin PluginConfig `mapstructure:"plugin"`
+
+	// IAM 身份认证与授权配置
+	IAM IAMConfig `mapstructure:"iam"`
+
 	// CORS 跨域资源共享配置
 	// 控制浏览器跨域访问策略
 	CORS CORSConfig `mapstructure:"cors"`
@@ -90,6 +96,8 @@ func (c *Config) Validate() error {
 		&c.InitDB,
 		&c.Executor,
 		&c.Storage,
+		&c.Plugin,
+		&c.IAM,
 		&c.CORS,
 	}
 	for _, validator := range validators {

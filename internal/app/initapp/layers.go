@@ -11,7 +11,9 @@ import (
 	"github.com/rei0721/go-scaffold/pkg/executor"
 	"github.com/rei0721/go-scaffold/pkg/httpserver"
 	"github.com/rei0721/go-scaffold/pkg/i18n"
+	"github.com/rei0721/go-scaffold/pkg/iam"
 	"github.com/rei0721/go-scaffold/pkg/logger"
+	"github.com/rei0721/go-scaffold/pkg/plugin"
 	"github.com/rei0721/go-scaffold/pkg/storage"
 	"github.com/rei0721/go-scaffold/pkg/utils"
 )
@@ -30,6 +32,8 @@ type Infrastructure struct {
 	Cache    cache.Cache
 	Executor executor.Manager
 	Storage  storage.Storage
+	IAM      iam.Service
+	Plugins  plugin.Manager
 }
 
 type Modules struct {

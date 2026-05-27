@@ -38,8 +38,8 @@ types/*
 | `internal/modules/demo` | 长期标准示例 | 生成 demo 分层验收和测试路线 | [CONFIRMED] |
 | `pkg/*` | 混合策略 | [CONFIRMED] TASK-P1-007 已逐包分类为公共基础设施 API、公共工具 API 或内部支撑工具包 | [CONFIRMED] |
 | 数据库迁移 | dev-prod 分层 | [CONFIRMED] TASK-P1-005 已明确 demo `AutoMigrate`、`initdb`、reload 职责；生产迁移框架仍延后 | [CONFIRMED] |
-| 插件系统 | v1 local/http 保留；注册责任已收拢为被动 registry/runtime | [CONFIRMED] TASK-P1-010 已完成；rpc/ws/discovery 留在 Backlog | [CONFIRMED] |
-| auth/JWT | 当前不实现，示例存在范围漂移 | 后续决定删除、保留占位或提升需求 | [CONFIRMED] |
+| 插件系统 | v1 local/http 保留；注册责任已收拢为被动 registry/runtime；TASK-P2-005 至 TASK-P2-007 已增加 hooks、HTTP server helper 和 `RemoteHook` | [CONFIRMED] rpc/ws/discovery、插件发现和 Go `.so` 插件仍留在 Backlog | [CONFIRMED] |
+| IAM/auth/JWT | `pkg/iam` 公共接口与 memory 实现已完成；JWT 中间件和业务 RBAC 仍不实现 | 后续如需业务登录、HTTP 中间件或数据库版权限，必须单独提升任务 | [CONFIRMED] |
 | CI/CD 与部署 | 先建立非生产质量门禁、手动部署说明、远程部署显式参数契约、手动远程部署 workflow、Docker production 制品和远程 Linux 统一 `deploy.sh` 入口；真实生产运行仍需单独确认 | [CONFIRMED] TASK-P2-001 已新增 CI workflow 和部署说明；TASK-P2-002 已新增 `deploy.sh` / `script/install.sh` 显式参数契约；TASK-P2-003 已新增手动 staging 远程部署 workflow；TASK-P2-004 已补 Dockerfile、production Compose 示例、统一 `deploy.sh` 部署入口和手动 production 闸门，但 Docker build 待具备 Docker 的环境验证；镜像发布和真实 production 运行仍需单独确认 | [CONFIRMED] |
 
 ## 需要详细分析的模块
@@ -71,7 +71,8 @@ types/*
 | `pkg/httpserver` | 公共基础设施 API | `HTTPServer`、`Config`、`Handler`、`New`、错误类型 | [CONFIRMED] TASK-P1-012 已覆盖构造、默认配置、配置错误、停止态 reload/shutdown 和已运行 start 拒绝路径 | [CONFIRMED] |
 | `pkg/i18n` | 公共基础设施 API | `I18n`、`Config`、`New`、`Default`、语言常量 | [CONFIRMED] TASK-P1-011 已覆盖 JSON/YAML 加载、模板渲染、fallback、`MustT` panic 和加载错误路径 | [CONFIRMED] |
 | `pkg/logger` | 公共基础设施 API | `Logger`、`Reloader`、`Config`、`New`、`Default` | 文件输出和轮转路径覆盖有限 | [CONFIRMED] |
-| `pkg/plugin` | 公共基础设施 API | v1 local/http runtime、被动 `Manager.Register` registry、`Plugin`、`Request`、`Response`、`Definition`、`NewHTTP` | `Load`/local factory 主动装配公共面已移除；rpc/ws/discovery 延后 | [CONFIRMED] |
+| `pkg/plugin` | 公共基础设施 API | v1 local/http runtime、被动 `Manager.Register` registry、`Plugin`、`Request`、`Response`、`Definition`、`NewHTTP`、`hooks`、HTTP server helper、`RemoteHook` | [CONFIRMED] hook-aware runtime 已完成；rpc/ws/discovery、插件发现和 Go `.so` 插件延后 | [CONFIRMED] |
+| `pkg/iam` | 公共基础设施 API | `Principal`、`Credential`、`Policy`、`Authenticator`、`Authorizer`、`Service`、context helper、memory service | [CONFIRMED] 当前是公共接口和内存实现，不是 JWT 中间件或完整业务 RBAC | [CONFIRMED] |
 | `pkg/sqlgen` | 公共工具 API | 当前测试覆盖的 SQL 构建、解析、事务和模板能力；unsupported 路径显式返回 `ErrCodeUnsupportedOperation` 或在 README 标注 partial | 高级查询、批量删除、DB reverse 和部分 rollback 能力不属于当前稳定能力 | [CONFIRMED] |
 | `pkg/storage` | 公共基础设施 API | `Storage`、`Config`、`New`、文件读写、复制、监听和 MIME/媒体辅助能力 | [CONFIRMED] TASK-P1-012 已覆盖内存文件系统读写、复制、MIME、Excel、图片和配置错误路径 | [CONFIRMED] |
 | `pkg/utils` | 内部支撑工具包 | 当前供 `internal/*` 和少量 `types/*` 使用的 ID、地址、端口、设备 ID、i18n helper | [CONFIRMED] TASK-P1-014 已覆盖最小行为；默认 Snowflake panic 策略保持不变 | [CONFIRMED] |
@@ -94,6 +95,7 @@ types/*
 - [CONFIRMED] TASK-P1-009 已明确 `types/*` 契约边界。
 - [CONFIRMED] TASK-P1-010 已收拢 `pkg/plugin` 被动注册边界。
 - [CONFIRMED] 用户选择 A，`BL-020` 首批 `pkg/*` 行为测试已完成 TASK-P1-011，第二批已完成 TASK-P1-012，第三批 `pkg/cache` 已完成 TASK-P1-013。
+- [CONFIRMED] TASK-P2-005 至 TASK-P2-010 已完成插件 hooks、HTTP 远程插件、IAM 公共接口、配置接入和 app reload/lifecycle 组装。
 - [CONFIRMED] 用户选择 B，`BL-023` `pkg/utils` 内部支撑测试已完成 TASK-P1-014。
 - [CONFIRMED] 用户选择 B，`BL-002` router/middleware/demo HTTP 集成测试已完成 TASK-P1-015。
 - [CONFIRMED] 用户明确要求实施 TASK-P1-016，app 装配、配置变更 hook 与 reload/config 剩余集成测试已完成。

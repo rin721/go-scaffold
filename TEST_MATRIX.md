@@ -3,10 +3,10 @@
 ## 测试矩阵状态
 
 - 项目：go-scaffold
-- 任务：TASK-P2-004
-- 时间切片：TS-P2-004
-- 状态：PENDING_VERIFICATION
-- 最后更新：2026-05-26
+- 任务：TASK-P2-005 至 TASK-P2-010
+- 时间切片：TS-P2-005 至 TS-P2-010
+- 状态：COMPLETED
+- 最后更新：2026-05-27
 - 原则：本文定义后续优化的验证边界，不代表测试代码已经实现。
 
 ## 验证分层
@@ -63,6 +63,12 @@
 | TM-P2-003 | 显式参数部署入口 | 提供可提交的远程部署显式参数契约，并删除旧本地部署 env 文件依赖 | `deploy.sh`、`script/install.sh`、`docs/deployment.md`、`README.md`、状态文档 | `git diff --check` | [CONFIRMED] 部署入口不包含真实密钥、服务器地址或远程部署动作 | BL-024、RISK-017 |
 | TM-P2-004 | 手动远程部署 workflow | 新增手动 staging/production 远程部署 workflow，通过 SSH 执行 `script/install.sh` 并传入 `deploy.sh` 显式参数 | `.github/workflows/deploy-remote.yml`、`deploy.sh`、`script/install.sh`、`docs/deployment.md`、`README.md`、状态文档 | 临时 Go YAML 解析；`go run github.com/rhysd/actionlint/cmd/actionlint@latest .github/workflows/ci.yml .github/workflows/deploy-remote.yml`；`git diff --check` | [CONFIRMED] workflow 改为显式参数入口；本会话不执行真实部署、不连接远程服务器、不写入真实密钥 | BL-024、RISK-016、RISK-017 |
 | TM-P2-005 | Linux Docker production 部署制品 | 新增 Dockerfile、production Compose 示例、统一 `deploy.sh` 部署入口和手动 production workflow 闸门，确保 production 需要显式环境选择与确认词 | `Dockerfile`、`.dockerignore`、`deploy/*`、`.github/workflows/deploy-remote.yml`、`deploy.sh` / `script/install.sh` 显式参数契约、`docs/deployment.md`、`README.md`、状态文档 | `docker build -t go-scaffold:local .`；`bash -n deploy.sh` 或 `shfmt` Bash 语法解析；临时 Go YAML 解析；`go run github.com/rhysd/actionlint/cmd/actionlint@latest .github/workflows/ci.yml .github/workflows/deploy-remote.yml`；`go test ./... -count=1`；`git diff --check` | [PENDING_VERIFICATION] 制品、统一 `deploy.sh` 入口和静态验证已完成；Docker CLI 缺失导致镜像构建待补跑；不触发 workflow、不连接服务器、不推送镜像、不执行真实 production | BL-024、RISK-016、RISK-017、RISK-018 |
+| TM-P2-006 | `pkg/plugin/hooks` | 独立钩子引擎提供优先级、复制快照、context 取消、停止语义、nil handler 拒绝和服务查找能力 | `pkg/plugin/hooks/**/*` | `go test ./pkg/plugin/... -count=1` | [CONFIRMED] TASK-P2-005 已完成 | RISK-020 |
+| TM-P2-007 | `pkg/plugin.Manager` 钩子化 | Manager 支持 `Hooks()`、`RegisterHook`、`WithHooks` 和标准钩子点，保持被动注册边界 | `pkg/plugin/**/*` | `go test ./pkg/plugin/... -count=1` | [CONFIRMED] TASK-P2-006 已完成；`pkg/plugin` 不导入 IAM/config/logger/internal | RISK-015、RISK-020 |
+| TM-P2-008 | HTTP 远程插件与 `RemoteHook` | HTTP 服务端 helper、`hooks.execute` 和远程钩子 round trip 可验证 | `pkg/plugin/**/*` | `go test ./pkg/plugin/... -count=1` | [CONFIRMED] TASK-P2-007 已完成 | RISK-020 |
+| TM-P2-009 | `pkg/iam` memory | IAM 公共类型、token 凭证、策略授权、通配、拒绝优先、过期和默认拒绝可验证 | `pkg/iam/**/*` | `go test ./pkg/iam/... -count=1` | [CONFIRMED] TASK-P2-008 已完成；仍非完整业务登录/RBAC | RISK-021 |
+| TM-P2-010 | 配置与 app 组装 | `plugin` / `iam` 默认 disabled，配置 HTTP 插件 adapter、远程钩子绑定和 app 层 IAM hook 可验证 | `internal/config/**/*`、`internal/app/**/*` | `go test ./internal/config ./internal/app/... -count=1` | [CONFIRMED] TASK-P2-009 已完成 | RISK-020、RISK-021 |
+| TM-P2-011 | reload、lifecycle 与全量验证 | 配置重载先构建新实例再替换，失败保留旧实例；关闭顺序安全；全量回归通过 | `internal/app/**/*`、状态文档 | `go test ./internal/config ./internal/app/... -count=1`；`go test ./... -count=1`；`go build -o <temp> ./cmd/server`；`git diff --check` | [CONFIRMED] TASK-P2-010 已完成 | RISK-020、RISK-021 |
 
 ## P1 优化任务草案
 
@@ -91,6 +97,12 @@
 | TASK-P2-002 | 补显式参数部署入口 | P2 | 发布配置文档 | `deploy.sh`、`script/install.sh`、`docs/deployment.md`、`README.md`、状态文档 | `git diff --check` | [CONFIRMED] 旧本地部署 env 文件依赖已删除，不实现真实部署 | COMPLETED |
 | TASK-P2-003 | 实现手动远程部署 workflow | P2 | CI/CD 配置+文档 | `.github/workflows/deploy-remote.yml`、`deploy.sh`、`script/install.sh`、`docs/deployment.md`、`README.md`、状态文档 | 临时 Go YAML 解析；actionlint；`git diff --check` | [CONFIRMED] workflow 手动触发、Secrets/Variables 注入显式参数、SSH 执行部署入口和文档说明均已完成 | COMPLETED |
 | TASK-P2-004 | 补 Linux Docker production 部署制品 | P2 | 发布工程配置+文档 | `Dockerfile`、`.dockerignore`、`deploy/*`、`.github/workflows/deploy-remote.yml`、`deploy.sh` / `script/install.sh` 显式参数契约、`docs/deployment.md`、`README.md`、状态文档 | `docker build -t go-scaffold:local .`；`bash -n deploy.sh` 或 `shfmt` Bash 语法解析；临时 Go YAML 解析；actionlint；`go test ./... -count=1`；`git diff --check` | [PENDING_VERIFICATION] Dockerfile、production Compose 示例、远程 Linux 统一 `deploy.sh` 入口和手动 production 闸门已补齐；Docker build 待具备 Docker 的环境补跑 | PENDING_VERIFICATION |
+| TASK-P2-005 | 实现 `pkg/plugin/hooks` | P2 | 公共 API+测试 | `pkg/plugin/hooks/**/*`、状态文档 | `go test ./pkg/plugin/... -count=1` | [CONFIRMED] 独立钩子引擎完成 | COMPLETED |
+| TASK-P2-006 | 让 `pkg/plugin.Manager` 支持钩子 | P2 | 公共 API+测试 | `pkg/plugin/**/*`、状态文档 | `go test ./pkg/plugin/... -count=1` | [CONFIRMED] Manager hook 语义完成且保持解耦 | COMPLETED |
+| TASK-P2-007 | 实现 HTTP 远程插件服务端和 `RemoteHook` | P2 | 公共 API+测试 | `pkg/plugin/**/*`、状态文档 | `go test ./pkg/plugin/... -count=1` | [CONFIRMED] HTTP server helper 与远程钩子完成 | COMPLETED |
+| TASK-P2-008 | 实现 `pkg/iam` 与 memory | P2 | 公共 API+测试 | `pkg/iam/**/*`、状态文档 | `go test ./pkg/iam/... -count=1` | [CONFIRMED] IAM 公共接口和内存实现完成 | COMPLETED |
+| TASK-P2-009 | 接入配置与应用组装 | P2 | 配置+app 组合 | `internal/config/**/*`、`internal/app/**/*`、相关公共包 | `go test ./internal/config ./internal/app/... -count=1` | [CONFIRMED] 默认 disabled、HTTP adapter、RemoteHook 和 IAM hook 接入完成 | COMPLETED |
+| TASK-P2-010 | reload、生命周期和最终验证 | P2 | app 生命周期+验证 | `internal/app/**/*`、状态文档 | `go test ./internal/config ./internal/app/... -count=1`；`go test ./... -count=1`；`go build -o <temp> ./cmd/server`；`git diff --check` | [CONFIRMED] reload/lifecycle/全量验证完成 | COMPLETED |
 
 ## 推荐执行顺序
 
@@ -113,9 +125,11 @@
 17. TASK-P2-001：补 CI 质量门禁与部署说明。
 18. TASK-P2-003：实现手动远程部署 workflow。
 19. TASK-P2-004：补 Linux Docker production 部署制品。
+20. TASK-P2-005 至 TASK-P2-010：实现插件钩子运行时、HTTP 远程插件、IAM 公共接口和 app 组合层接入。
 
 当前合法下一项：
 
+- [CONFIRMED] TASK-P2-005 至 TASK-P2-010 已完成；当前无自动下一实现任务。
 - [PENDING_VERIFICATION] TASK-P2-004 制品和静态验证已完成；当前唯一待验证项是 Docker 镜像构建。
 - [CONFIRMED] 后续镜像发布流水线、真实 production 运行、生产迁移、auth/rbac 或插件扩展仍必须由用户重新确认并拆成新的任务/时间切片。
 
@@ -131,4 +145,4 @@
 
 - [CONFIRMED] 本文不要求一次性实现所有测试代码；具体测试按 P1 时间切片逐项落地。
 - [CONFIRMED] 本文不修改 Go 代码、配置结构、数据库结构或 HTTP 路由。
-- [CONFIRMED] 本文当前提升 production Docker 部署制品；不提升镜像发布流水线、真实 production 运行、生产迁移、auth/rbac 或插件 rpc/ws/discovery。
+- [CONFIRMED] 本文当前完成插件钩子运行时与 IAM 公共接口；不提升镜像发布流水线、真实 production 运行、生产迁移、JWT 中间件、数据库版权限、OPA/Casbin、Go `.so` 插件、插件发现或 RPC/WS 传输。

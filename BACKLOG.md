@@ -18,13 +18,13 @@
 | BL-006 | 分阶段中文化包 README | 中文项目要求 | P1 | 第一阶段 `pkg/*/README.md` 已由 TASK-P1-017 完成；历史文档更大范围中文化仍需单独确认 | [COMPLETED] |
 | BL-007 | 增加 CI 质量门禁 | 质量工程 | P2 | 已提升为 TASK-P2-001 并完成 | [COMPLETED] |
 | BL-008 | 增加部署说明 | 发布工程 | P2 | 已提升为 TASK-P2-001 并完成 | [COMPLETED] |
-| BL-009 | 实现 auth/rbac 模块 | 未来功能 | P2 | README 当前说明暂不实现 | [DEFERRED] |
+| BL-009 | 实现 auth/rbac 模块 | 未来功能 | P2 | `pkg/iam` 公共接口和 memory 实现已完成；业务登录、JWT 中间件、数据库版权限和完整 RBAC 仍需单独确认 | [DEFERRED] |
 | BL-010 | 增加脚手架生成器 | 产品化方向 | P2 | 需要确认框架化抽取路线 | [DEFERRED] |
 | BL-011 | 增加性能基准测试 | 性能质量 | P2 | 需要先稳定功能边界 | [DEFERRED] |
 | BL-012 | 增加多租户支持 | 产品架构 | P2 | 未确认且范围较大 | [DEFERRED] |
-| BL-013 | 增加插件系统 rpc adapter | 插件扩展 | P2 | v1 仅支持 local/http | [DEFERRED] |
-| BL-014 | 增加插件系统 ws adapter | 插件扩展 | P2 | v1 仅支持 local/http | [DEFERRED] |
-| BL-015 | 增加插件发现机制 | 插件运行时增强 | P2 | 需要单独提升为任务 | [DEFERRED] |
+| BL-013 | 增加插件系统 rpc adapter | 插件扩展 | P2 | hook-aware runtime 与 HTTP 远程插件已完成；RPC adapter 仍需单独提升 | [DEFERRED] |
+| BL-014 | 增加插件系统 ws adapter | 插件扩展 | P2 | hook-aware runtime 与 HTTP 远程插件已完成；WS adapter 仍需单独提升 | [DEFERRED] |
+| BL-015 | 增加插件发现机制 | 插件运行时增强 | P2 | hooks 和 RemoteHook 已完成；插件发现仍需单独提升为任务 | [DEFERRED] |
 | BL-016 | 增加 local/http 插件示例 | 插件 v1 后续文档 | P2 | 当前主线已切回项目优化 | [DEFERRED] |
 | BL-017 | 统一配置环境变量命名策略 | `MODULES.md` BC-001 | P1 | 需要先生成测试矩阵和任务切片 | [DEFERRED] |
 | BL-018 | 修复 `manager.copyConfig` 字段覆盖 | `MODULES.md` BC-002 | P1 | 已提升为 TASK-P1-001 并完成 | [COMPLETED] |
@@ -35,6 +35,7 @@
 | BL-023 | 为 `pkg/utils` 内部支撑工具补最小测试 | `MODULES.md` pkg 分类草案 | P2 | 已提升为 TASK-P1-014 / TS-P1-014 并完成 | [COMPLETED] |
 | BL-024 | 增加真实 CD、镜像发布或远程部署自动化 | CI/CD 首切片后续 | P2 | 显式参数部署入口已由 TASK-P2-002/TASK-P2-004 收敛；手动 staging/production 远程部署 workflow 闸门已补齐；Docker build 待具备 Docker 的环境验证；镜像发布流水线和真实运行仍需单独确认 | [PENDING_VERIFICATION] |
 | BL-025 | 统一 Go 文件 gofmt 格式 | CI 格式审计 | P2 | 当前仓库存在历史 gofmt 漂移，批量格式化会触碰大量 Go 文件，需单独确认后执行 | [DEFERRED] |
+| BL-026 | 完整 IAM / auth 集成 | TASK-P2-008 后续 | P2 | 本轮仅完成公共接口、memory 实现和 app 层权限钩子；JWT 中间件、登录流程、数据库版权限、OPA/Casbin 和密钥管理需单独确认 | [DEFERRED] |
 
 ## 提升规则
 

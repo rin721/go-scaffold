@@ -60,6 +60,12 @@ func OverrideWithEnv(cfg *Config) {
 
 	// 国际化配置
 	overrideI18nConfig(&cfg.I18n)
+
+	// 插件配置
+	overridePluginConfig(&cfg.Plugin)
+
+	// IAM 配置
+	overrideIAMConfig(&cfg.IAM)
 }
 
 // getEnvOrDefault 获取环境变量,如果不存在则返回默认值

@@ -3,52 +3,61 @@
 ## 最新验证
 
 - 日期：2026-05-27
-- 任务 ID：TASK-P2-004
-- 时间切片 ID：TS-P2-004
-- 状态：PENDING_VERIFICATION
-- 范围：新增 Linux Docker 运行制品、production Compose 示例、production 配置样例和统一 `deploy.sh` 部署入口，并把远程部署 workflow 扩展为手动 staging/production 闸门；不执行真实部署、不推送镜像、不连接服务器、不写入真实 secrets。
+- 任务 ID：TASK-P2-005 至 TASK-P2-010
+- 时间切片 ID：TS-P2-005 至 TS-P2-010
+- 状态：COMPLETED
+- 范围：实现 `dev.tmp/new-plugin.md` 设计主线，包括 `pkg/plugin/hooks`、hook-aware `plugin.Manager`、HTTP 远程插件服务端、`RemoteHook`、独立 `pkg/iam` 公共 API、memory 实现、`plugin` / `iam` 配置、app 装配、reload 和 lifecycle 接入；不实现 JWT 中间件、数据库版权限、OPA/Casbin、Go `.so` 插件、插件发现、RPC/WS 传输、生产部署、镜像发布或密钥管理。
 
 ## 执行命令
 
 | 命令 | 结果 | 备注 |
 |---|---|---|
 | 必读文件读取 | PASS | 已读取 `AGENTS.md`、Agent 规则、状态、任务、切片、需求、架构、验收、问题、测试报告和交接文档 |
-| 用户修正审查 | ACCEPTED_WITH_RISK | 用户要求“linux、docker、production -> 部署”，并修正“环境变量在部署脚本上动态配置”；限定为可提交制品、统一 `deploy.sh` 入口和手动 workflow 闸门，不执行真实 production |
-| `docker version` | FAIL_ENV | 当前环境未安装 Docker CLI，无法执行 Docker build |
-| `Get-Command podman` / `Get-Command nerdctl` / `Get-Command docker.exe` | NOT_AVAILABLE | 未发现可替代容器构建 CLI |
-| `Get-Command bash` | FAIL_ENV | 本机没有可用 bash |
-| `go run mvdan.cc/sh/v3/cmd/shfmt@latest -ln bash -d deploy.sh script/install.sh` | PASS | 使用 Bash parser 验证 `deploy.sh` 和 `script/install.sh`，并按 shfmt 格式化 |
-| 临时 Go YAML 解析 | PASS | 使用 `gopkg.in/yaml.v3` 临时解析 `.github/workflows/ci.yml` 和 `.github/workflows/deploy-remote.yml` |
-| `go run github.com/rhysd/actionlint/cmd/actionlint@latest .github/workflows/ci.yml .github/workflows/deploy-remote.yml` | PASS | actionlint 未报告 workflow 问题 |
-| `rg -n "<old deploy env patterns>" -S .` | PASS | 无旧部署 env 文件和旧脚本引用 |
+| 用户修正审查 | ACCEPTED_WITH_RISK | 将 `dev.tmp/new-pllugin.md` 视为笔误，实际设计为 `dev.tmp/new-plugin.md`；TASK-P2-004 Docker 验证保持阻塞，不标记完成 |
+| `go test ./pkg/plugin/... -count=1` | PASS | 插件钩子、manager hook、HTTP server helper 和 `RemoteHook` 测试通过 |
+| `go test ./pkg/iam/... -count=1` | PASS | IAM 公共 API 和 memory 实现测试通过 |
+| `go test ./internal/config ./internal/app/... -count=1` | PASS | 配置、app 装配、reload 和 lifecycle 相关测试通过 |
 | `go test ./... -count=1` | PASS | 全量 Go 回归通过 |
 | `go build -o <temp> ./cmd/server` | PASS | server 二进制构建通过 |
-| `git diff --check` | PASS | 仅有 Windows LF/CRLF 转换警告 |
+| `git diff --check` | PASS | 空白检查通过 |
 
 ## 结果
 
-- [CONFIRMED] `Dockerfile` 已新增，构建 server 二进制并以非 root 用户运行。
-- [CONFIRMED] `.dockerignore` 已新增，排除 Git、真实 env、缓存、日志和文档噪音。
-- [CONFIRMED] `deploy/docker-compose.production.example.yml` 已新增，使用 `DEPLOY_IMAGE`、外置配置、数据和日志挂载，并包含 healthcheck。
-- [CONFIRMED] `deploy/config.production.example.yaml` 已新增，绑定 `0.0.0.0:9999`，不包含真实密钥。
-- [CONFIRMED] `deploy.sh` 和 `script/install.sh` 已新增，支持 clone 后执行和 direct curl 执行两种流程。
-- [CONFIRMED] `.github/workflows/deploy-remote.yml` 已扩展为手动 `staging` / `production` 环境选择，确认词为 `deploy-staging` 或 `deploy-production`。
-- [CONFIRMED] `docs/deployment.md` 和 README 已补 Linux Docker、直装入口、production Compose、GitHub Environment、Secrets、目录权限和回滚边界说明。
-- [CONFIRMED] 未修改 Go 代码、导出业务 API、配置 schema、HTTP 路由、数据库 schema、`go.mod` 或 `go.sum`。
-- [CONFIRMED] 未执行真实部署、未触发 workflow、未推送镜像、未连接服务器、未使用真实密钥。
-- [PENDING_VERIFICATION] `docker build -t go-scaffold:local .` 待具备 Docker 的环境补跑。
+- [CONFIRMED] `pkg/plugin/hooks` 已新增，提供 `Point`、`Event`、`Result`、`Handler`、`HandlerFunc`、`Registry` 和服务查找能力。
+- [CONFIRMED] `pkg/plugin.Manager` 已新增 `Hooks()`、`RegisterHook`、`WithHooks` 和标准钩子点，保留被动注册模型。
+- [CONFIRMED] HTTP 远程插件服务端与 `RemoteHook` 已实现，沿用 JSON `Request` / `Response` 协议。
+- [CONFIRMED] `pkg/iam` 与 `pkg/iam/memory` 已新增，覆盖 token 凭证、策略授权、拒绝优先、通配和过期。
+- [CONFIRMED] `plugin` 和 `iam` 配置已接入，默认 disabled；`internal/app/initapp.Infrastructure` 已包含 IAM 和 Plugins。
+- [CONFIRMED] reload 成功后替换 IAM/plugin 新实例，失败保留旧实例；关闭顺序已接入插件 manager。
+- [CONFIRMED] `pkg/plugin` 不导入 `pkg/iam`、日志、配置或 `internal/*`；`pkg/iam` 不导入 `pkg/plugin`；IAM 权限钩子只在 `internal/app` 注册。
+- [CONFIRMED] TASK-P2-004 Docker build 验证仍独立保留为 `ISSUE-P2-005`。
 
 ## 失败项
 
-- 环境待验证项：当前本机缺少 Docker CLI，无法运行 `docker build -t go-scaffold:local .`。该问题已记录到 `ISSUES.md`，不代表制品实现失败。
+- 无新增失败项。
+- 环境待验证项仍存在：当前本机缺少 Docker CLI，无法运行 TASK-P2-004 的 `docker build -t go-scaffold:local .`。该问题已记录到 `ISSUES.md`，不代表本轮插件/IAM 实现失败。
 
 ## 验证结论
 
-- TASK-P2-004 保持 `PENDING_VERIFICATION`。
-- 下一合法动作是在安装 Docker CLI/daemon 的 Linux 或 Docker Desktop 环境补跑 `docker build -t go-scaffold:local .`。
-- 真实 production 运行、镜像发布流水线或生产迁移框架仍需单独确认。
+- TASK-P2-005 至 TASK-P2-010 标记为 `COMPLETED`。
+- 当前无自动下一实现任务；后续新范围需用户重新确认。
+- TASK-P2-004 仍保持 `PENDING_VERIFICATION`，需要在安装 Docker CLI/daemon 的 Linux 或 Docker Desktop 环境补跑 `docker build -t go-scaffold:local .`。
 
 ## 历史报告
+
+### 2026-05-27 TASK-P2-005 至 TASK-P2-010
+
+- 用户要求实现 `dev.tmp/new-plugin.md` 设计，主线修正结论为 `ACCEPT_WITH_RISK`。
+- 新增 `pkg/plugin/hooks` 独立钩子引擎、扩展 `pkg/plugin.Manager` 钩子能力、实现 HTTP 远程插件服务端和 `RemoteHook`。
+- 新增 `pkg/iam` 公共接口与 `pkg/iam/memory` 内存实现。
+- 新增 `plugin` / `iam` 配置，接入 `internal/app` 装配、reload 和 lifecycle。
+- `go test ./pkg/plugin/... -count=1`：PASS。
+- `go test ./pkg/iam/... -count=1`：PASS。
+- `go test ./internal/config ./internal/app/... -count=1`：PASS。
+- `go test ./... -count=1`：PASS。
+- `go build -o <temp> ./cmd/server`：PASS。
+- `git diff --check`：PASS。
+- 结论：TASK-P2-005 至 TASK-P2-010 完成；TASK-P2-004 Docker build 仍独立待验证。
 
 ### 2026-05-26 TASK-P2-004 TS-P2-004
 

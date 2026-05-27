@@ -209,7 +209,8 @@ types/*
 | `pkg/httpserver` | 公共基础设施 API | [CONFIRMED] 已写入 | 有 | [CONFIRMED] TASK-P1-012 已覆盖构造、默认配置、配置错误、停止态 reload/shutdown 和已运行 start 拒绝路径 |
 | `pkg/i18n` | 公共基础设施 API | [CONFIRMED] 已写入 | 无 | MustT panic 和加载错误路径需测试 |
 | `pkg/logger` | 公共基础设施 API | [CONFIRMED] 已写入 | 有 | 文件输出/轮转路径覆盖有限 |
-| `pkg/plugin` | 公共基础设施 API | [CONFIRMED] 已写入 | 有 | [CONFIRMED] 被动注册边界已收拢；rpc/ws/discovery 明确延后 |
+| `pkg/plugin` | 公共基础设施 API | [CONFIRMED] 已写入 | 有 | [CONFIRMED] 被动注册边界、hooks、HTTP server helper 和 `RemoteHook` 已完成；rpc/ws/discovery、插件发现和 Go `.so` 明确延后 |
+| `pkg/iam` | 公共基础设施 API | [CONFIRMED] 已写入 | 有 | [CONFIRMED] 公共接口与 memory 实现已完成；JWT 中间件、数据库版权限和业务 RBAC 明确延后 |
 | `pkg/sqlgen` | 公共工具 API | [CONFIRMED] 已写入 | 有 | [CONFIRMED] 高级查询、批量删除、DB reverse 和部分 rollback 边界已显式 unsupported / partial |
 | `pkg/storage` | 公共基础设施 API | [CONFIRMED] 已写入 | 有 | [CONFIRMED] TASK-P1-012 已覆盖内存文件系统读写、复制、MIME、Excel、图片和配置错误路径 |
 | `pkg/utils` | 内部支撑工具包 | [CONFIRMED] 已写入 | 有 | [CONFIRMED] TASK-P1-014 已覆盖 Snowflake、地址校验、端口查找、设备 ID 和 i18n helper 最小行为；默认 Snowflake panic 策略保持不变 |
@@ -230,6 +231,7 @@ types/*
 
 - [ACCEPT_WITH_RISK] 用户修正：`pkg/plugin` 不应主动注册插件服务，而应被动由插件服务进行注册。
 - [CONFIRMED] 目标边界：`pkg/plugin` 只提供插件接口、local/http 插件实现和被动 registry/runtime；插件服务或宿主装配层负责构造插件并调用 `Register`。
+- [CONFIRMED] TASK-P2-005 至 TASK-P2-007 已在该边界内扩展 hooks、标准钩子点、HTTP server helper 和 `RemoteHook`；`pkg/plugin` 不导入 IAM、配置、日志或 `internal/*`。
 - [CONFIRMED] 历史 v1 API 中的 `Manager.Load(config)` 和 local factory 装配公共面已在 TASK-P1-010 移除，避免误解为由 `pkg/plugin` 主动发现并注册服务。
 - [CONFIRMED] TASK-P1-010 已收拢该边界，rpc/ws/discovery 仍不进入当前范围。
 

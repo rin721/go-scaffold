@@ -32,11 +32,23 @@ func NewInfrastructure(core Core) (Infrastructure, error) {
 		return Infrastructure{}, err
 	}
 
+	iamService, err := NewIAM(core.Config, core.Logger)
+	if err != nil {
+		return Infrastructure{}, err
+	}
+
+	pluginManager, err := NewPluginManager(core.Config, core.Logger, iamService)
+	if err != nil {
+		return Infrastructure{}, err
+	}
+
 	return Infrastructure{
 		Database: db,
 		Cache:    cacheClient,
 		Executor: executorManager,
 		Storage:  storageService,
+		IAM:      iamService,
+		Plugins:  pluginManager,
 	}, nil
 }
 

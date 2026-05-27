@@ -210,5 +210,21 @@ const (
 	AppExecutorName = "executor"
 	AppInitDBName   = "initdb"
 	AppStorageName  = "storage"
+	AppPluginName   = "plugin"
+	AppIAMName      = "iam"
 	AppCORSName     = "cors"
+)
+
+// 插件相关环境变量
+const (
+	EnvPluginEnabled          = "PLUGIN_ENABLED"
+	EnvPluginDefaultTimeout   = "PLUGIN_DEFAULT_TIMEOUT"
+	EnvPluginMaxResponseBytes = "PLUGIN_MAX_RESPONSE_BYTES"
+)
+
+// IAM 相关环境变量
+const (
+	EnvIAMEnabled     = "IAM_ENABLED"
+	EnvIAMMode        = "IAM_MODE"
+	EnvIAMDefaultDeny = "IAM_DEFAULT_DENY"
 )

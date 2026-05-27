@@ -2,10 +2,10 @@
 
 ## 当前合法时间切片
 
-- Time Slice ID：TS-P2-004
-- Task ID：TASK-P2-004
-- Status：PENDING_VERIFICATION
-- Summary：Linux Docker production 部署制品、手动 production workflow 闸门和统一 `deploy.sh` 部署入口已补齐；本机缺少 Docker CLI，镜像构建待具备 Docker 的环境补跑验证。
+- Time Slice ID：NONE
+- Task ID：NONE
+- Status：COMPLETED
+- Summary：`dev.tmp/new-plugin.md` 主线已完成；TASK-P2-005 至 TASK-P2-010 均已通过验证。TASK-P2-004 Docker build 验证因缺少 Docker CLI 保留为 `ISSUE-P2-005`。
 
 ## 时间切片列表
 
@@ -1356,6 +1356,72 @@
   - 修改文件：`Dockerfile`、`.dockerignore`、`deploy/docker-compose.production.example.yml`、`deploy/config.production.example.yaml`、`deploy.sh`、`.github/workflows/deploy-remote.yml`、`deploy.sh` / `script/install.sh` 显式参数契约、`README.md`、`docs/deployment.md` 和项目状态文档。
   - 未执行真实部署、未触发 GitHub workflow、未连接远程服务器、未推送镜像、未写入真实 `.env` 或 secrets。
   - 下一步：在具备 Docker CLI/daemon 的 Linux 或 Docker Desktop 环境执行 `docker build -t go-scaffold:local .`。
+
+### TS-P2-005：`pkg/plugin/hooks` 独立钩子引擎
+
+- Status：COMPLETED
+- Task ID：TASK-P2-005
+- Matrix：TM-P2-006
+- Purpose：实现无应用层依赖的钩子注册、排序、执行和停止语义。
+- Allowed Files：`pkg/plugin/hooks/**/*`、项目状态文档。
+- Verification Commands：`go test ./pkg/plugin/hooks -count=1`；`go test ./pkg/plugin/... -count=1`。
+- Acceptance：优先级高到低；执行前复制处理器；context 取消生效；nil handler 被拒绝；停止语义可测试。
+- Evidence：新增 `pkg/plugin/hooks` 并通过 `pkg/plugin` 相关测试。
+
+### TS-P2-006：插件管理器钩子化
+
+- Status：COMPLETED
+- Task ID：TASK-P2-006
+- Matrix：TM-P2-007
+- Purpose：扩展 `pkg/plugin.Manager` 钩子能力并保持被动注册 API。
+- Allowed Files：`pkg/plugin/**/*`、项目状态文档。
+- Verification Commands：`go test ./pkg/plugin/... -count=1`。
+- Acceptance：注册、调用、调用错误和关闭钩子行为稳定；`pkg/plugin` 不耦合 IAM、logger、config 或 internal。
+- Evidence：`Manager` 已支持 `Hooks()`、`RegisterHook`、`WithHooks` 和标准钩子点；包边界保持解耦。
+
+### TS-P2-007：HTTP 远程插件与远程钩子
+
+- Status：COMPLETED
+- Task ID：TASK-P2-007
+- Matrix：TM-P2-008
+- Purpose：新增 HTTP server helper、标准操作和 `RemoteHook`。
+- Allowed Files：`pkg/plugin/**/*`、项目状态文档。
+- Verification Commands：`go test ./pkg/plugin/... -count=1`。
+- Acceptance：`POST /plugin/v1/invoke`、非法请求、插件错误、响应限制和 `hooks.execute` round trip 均被测试固定。
+- Evidence：新增 `NewHTTPServer`、`hooks.execute` 和 `RemoteHook`，HTTP/远程钩子路径测试通过。
+
+### TS-P2-008：IAM 公共 API 与 memory 实现
+
+- Status：COMPLETED
+- Task ID：TASK-P2-008
+- Matrix：TM-P2-009
+- Purpose：新增独立身份认证与授权基础设施包。
+- Allowed Files：`pkg/iam/**/*`、项目状态文档。
+- Verification Commands：`go test ./pkg/iam/... -count=1`。
+- Acceptance：token 认证、策略授权、拒绝优先、通配、过期和 context helper 均有测试。
+- Evidence：新增 `pkg/iam` 与 `pkg/iam/memory`，memory 策略与上下文 helper 测试通过。
+
+### TS-P2-009：配置与应用组装接入
+
+- Status：COMPLETED
+- Task ID：TASK-P2-009
+- Matrix：TM-P2-010
+- Purpose：新增 plugin/iam 配置并在 server 模式装配。
+- Allowed Files：`internal/config/**/*`、`internal/app/**/*`、`pkg/plugin/**/*`、`pkg/iam/**/*`、项目状态文档。
+- Verification Commands：`go test ./internal/config ./internal/app/... ./pkg/plugin/... ./pkg/iam/... -count=1`。
+- Acceptance：HTTP 插件适配器、远程钩子绑定、IAM 授权钩子和默认 disabled 配置均可验证。
+- Evidence：`plugin` / `iam` 配置默认 disabled，app 组合层装配 IAM、Plugins、RemoteHook 和权限钩子。
+
+### TS-P2-010：reload、生命周期和最终验证
+
+- Status：COMPLETED
+- Task ID：TASK-P2-010
+- Matrix：TM-P2-011
+- Purpose：完成配置重载、关闭顺序、全量验证和状态交接。
+- Allowed Files：`internal/app/**/*`、项目状态文档、必要文档。
+- Verification Commands：`go test ./internal/config ./internal/app/... -count=1`；`go test ./... -count=1`；`go build -o <temp> ./cmd/server`；`git diff --check`。
+- Acceptance：新实例先构建后替换；失败保留旧实例；关闭顺序安全；最终文档可恢复。
+- Evidence：reload/lifecycle 已接入并通过目标包测试、全量回归、server build 和 diff 检查。
 
 ## 历史时间切片
 

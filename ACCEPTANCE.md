@@ -3,8 +3,8 @@
 ## 验收状态
 
 - Project：go-scaffold
-- Phase：P2 Linux Docker production 部署制品待验证
-- Status：PENDING_VERIFICATION
+- Phase：P2 插件钩子运行时与 IAM 公共接口完成
+- Status：COMPLETED
 - Last Updated：2026-05-27
 
 ## 本轮启动验收
@@ -84,6 +84,7 @@
 - TASK-P2-002 显式参数部署入口：COMPLETED，`deploy.sh` 和 `script/install.sh` 已新增，旧本地部署 env 文件依赖已删除
 - TASK-P2-003 手动远程部署 workflow：COMPLETED，staging/manual/Secrets/SSH/Docker Compose 路径已新增，本会话未执行真实部署
 - TASK-P2-004 Linux Docker production 部署制品：PENDING_VERIFICATION，Dockerfile、production Compose 示例、统一 `deploy.sh` 部署入口和手动 production 闸门已补齐；Docker build 待具备 Docker 的环境补跑
+- TASK-P2-005 至 TASK-P2-010 插件钩子运行时与 IAM 公共接口：COMPLETED，`pkg/plugin/hooks`、hook-aware manager、HTTP 远程插件服务端、`RemoteHook`、`pkg/iam` memory、配置/app/reload/lifecycle 接入均已完成并通过验证
 - Agent 基础设施补齐：COMPLETED
 - Agent 基础设施一致性修复：COMPLETED
 - 代码实现：COMPLETED，TASK-P1-016 已完成并通过验证
@@ -413,3 +414,18 @@
 | ACC-P2-033 | diff 空白检查通过 | `git diff --check` | 是 | [CONFIRMED] |
 | ACC-P2-034 | 本会话未触发 workflow、未连接服务器、未推送镜像、未执行真实 production | 核对执行命令 | 是 | [CONFIRMED] |
 | ACC-P2-035 | 远程 Linux 部署脚本按显式参数注入运行环境且不打印密钥值 | 检查 `deploy.sh`；`shfmt` Bash 语法解析 | 是 | [CONFIRMED] |
+
+## TASK-P2-005 至 TASK-P2-010 验收
+
+| ID | 验收项 | 方法 | 必须 | 状态 |
+|---|---|---|---|---|
+| ACC-P2-036 | `pkg/plugin/hooks` 提供独立钩子 API、优先级执行、复制快照、context 取消、停止语义和 nil handler 拒绝 | `go test ./pkg/plugin/... -count=1` | 是 | [CONFIRMED] |
+| ACC-P2-037 | `plugin.Manager` 支持 `Hooks()`、`RegisterHook`、`WithHooks` 和标准钩子点，且保持被动注册模型 | `go test ./pkg/plugin/... -count=1` | 是 | [CONFIRMED] |
+| ACC-P2-038 | `before_invoke` 可阻止插件调用，`invoke_error` 不覆盖原错误，`after_invoke` 错误返回插件响应和包装错误 | `go test ./pkg/plugin/... -count=1` | 是 | [CONFIRMED] |
+| ACC-P2-039 | HTTP 远程插件服务端只接受 `POST /plugin/v1/invoke`，`RemoteHook` 可通过 `hooks.execute` 解码 `hooks.Result` | `go test ./pkg/plugin/... -count=1` | 是 | [CONFIRMED] |
+| ACC-P2-040 | `pkg/iam` 公共 API 与 memory 实现支持 token、精确匹配、`*` 通配、拒绝优先、过期检查和默认拒绝 | `go test ./pkg/iam/... -count=1` | 是 | [CONFIRMED] |
+| ACC-P2-041 | `plugin` / `iam` 配置默认 disabled，配置创建插件仅限 HTTP adapter，本地插件仍由代码显式注册 | `go test ./internal/config ./internal/app/... -count=1` | 是 | [CONFIRMED] |
+| ACC-P2-042 | IAM 权限检查钩子只在 `internal/app` 注册，`pkg/plugin` 与 `pkg/iam` 互不导入 | 代码检查；包测试 | 是 | [CONFIRMED] |
+| ACC-P2-043 | reload 先构建新 IAM/plugin 基础设施再替换，失败保留旧实例；关闭顺序在 HTTP server 后、cache/database 前关闭插件管理器 | `go test ./internal/config ./internal/app/... -count=1` | 是 | [CONFIRMED] |
+| ACC-P2-044 | 全量回归、server build 和 diff 空白检查通过 | `go test ./... -count=1`；`go build -o <temp> ./cmd/server`；`git diff --check` | 是 | [CONFIRMED] |
+| ACC-P2-045 | 本轮未实现 JWT 中间件、数据库版权限、OPA/Casbin、Go `.so` 插件、插件发现、RPC/WS、生产部署、镜像发布或密钥管理 | 核对变更范围 | 是 | [CONFIRMED] |

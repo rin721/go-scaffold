@@ -272,3 +272,14 @@
 - Reason：显式参数入口可以统一 clone 后执行和直接下载执行两种流程，删除旧本地部署 env 文件依赖；通过 SSH 到 Linux 执行也更符合目标运行环境。
 - Consequences：脚本只写入非密钥部署变量，真实数据库密码、Redis 密码、SSH key、registry token 和生产迁移仍不由脚本生成或打印；本会话不执行脚本、不连接远程服务器。
 - Related Tasks：TASK-P2-004
+
+### DEC-026：提升支持钩子的插件运行时与 IAM 公共接口
+
+- Date：2026-05-27
+- Status：ACCEPTED_WITH_RISK
+- Context：用户要求实现 `dev.tmp/new-pllugin.md` 设计，并明确说明该路径为笔误，实际设计文件是 `dev.tmp/new-plugin.md`；同时要求 TASK-P2-004 不能因 Docker 环境缺失而标记完成。
+- Decision：将新主线限定为 hook-aware `pkg/plugin` runtime、HTTP 远程插件传输和独立 `pkg/iam` 公共接口，并由 `internal/app` 负责配置装配、IAM hook 绑定、reload 和 lifecycle。
+- Alternatives：先关闭 TASK-P2-004；直接实现完整业务登录/RBAC；引入 OPA/Casbin；实现 Go `.so` 插件、插件发现或 RPC/WS 传输。
+- Reason：该设计延续 `pkg/plugin` 被动注册边界，又能为后续插件与权限能力建立公共基础设施；风险在于 IAM/插件容易被误解为完整生产权限系统，因此必须明确非目标并保留 Docker 验证阻塞。
+- Consequences：`pkg/plugin` 不导入 `pkg/iam`、日志、配置或 `internal/*`；`pkg/iam` 不导入 `pkg/plugin`；配置创建的插件仅限 HTTP adapter；本地插件继续由代码显式注册；JWT 中间件、数据库版权限、OPA/Casbin、Go `.so` 插件、插件发现、RPC/WS、生产部署、镜像发布和密钥管理仍需单独确认。
+- Related Tasks：TASK-P2-005、TASK-P2-006、TASK-P2-007、TASK-P2-008、TASK-P2-009、TASK-P2-010

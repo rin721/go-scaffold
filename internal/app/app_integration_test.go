@@ -56,6 +56,12 @@ func TestNewServerModeBuildsMinimalApplication(t *testing.T) {
 	if application.Infra.Storage != nil {
 		t.Fatal("expected storage to be disabled")
 	}
+	if application.Infra.IAM != nil {
+		t.Fatal("expected iam to be disabled")
+	}
+	if application.Infra.Plugins != nil {
+		t.Fatal("expected plugin manager to be disabled")
+	}
 
 	if application.Modules.Demo.TodoRepository == nil {
 		t.Fatal("expected demo repository")
@@ -121,6 +127,12 @@ func TestNewInitDBModeBuildsDatabaseOnly(t *testing.T) {
 	}
 	if application.Infra.Storage != nil {
 		t.Fatal("expected storage to remain unassembled in initdb mode")
+	}
+	if application.Infra.IAM != nil {
+		t.Fatal("expected iam to remain unassembled in initdb mode")
+	}
+	if application.Infra.Plugins != nil {
+		t.Fatal("expected plugin manager to remain unassembled in initdb mode")
 	}
 	if application.Modules.Demo.TodoRepository != nil {
 		t.Fatal("expected demo module to remain unassembled in initdb mode")
@@ -293,6 +305,12 @@ func clearAppIntegrationEnv(t *testing.T) {
 		"STORAGE_BASE_PATH",
 		"STORAGE_ENABLE_WATCH",
 		"STORAGE_WATCH_BUFFER_SIZE",
+		"PLUGIN_ENABLED",
+		"PLUGIN_DEFAULT_TIMEOUT",
+		"PLUGIN_MAX_RESPONSE_BYTES",
+		"IAM_ENABLED",
+		"IAM_MODE",
+		"IAM_DEFAULT_DENY",
 		"CORS_ENABLED",
 		"CORS_ALLOW_ORIGINS",
 		"CORS_ALLOW_METHODS",

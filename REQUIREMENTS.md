@@ -52,12 +52,14 @@
 | REQ-OPT-P2-003 | CI/CD 与部署 | 首切片已完成 CI 质量门禁和部署说明；显式参数部署入口、手动 staging/production 远程部署 workflow 闸门、Dockerfile、production Compose 示例和统一 `deploy.sh` 部署入口已补齐；Docker build 待具备 Docker 的环境验证，镜像发布和真实 production 运行仍需单独确认 | [CONFIRMED] |
 | REQ-OPT-P2-004 | 性能基准测试 | 需先完成测试矩阵和功能边界收拢 | [DEFERRED] |
 | REQ-OPT-P2-005 | 脚手架生成器 | 需先确认框架化抽取路线 | [DEFERRED] |
+| REQ-OPT-P2-006 | 插件钩子运行时、HTTP 远程插件传输和 IAM 公共接口 | 用户确认 `dev.tmp/new-plugin.md` 设计；本轮仅实现公共基础设施接口、内存 IAM 和 app 组合层接入，不实现完整业务登录/RBAC | [CONFIRMED] |
 
 ## 非需求
 
 - [CONFIRMED] 当前不修改 Go API、配置结构、数据库结构或 HTTP 路由。
 - [CONFIRMED] 当前不执行部署、生产命令或不可逆迁移。
 - [CONFIRMED] 当前不删除插件系统历史记录。
+- [CONFIRMED] 当前不实现 JWT 中间件、数据库版权限、OPA/Casbin、Go `.so` 插件、插件发现、RPC/WS 传输、镜像发布、真实生产部署或密钥管理。
 
 ## 完成判断
 

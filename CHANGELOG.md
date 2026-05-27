@@ -1,6 +1,17 @@
 # CHANGELOG.md
 
 ## 最新变更
+### 2026-05-27 - TASK-P2-005 至 TASK-P2-010 - TS-P2-005 至 TS-P2-010
+
+- 变更：按 `dev.tmp/new-plugin.md` 设计完成插件钩子运行时、HTTP 远程插件传输、独立 IAM 公共接口和 app 组合层接入；原 `dev.tmp/new-pllugin.md` 视为笔误。
+- 变更：新增 `pkg/plugin/hooks`，提供钩子点、事件、结果、处理器、注册表和服务查找能力。
+- 变更：扩展 `pkg/plugin.Manager`，新增 `Hooks()`、`RegisterHook`、`WithHooks` 和注册/调用/错误/关闭/配置/日志/IAM 等标准钩子点，保持被动注册模型。
+- 变更：新增 `NewHTTPServer`、`hooks.execute` 标准操作和 `RemoteHook`，沿用 JSON `Request` / `Response` 协议。
+- 变更：新增 `pkg/iam` 公共类型和 `pkg/iam/memory` 实现，覆盖 token 凭证、策略授权、拒绝优先、通配、过期和默认拒绝。
+- 变更：新增 `plugin` 与 `iam` 配置字段，默认 disabled；`internal/app/initapp.Infrastructure` 增加 IAM 和 Plugins，reload/lifecycle 已接入。
+- 范围：未实现 JWT 中间件、数据库版权限、OPA/Casbin、Go `.so` 插件、插件发现、RPC/WS 传输、生产部署、镜像发布或密钥管理；TASK-P2-004 Docker build 阻塞项保持打开。
+- 验证：`go test ./pkg/plugin/... -count=1`、`go test ./pkg/iam/... -count=1`、`go test ./internal/config ./internal/app/... -count=1`、`go test ./... -count=1`、server build、`git diff --check` 均通过。
+
 ### 2026-05-27 - TASK-P2-004 - TS-P2-004 rework
 
 - 变更：删除已跟踪的旧部署 env 示例和旧远程 Linux 动态 env 脚本；本地旧部署 env 文件已删除且未读取内容。
