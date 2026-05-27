@@ -2,13 +2,21 @@
 
 FROM golang:1.24-bookworm AS build
 
+ARG GOPROXY=https://proxy.golang.org,direct
+ARG GOSUMDB=sum.golang.org
+ENV GOPROXY=${GOPROXY} \
+    GOSUMDB=${GOSUMDB}
+
 WORKDIR /src
 
 COPY go.mod go.sum ./
-RUN go mod download
+RUN --mount=type=cache,target=/go/pkg/mod,sharing=locked \
+    go mod download
 
 COPY . .
-RUN go build -trimpath -ldflags="-s -w" -o /out/go-scaffold-server ./cmd/server
+RUN --mount=type=cache,target=/go/pkg/mod,sharing=locked \
+    --mount=type=cache,target=/root/.cache/go-build,sharing=locked \
+    go build -trimpath -ldflags="-s -w" -o /out/go-scaffold-server ./cmd/server
 
 FROM debian:bookworm-slim AS runtime
 

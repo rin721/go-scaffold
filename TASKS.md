@@ -5,7 +5,7 @@
 - Task ID：TASK-P2-004
 - Status：BLOCKED
 - Time Slice：TS-P2-004
-- Summary：`dev.tmp/new-plugin.md` 设计已完成。当前唯一未关闭事项是 TASK-P2-004 的 Docker build 验证；2026-05-27 本轮再次检查后当前环境仍无 Docker 兼容 CLI，任务受环境缺失阻塞，`ISSUE-P2-005` 保持打开。
+- Summary：`dev.tmp/new-plugin.md` 设计已完成。当前唯一未关闭事项是 TASK-P2-004 的 Docker build 验证；2026-05-27 用户在 Docker 环境补跑时 `go mod download` 因 Go 代理网络超时失败，旧 Dockerfile 又未声明 `GOPROXY` build arg。本轮已补 Dockerfile 代理参数和 BuildKit 缓存，但镜像构建仍待 Docker 环境重跑通过，`ISSUE-P2-005` 保持打开。
 
 ## 任务列表
 
@@ -1220,7 +1220,7 @@
   - 不新增业务功能或修改 Go API。
   - 不引入 Kubernetes、systemd 或云平台模板。
 - Verification：
-  - `docker build -t go-scaffold:local .`：BLOCKED，当前本机未安装 Docker CLI；2026-05-27 复验 `docker version` 失败，`docker`、`podman`、`nerdctl`、`docker.exe` 均不可用。
+  - `docker build -t go-scaffold:local .`：BLOCKED，当前本机未安装 Docker CLI；2026-05-27 用户在 Docker 环境补跑时 `go mod download` 因访问 Go 代理超时失败。本轮已补 Dockerfile 的 `GOPROXY` / `GOSUMDB` build arg 和 BuildKit 缓存，待 Docker 环境重跑 `docker build --build-arg GOPROXY=https://goproxy.cn,direct -t go-scaffold:local .`。
   - 临时 Go YAML 解析：PASS。
   - `go run github.com/rhysd/actionlint/cmd/actionlint@latest .github/workflows/ci.yml .github/workflows/deploy-remote.yml`：PASS。
   - `bash -n deploy.sh`：FAIL_ENV，本机无可用 bash，WSL 未安装 Linux 发行版。
@@ -1229,7 +1229,7 @@
   - `go build -o <temp> ./cmd/server`：PASS。
   - `git diff --check`：PASS，仅有 Windows LF/CRLF 转换警告。
 - Exit Conditions：
-  - [BLOCKED] Dockerfile 镜像构建待具备 Docker 的环境验证。
+  - [BLOCKED] Dockerfile 镜像构建待具备 Docker 的环境用更新后的 Dockerfile 重跑验证。
   - [CONFIRMED] production Compose 示例使用 `DEPLOY_IMAGE`、只挂载示例路径，并包含 healthcheck。
   - [CONFIRMED] production 配置样例绑定 `0.0.0.0:9999`，不包含真实密钥。
   - [CONFIRMED] 远程 Linux 部署脚本会按参数/环境变量动态生成 `运行期显式部署参数`，不要求提交真实 显式部署参数。
@@ -1239,7 +1239,7 @@
   - [CONFIRMED] 除 Docker build 与本机 `bash -n` 外的验证命令已通过；Docker build 和 `bash -n` 不可执行原因已记录，脚本已通过 Bash 语法解析。
 - Evidence：
   - 修改文件：`Dockerfile`、`.dockerignore`、`deploy/docker-compose.production.example.yml`、`deploy/config.production.example.yaml`、`deploy.sh`、`.github/workflows/deploy-remote.yml`、`deploy.sh` / `script/install.sh` 显式参数契约、README、部署说明和项目状态文档。
-  - Docker build：未执行，原因是当前环境 `docker`、`podman`、`nerdctl`、`docker.exe` 均不可用。
+  - Docker build：本机未执行，原因是当前环境 `docker`、`podman`、`nerdctl`、`docker.exe` 均不可用；用户远端补跑曾在 `go mod download` 阶段因 Go 代理超时失败，Dockerfile 已补代理参数后待重跑。
   - 其他验证：脚本 Bash 语法解析 PASS；YAML 解析 PASS；actionlint PASS；`go test ./... -count=1` PASS；server build PASS；`git diff --check` PASS。
   - Next Task：受环境阻塞；切换到具备 Docker CLI/daemon 的环境后补跑 Docker build。真实 production 运行、镜像发布流水线和生产迁移框架仍需单独确认。
 

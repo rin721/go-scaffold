@@ -2,6 +2,14 @@
 
 ## 最新变更
 
+### 2026-05-27 - TASK-P2-004 - Docker build proxy args
+
+- 变更：诊断用户远端 Docker build 慢/超时问题，确认旧 `Dockerfile` 未声明 `GOPROXY` build arg，导致 `--build-arg GOPROXY=...` 未生效。
+- 变更：`Dockerfile` 新增 `GOPROXY` / `GOSUMDB` build arg，并为 `go mod download`、`go build` 增加 BuildKit cache mount。
+- 变更：`docs/deployment.md` 增加带 `GOPROXY` 的 Docker 构建示例，项目状态文档记录远端 Go 代理超时阻塞。
+- 验证：本机仍无 Docker CLI，未在本机执行 Docker build；本轮未修改 Go 代码，未运行 Go 测试；`git diff --check` PASS，仅有 Windows LF/CRLF 提示。
+- 状态：TASK-P2-004 / TS-P2-004 保持 `BLOCKED`，`ISSUE-P2-005` 保持 OPEN；待 Docker 环境用更新后的 Dockerfile 重跑。
+
 ### 2026-05-27 - TASK-P2-004 - TS-P2-004 blocked recheck
 
 - 变更：用户发送“下一步”后，按当前唯一合法任务复验 Docker build 前置环境，不推进新功能。

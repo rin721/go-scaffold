@@ -6,35 +6,48 @@
 - 任务 ID：TASK-P2-004
 - 时间切片 ID：TS-P2-004
 - 状态：BLOCKED
-- 范围：用户发送“下一步”后，按当前唯一合法任务复验 Docker build 前置环境；不推进新功能，不关闭 `ISSUE-P2-005`。
+- 范围：诊断用户远端 Docker build 在 `go mod download` 阶段很慢/超时的问题；补齐 Dockerfile 代理 build arg 和缓存；不关闭 `ISSUE-P2-005`。
 
 ## 执行命令
 
 | 命令 | 结果 | 备注 |
 |---|---|---|
 | 必读文件读取 | PASS | 已读取 `AGENTS.md`、Agent 规则、状态、任务、切片、需求、架构、验收、问题、测试报告、交接和恢复所需背景文件 |
-| `docker version` | FAIL_ENV | 当前环境未安装 Docker CLI |
-| `Get-Command docker,podman,nerdctl,docker.exe -ErrorAction SilentlyContinue` | NOT_AVAILABLE | 未发现 Docker 兼容 CLI |
-| `docker build -t go-scaffold:local .` | NOT_RUN | 前置 Docker CLI/daemon 不可用 |
-| Go 测试 | NOT_RUN | 本轮仅复验环境阻塞并更新状态文档，未修改 Go 代码 |
+| 用户远端 `docker build` 输出审查 | FAIL_REMOTE_NETWORK | 构建进入 `RUN go mod download` 后访问 `proxy.golang.org` 超时 |
+| Dockerfile 检查 | PASS | 发现旧 Dockerfile 未声明 `GOPROXY` build arg，用户传入的 `--build-arg GOPROXY=...` 不会生效 |
+| Dockerfile 修补 | PASS | 新增 `GOPROXY` / `GOSUMDB` build arg，并为 Go module/build cache 增加 BuildKit cache mount |
+| `docker version` | FAIL_ENV | 当前本机未安装 Docker CLI |
+| `Get-Command docker,podman,nerdctl,docker.exe -ErrorAction SilentlyContinue` | NOT_AVAILABLE | 当前本机未发现 Docker 兼容 CLI |
+| `docker build --build-arg GOPROXY=https://goproxy.cn,direct -t go-scaffold:local .` | NOT_RUN_LOCAL | 当前本机无 Docker CLI；待用户 Docker 环境使用更新后的 Dockerfile 重跑 |
+| Go 测试 | NOT_RUN | 本轮未修改 Go 代码 |
 | `git diff --check` | PASS | 仅输出 Windows LF/CRLF 提示，不存在空白错误 |
 
 ## 结果
 
-- [BLOCKED] TASK-P2-004 的 `docker build -t go-scaffold:local .` 仍是当前唯一未关闭验证项。
-- [CONFIRMED] 当前环境仍没有 `docker`、`podman`、`nerdctl` 或 `docker.exe`，无法执行 Docker image build。
+- [BLOCKED] TASK-P2-004 的 Docker build 仍是当前唯一未关闭验证项。
+- [CONFIRMED] 用户远端构建失败来源是依赖下载网络/代理问题；旧 Dockerfile 未使用 `GOPROXY` build arg，本轮已修补。
+- [CONFIRMED] 当前本机仍没有 Docker CLI，无法执行 Docker image build。
 - [CONFIRMED] TASK-P2-005 至 TASK-P2-010 的插件/IAM 主线保持完成，不受本轮 Docker 环境阻塞影响。
 
 ## 失败项
 
 - 无代码失败项。
-- 环境阻塞项仍存在：当前本机缺少 Docker 兼容 CLI，无法运行 TASK-P2-004 的 `docker build -t go-scaffold:local .`。该问题已记录到 `ISSUES.md`。
+- 环境阻塞项仍存在：当前本机缺少 Docker 兼容 CLI；远端构建需用更新后的 Dockerfile 重跑 `docker build --build-arg GOPROXY=https://goproxy.cn,direct -t go-scaffold:local .`。该问题已记录到 `ISSUES.md`。
 
 ## 验证结论
 
 - TASK-P2-004 / TS-P2-004 仍保持 `BLOCKED`。
 - TASK-P2-005 至 TASK-P2-010 完成判定保持：COMPLETED。
-- 解除阻塞条件：在安装 Docker CLI/daemon 的 Linux 或 Docker Desktop 环境运行 `docker build -t go-scaffold:local .` 并通过。
+- 解除阻塞条件：在安装 Docker CLI/daemon 的 Linux 或 Docker Desktop 环境运行 `docker build --build-arg GOPROXY=https://goproxy.cn,direct -t go-scaffold:local .` 并通过。
+
+### 2026-05-27 TASK-P2-004 Docker build proxy args
+
+- 用户远端 Docker build 已能启动，但在 `RUN go mod download` 阶段因访问 Go 代理超时失败。
+- 确认旧 Dockerfile 未声明 `GOPROXY` build arg，用户传入的 `--build-arg GOPROXY=https://goproxy.cn,direct` 未生效。
+- 修补 Dockerfile：新增 `GOPROXY` / `GOSUMDB` build arg，`go mod download` 和 `go build` 使用 BuildKit cache mount。
+- 更新 `docs/deployment.md` 和状态文档，记录推荐重跑命令。
+- Go 测试未运行：本轮未修改 Go 代码。
+- 结论：TASK-P2-004 / TS-P2-004 保持 `BLOCKED`，`ISSUE-P2-005` 保持 OPEN，待 Docker 环境重跑构建。
 
 ## 历史报告
 

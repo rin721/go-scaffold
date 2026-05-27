@@ -24,6 +24,14 @@ CI 中会报告 Go 格式漂移，并强制执行全量测试、server 构建和
 docker build -t go-scaffold:local .
 ```
 
+`Dockerfile` 支持 `GOPROXY` 和 `GOSUMDB` build arg，并为 Go module cache 与 build cache 启用 BuildKit 缓存挂载。网络访问 `proxy.golang.org` 较慢或超时时，可显式指定 Go 代理：
+
+```bash
+docker build \
+  --build-arg GOPROXY=https://goproxy.cn,direct \
+  -t go-scaffold:local .
+```
+
 当前会话环境未安装 Docker CLI，因此上述镜像构建命令尚未在本机完成验证；需在安装 Docker 的 Linux 或 Docker Desktop 环境补跑。
 
 镜像内置 `deploy/config.production.example.yaml` 作为默认 `/app/configs/config.yaml`，其中 server 绑定 `0.0.0.0:9999`。真实 production 应在远程主机用只读挂载覆盖 `/app/configs/config.yaml`，不要把真实数据库密码、Redis 密码或 token 写入镜像。

@@ -15,7 +15,7 @@
 - 当前任务 ID：TASK-P2-004
 - 当前时间切片 ID：TS-P2-004
 - 当前状态：BLOCKED
-- 为什么这是当前唯一合法状态：[CONFIRMED] 用户发送“下一步”后按协议处理剩余待验证项。TASK-P2-005 至 TASK-P2-010 已完成并验证；当前唯一未关闭事项是 TASK-P2-004 的 Docker image build。2026-05-27 再次执行 `docker version` 并检查 `docker`、`podman`、`nerdctl`、`docker.exe`，当前环境仍无可用 Docker 兼容 CLI，因此 TASK-P2-004 受环境缺失阻塞，`ISSUE-P2-005` 保持打开。
+- 为什么这是当前唯一合法状态：[CONFIRMED] 用户发送“下一步”后按协议处理剩余待验证项。TASK-P2-005 至 TASK-P2-010 已完成并验证；当前唯一未关闭事项是 TASK-P2-004 的 Docker image build。2026-05-27 当前本机仍无可用 Docker 兼容 CLI；用户在 Docker 环境补跑时 `go mod download` 因访问 `proxy.golang.org` 超时失败，随后发现旧 Dockerfile 未声明 `GOPROXY` build arg，导致 `--build-arg GOPROXY=...` 未生效。本轮已补 Dockerfile 的 `GOPROXY` / `GOSUMDB` build arg 和 BuildKit 缓存，`ISSUE-P2-005` 保持打开，待 Docker 环境用更新后的 Dockerfile 重跑。
 
 ## 阶段状态
 
@@ -52,10 +52,10 @@
 | 真实 CD 范围确认 | COMPLETED | 用户选择 C、确认使用远程部署，并进一步确认用 `.env` 风格文件配置；TASK-P2-002 已新增远程部署变量模板 |
 | 显式参数部署入口 | COMPLETED | `deploy.sh` 和 `script/install.sh` 已新增，旧本地部署 env 文件已删除，部署说明已同步 |
 | 远程部署 workflow | COMPLETED | TASK-P2-003 已新增手动 staging workflow、Secrets 配置说明和远程主机前置条件；未执行真实部署 |
-| Linux Docker production 部署制品 | BLOCKED | TASK-P2-004 / TS-P2-004 已实现 Dockerfile、production Compose 示例、手动 production workflow 闸门和统一 `deploy.sh` 部署入口；Docker 构建因当前环境无 Docker CLI 阻塞 |
+| Linux Docker production 部署制品 | BLOCKED | TASK-P2-004 / TS-P2-004 已实现 Dockerfile、production Compose 示例、手动 production workflow 闸门和统一 `deploy.sh` 部署入口；Dockerfile 已补 Go 代理 build arg 和缓存，但 Docker 构建仍待 Docker 环境重跑通过 |
 | 插件钩子运行时与 IAM 公共接口 | COMPLETED | TASK-P2-005 至 TASK-P2-010 已完成；`go test ./pkg/plugin/... -count=1`、`go test ./pkg/iam/... -count=1`、`go test ./internal/config ./internal/app/... -count=1`、`go test ./... -count=1`、server build 和 `git diff --check` 均通过 |
 | 部署实现 | COMPLETED | TASK-P2-004 已补齐 Dockerfile、production Compose 示例、production 配置样例、统一 `deploy.sh` 部署入口和手动 production workflow 闸门 |
-| 部署验证 | BLOCKED | 脚本 Bash 语法解析、YAML 解析、actionlint、`go test ./... -count=1`、server build 和 `git diff --check` 均通过；Docker build 因本机缺少 Docker CLI 阻塞 |
+| 部署验证 | BLOCKED | 脚本 Bash 语法解析、YAML 解析、actionlint、`go test ./... -count=1`、server build 和 `git diff --check` 均通过；Docker build 在远端曾因 Go 代理网络超时失败，Dockerfile 已补代理参数，仍待重跑 |
 | 交接 | COMPLETED | `AGENT_HANDOFF.md` 已更新到 TASK-P2-004 / TS-P2-004 阻塞状态，并保留 TASK-P2-005 至 TASK-P2-010 完成验证记录 |
 | Phase 6 收尾 | COMPLETED | 用户选择 A 后已完成 TASK-PHASE6-001；最终回归和交接文档已更新 |
 
@@ -75,7 +75,7 @@
 | FIND-014 | 背景文档保留 TASK-P1-016 前旧状态 | `ARCHITECTURE.md`、`MODULES.md`、`PROJECT_BRIEF.md`、`ROADMAP.md`；TASK-INFRA-003 已修复 | [CONFIRMED] 已处理 |
 | FIND-015 | CI/CD 与部署缺少首个安全边界 | `REQ-OPT-P2-003`、`BL-007`、`BL-008`；用户选择 D | [CONFIRMED] TASK-P2-001 已处理非生产 CI 门禁和部署说明 |
 | FIND-016 | 真实 CD 自动化缺少环境与密钥决策 | `BL-024`；用户选择 C、确认远程部署，并确认使用 `.env` 风格配置和实现 workflow | [CONFIRMED] 手动 staging 远程部署 workflow 已补；镜像发布、production 和真实运行仍需单独确认 |
-| FIND-017 | production Docker 部署缺少可提交制品 | 用户要求“linux、docker、production -> 部署”；用户修正“环境变量在部署脚本上动态配置”；`BL-024` 剩余范围 | [BLOCKED] 制品和统一 `deploy.sh` 入口已补；Docker CLI 缺失导致镜像构建阻塞，真实 production 运行仍不在当前会话执行 |
+| FIND-017 | production Docker 部署缺少可提交制品 | 用户要求“linux、docker、production -> 部署”；用户修正“环境变量在部署脚本上动态配置”；`BL-024` 剩余范围 | [BLOCKED] 制品和统一 `deploy.sh` 入口已补；远端 Docker build 曾在 `go mod download` 阶段因 Go 代理网络超时失败，Dockerfile 已补 `GOPROXY` build arg 和缓存，真实 production 运行仍不在当前会话执行 |
 | FIND-006 | P1 执行顺序尚未确认 | `TEST_MATRIX.md`、`RISK_REGISTER.md` RISK-009；用户再次发送“下一步” | [CONFIRMED] 已确认 |
 | FIND-007 | `AGENTS.md` 被状态文件声明已补齐但实际缺失 | `Test-Path AGENTS.md`、`docs/reports/status_diagnostics/2026-05-25-task-infra-002-agents-md-missing.md` | [CONFIRMED] 已修复 |
 | FIND-008 | `/health`、`/ready` 路由缺少 smoke test | `TEST_MATRIX.md` TM-P0-003；TASK-P1-003 已补测试 | [CONFIRMED] 已处理 |
@@ -101,7 +101,7 @@
 
 | ID | 任务 | 需要验证内容 | 命令/方法 |
 |---|---|---|---|
-| VERIFY-P2-004 | TASK-P2-004 | Dockerfile 镜像构建 | [BLOCKED] 当前环境无 `docker`、`podman`、`nerdctl` 或 `docker.exe`；需在安装 Docker 的 Linux 或 Docker Desktop 环境运行 `docker build -t go-scaffold:local .` |
+| VERIFY-P2-004 | TASK-P2-004 | Dockerfile 镜像构建 | [BLOCKED] 当前本机无 `docker`、`podman`、`nerdctl` 或 `docker.exe`；远端曾因 Go 代理网络超时失败。需在 Docker 环境用更新后的 Dockerfile 运行 `docker build --build-arg GOPROXY=https://goproxy.cn,direct -t go-scaffold:local .` |
 | VERIFY-P2-005 | TASK-P2-005 至 TASK-P2-010 | 插件钩子运行时、远程插件传输、IAM 公共接口和 app 装配 | [CONFIRMED] `go test ./pkg/plugin/... -count=1`；`go test ./pkg/iam/... -count=1`；`go test ./internal/config ./internal/app/... -count=1`；`go test ./... -count=1`；`go build -o <temp> ./cmd/server`；`git diff --check` |
 
 ## 需要返工
@@ -112,14 +112,14 @@
 
 ## 最近执行
 
-- 摘要：用户发送“下一步”后，按协议复验当前唯一未关闭项 TASK-P2-004 的 Docker build 前置环境。
-- 变更文件：项目状态文档与交接文档。
-- 执行命令：必读文件读取；`docker version`；`Get-Command docker,podman,nerdctl,docker.exe -ErrorAction SilentlyContinue`；`git diff --check`。
-- 测试结果：`docker version` 失败，未发现 `docker`、`podman`、`nerdctl` 或 `docker.exe`；`docker build -t go-scaffold:local .` 因前置 Docker CLI/daemon 不可用未执行；本轮未修改 Go 代码，未运行 Go 测试。
+- 摘要：用户反馈远端 Docker build 在 `go mod download` 阶段很慢/超时；本轮确认旧 Dockerfile 未声明 `GOPROXY` build arg，导致用户传入的代理参数未生效。
+- 变更文件：`Dockerfile`、`docs/deployment.md`、项目状态文档与交接文档。
+- 执行命令：必读文件读取；Dockerfile/文档检查；`docker version`；`Get-Command docker,podman,nerdctl,docker.exe -ErrorAction SilentlyContinue`；`git diff --check`。
+- 测试结果：本机仍无 Docker CLI，未在本机执行 Docker build；远端构建失败来源是依赖下载网络/代理问题；本轮未修改 Go 代码，未运行 Go 测试；`git diff --check` PASS，仅有 Windows LF/CRLF 提示。
 - 完成判断：TASK-P2-004 / TS-P2-004 仍为 BLOCKED，`ISSUE-P2-005` 保持 OPEN；TASK-P2-005 至 TASK-P2-010 仍为 COMPLETED。
 
 ## 下一步
 
-- 合法下一步：TASK-P2-004 / TS-P2-004 处于 BLOCKED；需切换到具备 Docker CLI/daemon 的环境后补跑 `docker build -t go-scaffold:local .`。
+- 合法下一步：TASK-P2-004 / TS-P2-004 处于 BLOCKED；需在具备 Docker CLI/daemon 的环境后补跑 `docker build --build-arg GOPROXY=https://goproxy.cn,direct -t go-scaffold:local .`。
 - 解除阻塞条件：Docker build 通过后，更新 `STATUS.md`、`TASKS.md`、`TIME_SLICES.md`、`ACCEPTANCE.md`、`TEST_REPORT.md`、`CHANGELOG.md`、`ISSUES.md` 和 `AGENT_HANDOFF.md`，再关闭 TASK-P2-004。
 - 非目标保持：JWT 中间件、数据库版权限、OPA/Casbin、Go `.so` 插件、插件发现、RPC/WS 传输、生产部署、镜像发布和密钥管理仍不属于本轮完成范围。
