@@ -17,10 +17,12 @@
 
 ## What Was Done Last
 
-- 用户发送“下一步”后，按协议处理当前唯一未关闭事项：TASK-P2-004 / TS-P2-004 Docker image build 验证。
-- 已执行 `docker version`，当前环境未安装 Docker CLI；已检查 `docker`、`podman`、`nerdctl`、`docker.exe`，均不可用。
-- `docker build -t go-scaffold:local .` 因前置 Docker CLI/daemon 缺失未执行，TASK-P2-004 / TS-P2-004 已记录为 `BLOCKED`，`ISSUE-P2-005` 保持打开。
-- TASK-P2-005 至 TASK-P2-010 插件钩子运行时、HTTP 远程插件传输、独立 IAM 公共接口、配置接入、app 装配、reload 和 lifecycle 仍保持 `COMPLETED`。
+- 按 `dev.tmp/new-plugin.md` 重新审计 TASK-P2-005 至 TASK-P2-010 的当前实现。
+- 补强 `pkg/plugin/hooks`：nil `HandlerFunc` 作为空处理器在注册时拒绝，直接调用也返回 `ErrNilHandler`。
+- 补强 HTTP 远程插件客户端：响应超过 `maxResponseBytes` 时返回包装 `ErrInvalidResponse` 的明确错误。
+- 新增测试覆盖 nil hook handler 拒绝、HTTP 响应大小限制、`after_invoke` hook 失败时返回插件响应和包装后的 hook 错误。
+- TASK-P2-005 至 TASK-P2-010 插件钩子运行时、HTTP 远程插件传输、独立 IAM 公共接口、配置接入、app 装配、reload 和 lifecycle 保持 `COMPLETED`。
+- TASK-P2-004 / TS-P2-004 Docker build 仍因当前环境缺少 Docker 兼容 CLI 保持 `BLOCKED`，`ISSUE-P2-005` 保持打开。
 - 本轮未触发 workflow、未连接远程服务器、未推送镜像、未执行真实 production、未写入真实密钥。
 
 ## Files Changed Last
@@ -28,9 +30,10 @@
 | File | Change | Reason |
 |---|---|---|
 | `pkg/plugin/hooks/*` | Added | 独立钩子引擎、注册表、服务查找、停止语义和测试 |
+| `pkg/plugin/hooks/registry.go`、`pkg/plugin/hooks/types.go`、`pkg/plugin/hooks/registry_test.go` | Updated | 拒绝 nil `HandlerFunc` 并补测试 |
 | `pkg/plugin/manager.go`、`pkg/plugin/constants.go` | Updated | manager 钩子 API、标准钩子点、调用语义 |
 | `pkg/plugin/http_server.go`、`pkg/plugin/remote_hook.go` | Added | HTTP 插件服务端 helper 和远程钩子适配器 |
-| `pkg/plugin/plugin_test.go` | Updated | 覆盖钩子、HTTP server、RemoteHook 行为 |
+| `pkg/plugin/http.go`、`pkg/plugin/plugin_test.go` | Updated | 明确 HTTP 响应大小超限错误，并覆盖 after hook 错误返回响应 |
 | `pkg/iam/*`、`pkg/iam/memory/*` | Added | IAM 公共 API 和内存实现 |
 | `internal/config/*` | Updated | 新增 `plugin` / `iam` 配置、默认值、校验、env override 和深拷贝 |
 | `internal/app/initapp/*` | Updated | Infrastructure 新增 IAM/Plugins，server 模式装配和 app 层 hook 注册 |
@@ -43,19 +46,22 @@
 | Command | Result |
 |---|---|
 | Required file reads | PASS |
-| `docker version` | FAIL_ENV |
-| `Get-Command docker,podman,nerdctl,docker.exe -ErrorAction SilentlyContinue` | NOT_AVAILABLE |
-| `docker build -t go-scaffold:local .` | NOT_RUN，Docker CLI/daemon 不可用 |
+| `gofmt -w pkg/plugin/hooks/types.go pkg/plugin/hooks/registry.go pkg/plugin/hooks/registry_test.go pkg/plugin/http.go pkg/plugin/plugin_test.go` | PASS |
+| `go test ./pkg/plugin/... -count=1` | PASS |
+| `go test ./pkg/iam/... -count=1` | PASS |
+| `go test ./internal/config ./internal/app/... -count=1` | PASS |
+| `go test ./... -count=1` | PASS |
+| `go build -o <temp> ./cmd/server` | PASS |
 | `git diff --check` | PASS |
 
 ## Test Status
 
 - Docker image build: BLOCKED for TASK-P2-004 because Docker CLI/daemon is unavailable in the current environment.
-- `pkg/plugin` and `pkg/plugin/hooks`: PASS in the previous TASK-P2-005 to TASK-P2-010 verification.
-- `pkg/iam` and `pkg/iam/memory`: PASS in the previous TASK-P2-005 to TASK-P2-010 verification.
-- `internal/config` and `internal/app/...`: PASS in the previous TASK-P2-005 to TASK-P2-010 verification.
-- Full regression and server build: PASS in the previous TASK-P2-005 to TASK-P2-010 verification.
-- Diff whitespace check: PASS after this status update.
+- `pkg/plugin` and `pkg/plugin/hooks`: PASS after completion audit.
+- `pkg/iam` and `pkg/iam/memory`: PASS after completion audit.
+- `internal/config` and `internal/app/...`: PASS after completion audit.
+- Full regression and server build: PASS after completion audit.
+- Diff whitespace check: PASS; only Windows LF/CRLF warnings were printed.
 
 ## Current Blockers
 

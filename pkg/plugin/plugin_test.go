@@ -6,6 +6,7 @@ import (
 	"errors"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/rei0721/go-scaffold/pkg/plugin/hooks"
@@ -108,6 +109,27 @@ func TestHTTPPluginStatusError(t *testing.T) {
 	_, err = mgr.Invoke(context.Background(), "remote", MustNewRequest("run", nil))
 	if !errors.Is(err, ErrHTTPStatus) {
 		t.Fatalf("Invoke() error = %v, want ErrHTTPStatus", err)
+	}
+}
+
+func TestHTTPPluginResponseSizeLimit(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_ = json.NewEncoder(w).Encode(MustNewResponse(map[string]string{
+			"body": strings.Repeat("x", 64),
+		}))
+	}))
+	defer server.Close()
+
+	remote, err := NewHTTP(
+		Definition{Name: "remote", Protocol: ProtocolHTTP, Endpoint: server.URL},
+		WithHTTPMaxResponseBytes(16),
+	)
+	if err != nil {
+		t.Fatalf("NewHTTP() error = %v", err)
+	}
+	_, err = remote.Invoke(context.Background(), MustNewRequest("run", nil))
+	if !errors.Is(err, ErrInvalidResponse) {
+		t.Fatalf("Invoke() error = %v, want ErrInvalidResponse", err)
 	}
 }
 
@@ -276,6 +298,40 @@ func TestManagerInvokeErrorHookIsBestEffort(t *testing.T) {
 	}
 	if !hookCalled {
 		t.Fatal("invoke error hook was not called")
+	}
+}
+
+func TestManagerAfterInvokeHookErrorReturnsResponse(t *testing.T) {
+	mgr := NewManager()
+	hookErr := errors.New("after hook failed")
+	if err := mgr.RegisterHook(HookAfterInvoke, hooks.HandlerFunc(func(ctx context.Context, event hooks.Event) (hooks.Result, error) {
+		return hooks.Result{}, hookErr
+	})); err != nil {
+		t.Fatalf("RegisterHook() error = %v", err)
+	}
+	echo, err := NewLocal(Metadata{Name: "echo", Protocol: ProtocolLocal}, func(ctx context.Context, req Request) (*Response, error) {
+		return NewResponse(map[string]string{"ok": "true"})
+	})
+	if err != nil {
+		t.Fatalf("NewLocal() error = %v", err)
+	}
+	if err := mgr.Register(echo); err != nil {
+		t.Fatalf("Register() error = %v", err)
+	}
+
+	resp, err := mgr.Invoke(context.Background(), "echo", MustNewRequest("run", nil))
+	if !errors.Is(err, hookErr) {
+		t.Fatalf("Invoke() error = %v, want after hook error", err)
+	}
+	if resp == nil {
+		t.Fatal("expected plugin response to be returned with after hook error")
+	}
+	var got map[string]string
+	if err := resp.DecodePayload(&got); err != nil {
+		t.Fatalf("DecodePayload() error = %v", err)
+	}
+	if got["ok"] != "true" {
+		t.Fatalf("response = %#v, want plugin response", got)
 	}
 }
 

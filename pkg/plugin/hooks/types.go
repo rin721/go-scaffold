@@ -86,6 +86,9 @@ type HandlerFunc func(ctx context.Context, event Event) (Result, error)
 
 // HandleHook implements Handler.
 func (f HandlerFunc) HandleHook(ctx context.Context, event Event) (Result, error) {
+	if f == nil {
+		return Result{}, ErrNilHandler
+	}
 	return f(ctx, event)
 }
 

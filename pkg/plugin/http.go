@@ -132,11 +132,18 @@ func (p *httpPlugin) Invoke(ctx context.Context, req Request) (*Response, error)
 
 	reader := io.Reader(httpResp.Body)
 	if p.maxResponseBytes > 0 {
-		reader = io.LimitReader(httpResp.Body, p.maxResponseBytes)
+		reader = io.LimitReader(httpResp.Body, p.maxResponseBytes+1)
 	}
 	data, err := io.ReadAll(reader)
 	if err != nil {
 		return nil, &Error{Op: "read", Plugin: p.metadata.Name, Err: err}
+	}
+	if p.maxResponseBytes > 0 && int64(len(data)) > p.maxResponseBytes {
+		return nil, &Error{
+			Op:     "read",
+			Plugin: p.metadata.Name,
+			Err:    fmt.Errorf("%w: response exceeds %d bytes", ErrInvalidResponse, p.maxResponseBytes),
+		}
 	}
 
 	resp := &Response{}

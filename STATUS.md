@@ -112,11 +112,11 @@
 
 ## 最近执行
 
-- 摘要：用户发送“下一步”后，按协议尝试处理 TASK-P2-004 Docker build 待验证项；当前环境仍无 Docker 兼容 CLI，任务保持阻塞，不标记完成。
-- 变更文件：更新项目状态、验收、问题、测试报告、变更记录和交接文档；插件/IAM 代码实现保持上一轮已验证状态。
-- 执行命令：必读文件读取；`docker version`；`Get-Command docker,podman,nerdctl,docker.exe -ErrorAction SilentlyContinue`。
-- 测试结果：Docker build 未执行，原因是当前环境缺少 Docker 兼容 CLI；VERIFY-P2-005 仍保持已通过。
-- 完成判断：BLOCKED。
+- 摘要：按 `dev.tmp/new-plugin.md` 重新审计 TASK-P2-005 至 TASK-P2-010，补强 nil hook handler 拒绝、HTTP 响应大小超限错误和关键测试；当前 Docker build 阻塞仍独立保留。
+- 变更文件：`pkg/plugin/hooks/registry.go`、`pkg/plugin/hooks/types.go`、`pkg/plugin/hooks/registry_test.go`、`pkg/plugin/http.go`、`pkg/plugin/plugin_test.go`、`TEST_REPORT.md`、`CHANGELOG.md`、`AGENT_HANDOFF.md`、`STATUS.md`。
+- 执行命令：必读文件读取；设计文件读取；`gofmt`；`go test ./pkg/plugin/... -count=1`；`go test ./pkg/iam/... -count=1`；`go test ./internal/config ./internal/app/... -count=1`；`go test ./... -count=1`；`go build -o <temp> ./cmd/server`；`git diff --check`。
+- 测试结果：插件/IAM/app 相关测试、全量回归、server build 和 diff 检查均通过；Docker build 未执行，原因仍是当前环境缺少 Docker 兼容 CLI。
+- 完成判断：`dev.tmp/new-plugin.md` 设计已完成；TASK-P2-004 / TS-P2-004 仍为 BLOCKED。
 
 ## 下一步
 

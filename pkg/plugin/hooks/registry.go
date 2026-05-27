@@ -3,6 +3,7 @@ package hooks
 import (
 	"context"
 	"errors"
+	"reflect"
 	"sort"
 	"sync"
 	"time"
@@ -57,7 +58,7 @@ func (r *registry) Register(point Point, handler Handler, opts ...RegisterOption
 	if point == "" {
 		return ErrInvalidPoint
 	}
-	if handler == nil {
+	if isNilHandler(handler) {
 		return ErrNilHandler
 	}
 	reg := registration{
@@ -131,4 +132,17 @@ func (r *registry) handlersFor(point Point) []registration {
 // IsStopped reports whether an error means the hook chain stopped.
 func IsStopped(err error) bool {
 	return errors.Is(err, ErrStopped)
+}
+
+func isNilHandler(handler Handler) bool {
+	if handler == nil {
+		return true
+	}
+	value := reflect.ValueOf(handler)
+	switch value.Kind() {
+	case reflect.Chan, reflect.Func, reflect.Interface, reflect.Map, reflect.Ptr, reflect.Slice:
+		return value.IsNil()
+	default:
+		return false
+	}
 }

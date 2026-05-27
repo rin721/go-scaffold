@@ -2,6 +2,15 @@
 
 ## 最新变更
 
+### 2026-05-27 - dev.tmp/new-plugin completion audit
+
+- 变更：按 `dev.tmp/new-plugin.md` 重新审计插件钩子运行时、HTTP 远程插件传输、IAM 公共接口、配置/app/reload/lifecycle 接入。
+- 变更：`pkg/plugin/hooks` 现在会在注册时拒绝 nil `HandlerFunc`，直接调用 nil `HandlerFunc` 也返回 `ErrNilHandler`。
+- 变更：HTTP 远程插件响应超过 `maxResponseBytes` 时返回包装 `ErrInvalidResponse` 的明确错误，不再依赖截断后的 JSON 解码失败。
+- 变更：新增测试覆盖 nil hook handler 拒绝、HTTP 响应大小限制、`after_invoke` hook 失败时返回插件响应和包装后的 hook 错误。
+- 验证：`go test ./pkg/plugin/... -count=1`、`go test ./pkg/iam/... -count=1`、`go test ./internal/config ./internal/app/... -count=1`、`go test ./... -count=1`、server build、`git diff --check` 均通过。
+- 状态：`dev.tmp/new-plugin.md` 设计完成；TASK-P2-004 Docker build 阻塞仍独立保持打开。
+
 ### 2026-05-27 - TASK-P2-004 - TS-P2-004 blocked verification
 
 - 变更：用户发送“下一步”后，按协议处理剩余 Docker build 验证项，不推进新功能。

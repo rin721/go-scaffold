@@ -76,6 +76,10 @@ func TestRegistryContextAndValidation(t *testing.T) {
 	if err := registry.Register("point", nil); !errors.Is(err, ErrNilHandler) {
 		t.Fatalf("Register(nil) error = %v, want ErrNilHandler", err)
 	}
+	var nilFunc HandlerFunc
+	if err := registry.Register("point", nilFunc); !errors.Is(err, ErrNilHandler) {
+		t.Fatalf("Register(nil HandlerFunc) error = %v, want ErrNilHandler", err)
+	}
 
 	if err := registry.Register("point", HandlerFunc(func(ctx context.Context, event Event) (Result, error) {
 		t.Fatal("handler should not run after cancellation")

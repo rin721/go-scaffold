@@ -3,26 +3,29 @@
 ## 最新验证
 
 - 日期：2026-05-27
-- 任务 ID：TASK-P2-004
-- 时间切片 ID：TS-P2-004
-- 状态：BLOCKED
-- 范围：用户发送“下一步”后按协议处理剩余待验证项；TASK-P2-005 至 TASK-P2-010 插件/IAM 主线已完成并验证，当前唯一未关闭事项是 TASK-P2-004 的 Docker image build 验证。
+- 任务 ID：TASK-P2-005 至 TASK-P2-010 completion audit
+- 时间切片 ID：TS-P2-005 至 TS-P2-010
+- 状态：COMPLETED；TASK-P2-004 Docker build 仍独立 BLOCKED
+- 范围：按 `dev.tmp/new-plugin.md` 重新审计插件钩子运行时、HTTP 远程插件传输、IAM 公共接口、配置/app/reload/lifecycle 接入；补齐 nil `HandlerFunc` 拒绝、HTTP 响应大小超限错误和相关测试。
 
 ## 执行命令
 
 | 命令 | 结果 | 备注 |
 |---|---|---|
-| 必读文件读取 | PASS | 已读取 `AGENTS.md`、Agent 规则、状态、任务、切片、需求、架构、验收、问题、测试报告和交接文档 |
-| `docker version` | FAIL_ENV | 当前环境未安装 Docker CLI，命令不可用 |
-| `Get-Command docker,podman,nerdctl,docker.exe -ErrorAction SilentlyContinue` | NOT_AVAILABLE | 未发现 Docker 兼容 CLI |
-| `docker build -t go-scaffold:local .` | NOT_RUN | 前置 Docker CLI/daemon 不可用，不能执行镜像构建 |
-| `git diff --check` | PASS | 文档状态更新后的空白检查通过 |
+| 必读文件读取 | PASS | 已读取 `AGENTS.md`、Agent 规则、状态、任务、切片、需求、架构、验收、问题、测试报告、交接和设计文件 |
+| `gofmt -w pkg/plugin/hooks/types.go pkg/plugin/hooks/registry.go pkg/plugin/hooks/registry_test.go pkg/plugin/http.go pkg/plugin/plugin_test.go` | PASS | 格式化本轮插件审计补丁 |
+| `go test ./pkg/plugin/... -count=1` | PASS | 覆盖 hooks、manager、HTTP helper、RemoteHook 和新增大小限制测试 |
+| `go test ./pkg/iam/... -count=1` | PASS | IAM memory 与上下文 helper 回归 |
+| `go test ./internal/config ./internal/app/... -count=1` | PASS | 配置、app 装配、reload/lifecycle 回归 |
+| `go test ./... -count=1` | PASS | 全量回归通过 |
+| `go build -o <temp> ./cmd/server` | PASS | server 构建通过，临时产物已删除 |
+| `git diff --check` | PASS | 仅输出 Windows LF/CRLF 提示，不存在空白错误 |
 
 ## 结果
 
-- [BLOCKED] TASK-P2-004 的 `docker build -t go-scaffold:local .` 仍无法执行，原因是当前环境缺少 `docker`、`podman`、`nerdctl`、`docker.exe`。
-- [CONFIRMED] ISSUE-P2-005 保持 OPEN；不能把 TASK-P2-004 / TS-P2-004 标记为 COMPLETED。
-- [CONFIRMED] TASK-P2-005 至 TASK-P2-010 插件钩子运行时、HTTP 远程插件传输、IAM 公共接口、配置/app/reload/lifecycle 接入已在上一轮验证通过。
+- [CONFIRMED] `dev.tmp/new-plugin.md` 设计当前已由代码和测试覆盖：hooks、hook-aware manager、HTTP server helper、RemoteHook、IAM memory、配置/app/reload/lifecycle 均通过验证。
+- [CONFIRMED] 本轮补强 nil `HandlerFunc` 注册拒绝、after invoke hook 错误返回插件响应的测试、HTTP 响应大小超限错误和测试。
+- [BLOCKED] TASK-P2-004 的 `docker build -t go-scaffold:local .` 仍是独立环境阻塞；本轮未关闭 `ISSUE-P2-005`。
 
 ## 失败项
 
@@ -31,11 +34,20 @@
 
 ## 验证结论
 
-- TASK-P2-004 / TS-P2-004 标记为 `BLOCKED`。
+- TASK-P2-005 至 TASK-P2-010 完成判定：COMPLETED。
+- TASK-P2-004 / TS-P2-004 仍保持 `BLOCKED`。
 - 解除阻塞条件：在安装 Docker CLI/daemon 的 Linux 或 Docker Desktop 环境运行 `docker build -t go-scaffold:local .` 并通过。
-- TASK-P2-005 至 TASK-P2-010 保持 `COMPLETED`；后续新范围仍需用户重新确认。
 
 ## 历史报告
+
+### 2026-05-27 dev.tmp/new-plugin completion audit
+
+- 重新读取必读文档和 `dev.tmp/new-plugin.md`，按设计逐项审计当前实现。
+- 补强 `pkg/plugin/hooks`：nil `HandlerFunc` 作为空处理器在注册时拒绝，直接调用也返回 `ErrNilHandler`。
+- 补强 HTTP 远程插件客户端：响应超过 `maxResponseBytes` 时返回包装 `ErrInvalidResponse` 的明确错误。
+- 新增测试：nil `HandlerFunc` 拒绝、HTTP 响应大小限制、`after_invoke` hook 失败时仍返回插件响应和包装后的 hook 错误。
+- 验证：`go test ./pkg/plugin/... -count=1`、`go test ./pkg/iam/... -count=1`、`go test ./internal/config ./internal/app/... -count=1`、`go test ./... -count=1`、server build、`git diff --check` 均通过。
+- 结论：`dev.tmp/new-plugin.md` 设计已完成；TASK-P2-004 Docker build 环境阻塞保持独立打开。
 
 ### 2026-05-27 TASK-P2-004 TS-P2-004 blocked verification
 
