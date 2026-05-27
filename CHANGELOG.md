@@ -2,6 +2,16 @@
 
 ## Latest Addendum
 
+### 2026-05-28 - TASK-INFRA-004 - CI build target repair
+
+- Change: Updated `.github/workflows/ci.yml` so the `Build server` step builds the current `./cmd/main` entrypoint instead of removed `./cmd/server`.
+- Root cause: GitHub Actions run `26531295923` passed tests but failed with `stat .../cmd/server: directory not found`.
+- Scope: CI workflow and project status records only; no Go behavior, deployment, secrets, workflow trigger, or image publishing.
+- Verification: GitHub job log inspection; `go test ./... -count=1 -mod=readonly`; `go build -mod=readonly -o <temp> ./cmd/main`; `actionlint`; `git diff --check` passed.
+- Status: TASK-INFRA-004 / TS-INFRA-004 completed; project remains `IN_DEVELOPMENT_NOT_RELEASE_READY`, legal next state is `NONE / NONE / PENDING_USER_CONFIRMATION`.
+
+## Previous Addendum
+
 ### 2026-05-28 - TASK-P2-017 - Plugin control-plane interface configuration
 
 - Change: Added host plugin control-plane config for `plugin.interface.http.enabled/host/port/public_url` and reserved `plugin.interface.ws.public_url`.

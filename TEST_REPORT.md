@@ -2,11 +2,36 @@
 
 ## Latest Current Verification
 
+- TASK-INFRA-004: PASS.
+- Commands: GitHub Actions run `26531295923` / job `78148329151` log inspection, `go test ./... -count=1 -mod=readonly`, `go build -mod=readonly -o <temp> ./cmd/main`, `go run github.com/rhysd/actionlint/cmd/actionlint@latest .github/workflows/ci.yml`, and `git diff --check`.
+- Note: GitHub failure was isolated to the stale `go build ... ./cmd/server` command; the GitHub test step and local CI-equivalent tests passed.
+
 - TASK-P2-017: PASS.
 - Commands: `go test ./internal/config`, `go test ./internal/app/...`, `go test ./internal/transport/http`, `go test ./pkg/plugin/...`, `go test ./...`, `go test ./...` inside `remote_plugins/blog`, and `git diff --check`.
 - Note: `git diff --check` emitted only Git LF/CRLF notices.
 
 ## Latest Verification Addendum
+
+- Date: 2026-05-28
+- Task ID: TASK-INFRA-004
+- Time Slice ID: TS-INFRA-004
+- Status: COMPLETED
+- Scope: Repair GitHub Actions push CI by aligning the build target with the current `cmd/main` entrypoint.
+
+| Command | Result | Notes |
+|---|---|---|
+| GitHub Actions run/job log inspection | PASS | Run `26531295923` failed at `Build server`; tests passed; error was `stat .../cmd/server: directory not found`. |
+| `go build -mod=readonly -o <temp> ./cmd/server` | FAIL_EXPECTED | Local reproduction confirmed the stale CI path is missing. |
+| `go test ./... -count=1 -mod=readonly` | PASS | Root module tests passed with CI flags. |
+| `go build -mod=readonly -o <temp> ./cmd/main` | PASS | Current entrypoint package builds. |
+| `go run github.com/rhysd/actionlint/cmd/actionlint@latest .github/workflows/ci.yml` | PASS | Workflow syntax and action usage check passed. |
+| `git diff --check` | PASS | No whitespace errors. |
+
+Result:
+
+- [CONFIRMED] CI failure root cause was a stale build target.
+- [CONFIRMED] `.github/workflows/ci.yml` now builds `./cmd/main`.
+- [CONFIRMED] No workflow was triggered from this session.
 
 - Date: 2026-05-28
 - Task ID: TASK-P2-017

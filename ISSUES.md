@@ -1,5 +1,15 @@
 # ISSUES.md
 
+## Latest Issue Review: TASK-INFRA-004
+
+- Date: 2026-05-28
+- Result: CI failure fixed locally; no new blocking issue after verification.
+- Failure: GitHub Actions run `26531295923` failed in `CI / Go verify` at the `Build server` step with `stat .../cmd/server: directory not found`.
+- Root cause: CI still referenced the removed `./cmd/server` entrypoint after the repository moved to `./cmd/main`.
+- Fix: `.github/workflows/ci.yml` now builds `./cmd/main`.
+- Verification: GitHub job logs inspected; `go test ./... -count=1 -mod=readonly`, `go build -mod=readonly -o <temp> ./cmd/main`, `actionlint`, and `git diff --check` passed.
+- Residual note: broader historical documentation may still mention `cmd/server`; this slice only repairs the failing CI build target and records the drift for future confirmed cleanup if needed.
+
 ## Latest Issue Review: TASK-P2-017
 
 - Date: 2026-05-28

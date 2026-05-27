@@ -1,5 +1,15 @@
 # ACCEPTANCE.md
 
+## TASK-INFRA-004 Acceptance
+
+| ID | Acceptance Item | Method | Required | Status |
+|---|---|---|---|---|
+| ACC-INFRA-014 | GitHub Actions failure root cause is confirmed from run logs | Inspect run `26531295923` / job `78148329151` | Yes | [CONFIRMED] |
+| ACC-INFRA-015 | CI build step targets the current Go entrypoint package | Check `.github/workflows/ci.yml` | Yes | [CONFIRMED] |
+| ACC-INFRA-016 | Current entrypoint builds with CI flags | `go build -mod=readonly -o <temp> ./cmd/main` | Yes | [CONFIRMED] |
+| ACC-INFRA-017 | Workflow syntax check passes | `go run github.com/rhysd/actionlint/cmd/actionlint@latest .github/workflows/ci.yml` | Yes | [CONFIRMED] |
+| ACC-INFRA-018 | Root tests and whitespace check pass | `go test ./... -count=1 -mod=readonly`; `git diff --check` | Yes | [CONFIRMED] |
+
 ## TASK-P2-017 Acceptance
 
 | ID | Acceptance Item | Method | Required | Status |

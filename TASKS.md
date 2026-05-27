@@ -2,6 +2,11 @@
 
 ## Latest Current Task
 
+- TASK-INFRA-004 / TS-INFRA-004: COMPLETED.
+- Source: GitHub Actions push CI failure on run `26531295923`, check `CI / Go verify`.
+- Review Result: ACCEPT.
+- Current legal task after completion: `NONE / NONE / PENDING_USER_CONFIRMATION`.
+
 - TASK-P2-017 / TS-P2-017: COMPLETED.
 - Source: user correction requiring standard remote plugin flow (`/plugin/v1/invoke` on plugin service, startup registration to host `/plugin/v1/register`) and aligned HTTP/WS address configuration through a separate plugin interface address/port.
 - Review Result: ACCEPT_WITH_RISK.
@@ -17,6 +22,38 @@
 - Current legal task after completion: `NONE / NONE / PENDING_USER_CONFIRMATION`.
 
 ## Current Addendum Task
+
+### TASK-INFRA-004: Align CI build target with current entrypoint
+
+- Status: COMPLETED
+- Time Slice: TS-INFRA-004
+- Source: User reported GitHub error: `CI / Go verify (push)` failing after 28s.
+- Review Result: ACCEPT
+- Priority: P2
+- Type: CI repair
+- Goal: Fix the push CI failure by aligning the GitHub Actions build target with the current tracked Go entrypoint package.
+- Allowed Files:
+  - `.github/workflows/ci.yml`
+  - Project status, acceptance, changelog, issue, test report, task, time-slice, and handoff documents.
+- Forbidden Files:
+  - Go source code, production deployment scripts, secrets, real `.env` files, or irreversible migration paths.
+  - Reverting the existing `cmd/server` to `cmd/main` entrypoint move.
+  - Broad documentation rewrite for all historical `cmd/server` references.
+- Non-Goals:
+  - No workflow trigger, deployment, image publishing, or remote server access.
+  - No gofmt cleanup for historical formatting drift; the CI step only reports drift.
+  - No application behavior change.
+- Verification:
+  - GitHub Actions run `26531295923` job log inspection: PASS, root cause confirmed at `Build server`.
+  - `go test ./... -count=1 -mod=readonly`: PASS
+  - `go build -mod=readonly -o <temp> ./cmd/main`: PASS
+  - `go run github.com/rhysd/actionlint/cmd/actionlint@latest .github/workflows/ci.yml`: PASS
+  - `git diff --check`: PASS
+- Exit Conditions:
+  - [CONFIRMED] CI build step no longer points at removed `./cmd/server`.
+  - [CONFIRMED] Current entrypoint package `./cmd/main` builds with `-mod=readonly`.
+  - [CONFIRMED] Full root module tests still pass with CI flags.
+  - [CONFIRMED] Project status documents record the CI failure and fix.
 
 ### TASK-P2-017: Configurable plugin control-plane interface
 

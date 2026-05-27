@@ -2,6 +2,13 @@
 
 ## Latest Current Slice
 
+- 2026-05-28: TASK-INFRA-004 / TS-INFRA-004 COMPLETED.
+- GitHub Actions push CI run `26531295923` failed in `CI / Go verify` at the `Build server` step.
+- Root cause: `.github/workflows/ci.yml` still built the removed `./cmd/server` package, while the current repository entrypoint is `./cmd/main`.
+- Fix: aligned the CI build step to `go build -mod=readonly -o /tmp/go-scaffold-server ./cmd/main`.
+- Verification: GitHub job logs confirmed tests passed and build failed on `stat .../cmd/server: directory not found`; local `go test ./... -count=1 -mod=readonly`, `go build -mod=readonly -o <temp> ./cmd/main`, `actionlint` for `.github/workflows/ci.yml`, and `git diff --check` passed.
+- Current legal work after completion: `NONE / NONE / PENDING_USER_CONFIRMATION`.
+
 - 2026-05-28: TASK-P2-017 / TS-P2-017 COMPLETED.
 - User correction accepted with risk: remote plugin services expose standard `/plugin/v1/invoke` and register to host `/plugin/v1/register`, while the host explicitly configures the plugin control-plane HTTP interface address/port and reserved WS address.
 - Implemented host plugin interface config (`interface.http` and `interface.ws`), optional dedicated plugin HTTP server for `/plugin/v1/register`, explicit `registration.expose_on_main_http`, config/env examples, and Blog sample host URL alignment.
@@ -15,7 +22,7 @@
 - Current Task ID: NONE
 - Current Time Slice ID: NONE
 - Current Status: PENDING_USER_CONFIRMATION
-- Why this is the only legal work now: TASK-P2-017 / TS-P2-017 is completed and verified. The project remains `IN_DEVELOPMENT_NOT_RELEASE_READY`; any real WS/RPC transport, plugin heartbeat/discovery, production deployment, real secrets, or database-backed IAM work requires a new confirmed task and time slice.
+- Why this is the only legal work now: TASK-INFRA-004 / TS-INFRA-004 and TASK-P2-017 / TS-P2-017 are completed and verified. The project remains `IN_DEVELOPMENT_NOT_RELEASE_READY`; any real WS/RPC transport, plugin heartbeat/discovery, production deployment, real secrets, database-backed IAM work, or broader entrypoint documentation rewrite requires a new confirmed task and time slice.
 
 - 2026-05-28: TASK-P2-016 / TS-P2-016 COMPLETED.
 - User goal accepted with risk: implement a host-side remote plugin registration loop, inject safe IAM principal data into the plugin hook JSON event protocol, and add `remote_plugins/blog` as an independently deployable remote Blog plugin sample.

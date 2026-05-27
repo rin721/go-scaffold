@@ -2,6 +2,13 @@
 
 ## Latest Current Handoff
 
+- TASK-INFRA-004 / TS-INFRA-004: COMPLETED.
+- GitHub Actions push CI failure was confirmed on run `26531295923`, job `78148329151`: tests passed, but `Build server` failed because CI still ran `go build ... ./cmd/server`.
+- `.github/workflows/ci.yml` now builds the current `./cmd/main` entrypoint.
+- Verification completed: GitHub job logs inspected, stale `./cmd/server` build reproduced locally, `go test ./... -count=1 -mod=readonly` passed, `go build -mod=readonly -o <temp> ./cmd/main` passed, `actionlint` passed, and `git diff --check` passed.
+- No workflow was rerun or triggered from this session.
+- Next legal state: `NONE / NONE / PENDING_USER_CONFIRMATION`.
+
 - TASK-P2-017 / TS-P2-017: COMPLETED.
 - Host plugin config now has explicit control-plane interface settings: `plugin.interface.http.enabled/host/port/public_url` and reserved `plugin.interface.ws.public_url`.
 - Host app can start an optional dedicated plugin HTTP server exposing `/plugin/v1/register`; main HTTP registration exposure is now explicit through `plugin.registration.expose_on_main_http`.
@@ -21,6 +28,13 @@
 - Next legal state: `NONE / NONE / PENDING_USER_CONFIRMATION`.
 
 ## Latest Handoff Addendum
+
+- Date: 2026-05-28
+- Task: TASK-INFRA-004 / TS-INFRA-004
+- Summary: Repaired the GitHub Actions CI build target after the repository entrypoint moved to `cmd/main`.
+- Files changed in this addendum: `.github/workflows/ci.yml` and project status documents.
+- Verification: GitHub Actions run `26531295923` / job `78148329151` logs inspected; `go test ./... -count=1 -mod=readonly` PASS; `go build -mod=readonly -o <temp> ./cmd/main` PASS; `actionlint` PASS; `git diff --check` PASS.
+- Legal next step returns to `NONE / NONE / PENDING_USER_CONFIRMATION`; project remains `IN_DEVELOPMENT_NOT_RELEASE_READY`.
 
 - Date: 2026-05-28
 - Task: TASK-P2-017 / TS-P2-017
@@ -149,7 +163,7 @@
 - Task ID: NONE
 - Time Slice ID: NONE
 - Status: PENDING_USER_CONFIRMATION
-- Why: TASK-P2-015 DB CLI comments/documentation is complete, TASK-P2-014 sqlgen DB CLI remains complete, and the project is explicitly not release-ready; current confirmed scope has no automatic next task.
+- Why: TASK-INFRA-004 CI repair, TASK-P2-017 plugin interface configuration, TASK-P2-015 DB CLI comments/documentation, and TASK-P2-014 sqlgen DB CLI are complete; the project is explicitly not release-ready and the current confirmed scope has no automatic next task.
 - Entry condition for future work: user must confirm a new scope or first-version release acceptance checklist, and it must be written into `TASKS.md` and `TIME_SLICES.md`.
 - Likely next choices: define v1 acceptance checklist, complete product scope, image publishing pipeline, real staging/production run, production migration framework, complete auth/rbac, plugin discovery, or RPC/WS transport.
 

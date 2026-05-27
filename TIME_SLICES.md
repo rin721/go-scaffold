@@ -2,6 +2,11 @@
 
 ## Latest Current Time Slice
 
+- TS-INFRA-004: COMPLETED.
+- Scope completed: GitHub Actions CI build target aligned from removed `./cmd/server` to current `./cmd/main`.
+- Verification: failed GitHub job logs inspected, root `go test ./... -count=1 -mod=readonly`, `go build -mod=readonly -o <temp> ./cmd/main`, `actionlint`, and `git diff --check` passed.
+- Next legal state: `NONE / NONE / PENDING_USER_CONFIRMATION`.
+
 - TS-P2-017: COMPLETED.
 - Scope completed: host plugin control-plane endpoint configuration, optional separate HTTP registration interface, and Blog sample config alignment.
 - Verification: plugin/config/app/router target tests, root `go test ./...`, Blog module `go test ./...`, and `git diff --check` passed.
@@ -19,6 +24,40 @@
 - Next legal state: `NONE / NONE / PENDING_USER_CONFIRMATION`.
 
 ## Current Addendum Time Slice
+
+### TS-INFRA-004: CI build target repair
+
+- Status: COMPLETED
+- Task ID: TASK-INFRA-004
+- Purpose: Repair the failing GitHub Actions push CI build step after the repository entrypoint moved from `cmd/server` to `cmd/main`.
+- Inputs:
+  - User-reported check failure: `CI / Go verify (push)`.
+  - GitHub Actions run `26531295923` and job `78148329151`.
+  - Current tracked package layout under `cmd/main`.
+- Allowed Files:
+  - `.github/workflows/ci.yml`
+  - Project status documents.
+- Forbidden:
+  - Recreating `cmd/server`.
+  - Changing Go application behavior.
+  - Triggering workflows, deployments, image pushes, or remote server access.
+  - Broad cleanup of historical formatting drift or historical docs.
+- Execution Steps:
+  1. Inspect GitHub Actions run and job logs.
+  2. Reproduce the failing CI build command locally.
+  3. Update the CI build target to `./cmd/main`.
+  4. Run CI-equivalent tests, build, and whitespace verification.
+  5. Update status, acceptance, changelog, issues, test report, tasks, time slices, and handoff.
+- Verification Commands:
+  - GitHub Actions run/job log inspection: PASS
+  - `go test ./... -count=1 -mod=readonly`: PASS
+  - `go build -mod=readonly -o <temp> ./cmd/main`: PASS
+  - `go run github.com/rhysd/actionlint/cmd/actionlint@latest .github/workflows/ci.yml`: PASS
+  - `git diff --check`: PASS
+- Acceptance:
+  - [CONFIRMED] CI build target points at the current entrypoint package.
+  - [CONFIRMED] The previous failing `./cmd/server` build path is no longer used by CI.
+  - [CONFIRMED] No production deployment or workflow rerun was triggered from this session.
 
 ### TS-P2-017: Plugin control-plane interface config
 

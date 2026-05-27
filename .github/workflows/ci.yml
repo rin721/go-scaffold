@@ -40,7 +40,7 @@ jobs:
         run: go test ./... -count=1 -mod=readonly
 
       - name: Build server
-        run: go build -mod=readonly -o /tmp/go-scaffold-server ./cmd/server
+        run: go build -mod=readonly -o /tmp/go-scaffold-server ./cmd/main
 
       - name: Check whitespace
         run: git diff --check
