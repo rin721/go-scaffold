@@ -13,7 +13,7 @@ import (
 )
 
 func RegisterWithHost(ctx context.Context, cfg Config, client *http.Client) error {
-	if strings.TrimSpace(cfg.MainHTTPURL) == "" {
+	if strings.TrimSpace(cfg.HostHTTPURL) == "" {
 		return nil
 	}
 	if client == nil {
@@ -38,7 +38,7 @@ func RegisterWithHost(ctx context.Context, cfg Config, client *http.Client) erro
 		return err
 	}
 
-	url := strings.TrimRight(cfg.MainHTTPURL, "/") + plugin.HTTPRegisterPath
+	url := strings.TrimRight(cfg.HostHTTPURL, "/") + plugin.HTTPRegisterPath
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewReader(body))
 	if err != nil {
 		return err

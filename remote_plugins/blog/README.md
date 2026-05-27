@@ -4,9 +4,9 @@
 
 ## Startup Flow
 
-1. Start the host service with plugin registration enabled.
+1. Start the host service with plugin registration enabled on the plugin control-plane HTTP interface.
 2. Start this Blog plugin service.
-3. The Blog plugin posts its HTTP invoke endpoint to the host registration endpoint.
+3. The Blog plugin exposes `/plugin/v1/invoke` and posts its HTTP invoke endpoint to the host `/plugin/v1/register` endpoint.
 4. The host creates an HTTP plugin adapter and uses the existing `hooks.execute` JSON protocol for remote hooks.
 
 ## Environment
@@ -15,8 +15,8 @@
 |---|---|
 | `BLOG_PLUGIN_LISTEN_ADDR` | Blog service listen address, for example `127.0.0.1:18081`. |
 | `BLOG_PLUGIN_PUBLIC_HTTP_URL` | Public URL the host uses, for example `http://blog.example.com:18081`. |
-| `BLOG_PLUGIN_MAIN_HTTP_URL` | Host HTTP base URL, for example `http://host.example.com:9999`. |
-| `BLOG_PLUGIN_MAIN_WS_URL` | Reserved host WS URL, for example `ws://host.example.com:9999/ws`; this sample does not implement WS transport. |
+| `BLOG_PLUGIN_HOST_HTTP_URL` | Host plugin HTTP interface base URL, for example `http://host.example.com:18080`. Fallback: `BLOG_PLUGIN_MAIN_HTTP_URL`. |
+| `BLOG_PLUGIN_HOST_WS_URL` | Reserved host plugin WS URL, for example `ws://host.example.com:18080/plugin/v1/ws`. Fallback: `BLOG_PLUGIN_MAIN_WS_URL`; this sample does not implement WS transport. |
 | `BLOG_PLUGIN_REGISTRATION_TOKEN` | Placeholder shared token for host registration. Do not commit real values. |
 | `BLOG_PLUGIN_SHARED_SECRET` | Optional placeholder secret sent by the host when invoking the Blog plugin. |
 | `BLOG_PLUGIN_HOOK_POINTS` | Comma-separated hook points, default `plugin.after_invoke`. |

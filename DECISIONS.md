@@ -1,5 +1,17 @@
 # DECISIONS.md
 
+## Latest Decision
+
+### DEC-038: Plugin control-plane endpoints are explicitly configured and optionally exposed
+- Date: 2026-05-28
+- Status: ACCEPTED_WITH_RISK
+- Context: The user corrected the remote plugin flow: a plugin service should expose the standard `/plugin/v1/invoke` endpoint, register to the host `/plugin/v1/register` on startup, and keep HTTP/WS protocol addresses aligned through separate configured endpoint addresses.
+- Decision: Implement host-side plugin interface configuration first. The host may choose to expose the plugin registration endpoint on a separate HTTP address/port, while WS remains a reserved configured address until a real WS/RPC task is confirmed.
+- Alternatives: Keep registration mounted only on the main HTTP API; implement real WS/RPC transport immediately; add persistent discovery and heartbeat in the same slice.
+- Reason: A separate configurable control-plane endpoint matches the user's deployment model while preserving the existing passive plugin registry and avoiding a larger transport/discovery refactor.
+- Consequences: Operators must explicitly enable the plugin HTTP interface before remote plugin startup registration can target it. WS settings are placeholders and must not be treated as implemented transport.
+- Related Tasks: TASK-P2-017
+
 ## 决策记录
 
 ### DEC-037：远程插件使用显式 HTTP 注册，Hook JSON 注入安全 IAM 主体上下文

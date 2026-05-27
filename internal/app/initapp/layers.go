@@ -47,6 +47,7 @@ type DemoModule struct {
 }
 
 type Transport struct {
-	Router     *gin.Engine
-	HTTPServer httpserver.HTTPServer
+	Router           *gin.Engine
+	HTTPServer       httpserver.HTTPServer
+	PluginHTTPServer httpserver.HTTPServer
 }

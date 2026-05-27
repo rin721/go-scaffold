@@ -2,6 +2,38 @@
 
 ## Latest Current Verification
 
+- TASK-P2-017: PASS.
+- Commands: `go test ./internal/config`, `go test ./internal/app/...`, `go test ./internal/transport/http`, `go test ./pkg/plugin/...`, `go test ./...`, `go test ./...` inside `remote_plugins/blog`, and `git diff --check`.
+- Note: `git diff --check` emitted only Git LF/CRLF notices.
+
+## Latest Verification Addendum
+
+- Date: 2026-05-28
+- Task ID: TASK-P2-017
+- Time Slice ID: TS-P2-017
+- Status: COMPLETED
+- Scope: Host plugin control-plane HTTP interface configuration, optional separate `/plugin/v1/register` server, reserved WS address placeholders, config/env examples, and Blog sample host URL alignment.
+
+| Command | Result | Notes |
+|---|---|---|
+| Required file reads | PASS | Agent driver documents and relevant skills were reviewed before implementation. |
+| User correction review | ACCEPT_WITH_RISK | Scope limited to configurable HTTP control-plane exposure and reserved WS address placeholders. |
+| `gofmt -w ...` | PASS | Modified Go files in host and Blog sample were formatted. |
+| `go test ./internal/config` | PASS | Plugin interface config env overrides and validation tests passed. |
+| `go test ./internal/app/...` | PASS | App/init wiring tests passed, including main HTTP registration exposure control and plugin HTTP server config. |
+| `go test ./internal/transport/http` | PASS | Main router and dedicated plugin router registration endpoint tests passed. |
+| `go test ./pkg/plugin/...` | PASS | Plugin package regression passed. |
+| `go test ./...` | PASS | Full root module regression passed; current workspace uses pre-existing `cmd/main` layout. |
+| `go test ./...` in `remote_plugins/blog` | PASS | Independent Blog plugin module tests passed with host HTTP URL registration alignment. |
+| `git diff --check` | PASS | Only Git LF/CRLF notices, no whitespace errors. |
+
+Result:
+
+- [CONFIRMED] TASK-P2-017 / TS-P2-017 completed.
+- [CONFIRMED] Host plugin registration is exposed on a separate configured HTTP interface only when enabled.
+- [CONFIRMED] Main HTTP exposure is explicit through `registration.expose_on_main_http`.
+- [CONFIRMED] No real WS/RPC adapter, heartbeat/discovery, production deployment, real secrets, JWT/login, or database-backed IAM was implemented.
+
 - TASK-P2-016: PASS.
 - Commands: `go test ./pkg/plugin/... -count=1`, `go test ./internal/config ./internal/app/... ./internal/transport/http -count=1`, `go test ./pkg/iam/... -count=1`, `go test ./... -count=1`, `go test ./... -count=1` inside `remote_plugins/blog`, and `git diff --check`.
 - Note: `git diff --check` emitted only Git LF/CRLF notices.

@@ -2,6 +2,12 @@
 
 ## Latest Current Time Slice
 
+- TS-P2-017: COMPLETED.
+- Scope completed: host plugin control-plane endpoint configuration, optional separate HTTP registration interface, and Blog sample config alignment.
+- Verification: plugin/config/app/router target tests, root `go test ./...`, Blog module `go test ./...`, and `git diff --check` passed.
+- Next legal state: `NONE / NONE / PENDING_USER_CONFIRMATION`.
+- Strict non-goals: real WS/RPC transport, persistent discovery/heartbeat, JWT/login flow, database-backed IAM, production deployment, real secrets, and unrelated `cmd/*` rewrites.
+
 - TS-P2-016: COMPLETED.
 - Scope: host HTTP remote plugin registration, safe IAM hook context injection, and independent `remote_plugins/blog` sample service.
 - Verification: host/plugin/app/router/IAM target tests, root `go test ./...`, Blog module `go test ./...`, and `git diff --check` passed.
@@ -13,6 +19,49 @@
 - Next legal state: `NONE / NONE / PENDING_USER_CONFIRMATION`.
 
 ## Current Addendum Time Slice
+
+### TS-P2-017: Plugin control-plane interface config
+
+- Status: COMPLETED
+- Task ID: TASK-P2-017
+- Purpose: Implement the host-side configuration and wiring needed for a dedicated plugin control-plane endpoint so remote plugin startup can target a configured `/plugin/v1/register` address while plugin services continue exposing standard `/plugin/v1/invoke`.
+- Inputs:
+  - User correction on 2026-05-28.
+  - Existing `plugin.NewHTTPRegistrationHandler`.
+  - Existing host HTTP router registration path and Blog remote plugin sample.
+- Allowed Files:
+  - `pkg/plugin/**/*`
+  - `internal/config/**/*`
+  - `internal/app/initapp/**/*`
+  - `internal/transport/http/**/*`
+  - `configs/config.example.yaml`
+  - `.env.example`
+  - `remote_plugins/blog/**/*`
+  - Project status documents.
+- Forbidden:
+  - Real secrets or production config values.
+  - Production deployment, workflow triggering, image publishing, or irreversible migration.
+  - Real WS/RPC transport, persistent plugin discovery/heartbeat, JWT/login, database-backed IAM, OPA/Casbin, or Go `.so`.
+  - Reverting existing user or prior-agent workspace changes.
+- Execution Steps:
+  1. Inspect current plugin config, host app wiring, router mounting, and Blog startup registration.
+  2. Add plugin interface config for HTTP enabled/address/public URL and reserved WS URL.
+  3. Wire host app to start the plugin registration HTTP interface only when configured.
+  4. Keep standard `/plugin/v1/invoke` and `/plugin/v1/register` protocol paths aligned in Blog docs/config.
+  5. Run target and full verification; update status, tests, changelog, issues, and handoff.
+- Verification Commands:
+  - `go test ./internal/config`: PASS
+  - `go test ./internal/app/...`: PASS
+  - `go test ./internal/transport/http`: PASS
+  - `go test ./pkg/plugin/...`: PASS
+  - `go test ./...`: PASS
+  - `go test ./...` inside `remote_plugins/blog`: PASS
+  - `git diff --check`: PASS, only Git LF/CRLF notices
+- Acceptance:
+  - [CONFIRMED] Main service plugin registration can be exposed on a configured separate HTTP address.
+  - [CONFIRMED] Main service can keep that plugin interface disabled by config.
+  - [CONFIRMED] HTTP and reserved WS plugin endpoint addresses are represented consistently in config/examples.
+  - [CONFIRMED] Blog sample targets the configured host plugin HTTP registration URL and keeps WS as a reserved address only.
 
 ### TS-P2-016: Remote plugin registration and Blog sample
 

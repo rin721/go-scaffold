@@ -2,6 +2,11 @@
 
 ## Latest Current Task
 
+- TASK-P2-017 / TS-P2-017: COMPLETED.
+- Source: user correction requiring standard remote plugin flow (`/plugin/v1/invoke` on plugin service, startup registration to host `/plugin/v1/register`) and aligned HTTP/WS address configuration through a separate plugin interface address/port.
+- Review Result: ACCEPT_WITH_RISK.
+- Current legal task after completion: `NONE / NONE / PENDING_USER_CONFIRMATION`.
+
 - TASK-P2-016 / TS-P2-016: COMPLETED.
 - Source: user `/goal` requesting IAM service implementation, IAM data injection into plugin hook JSON protocol, and a remote Blog plugin service under `remote_plugins`.
 - Review Result: ACCEPT_WITH_RISK.
@@ -12,6 +17,48 @@
 - Current legal task after completion: `NONE / NONE / PENDING_USER_CONFIRMATION`.
 
 ## Current Addendum Task
+
+### TASK-P2-017: Configurable plugin control-plane interface
+
+- Status: COMPLETED
+- Time Slice: TS-P2-017
+- Source: User correction on 2026-05-28.
+- Review Result: ACCEPT_WITH_RISK
+- Priority: P2
+- Type: Plugin infrastructure config + app wiring + example alignment
+- Goal: Let the host service explicitly configure and choose whether to expose the plugin control-plane HTTP interface, so remote plugins keep the standard `/plugin/v1/invoke` service and register to host `/plugin/v1/register` through a configured host plugin endpoint. Keep HTTP and reserved WS addresses aligned in config without implementing real WS transport.
+- Allowed Files:
+  - `pkg/plugin/**/*`
+  - `internal/config/**/*`
+  - `internal/app/initapp/**/*`
+  - `internal/transport/http/**/*`
+  - `configs/config.example.yaml`
+  - `.env.example`
+  - `remote_plugins/blog/**/*`
+  - Project status, requirements, architecture, acceptance, decision, risk, changelog, issue, test report, and handoff documents.
+- Forbidden Files:
+  - Real `.env`, secrets, passwords, tokens, SSH keys, or production host values.
+  - Production deployment, workflow triggering, image publishing, or irreversible database migration.
+  - Real WS/RPC adapter implementation, persistent discovery/heartbeat, JWT/login flow, database-backed IAM, OPA/Casbin, and Go `.so` plugins.
+  - Unrelated `cmd/*` rewrites; existing dirty `cmd/server` -> `cmd/main` workspace changes must not be reverted.
+- Non-Goals:
+  - No real WebSocket transport, reconnect loop, heartbeat, or persistent plugin registry.
+  - No production-grade secret management.
+  - No business auth/RBAC or database-backed IAM.
+- Verification:
+  - `go test ./internal/config`: PASS
+  - `go test ./internal/app/...`: PASS
+  - `go test ./internal/transport/http`: PASS
+  - `go test ./pkg/plugin/...`: PASS
+  - `go test ./...`: PASS
+  - `go test ./...` inside `remote_plugins/blog`: PASS
+  - `git diff --check`: PASS, only Git LF/CRLF notices
+- Exit Conditions:
+  - [CONFIRMED] Host config exposes plugin interface settings for HTTP enabled/address/public URL and reserved WS URL.
+  - [CONFIRMED] Host app starts the plugin registration interface only when configured, separate from the main HTTP router path.
+  - [CONFIRMED] Existing main HTTP registration mounting remains controlled through explicit `registration.expose_on_main_http` and does not expose unintentionally.
+  - [CONFIRMED] Blog sample documents and uses the configured host plugin HTTP registration URL and reserved WS URL placeholders.
+  - [CONFIRMED] Tests and status documents are updated.
 
 ### TASK-P2-016: Remote plugin registration, IAM hook context, and Blog sample
 

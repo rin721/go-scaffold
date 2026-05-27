@@ -66,7 +66,7 @@ func TestRegisterWithHost(t *testing.T) {
 		Name:              "blog",
 		Version:           "test",
 		PublicHTTPURL:     blogServer.URL,
-		MainHTTPURL:       hostServer.URL,
+		HostHTTPURL:       hostServer.URL,
 		RegistrationToken: "register-secret",
 		SharedSecret:      "plugin-secret",
 		HookPoints:        []string{string(plugin.HookAfterInvoke)},

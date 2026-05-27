@@ -270,7 +270,13 @@ func TestOverrideWithEnvUsesEnvnameTagsForNonDatabaseConfigs(t *testing.T) {
 	setTaggedEnv(t, PluginConfig{}, "Enabled", "true")
 	setTaggedEnv(t, PluginConfig{}, "DefaultTimeout", "15")
 	setTaggedEnv(t, PluginConfig{}, "MaxResponseBytes", "2048")
+	setTaggedEnv(t, PluginHTTPInterfaceConfig{}, "Enabled", "true")
+	setTaggedEnv(t, PluginHTTPInterfaceConfig{}, "Host", "127.0.0.1")
+	setTaggedEnv(t, PluginHTTPInterfaceConfig{}, "Port", "19090")
+	setTaggedEnv(t, PluginHTTPInterfaceConfig{}, "PublicURL", "http://127.0.0.1:19090")
+	setTaggedEnv(t, PluginWSInterfaceConfig{}, "PublicURL", "ws://127.0.0.1:19090/plugin/v1/ws")
 	setTaggedEnv(t, PluginRegistrationConfig{}, "Enabled", "true")
+	setTaggedEnv(t, PluginRegistrationConfig{}, "ExposeOnMainHTTP", "false")
 	setTaggedEnv(t, PluginRegistrationConfig{}, "Token", "registration-secret")
 	setTaggedEnv(t, IAMConfig{}, "Enabled", "true")
 	setTaggedEnv(t, IAMConfig{}, "Mode", "memory")
@@ -316,7 +322,11 @@ func TestOverrideWithEnvUsesEnvnameTagsForNonDatabaseConfigs(t *testing.T) {
 		t.Fatalf("Storage override mismatch: %#v", cfg.Storage)
 	}
 	if !cfg.Plugin.Enabled || cfg.Plugin.DefaultTimeout != 15 || cfg.Plugin.MaxResponseBytes != 2048 ||
-		!cfg.Plugin.Registration.Enabled || cfg.Plugin.Registration.Token != "registration-secret" {
+		!cfg.Plugin.Interface.HTTP.Enabled || cfg.Plugin.Interface.HTTP.Host != "127.0.0.1" ||
+		cfg.Plugin.Interface.HTTP.Port != 19090 || cfg.Plugin.Interface.HTTP.PublicURL != "http://127.0.0.1:19090" ||
+		cfg.Plugin.Interface.WS.PublicURL != "ws://127.0.0.1:19090/plugin/v1/ws" ||
+		!cfg.Plugin.Registration.Enabled || cfg.Plugin.Registration.ExposeOnMainHTTP ||
+		cfg.Plugin.Registration.Token != "registration-secret" {
 		t.Fatalf("Plugin override mismatch: %#v", cfg.Plugin)
 	}
 	if !cfg.IAM.Enabled || cfg.IAM.Mode != "memory" || cfg.IAM.DefaultDenyEnabled() {
@@ -458,6 +468,17 @@ func testCompleteConfig() *Config {
 			Enabled:          true,
 			DefaultTimeout:   10,
 			MaxResponseBytes: 1024,
+			Interface: PluginInterfaceConfig{
+				HTTP: PluginHTTPInterfaceConfig{
+					Enabled:   true,
+					Host:      "127.0.0.1",
+					Port:      18080,
+					PublicURL: "http://127.0.0.1:18080",
+				},
+				WS: PluginWSInterfaceConfig{
+					PublicURL: "ws://127.0.0.1:18080/plugin/v1/ws",
+				},
+			},
 			Registration: PluginRegistrationConfig{
 				Enabled: true,
 				Token:   "registration-secret",

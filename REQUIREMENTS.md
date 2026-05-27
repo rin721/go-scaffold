@@ -6,7 +6,7 @@
 - 阶段：需求确认
 - 状态：COMPLETED
 - 发布状态：NOT_RELEASE_READY
-- 最后更新：2026-05-27
+- 最后更新：2026-05-28
 - 输入：用户发送“下一步”，按当前文档默认值确认 `TASK-OPT-002`
 
 ## 确认结果
@@ -59,6 +59,7 @@
 | REQ-OPT-P2-006 | 插件钩子运行时、HTTP 远程插件传输和 IAM 公共接口 | 用户确认 `dev.tmp/new-plugin.md` 设计；本轮仅实现公共基础设施接口、内存 IAM 和 app 组合层接入，不实现完整业务登录/RBAC | [CONFIRMED] |
 | REQ-OPT-P2-007 | 配置环境变量动态前缀与字段标签覆盖 | 用户要求 `internal/config` 结合 `AppPrefix` 自动注入环境变量，并使用 `envname` 配置字段环境变量名；已实现 `RIN_APP_*` 动态前缀、未加前缀 fallback 和 `.env` 自动加载测试；重复 env-name 常量已删除，字段名以 `envname` 标签为唯一事实源 | [CONFIRMED] |
 | REQ-OPT-P2-008 | 远程插件显式注册、IAM hook JSON 上下文和 Blog 示例 | 用户通过 `/goal` 确认新范围；TASK-P2-016 已完成 HTTP 显式注册、IAM 安全主体上下文注入和 `remote_plugins/blog` 示例；真实 WS/RPC、JWT/login、数据库版权限或生产部署仍不实现 | [CONFIRMED] |
+| REQ-OPT-P2-009 | Plugin control-plane interface address configuration | User correction requires remote plugin services to expose standard `/plugin/v1/invoke`, register to host `/plugin/v1/register`, and align HTTP/WS protocol addresses through host plugin-system configuration. TASK-P2-017 implements configurable host HTTP interface exposure and reserved WS address placeholders only. | [CONFIRMED] |
 
 ## 非需求
 

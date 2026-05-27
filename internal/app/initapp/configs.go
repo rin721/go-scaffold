@@ -135,6 +135,16 @@ func HTTPServerConfig(cfg *config.Config) *httpserver.Config {
 	}
 }
 
+func PluginHTTPServerConfig(cfg *config.Config) *httpserver.Config {
+	return &httpserver.Config{
+		Host:         cfg.Plugin.Interface.HTTP.Host,
+		Port:         cfg.Plugin.Interface.HTTP.Port,
+		ReadTimeout:  time.Duration(cfg.Server.ReadTimeout) * time.Second,
+		WriteTimeout: time.Duration(cfg.Server.WriteTimeout) * time.Second,
+		IdleTimeout:  time.Duration(cfg.Server.IdleTimeout) * time.Second,
+	}
+}
+
 func NormalizedStorageConfig(cfg *config.Config) config.StorageConfig {
 	storageCfg := cfg.Storage
 	storageCfg.DefaultConfig()

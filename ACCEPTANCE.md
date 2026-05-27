@@ -1,5 +1,15 @@
 # ACCEPTANCE.md
 
+## TASK-P2-017 Acceptance
+
+| ID | Acceptance Item | Method | Required | Status |
+|---|---|---|---|---|
+| ACC-P2-066 | Host plugin config exposes HTTP interface enabled/address/public URL and reserved WS URL fields | `go test ./internal/config` | Yes | [CONFIRMED] |
+| ACC-P2-067 | Host can expose `/plugin/v1/register` on a separate configured plugin HTTP interface | `go test ./internal/app/... ./internal/transport/http` | Yes | [CONFIRMED] |
+| ACC-P2-068 | Host keeps plugin interface disabled unless explicitly configured | `go test ./internal/app/...` | Yes | [CONFIRMED] |
+| ACC-P2-069 | Blog sample keeps standard `/plugin/v1/invoke` and registers to configured host `/plugin/v1/register` endpoint | `go test ./...` in `remote_plugins/blog` | Yes | [CONFIRMED] |
+| ACC-P2-070 | Scope does not implement real WS/RPC, discovery heartbeat, production deployment, or real secrets | Scope review and `git diff --check` | Yes | [CONFIRMED] |
+
 ## TASK-P2-016 Acceptance
 
 | ID | Acceptance Item | Method | Required | Status |

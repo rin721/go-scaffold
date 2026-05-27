@@ -2,6 +2,16 @@
 
 ## Latest Current Handoff
 
+- TASK-P2-017 / TS-P2-017: COMPLETED.
+- Host plugin config now has explicit control-plane interface settings: `plugin.interface.http.enabled/host/port/public_url` and reserved `plugin.interface.ws.public_url`.
+- Host app can start an optional dedicated plugin HTTP server exposing `/plugin/v1/register`; main HTTP registration exposure is now explicit through `plugin.registration.expose_on_main_http`.
+- `remote_plugins/blog` continues exposing standard `/plugin/v1/invoke` and registers to the configured host plugin HTTP URL; new `BLOG_PLUGIN_HOST_HTTP_URL` / `BLOG_PLUGIN_HOST_WS_URL` env names fall back to the older `BLOG_PLUGIN_MAIN_*` names.
+- Real WS/RPC transport, heartbeat/discovery, JWT/login, database-backed IAM, production deployment, and real secrets remain out of scope.
+- Verification completed: `go test ./internal/config`, `go test ./internal/app/...`, `go test ./internal/transport/http`, `go test ./pkg/plugin/...`, root `go test ./...`, Blog module `go test ./...`, and `git diff --check` passed. `git diff --check` emitted only Git LF/CRLF notices.
+- Next legal state: `NONE / NONE / PENDING_USER_CONFIRMATION`.
+
+## Previous Current Handoff
+
 - TASK-P2-016 / TS-P2-016: COMPLETED.
 - Host now exposes explicit remote plugin registration through `POST /plugin/v1/register` when plugin registration is enabled and a registration token is configured.
 - Hook JSON events can include safe IAM principal context at `identity.principal`; tokens, policies, credentials, secrets, and IAM service internals are not sent to plugins.
@@ -11,6 +21,13 @@
 - Next legal state: `NONE / NONE / PENDING_USER_CONFIRMATION`.
 
 ## Latest Handoff Addendum
+
+- Date: 2026-05-28
+- Task: TASK-P2-017 / TS-P2-017
+- Summary: Added configurable host plugin control-plane HTTP interface, optional dedicated `/plugin/v1/register` server, explicit main HTTP exposure flag, reserved WS URL config, and Blog sample host URL alignment.
+- Files changed in this addendum: `internal/config`, `internal/app/initapp`, `internal/app/lifecycleapp`, `internal/transport/http`, `.env.example`, `configs/config.example.yaml`, `remote_plugins/blog`, and project status documents.
+- Verification: `go test ./internal/config` PASS, `go test ./internal/app/...` PASS, `go test ./internal/transport/http` PASS, `go test ./pkg/plugin/...` PASS, `go test ./...` PASS, Blog module `go test ./...` PASS, `git diff --check` PASS with only Git LF/CRLF notices.
+- Legal next step returns to `NONE / NONE / PENDING_USER_CONFIRMATION`; project remains `IN_DEVELOPMENT_NOT_RELEASE_READY`.
 
 - Date: 2026-05-28
 - Task: TASK-P2-016 / TS-P2-016
@@ -37,7 +54,7 @@
 
 ## Last Updated
 
-- Date: 2026-05-27
+- Date: 2026-05-28
 - Agent: Codex
 - Tool: Codex Desktop
 

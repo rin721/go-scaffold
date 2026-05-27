@@ -2,6 +2,21 @@
 
 ## Latest Current Slice
 
+- 2026-05-28: TASK-P2-017 / TS-P2-017 COMPLETED.
+- User correction accepted with risk: remote plugin services expose standard `/plugin/v1/invoke` and register to host `/plugin/v1/register`, while the host explicitly configures the plugin control-plane HTTP interface address/port and reserved WS address.
+- Implemented host plugin interface config (`interface.http` and `interface.ws`), optional dedicated plugin HTTP server for `/plugin/v1/register`, explicit `registration.expose_on_main_http`, config/env examples, and Blog sample host URL alignment.
+- Verification: `go test ./internal/config`, `go test ./internal/app/...`, `go test ./internal/transport/http`, `go test ./pkg/plugin/...`, `go test ./...`, `go test ./...` in `remote_plugins/blog`, and `git diff --check` passed. `git diff --check` emitted only Git LF/CRLF notices.
+- Current legal work after completion: `NONE / NONE / PENDING_USER_CONFIRMATION`.
+- Strict non-goals remain: real WS/RPC transport, persistent discovery/heartbeat, production deployment, real secrets, JWT/login, database-backed IAM, and unrelated `cmd/*` rewrites.
+
+## Current Legal Work Override
+
+- Current Module: NONE
+- Current Task ID: NONE
+- Current Time Slice ID: NONE
+- Current Status: PENDING_USER_CONFIRMATION
+- Why this is the only legal work now: TASK-P2-017 / TS-P2-017 is completed and verified. The project remains `IN_DEVELOPMENT_NOT_RELEASE_READY`; any real WS/RPC transport, plugin heartbeat/discovery, production deployment, real secrets, or database-backed IAM work requires a new confirmed task and time slice.
+
 - 2026-05-28: TASK-P2-016 / TS-P2-016 COMPLETED.
 - User goal accepted with risk: implement a host-side remote plugin registration loop, inject safe IAM principal data into the plugin hook JSON event protocol, and add `remote_plugins/blog` as an independently deployable remote Blog plugin sample.
 - Implemented `POST /plugin/v1/register`, host config for registration token gating, IAM principal injection into `hooks.Event.identity`, and a standalone `remote_plugins/blog` module with registration client, invoke endpoint, README, and tests.
@@ -27,7 +42,7 @@
 - 项目：go-scaffold
 - 当前阶段：项目开发中，未达第一版发布条件
 - 总体状态：IN_DEVELOPMENT_NOT_RELEASE_READY
-- 最后更新：2026-05-27
+- 最后更新：2026-05-28
 - 最近 Agent：Codex
 - 最近工具：Codex Desktop
 

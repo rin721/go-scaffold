@@ -14,8 +14,8 @@ type Config struct {
 	Version           string
 	ListenAddr        string
 	PublicHTTPURL     string
-	MainHTTPURL       string
-	MainWSURL         string
+	HostHTTPURL       string
+	HostWSURL         string
 	RegistrationToken string
 	SharedSecret      string
 	RegisterTimeout   time.Duration
@@ -23,13 +23,15 @@ type Config struct {
 }
 
 func LoadConfigFromEnv() Config {
+	hostHTTPURL := envString("BLOG_PLUGIN_HOST_HTTP_URL", envString("BLOG_PLUGIN_MAIN_HTTP_URL", ""))
+	hostWSURL := envString("BLOG_PLUGIN_HOST_WS_URL", envString("BLOG_PLUGIN_MAIN_WS_URL", ""))
 	return Config{
 		Name:              envString("BLOG_PLUGIN_NAME", "blog"),
 		Version:           envString("BLOG_PLUGIN_VERSION", "0.1.0"),
 		ListenAddr:        envString("BLOG_PLUGIN_LISTEN_ADDR", "127.0.0.1:18081"),
 		PublicHTTPURL:     envString("BLOG_PLUGIN_PUBLIC_HTTP_URL", "http://127.0.0.1:18081"),
-		MainHTTPURL:       envString("BLOG_PLUGIN_MAIN_HTTP_URL", ""),
-		MainWSURL:         envString("BLOG_PLUGIN_MAIN_WS_URL", ""),
+		HostHTTPURL:       hostHTTPURL,
+		HostWSURL:         hostWSURL,
 		RegistrationToken: envString("BLOG_PLUGIN_REGISTRATION_TOKEN", ""),
 		SharedSecret:      envString("BLOG_PLUGIN_SHARED_SECRET", ""),
 		RegisterTimeout:   envDuration("BLOG_PLUGIN_REGISTER_TIMEOUT_SECONDS", 10*time.Second),

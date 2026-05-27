@@ -2,6 +2,18 @@
 
 ## Latest Addendum
 
+### 2026-05-28 - TASK-P2-017 - Plugin control-plane interface configuration
+
+- Change: Added host plugin control-plane config for `plugin.interface.http.enabled/host/port/public_url` and reserved `plugin.interface.ws.public_url`.
+- Change: Added optional dedicated plugin HTTP server startup for `/plugin/v1/register`, while main HTTP registration exposure now requires explicit `plugin.registration.expose_on_main_http`.
+- Change: Updated config/env examples and validation so registration must be explicitly exposed either on the plugin interface or on main HTTP.
+- Change: Updated `remote_plugins/blog` to use `BLOG_PLUGIN_HOST_HTTP_URL` / `BLOG_PLUGIN_HOST_WS_URL` with fallback to the older `BLOG_PLUGIN_MAIN_*` names, while keeping the standard `/plugin/v1/invoke` service.
+- Scope: No real WS/RPC adapter, heartbeat/discovery, production deployment, real secrets, JWT/login, or database-backed IAM.
+- Verification: `go test ./internal/config`; `go test ./internal/app/...`; `go test ./internal/transport/http`; `go test ./pkg/plugin/...`; `go test ./...`; `go test ./...` inside `remote_plugins/blog`; `git diff --check` passed with only Git LF/CRLF notices.
+- Status: TASK-P2-017 / TS-P2-017 completed; project remains `IN_DEVELOPMENT_NOT_RELEASE_READY`, legal next state is `NONE / NONE / PENDING_USER_CONFIRMATION`.
+
+## Previous Addendum
+
 ### 2026-05-28 - TASK-P2-016 - Remote plugin registration and Blog sample
 
 - Change: Added host-side remote plugin registration protocol and `POST /plugin/v1/register` HTTP handler with optional shared registration token validation.

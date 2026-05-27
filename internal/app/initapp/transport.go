@@ -35,9 +35,15 @@ func NewTransport(core Core, infra Infrastructure, modules Modules) (Transport, 
 		return Transport{}, err
 	}
 
+	pluginHTTPServer, err := NewPluginHTTPServer(core.Config, core.Logger, infra.Plugins)
+	if err != nil {
+		return Transport{}, err
+	}
+
 	return Transport{
-		Router:     router,
-		HTTPServer: server,
+		Router:           router,
+		HTTPServer:       server,
+		PluginHTTPServer: pluginHTTPServer,
 	}, nil
 }
 
@@ -92,7 +98,7 @@ func NewHTTPServer(
 		Database:    db,
 		Middleware:  middlewareCfg,
 		TodoHandler: todoHandler,
-		PluginRegistration: NewPluginRegistrationHandler(
+		PluginRegistration: NewMainPluginRegistrationHandler(
 			cfg,
 			plugins,
 		),
@@ -104,6 +110,28 @@ func NewHTTPServer(
 	}
 
 	return router, server, nil
+}
+
+func NewPluginHTTPServer(cfg *config.Config, log logger.Logger, plugins plugin.Manager) (httpserver.HTTPServer, error) {
+	if cfg == nil || !cfg.Plugin.Interface.HTTP.Enabled {
+		return nil, nil
+	}
+	handler := NewPluginRegistrationHandler(cfg, plugins)
+	if handler == nil {
+		return nil, fmt.Errorf("plugin http interface requires plugin registration handler")
+	}
+	server, err := httpserver.New(httptransport.NewPluginRouter(handler), PluginHTTPServerConfig(cfg), log)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create plugin http server: %w", err)
+	}
+	return server, nil
+}
+
+func NewMainPluginRegistrationHandler(cfg *config.Config, plugins plugin.Manager) http.Handler {
+	if cfg == nil || !cfg.Plugin.Registration.ExposeOnMainHTTP {
+		return nil
+	}
+	return NewPluginRegistrationHandler(cfg, plugins)
 }
 
 func NewPluginRegistrationHandler(cfg *config.Config, plugins plugin.Manager) http.Handler {

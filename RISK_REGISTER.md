@@ -1,11 +1,24 @@
 # RISK_REGISTER.md
 
+## Latest Risk Addendum
+
+### RISK-025: Plugin control-plane address exposure can widen the attack surface
+- Type: Security/Plugin
+- Severity: High
+- Probability: Medium
+- Impact: If a dedicated plugin registration interface is enabled on a broad address without proper network controls and shared token configuration, untrusted services may attempt plugin registration.
+- Trigger: TASK-P2-017 adds host-side plugin interface address/port configuration and optional separate HTTP exposure.
+- Mitigation: Keep the plugin HTTP interface disabled by default, require an explicit registration token when registration is enabled, use placeholder examples only, and keep WS as a non-functional reserved address until a separate task confirms transport security.
+- Owner: User/Agent
+- Status: [RISK]
+- Blocking: No, but it blocks claiming production-grade plugin discovery or secret management.
+
 ## 风险登记状态
 
 - Project：go-scaffold
 - Phase：项目开发中，未达第一版发布条件
 - Status：IN_DEVELOPMENT_NOT_RELEASE_READY
-- Last Updated：2026-05-27
+- Last Updated：2026-05-28
 
 ## 风险列表
 

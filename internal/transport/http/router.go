@@ -58,6 +58,14 @@ func NewRouter(deps RouterDeps) *gin.Engine {
 	return r
 }
 
+func NewPluginRouter(registration http.Handler) http.Handler {
+	mux := http.NewServeMux()
+	if registration != nil {
+		mux.Handle(plugin.HTTPRegisterPath, registration)
+	}
+	return mux
+}
+
 func health(c *gin.Context) {
 	c.JSON(http.StatusOK, result.Success(gin.H{"status": "ok"}))
 }

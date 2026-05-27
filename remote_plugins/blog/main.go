@@ -43,7 +43,7 @@ func run(ctx context.Context, cfg Config) error {
 		errCh <- server.Serve(listener)
 	}()
 
-	if cfg.MainHTTPURL != "" {
+	if cfg.HostHTTPURL != "" {
 		registerCtx, cancel := context.WithTimeout(ctx, cfg.RegisterTimeout)
 		if err := RegisterWithHost(registerCtx, cfg, http.DefaultClient); err != nil {
 			cancel()
@@ -51,7 +51,7 @@ func run(ctx context.Context, cfg Config) error {
 			return err
 		}
 		cancel()
-		log.Printf("registered blog plugin with host %s; ws address reserved as %s", cfg.MainHTTPURL, cfg.MainWSURL)
+		log.Printf("registered blog plugin with host %s; ws address reserved as %s", cfg.HostHTTPURL, cfg.HostWSURL)
 	}
 
 	signalCh := make(chan os.Signal, 1)
@@ -84,5 +84,5 @@ func protectWithSharedSecret(next http.Handler, secret string) http.Handler {
 }
 
 func printConfig(cfg Config) string {
-	return fmt.Sprintf("listen=%s public_http=%s main_http=%s main_ws=%s", cfg.ListenAddr, cfg.PublicHTTPURL, cfg.MainHTTPURL, cfg.MainWSURL)
+	return fmt.Sprintf("listen=%s public_http=%s host_http=%s host_ws=%s", cfg.ListenAddr, cfg.PublicHTTPURL, cfg.HostHTTPURL, cfg.HostWSURL)
 }

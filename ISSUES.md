@@ -1,6 +1,14 @@
 # ISSUES.md
 
-## Latest Issue Review: TASK-P2-016
+## Latest Issue Review: TASK-P2-017
+
+- Date: 2026-05-28
+- Result: No new blocking issue for TASK-P2-017.
+- Note: Plugin registration exposure is now explicit: dedicated plugin HTTP interface must be enabled, or main HTTP exposure must be opted in with `plugin.registration.expose_on_main_http`. WS remains a reserved URL placeholder only.
+- Verification: config/app/router/plugin target tests, root `go test ./...`, Blog module `go test ./...`, and `git diff --check` passed. `git diff --check` emitted only Git LF/CRLF notices.
+- Residual risks: broad network exposure of the plugin control plane, real WS/RPC transport, plugin heartbeat/persistent discovery, JWT/login, database-backed IAM, production deployment, and real secret management remain out of scope.
+
+## Previous Issue Review: TASK-P2-016
 
 - Date: 2026-05-28
 - Result: No new blocking issue.
@@ -22,7 +30,7 @@
 ## Issue 状态
 
 - 项目：go-scaffold
-- 最后更新：2026-05-27
+- 最后更新：2026-05-28
 - 规则：失败、返工和阻塞问题记录在本文；风险项仍记录在 `RISK_REGISTER.md`。
 
 ## Open Issues

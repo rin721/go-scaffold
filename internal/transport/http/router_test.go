@@ -152,6 +152,35 @@ func TestNewRouterPluginRegistrationEndpoint(t *testing.T) {
 	}
 }
 
+func TestNewPluginRouterRegistrationEndpoint(t *testing.T) {
+	manager := plugin.NewManager()
+	router := NewPluginRouter(plugin.NewHTTPRegistrationHandler(manager, plugin.WithRegistrationToken("secret")))
+
+	body, err := json.Marshal(plugin.RegistrationRequest{
+		Plugin: plugin.Definition{
+			Name:     "blog",
+			Protocol: plugin.ProtocolHTTP,
+			Endpoint: "http://127.0.0.1:18081" + plugin.HTTPInvokePath,
+		},
+	})
+	if err != nil {
+		t.Fatalf("Marshal registration: %v", err)
+	}
+	request := httptest.NewRequest(http.MethodPost, plugin.HTTPRegisterPath, bytes.NewReader(body))
+	request.Header.Set("Content-Type", "application/json")
+	request.Header.Set("Authorization", "Bearer secret")
+	recorder := httptest.NewRecorder()
+
+	router.ServeHTTP(recorder, request)
+
+	if recorder.Code != http.StatusCreated {
+		t.Fatalf("registration status = %d, want 201 with body %s", recorder.Code, recorder.Body.String())
+	}
+	if _, ok := manager.Get("blog"); !ok {
+		t.Fatal("registered plugin not found in manager")
+	}
+}
+
 func newTestRouter(deps RouterDeps) *gin.Engine {
 	gin.SetMode(gin.TestMode)
 	return NewRouter(deps)
