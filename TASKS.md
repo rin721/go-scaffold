@@ -5,7 +5,7 @@
 - Task ID：TASK-P2-004
 - Status：BLOCKED
 - Time Slice：TS-P2-004
-- Summary：`dev.tmp/new-plugin.md` 设计已完成。当前唯一未关闭事项是 TASK-P2-004 的 Docker build 验证；2026-05-27 再次检查后当前环境仍无 Docker 兼容 CLI，任务受环境缺失阻塞，`ISSUE-P2-005` 保持打开。
+- Summary：`dev.tmp/new-plugin.md` 设计已完成。当前唯一未关闭事项是 TASK-P2-004 的 Docker build 验证；2026-05-27 本轮再次检查后当前环境仍无 Docker 兼容 CLI，任务受环境缺失阻塞，`ISSUE-P2-005` 保持打开。
 
 ## 任务列表
 

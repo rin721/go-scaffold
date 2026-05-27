@@ -2,6 +2,13 @@
 
 ## 最新变更
 
+### 2026-05-27 - TASK-P2-004 - TS-P2-004 blocked recheck
+
+- 变更：用户发送“下一步”后，按当前唯一合法任务复验 Docker build 前置环境，不推进新功能。
+- 验证：`docker version` 失败；`docker`、`podman`、`nerdctl`、`docker.exe` 均不可用；`docker build -t go-scaffold:local .` 因前置 Docker CLI/daemon 缺失未执行。
+- 范围：本轮仅更新项目状态与交接文档，未修改 Go 代码、部署脚本、workflow、真实配置或密钥。
+- 状态：TASK-P2-004 / TS-P2-004 保持 `BLOCKED`，`ISSUE-P2-005` 保持 OPEN；TASK-P2-005 至 TASK-P2-010 插件/IAM 主线仍保持 `COMPLETED`。
+
 ### 2026-05-27 - dev.tmp/new-plugin completion audit
 
 - 变更：按 `dev.tmp/new-plugin.md` 重新审计插件钩子运行时、HTTP 远程插件传输、IAM 公共接口、配置/app/reload/lifecycle 接入。

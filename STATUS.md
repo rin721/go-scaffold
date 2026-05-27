@@ -112,11 +112,11 @@
 
 ## 最近执行
 
-- 摘要：按 `dev.tmp/new-plugin.md` 重新审计 TASK-P2-005 至 TASK-P2-010，补强 nil hook handler 拒绝、HTTP 响应大小超限错误和关键测试；当前 Docker build 阻塞仍独立保留。
-- 变更文件：`pkg/plugin/hooks/registry.go`、`pkg/plugin/hooks/types.go`、`pkg/plugin/hooks/registry_test.go`、`pkg/plugin/http.go`、`pkg/plugin/plugin_test.go`、`TEST_REPORT.md`、`CHANGELOG.md`、`AGENT_HANDOFF.md`、`STATUS.md`。
-- 执行命令：必读文件读取；设计文件读取；`gofmt`；`go test ./pkg/plugin/... -count=1`；`go test ./pkg/iam/... -count=1`；`go test ./internal/config ./internal/app/... -count=1`；`go test ./... -count=1`；`go build -o <temp> ./cmd/server`；`git diff --check`。
-- 测试结果：插件/IAM/app 相关测试、全量回归、server build 和 diff 检查均通过；Docker build 未执行，原因仍是当前环境缺少 Docker 兼容 CLI。
-- 完成判断：`dev.tmp/new-plugin.md` 设计已完成；TASK-P2-004 / TS-P2-004 仍为 BLOCKED。
+- 摘要：用户发送“下一步”后，按协议复验当前唯一未关闭项 TASK-P2-004 的 Docker build 前置环境。
+- 变更文件：项目状态文档与交接文档。
+- 执行命令：必读文件读取；`docker version`；`Get-Command docker,podman,nerdctl,docker.exe -ErrorAction SilentlyContinue`；`git diff --check`。
+- 测试结果：`docker version` 失败，未发现 `docker`、`podman`、`nerdctl` 或 `docker.exe`；`docker build -t go-scaffold:local .` 因前置 Docker CLI/daemon 不可用未执行；本轮未修改 Go 代码，未运行 Go 测试。
+- 完成判断：TASK-P2-004 / TS-P2-004 仍为 BLOCKED，`ISSUE-P2-005` 保持 OPEN；TASK-P2-005 至 TASK-P2-010 仍为 COMPLETED。
 
 ## 下一步
 

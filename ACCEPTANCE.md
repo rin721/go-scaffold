@@ -83,7 +83,7 @@
 - TASK-NEXT-SCOPE-010 真实 CD 范围确认：COMPLETED，用户已确认使用远程部署和 `.env` 风格配置
 - TASK-P2-002 显式参数部署入口：COMPLETED，`deploy.sh` 和 `script/install.sh` 已新增，旧本地部署 env 文件依赖已删除
 - TASK-P2-003 手动远程部署 workflow：COMPLETED，staging/manual/Secrets/SSH/Docker Compose 路径已新增，本会话未执行真实部署
-- TASK-P2-004 Linux Docker production 部署制品：BLOCKED，Dockerfile、production Compose 示例、统一 `deploy.sh` 部署入口和手动 production 闸门已补齐；2026-05-27 复验当前环境仍无 `docker`、`podman`、`nerdctl` 或 `docker.exe`，Docker build 待具备 Docker 的环境补跑
+- TASK-P2-004 Linux Docker production 部署制品：BLOCKED，Dockerfile、production Compose 示例、统一 `deploy.sh` 部署入口和手动 production 闸门已补齐；2026-05-27 本轮复验当前环境仍无 `docker`、`podman`、`nerdctl` 或 `docker.exe`，Docker build 待具备 Docker 的环境补跑
 - TASK-P2-005 至 TASK-P2-010 插件钩子运行时与 IAM 公共接口：COMPLETED，`pkg/plugin/hooks`、hook-aware manager、HTTP 远程插件服务端、`RemoteHook`、`pkg/iam` memory、配置/app/reload/lifecycle 接入均已完成并通过验证
 - Agent 基础设施补齐：COMPLETED
 - Agent 基础设施一致性修复：COMPLETED
@@ -404,7 +404,7 @@
 
 | ID | 验收项 | 方法 | 必须 | 状态 |
 |---|---|---|---|---|
-| ACC-P2-026 | Dockerfile 存在且可构建 Linux server 镜像 | `docker build -t go-scaffold:local .` | 是 | [BLOCKED] 当前环境缺少 Docker 兼容 CLI；2026-05-27 复验 `docker`、`podman`、`nerdctl`、`docker.exe` 均不可用，待具备 Docker 的环境补跑 |
+| ACC-P2-026 | Dockerfile 存在且可构建 Linux server 镜像 | `docker build -t go-scaffold:local .` | 是 | [BLOCKED] 当前环境缺少 Docker 兼容 CLI；2026-05-27 本轮复验 `docker`、`podman`、`nerdctl`、`docker.exe` 均不可用，待具备 Docker 的环境补跑 |
 | ACC-P2-027 | production Compose 示例存在并使用外置配置、数据和日志挂载 | 检查 `deploy/docker-compose.production.example.yml` | 是 | [CONFIRMED] |
 | ACC-P2-028 | production 配置样例绑定 `0.0.0.0:9999` 且不含真实密钥 | 检查 `deploy/config.production.example.yaml` | 是 | [CONFIRMED] |
 | ACC-P2-029 | 远程部署 workflow 支持 staging/production 手动选择并要求环境绑定确认词 | 检查 `.github/workflows/deploy-remote.yml` | 是 | [CONFIRMED] |

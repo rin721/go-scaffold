@@ -17,51 +17,42 @@
 
 ## What Was Done Last
 
-- 按 `dev.tmp/new-plugin.md` 重新审计 TASK-P2-005 至 TASK-P2-010 的当前实现。
-- 补强 `pkg/plugin/hooks`：nil `HandlerFunc` 作为空处理器在注册时拒绝，直接调用也返回 `ErrNilHandler`。
-- 补强 HTTP 远程插件客户端：响应超过 `maxResponseBytes` 时返回包装 `ErrInvalidResponse` 的明确错误。
-- 新增测试覆盖 nil hook handler 拒绝、HTTP 响应大小限制、`after_invoke` hook 失败时返回插件响应和包装后的 hook 错误。
+- 用户发送“下一步”后，按协议读取必读项目文档并确认当前唯一合法任务仍为 TASK-P2-004 / TS-P2-004。
+- 复验 Docker build 前置环境：`docker version` 失败，`docker`、`podman`、`nerdctl`、`docker.exe` 均不可用。
+- `docker build -t go-scaffold:local .` 因前置 Docker CLI/daemon 缺失未执行。
+- TASK-P2-004 / TS-P2-004 继续保持 `BLOCKED`，`ISSUE-P2-005` 保持打开。
 - TASK-P2-005 至 TASK-P2-010 插件钩子运行时、HTTP 远程插件传输、独立 IAM 公共接口、配置接入、app 装配、reload 和 lifecycle 保持 `COMPLETED`。
-- TASK-P2-004 / TS-P2-004 Docker build 仍因当前环境缺少 Docker 兼容 CLI 保持 `BLOCKED`，`ISSUE-P2-005` 保持打开。
 - 本轮未触发 workflow、未连接远程服务器、未推送镜像、未执行真实 production、未写入真实密钥。
 
 ## Files Changed Last
 
 | File | Change | Reason |
 |---|---|---|
-| `pkg/plugin/hooks/*` | Added | 独立钩子引擎、注册表、服务查找、停止语义和测试 |
-| `pkg/plugin/hooks/registry.go`、`pkg/plugin/hooks/types.go`、`pkg/plugin/hooks/registry_test.go` | Updated | 拒绝 nil `HandlerFunc` 并补测试 |
-| `pkg/plugin/manager.go`、`pkg/plugin/constants.go` | Updated | manager 钩子 API、标准钩子点、调用语义 |
-| `pkg/plugin/http_server.go`、`pkg/plugin/remote_hook.go` | Added | HTTP 插件服务端 helper 和远程钩子适配器 |
-| `pkg/plugin/http.go`、`pkg/plugin/plugin_test.go` | Updated | 明确 HTTP 响应大小超限错误，并覆盖 after hook 错误返回响应 |
-| `pkg/iam/*`、`pkg/iam/memory/*` | Added | IAM 公共 API 和内存实现 |
-| `internal/config/*` | Updated | 新增 `plugin` / `iam` 配置、默认值、校验、env override 和深拷贝 |
-| `internal/app/initapp/*` | Updated | Infrastructure 新增 IAM/Plugins，server 模式装配和 app 层 hook 注册 |
-| `internal/app/reloadapp/reload.go` | Updated | 配置重载先构建新 IAM/plugin 实例再替换，失败保留旧实例 |
-| `internal/app/lifecycleapp/lifecycle.go` | Updated | HTTP server 停止后、cache/database 前关闭插件管理器 |
-| Project status docs | Updated | 记录用户“下一步”后的 Docker 复验结果；TASK-P2-004 / TS-P2-004 为 BLOCKED，TASK-P2-005 至 TASK-P2-010 保持完成 |
+| `STATUS.md` | Updated | 将最近执行切回 TASK-P2-004 Docker 阻塞复验 |
+| `TEST_REPORT.md` | Updated | 记录当前最新验证为 Docker 前置环境复验 |
+| `CHANGELOG.md` | Updated | 新增本轮 blocked recheck 变更记录 |
+| `ISSUES.md` | Updated | 追加 `ISSUE-P2-005` 的本轮复验记录 |
+| `AGENT_HANDOFF.md` | Updated | 交接说明指向当前合法阻塞任务 |
 
 ## Commands Run Last
 
 | Command | Result |
 |---|---|
 | Required file reads | PASS |
-| `gofmt -w pkg/plugin/hooks/types.go pkg/plugin/hooks/registry.go pkg/plugin/hooks/registry_test.go pkg/plugin/http.go pkg/plugin/plugin_test.go` | PASS |
-| `go test ./pkg/plugin/... -count=1` | PASS |
-| `go test ./pkg/iam/... -count=1` | PASS |
-| `go test ./internal/config ./internal/app/... -count=1` | PASS |
-| `go test ./... -count=1` | PASS |
-| `go build -o <temp> ./cmd/server` | PASS |
+| `docker version` | FAIL_ENV |
+| `Get-Command docker,podman,nerdctl,docker.exe -ErrorAction SilentlyContinue` | NOT_AVAILABLE |
+| `docker build -t go-scaffold:local .` | NOT_RUN |
+| Go tests | NOT_RUN，本轮未修改 Go 代码 |
 | `git diff --check` | PASS |
 
 ## Test Status
 
 - Docker image build: BLOCKED for TASK-P2-004 because Docker CLI/daemon is unavailable in the current environment.
-- `pkg/plugin` and `pkg/plugin/hooks`: PASS after completion audit.
-- `pkg/iam` and `pkg/iam/memory`: PASS after completion audit.
-- `internal/config` and `internal/app/...`: PASS after completion audit.
-- Full regression and server build: PASS after completion audit.
-- Diff whitespace check: PASS; only Windows LF/CRLF warnings were printed.
+- `pkg/plugin` and `pkg/plugin/hooks`: PASS from the previous completion audit.
+- `pkg/iam` and `pkg/iam/memory`: PASS from the previous completion audit.
+- `internal/config` and `internal/app/...`: PASS from the previous completion audit.
+- Full regression and server build: PASS from the previous completion audit.
+- Diff whitespace check: PASS for this documentation-only update; only Windows LF/CRLF warnings were printed.
 
 ## Current Blockers
 

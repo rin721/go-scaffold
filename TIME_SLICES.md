@@ -5,7 +5,7 @@
 - Time Slice ID：TS-P2-004
 - Task ID：TASK-P2-004
 - Status：BLOCKED
-- Summary：`dev.tmp/new-plugin.md` 主线已完成；TASK-P2-005 至 TASK-P2-010 均已通过验证。当前唯一未关闭事项是 TASK-P2-004 Docker build，2026-05-27 再次检查后当前环境仍无 Docker 兼容 CLI，`ISSUE-P2-005` 保持打开。
+- Summary：`dev.tmp/new-plugin.md` 主线已完成；TASK-P2-005 至 TASK-P2-010 均已通过验证。当前唯一未关闭事项是 TASK-P2-004 Docker build，2026-05-27 本轮再次检查后当前环境仍无 Docker 兼容 CLI，`ISSUE-P2-005` 保持打开。
 
 ## 时间切片列表
 

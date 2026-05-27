@@ -3,42 +3,50 @@
 ## 最新验证
 
 - 日期：2026-05-27
-- 任务 ID：TASK-P2-005 至 TASK-P2-010 completion audit
-- 时间切片 ID：TS-P2-005 至 TS-P2-010
-- 状态：COMPLETED；TASK-P2-004 Docker build 仍独立 BLOCKED
-- 范围：按 `dev.tmp/new-plugin.md` 重新审计插件钩子运行时、HTTP 远程插件传输、IAM 公共接口、配置/app/reload/lifecycle 接入；补齐 nil `HandlerFunc` 拒绝、HTTP 响应大小超限错误和相关测试。
+- 任务 ID：TASK-P2-004
+- 时间切片 ID：TS-P2-004
+- 状态：BLOCKED
+- 范围：用户发送“下一步”后，按当前唯一合法任务复验 Docker build 前置环境；不推进新功能，不关闭 `ISSUE-P2-005`。
 
 ## 执行命令
 
 | 命令 | 结果 | 备注 |
 |---|---|---|
-| 必读文件读取 | PASS | 已读取 `AGENTS.md`、Agent 规则、状态、任务、切片、需求、架构、验收、问题、测试报告、交接和设计文件 |
-| `gofmt -w pkg/plugin/hooks/types.go pkg/plugin/hooks/registry.go pkg/plugin/hooks/registry_test.go pkg/plugin/http.go pkg/plugin/plugin_test.go` | PASS | 格式化本轮插件审计补丁 |
-| `go test ./pkg/plugin/... -count=1` | PASS | 覆盖 hooks、manager、HTTP helper、RemoteHook 和新增大小限制测试 |
-| `go test ./pkg/iam/... -count=1` | PASS | IAM memory 与上下文 helper 回归 |
-| `go test ./internal/config ./internal/app/... -count=1` | PASS | 配置、app 装配、reload/lifecycle 回归 |
-| `go test ./... -count=1` | PASS | 全量回归通过 |
-| `go build -o <temp> ./cmd/server` | PASS | server 构建通过，临时产物已删除 |
+| 必读文件读取 | PASS | 已读取 `AGENTS.md`、Agent 规则、状态、任务、切片、需求、架构、验收、问题、测试报告、交接和恢复所需背景文件 |
+| `docker version` | FAIL_ENV | 当前环境未安装 Docker CLI |
+| `Get-Command docker,podman,nerdctl,docker.exe -ErrorAction SilentlyContinue` | NOT_AVAILABLE | 未发现 Docker 兼容 CLI |
+| `docker build -t go-scaffold:local .` | NOT_RUN | 前置 Docker CLI/daemon 不可用 |
+| Go 测试 | NOT_RUN | 本轮仅复验环境阻塞并更新状态文档，未修改 Go 代码 |
 | `git diff --check` | PASS | 仅输出 Windows LF/CRLF 提示，不存在空白错误 |
 
 ## 结果
 
-- [CONFIRMED] `dev.tmp/new-plugin.md` 设计当前已由代码和测试覆盖：hooks、hook-aware manager、HTTP server helper、RemoteHook、IAM memory、配置/app/reload/lifecycle 均通过验证。
-- [CONFIRMED] 本轮补强 nil `HandlerFunc` 注册拒绝、after invoke hook 错误返回插件响应的测试、HTTP 响应大小超限错误和测试。
-- [BLOCKED] TASK-P2-004 的 `docker build -t go-scaffold:local .` 仍是独立环境阻塞；本轮未关闭 `ISSUE-P2-005`。
+- [BLOCKED] TASK-P2-004 的 `docker build -t go-scaffold:local .` 仍是当前唯一未关闭验证项。
+- [CONFIRMED] 当前环境仍没有 `docker`、`podman`、`nerdctl` 或 `docker.exe`，无法执行 Docker image build。
+- [CONFIRMED] TASK-P2-005 至 TASK-P2-010 的插件/IAM 主线保持完成，不受本轮 Docker 环境阻塞影响。
 
 ## 失败项
 
 - 无代码失败项。
-- 环境阻塞项仍存在：当前本机缺少 Docker 兼容 CLI，无法运行 TASK-P2-004 的 `docker build -t go-scaffold:local .`。该问题已记录到 `ISSUES.md`，不代表插件/IAM 主线失败。
+- 环境阻塞项仍存在：当前本机缺少 Docker 兼容 CLI，无法运行 TASK-P2-004 的 `docker build -t go-scaffold:local .`。该问题已记录到 `ISSUES.md`。
 
 ## 验证结论
 
-- TASK-P2-005 至 TASK-P2-010 完成判定：COMPLETED。
 - TASK-P2-004 / TS-P2-004 仍保持 `BLOCKED`。
+- TASK-P2-005 至 TASK-P2-010 完成判定保持：COMPLETED。
 - 解除阻塞条件：在安装 Docker CLI/daemon 的 Linux 或 Docker Desktop 环境运行 `docker build -t go-scaffold:local .` 并通过。
 
 ## 历史报告
+
+### 2026-05-27 TASK-P2-004 TS-P2-004 blocked recheck
+
+- 用户发送“下一步”后按协议处理剩余 Docker build 验证项。
+- `docker version`：FAIL_ENV，当前环境未安装 Docker CLI。
+- `Get-Command docker,podman,nerdctl,docker.exe -ErrorAction SilentlyContinue`：NOT_AVAILABLE，未发现 Docker 兼容 CLI。
+- `docker build -t go-scaffold:local .`：NOT_RUN，前置 Docker CLI/daemon 不可用。
+- Go 测试未运行：本轮仅复验环境阻塞并更新状态文档，未修改 Go 代码。
+- `git diff --check`：PASS，仅输出 Windows LF/CRLF 提示，不存在空白错误。
+- 结论：TASK-P2-004 / TS-P2-004 保持 `BLOCKED`，`ISSUE-P2-005` 保持 OPEN。
 
 ### 2026-05-27 dev.tmp/new-plugin completion audit
 
