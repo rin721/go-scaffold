@@ -1,5 +1,53 @@
 # ISSUES.md
 
+## Latest Issue Review: TASK-P2-023
+
+- Date: 2026-05-28
+- Result: No new blocking issue after verification.
+- Note: Auth token issue/verify now uses the public `pkg/auth` JWT-backed token API; business code no longer owns hand-written JWT signing/parsing.
+- Verification: `pkg/auth`, user module, initapp, app, router, full root regression, and diff-check passed. `git diff --check` emitted only Git LF/CRLF notices.
+- Residual risks: `pkg/auth` does not replace production IAM hardening; refresh/session/audit/password-reset work, secret rotation, production migrations, deployment, real secrets/users, and plugin transport changes remain out of scope.
+
+## Latest Issue Review: TASK-P2-022
+
+- Date: 2026-05-28
+- Result: No new blocking issue after verification.
+- Note: RBAC authorization now uses the public `pkg/rbac` Casbin-backed authorizer API; business code no longer imports `internal/modules/user/rbac`.
+- Verification: `pkg/rbac`, config, user module, initapp, app, router, full root regression, and diff-check passed. `git diff --check` emitted only Git LF/CRLF notices.
+- Residual risks: `pkg/rbac` does not replace production IAM hardening; refresh/session/audit/password-reset work, production migrations, deployment, real secrets/users, and plugin transport changes remain out of scope.
+
+## Latest Issue Review: TASK-P2-021
+
+- Date: 2026-05-28
+- Result: No new blocking issue after verification.
+- Note: RBAC authorization now uses a Casbin-backed local wrapper and DB-backed role-permission policies; `configs/rbac_model.conf` stores the recoverable model.
+- Verification: config, user module, initapp, app, router, full root regression, and diff-check passed. `git diff --check` emitted only Git LF/CRLF notices.
+- Residual risks: Casbin integration does not replace production IAM hardening; refresh/session/audit/password-reset work, production migrations, deployment, real secrets/users, and plugin transport changes remain out of scope.
+
+## Latest Issue Review: TASK-P2-020
+
+- Date: 2026-05-28
+- Result: No new blocking issue after verification.
+- Note: RBAC configuration now seeds roles, permissions, and role-permission grants only; no real users/passwords or production policy engine were added.
+- Verification: config, user service, initapp, app, full root regression, and diff-check passed. `git diff --check` emitted only Git LF/CRLF notices.
+- Residual risks: production IAM hardening, OPA/Casbin, external IAM, refresh/session/audit/password-reset work, production migrations, deployment, and plugin transport changes remain out of scope.
+
+## Latest Issue Review: TASK-P2-019
+
+- Date: 2026-05-28
+- Result: No new blocking issue after verification.
+- Note: User selected both auth hardening and plugin WS/RPC/discovery. The current legal slice is limited to auth token config hardening; plugin WS/RPC/discovery remains deferred as `BL-028`.
+- Verification: config, initapp, app, full root regression, and diff-check passed. `git diff --check` emitted only Git LF/CRLF notices.
+- Residual risks: real secret management, refresh-token/session revocation, audit logging, password reset, external IAM, OPA/Casbin, production migration, deployment, and plugin transport changes remain out of scope.
+
+## Latest Issue Review: TASK-P2-018
+
+- Date: 2026-05-28
+- Result: No new blocking issue after verification.
+- Note: Full root regression passed after one in-scope repair to update existing `internal/app/initapp/transport_test.go` call sites for the new `NewHTTPServer` user handler parameter.
+- Verification: user module, dbapp, router, app/initapp target tests, full `go test ./... -count=1`, and `git diff --check` passed. `git diff --check` emitted only Git LF/CRLF notices.
+- Residual risks: production secret/session management, refresh-token/session revocation, audit logging, password reset, OPA/Casbin, external IAM, production migration, deployment, and plugin transport changes remain out of scope.
+
 ## Latest Issue Review: TASK-INFRA-004
 
 - Date: 2026-05-28

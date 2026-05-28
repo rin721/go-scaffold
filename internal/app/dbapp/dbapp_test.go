@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/rei0721/go-scaffold/internal/modules/demo/model"
+	usermodel "github.com/rei0721/go-scaffold/internal/modules/user/model"
 	"github.com/rei0721/go-scaffold/pkg/database"
 	"gorm.io/gorm"
 )
@@ -36,6 +37,41 @@ func TestDatabaseSQLUsesSQLGenDDL(t *testing.T) {
 	}
 	if sql != "CREATE DATABASE IF NOT EXISTS `demo_app`;" {
 		t.Fatalf("DatabaseSQL() = %q, want sqlgen CREATE DATABASE", sql)
+	}
+}
+
+func TestUserSchemaSQLUsesSQLGenDDL(t *testing.T) {
+	sql, err := UserSchemaSQL(string(database.DriverSQLite))
+	if err != nil {
+		t.Fatalf("UserSchemaSQL() error = %v", err)
+	}
+	for _, want := range []string{
+		`CREATE TABLE IF NOT EXISTS "users"`,
+		`CREATE TABLE IF NOT EXISTS "roles"`,
+		`CREATE TABLE IF NOT EXISTS "permissions"`,
+		`CREATE TABLE IF NOT EXISTS "user_roles"`,
+		`CREATE TABLE IF NOT EXISTS "role_permissions"`,
+		`CREATE UNIQUE INDEX IF NOT EXISTS "uk_users_username"`,
+	} {
+		if !strings.Contains(sql, want) {
+			t.Fatalf("schema SQL %q does not contain %q", sql, want)
+		}
+	}
+
+	db := newSQLiteDatabase(t)
+	if _, err := ApplyUserSchema(context.Background(), db, string(database.DriverSQLite)); err != nil {
+		t.Fatalf("ApplyUserSchema() error = %v", err)
+	}
+	for _, table := range []interface{}{
+		&usermodel.User{},
+		&usermodel.Role{},
+		&usermodel.Permission{},
+		&usermodel.UserRole{},
+		&usermodel.RolePermission{},
+	} {
+		if !db.DB().Migrator().HasTable(table) {
+			t.Fatalf("expected table for %#v to exist", table)
+		}
 	}
 }
 

@@ -1,6 +1,45 @@
 # TEST_REPORT.md
 
+## Current Verification Addendum
+
+- TASK-P2-023: PASS.
+- Commands: `go test ./pkg/auth -count=1`, `go test ./internal/modules/user/... -count=1`, `go test ./internal/app/initapp -count=1`, `go test ./internal/app/... -count=1`, `go test ./internal/transport/http -count=1`, `go test ./... -count=1`, and `git diff --check`.
+- Scope: `pkg/auth` public token contracts and JWT implementation, user service token import boundary, initapp token construction, router/app regression, and full root regression.
+- Note: `git diff --check` emitted only Git LF/CRLF notices.
+
+## Previous Verification Addendum
+
+- TASK-P2-022: PASS.
+- Commands: `go test ./pkg/rbac -count=1`, `go test ./internal/config -count=1`, `go test ./internal/modules/user/... -count=1`, `go test ./internal/app/initapp -count=1`, `go test ./internal/app/... -count=1`, `go test ./internal/transport/http -count=1`, `go test ./... -count=1`, and `git diff --check`.
+- Scope: `pkg/rbac` public RBAC contracts and Casbin implementation, user service import boundary, initapp authorizer construction, config compatibility, router/app regression, and full root regression.
+- Note: `git diff --check` emitted only Git LF/CRLF notices.
+
+## Previous Verification Addendum
+
+- TASK-P2-021: PASS.
+- Commands: `go test ./internal/config -count=1`, `go test ./internal/modules/user/... -count=1`, `go test ./internal/app/initapp -count=1`, `go test ./internal/app/... -count=1`, `go test ./internal/transport/http -count=1`, `go test ./... -count=1`, and `git diff --check`.
+- Scope: Casbin-backed RBAC wrapper, `configs/rbac_model.conf`, `rbac.model_path` config/env support, DB-backed role-permission policy loading, initapp wiring, router/app regression, full root regression, and whitespace check.
+- Note: `git diff --check` emitted only Git LF/CRLF notices.
+
+## Previous Verification Addendum
+
+- TASK-P2-020: PASS.
+- Commands: `go test ./internal/config -count=1`, `go test ./internal/modules/user/... -count=1`, `go test ./internal/app/initapp -count=1`, `go test ./internal/app/... -count=1`, `go test ./... -count=1`, and `git diff --check`.
+- Scope: RBAC config validation/copy/env behavior, user-service RBAC seed idempotency, initapp startup seed wiring, app regression, full root regression, and whitespace check.
+- Note: `git diff --check` emitted only Git LF/CRLF notices.
+
+## Earlier Verification Addendum
+
+- TASK-P2-019: PASS.
+- Commands: `go test ./internal/config -count=1`, `go test ./internal/app/initapp -count=1`, `go test ./internal/app/... -count=1`, `go test ./... -count=1`, and `git diff --check`.
+- Scope: auth token secret/TTL config, env override, user module wiring, and examples.
+- Note: `git diff --check` emitted only Git LF/CRLF notices.
+
 ## Latest Current Verification
+
+- TASK-P2-018: PASS.
+- Commands: `go test ./internal/modules/user/... -count=1`, `go test ./internal/app/dbapp -count=1`, `go test ./internal/transport/http -count=1`, `go test ./internal/app -count=1`, `go test ./internal/app/initapp -count=1`, `go test ./internal/app/... -count=1`, `go test ./... -count=1`, and `git diff --check`.
+- Note: `git diff --check` emitted only Git LF/CRLF notices.
 
 - TASK-INFRA-004: PASS.
 - Commands: GitHub Actions run `26531295923` / job `78148329151` log inspection, `go test ./... -count=1 -mod=readonly`, `go build -mod=readonly -o <temp> ./cmd/main`, `go run github.com/rhysd/actionlint/cmd/actionlint@latest .github/workflows/ci.yml`, and `git diff --check`.
@@ -11,6 +50,33 @@
 - Note: `git diff --check` emitted only Git LF/CRLF notices.
 
 ## Latest Verification Addendum
+
+- Date: 2026-05-28
+- Task ID: TASK-P2-018
+- Time Slice ID: TS-P2-018
+- Status: COMPLETED
+- Scope: Main-service user/auth/RBAC module with users, roles, permissions, password hashing, bearer token auth, route-level permission checks, sqlgen schema bootstrap, and focused tests.
+
+| Command | Result | Notes |
+|---|---|---|
+| Required file reads | PASS | Agent driver documents and relevant skills were reviewed before implementation and completion. |
+| User correction review | ACCEPT_WITH_RISK | Scope expanded from user CRUD to user + auth + RBAC; production secret/session management and production migrations stayed out of scope. |
+| `gofmt -w ...` | PASS | Modified Go files were formatted. |
+| `go test ./internal/modules/user/... -count=1` | PASS | Service tests covered registration, login, password hashing, token auth, roles, permissions, and authorization. |
+| `go test ./internal/app/dbapp -count=1` | PASS | User/RBAC sqlgen schema generation and application passed. |
+| `go test ./internal/transport/http -count=1` | PASS | HTTP integration covered auth, user CRUD, role/permission creation, assignment, and forbidden access. |
+| `go test ./internal/app -count=1` | PASS | App assembly creates user/RBAC modules and tables. |
+| `go test ./internal/app/initapp -count=1` | PASS | Initapp transport signature and module wiring tests passed. |
+| `go test ./internal/app/... -count=1` | PASS | App package regression passed. |
+| `go test ./... -count=1` | PASS | Full root module regression passed. |
+| `git diff --check` | PASS | Only Git LF/CRLF notices, no whitespace errors. |
+
+Result:
+
+- [CONFIRMED] TASK-P2-018 / TS-P2-018 completed.
+- [CONFIRMED] Main service now exposes local user/auth/RBAC APIs.
+- [CONFIRMED] Password hashes are stored and never returned by tested API responses.
+- [CONFIRMED] Production secret/session management, OPA/Casbin, audit, password reset, deployment, and production migrations remain out of scope.
 
 - Date: 2026-05-28
 - Task ID: TASK-INFRA-004

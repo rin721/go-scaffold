@@ -10,7 +10,7 @@
 ## 结论
 
 - [CONFIRMED] `types/result` 是 HTTP API 响应契约包，其中 `helpers.go` 直接依赖 Gin，不能被视为纯领域类型包。
-- [CONFIRMED] `types/errors` 是错误码和 `BizError` 契约包。3000-3999 是 auth/rbac 预留错误码范围，但当前项目未实现 auth/rbac。
+- [CONFIRMED] `types/errors` 是错误码和 `BizError` 契约包。3000-3999 是 auth/rbac 错误码范围，当前由 `internal/modules/user` 的认证与权限 HTTP 层使用。
 - [CONFIRMED] `types/constants` 是应用层以上运行常量包，当前包含应用命令、配置路径、关闭超时、缓存键和 executor pool 名称；常量保持为字符串，不直接导入 `pkg/executor`。
 - [ACCEPT] 用户修正：根 `types` 包不得直接向 `pkg/crypto.Crypto` 提供别名，也不得定义依赖 `pkg/cache.Cache` 的 `CacheInjectable` 接口；`types` 只能承载应用层以上确认过的跨层契约。
 - [CONFIRMED] 根 `types` 包当前不再导入 `pkg/cache` 或 `pkg/crypto`，也不再作为 `pkg/*` 基础设施聚合入口。
@@ -34,8 +34,8 @@
 ## auth/rbac 范围
 
 - [CONFIRMED] `ErrUnauthorized`、`ErrInvalidToken`、`ErrTokenExpired`、`ErrPermissionDenied` 是错误码契约。
-- [CONFIRMED] 上述错误码不代表当前项目已实现登录、JWT、token 刷新、角色或权限系统。
-- [DEFERRED] auth/rbac 实现仍保留在 Backlog，必须单独确认需求、架构、任务和验收标准。
+- [CONFIRMED] 上述错误码现在覆盖 `internal/modules/user` 的 bearer token 登录、token 校验和权限拒绝响应。
+- [DEFERRED] refresh token、session revoke、生产级密钥管理、外部 IAM/OPA/Casbin、审计和账号恢复仍需单独确认需求、架构、任务和验收标准。
 
 ## 验收证据
 
@@ -48,5 +48,5 @@
 
 - 不移动 `types/*` 包。
 - 不修改 HTTP router、middleware 或 demo handler 行为。
-- 不实现 auth/rbac。
+- 不实现 production-grade IAM、refresh token/session revoke、外部策略引擎或账号恢复。
 - 不把 `pkg/*` 行为测试并入本切片。

@@ -1,5 +1,289 @@
 # TIME_SLICES.md
 
+## Current Auth Public API Time Slice
+
+### TS-P2-023: pkg/auth public token API
+
+- Status: COMPLETED
+- Task ID: TASK-P2-023
+- Purpose: Promote reusable auth token signing and verification to a public infrastructure package before business authentication uses it.
+- Inputs:
+  - User correction on 2026-05-28: `auth呢？`.
+  - Existing `internal/modules/user/service.TokenService` with hand-written HMAC JWT-like signing/parsing.
+  - Existing `auth.token_secret` and `auth.token_ttl` config wiring.
+- Allowed Files:
+  - `go.mod`, `go.sum`
+  - `pkg/auth/**/*`
+  - `internal/modules/user/service/**/*`
+  - `internal/app/initapp/**/*`
+  - Focused router/app tests
+  - Project status documents.
+- Forbidden:
+  - Real secrets, real users/passwords, production values, irreversible migrations, deployment execution, workflow triggering, image publishing, and remote server access.
+  - External IAM replacement, refresh/session revoke, audit, password reset, plugin WS/RPC/discovery, broad user/router rewrites, and unrelated refactors.
+- Execution Steps:
+  1. Add a public `pkg/auth` token package backed by a mainstream JWT library.
+  2. Add focused package tests for issue, verify, expiration, tampering, and invalid secret behavior.
+  3. Update `internal/modules/user/service` to map user models into `pkg/auth` claims.
+  4. Keep startup auth config wiring compatible.
+  5. Run target/full verification and update status, acceptance, test report, changelog, issues, risk, decisions, modules, test matrix, and handoff.
+- Verification Commands:
+  - `go test ./pkg/auth -count=1`
+  - `go test ./internal/modules/user/... -count=1`
+  - `go test ./internal/app/initapp -count=1`
+  - `go test ./internal/app/... -count=1`
+  - `go test ./internal/transport/http -count=1`
+  - `go test ./... -count=1`
+  - `git diff --check`
+- Acceptance:
+  - Auth token API lives under `pkg/auth` and does not depend on `internal/*`.
+  - Token signing/parsing uses a mainstream JWT library rather than hand-written JWT handling.
+  - Main-service business auth depends on `pkg/auth` for token issue/verify behavior.
+  - No production IAM, session revoke, audit, migration, deployment, or plugin transport expansion is introduced.
+- Next Slice Entry Conditions:
+  - After completion, legal next state returns to `NONE / NONE / PENDING_USER_CONFIRMATION` unless the user confirms a separate follow-up.
+- Result:
+  - Completed. The legal next state is `NONE / NONE / PENDING_USER_CONFIRMATION`.
+
+## Current RBAC Public API Time Slice
+
+### TS-P2-022: pkg/rbac public RBAC API
+
+- Status: COMPLETED
+- Task ID: TASK-P2-022
+- Purpose: Promote the Casbin-backed RBAC wrapper to a public infrastructure package before business authorization uses it.
+- Inputs:
+  - User correction on 2026-05-28: `先封装成pkg公共设施api，再使用公共api库实现其功能`.
+  - Existing Casbin-backed wrapper under `internal/modules/user/rbac`.
+  - Existing main-service user/auth/RBAC module and `configs/rbac_model.conf`.
+- Allowed Files:
+  - `pkg/rbac/**/*`
+  - `internal/modules/user/**/*`
+  - `internal/app/initapp/**/*`
+  - `configs/rbac_model.conf`, `configs/config.example.yaml`, `configs/config.yaml`
+  - `internal/config/**/*`
+  - Focused app/router tests
+  - Project status documents.
+- Forbidden:
+  - Real secrets, real users/passwords, production values, irreversible migrations, deployment execution, workflow triggering, image publishing, and remote server access.
+  - External IAM replacement, refresh/session/audit/password-reset work, plugin WS/RPC/discovery, broad user/router rewrites, and unrelated refactors.
+- Execution Steps:
+  1. Add a public `pkg/rbac` package around the Casbin-backed authorizer contract.
+  2. Move focused RBAC tests to `pkg/rbac`.
+  3. Update `internal/modules/user` and app composition to use `pkg/rbac`.
+  4. Remove the module-local `internal/modules/user/rbac` wrapper.
+  5. Run target/full verification and update status, acceptance, test report, changelog, issues, risk, decisions, modules, test matrix, and handoff.
+- Verification Commands:
+  - `go test ./pkg/rbac -count=1`
+  - `go test ./internal/config -count=1`
+  - `go test ./internal/modules/user/... -count=1`
+  - `go test ./internal/app/initapp -count=1`
+  - `go test ./internal/app/... -count=1`
+  - `go test ./internal/transport/http -count=1`
+  - `go test ./... -count=1`
+  - `git diff --check`
+- Acceptance:
+  - RBAC public API lives under `pkg/rbac` and does not depend on `internal/*`.
+  - Main-service business authorization depends on `pkg/rbac`.
+  - Casbin remains the mainstream policy engine behind the public API.
+  - No production IAM, session, audit, migration, deployment, or plugin transport expansion is introduced.
+- Next Slice Entry Conditions:
+  - After completion, legal next state returns to `NONE / NONE / PENDING_USER_CONFIRMATION` unless the user confirms a separate follow-up.
+- Result:
+  - Completed. The legal next state is `NONE / NONE / PENDING_USER_CONFIRMATION`.
+
+## Current RBAC Library Rework Time Slice
+
+### TS-P2-021: Casbin-backed RBAC authorization
+
+- Status: COMPLETED
+- Task ID: TASK-P2-021
+- Purpose: Replace the hand-written permission matching path with a mainstream RBAC library wrapper while preserving the current user/RBAC business API.
+- Inputs:
+  - User correction on 2026-05-28: `你必须使用主流库进行封装，在实现业务`.
+  - Existing main-service user/auth/RBAC module.
+  - Existing `rbac` config seed block under `configs`.
+- Allowed Files:
+  - `go.mod`, `go.sum`
+  - `configs/rbac_model.conf`, `configs/config.example.yaml`, `configs/config.yaml`
+  - `internal/config/**/*`
+  - `internal/modules/user/**/*`
+  - `internal/app/initapp/**/*`
+  - Focused app/router tests
+  - Project status documents.
+- Forbidden:
+  - Real secrets, real users/passwords, production values, irreversible migrations, deployment execution, workflow triggering, image publishing, and remote server access.
+  - External IAM replacement, refresh/session/audit/password-reset work, plugin WS/RPC/discovery, broad user/router rewrites, and unrelated refactors.
+- Execution Steps:
+  1. Add Casbin dependency and `configs/rbac_model.conf`.
+  2. Add `rbac.model_path` config support and config tests.
+  3. Add a local Casbin authorizer wrapper under `internal/modules/user`.
+  4. Feed DB-backed role-permission assignments into the wrapper from the user service.
+  5. Update focused tests, run target/full verification, and update status, acceptance, test report, changelog, issues, risk, decisions, and handoff.
+- Verification Commands:
+  - `go test ./internal/config -count=1`
+  - `go test ./internal/modules/user/... -count=1`
+  - `go test ./internal/app/initapp -count=1`
+  - `go test ./internal/app/... -count=1`
+  - `go test ./... -count=1`
+  - `git diff --check`
+- Acceptance:
+  - Business authorization goes through Casbin-backed wrapper code.
+  - Casbin model config is recoverable from `configs`.
+  - Existing RBAC CRUD and config seed behavior remain compatible.
+  - No production IAM, session, audit, migration, deployment, or plugin transport expansion is introduced.
+- Next Slice Entry Conditions:
+  - After completion, legal next state returns to `NONE / NONE / PENDING_USER_CONFIRMATION` unless the user confirms a separate follow-up.
+- Result:
+  - Completed. The legal next state is `NONE / NONE / PENDING_USER_CONFIRMATION`.
+
+## Current RBAC Config Time Slice
+
+### TS-P2-020: RBAC config seed wiring
+
+- Status: COMPLETED
+- Task ID: TASK-P2-020
+- Purpose: Move recoverable RBAC seed data into `configs` and wire optional startup application without expanding the authorization model.
+- Inputs:
+  - User request on 2026-05-28: `将rbac的配置塞到configs下`.
+  - Existing main-service `internal/modules/user` RBAC service and DB schema.
+  - Existing `internal/config` dynamic env override and validation pattern.
+- Allowed Files:
+  - `internal/config/**/*`
+  - `configs/config.example.yaml`
+  - `configs/config.yaml`
+  - `internal/modules/user/service/**/*`
+  - `internal/app/initapp/**/*`
+  - `internal/app/**/*_test.go`
+  - Project status documents.
+- Forbidden:
+  - Real secrets, real users/passwords, production values, irreversible migrations, deployment execution, workflow triggering, image publishing, and remote server access.
+  - OPA/Casbin, external IAM replacement, refresh/session/audit/password-reset work, plugin WS/RPC/discovery, broad user/router rewrites, and unrelated refactors.
+- Execution Steps:
+  1. Add `RBACConfig` validation/copy/env support under `internal/config`.
+  2. Add safe RBAC seed entries under `configs`.
+  3. Add idempotent user-service seed application for roles, permissions, and role-permission grants.
+  4. Wire startup to apply configured seeds when enabled.
+  5. Add focused tests, run target/full verification, and update status, acceptance, test report, changelog, issues, and handoff.
+- Verification Commands:
+  - `go test ./internal/config -count=1`
+  - `go test ./internal/modules/user/... -count=1`
+  - `go test ./internal/app/initapp -count=1`
+  - `go test ./internal/app/... -count=1`
+  - `go test ./... -count=1`
+  - `git diff --check`
+- Acceptance:
+  - RBAC config lives under the normal `configs` surface and is decoded into `internal/config`.
+  - Config validation rejects empty/duplicate/unknown RBAC seed references when enabled.
+  - Startup seed application is idempotent and does not seed real users or passwords.
+  - Existing auth/RBAC HTTP behavior remains compatible when the `rbac` block is omitted or disabled.
+- Next Slice Entry Conditions:
+  - After completion, legal next state returns to `NONE / NONE / PENDING_USER_CONFIRMATION` unless the user confirms a separate follow-up.
+
+- Completion Evidence:
+  - RBAC config now lives under the normal config surface and is represented in `configs/config.example.yaml` and `configs/config.yaml`.
+  - Config validation rejects duplicate or unknown RBAC seed references when enabled.
+  - Startup seed application is idempotent and does not create real users or passwords.
+  - Verification passed: config, user service, initapp, app, full root tests, and diff-check.
+
+## Current Auth Hardening Time Slice
+
+### TS-P2-019: Auth token config wiring
+
+- Status: COMPLETED
+- Task ID: TASK-P2-019
+- Purpose: Replace the hard-coded local token service construction with config-driven token secret and TTL wiring while keeping deeper IAM/session work out of scope.
+- Inputs:
+  - User selected `2+4` on 2026-05-28.
+  - Existing `internal/modules/user/service.TokenService`.
+  - Existing dynamic config/env override mechanism based on `envname`.
+- Allowed Files:
+  - `internal/config/**/*`
+  - `internal/app/initapp/**/*`
+  - `internal/app/**/*_test.go`
+  - `.env.example`
+  - `configs/config.example.yaml`
+  - Project status documents.
+- Forbidden:
+  - Real secrets, production values, irreversible migrations, deployment execution, workflow triggering, image publishing, and remote server access.
+  - Refresh-token/session revocation, audit logging, password reset, external IAM, OPA/Casbin, plugin WS/RPC/discovery, and unrelated user/router rewrites.
+- Execution Steps:
+  1. Add `AuthConfig` with token secret and TTL validation plus env override tags.
+  2. Wire `core.Config.Auth` into `NewUserModule` and `TokenService`.
+  3. Update examples and focused tests for config/env/module wiring.
+  4. Run target/full verification and update status, acceptance, test report, changelog, issues, and handoff.
+- Verification Commands:
+  - `go test ./internal/config -count=1`
+  - `go test ./internal/app/initapp -count=1`
+  - `go test ./internal/app/... -count=1`
+  - `go test ./... -count=1`
+  - `git diff --check`
+- Acceptance:
+  - Configured auth token secret is accepted only when empty or at least 32 bytes.
+  - Negative token TTL is rejected; zero TTL keeps TokenService default behavior.
+  - Env overrides support `RIN_APP_AUTH_TOKEN_SECRET` and `RIN_APP_AUTH_TOKEN_TTL`.
+  - Module wiring issues tokens verifiable by a separate token service with the configured secret.
+  - No real secret, refresh/session, audit, password reset, plugin transport, or production migration is introduced.
+- Next Slice Entry Conditions:
+  - After completion, legal next state returns to `NONE / NONE / PENDING_USER_CONFIRMATION`; `BL-028` remains available for a separate plugin WS/RPC/discovery slice.
+
+- Completion Evidence:
+  - Auth token secret and TTL are config/env driven.
+  - User module wiring uses configured auth settings.
+  - Config, initapp, app, full repo, and diff-check verification passed.
+
+## Current User Management Time Slice
+
+### TS-P2-018: Main-service user/auth/RBAC wiring
+
+- Status: COMPLETED
+- Task ID: TASK-P2-018
+- Purpose: Implement a compact, complete main-service user + auth + RBAC service that is useful and testable without claiming production-grade secret/session management.
+- Inputs:
+  - User `/goal` on 2026-05-28.
+  - Existing demo module layering pattern.
+  - Existing `pkg/crypto` password hashing and `pkg/sqlgen` DDL generation.
+  - Existing main HTTP router and app composition root.
+- Allowed Files:
+  - `internal/modules/user/**/*`
+  - `internal/app/dbapp/**/*`
+  - `internal/app/initapp/**/*`
+  - `internal/app/**/*_test.go`
+  - `internal/transport/http/**/*`
+  - Project status documents.
+- Forbidden:
+  - Real secrets, production values, irreversible migrations, deployment execution, workflow triggering, image publishing, and remote server access.
+  - Production secret management, refresh-token/session revocation, database-backed `pkg/iam` replacement, OPA/Casbin, plugin WS/RPC/discovery, and unrelated command rewrites.
+- Execution Steps:
+  1. Add `internal/modules/user` model/repository/service/handler following the existing demo module layering.
+  2. Add users, roles, permissions, and assignment schema DDL/apply helpers through `pkg/sqlgen` and invoke them during server-start module construction.
+  3. Wire auth, user, role, and permission routes into `initapp.Modules`, `NewTransport`, and `internal/transport/http`.
+  4. Add tests for service validation, password hashing, register/login/token authentication, permission checks, HTTP RBAC responses, app wiring, and schema bootstrap.
+  5. Run target/full verification and update status, acceptance, test report, changelog, issues, and handoff.
+- Verification Commands:
+  - `go test ./internal/modules/user/... -count=1`
+  - `go test ./internal/transport/http -count=1`
+  - `go test ./internal/app/... -count=1`
+  - `go test ./... -count=1`
+  - `git diff --check`
+- Acceptance:
+  - User CRUD works through service and `/api/v1/users` routes.
+  - Register/login/me work through `/api/v1/auth` with bearer token authentication.
+  - Role/permission CRUD and user-role/role-permission assignment work through RBAC routes.
+  - Password hashes are stored but never returned in API responses.
+  - Duplicate username/email, invalid input, unauthorized, forbidden, and not-found paths are handled consistently.
+  - User/auth/RBAC schema is created through sqlgen DDL in the server-start path.
+  - No production secret/session management, production migration, deployment, or external policy engine is introduced.
+- Next Slice Entry Conditions:
+  - After completion, legal next state returns to `NONE / NONE / PENDING_USER_CONFIRMATION` unless the user confirms a follow-up such as production secret/session management, IAM persistence, audit logging, password reset, production migration, or release validation.
+
+- Completion Evidence:
+  - `internal/modules/user` implements user/auth/RBAC domain, token, handler, and tests.
+  - `internal/app/dbapp` applies user/RBAC tables through sqlgen-generated DDL.
+  - `internal/app/initapp` and `internal/transport/http` wire handlers and protected routes.
+  - Verification passed: target tests, full `go test ./... -count=1`, and `git diff --check`.
+  - Legal next state: `NONE / NONE / PENDING_USER_CONFIRMATION`.
+
 ## Latest Current Time Slice
 
 - TS-INFRA-004: COMPLETED.
@@ -209,7 +493,7 @@
 - Time Slice ID：NONE
 - Task ID：NONE
 - Status：PENDING_USER_CONFIRMATION
-- Summary：[ACCEPT] 用户纠正 `internal/config` 中 `EnvDB*` / `EnvRedis*` 等 env-name 常量已无存在必要；TS-P2-012 已删除重复常量，并把测试改为从配置结构体 `envname` 标签读取环境变量名。`dev.tmp/new-plugin.md` 主线和 TASK-P2-004 至 TASK-P2-010 均保持完成。当前无自动下一实现任务；后续必须先确认新的开发范围或第一版发布验收清单。
+- Summary：TASK-P2-018 / TS-P2-018 已完成。当前无自动下一时间切片；生产级密钥/会话管理、OPA/Casbin、审计、密码重置、生产迁移、发布验收或其他范围需用户再次确认。
 
 ## 最近用户修正时间切片
 

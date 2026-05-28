@@ -1,5 +1,13 @@
 # REQUIREMENTS.md
 
+## Current Requirement Addendum
+
+- [CONFIRMED] `REQ-OPT-P2-015`: Auth token signing and verification must expose reusable infrastructure through `pkg/auth` before business code uses it. User asked `auth呢？` after the RBAC public API correction; TASK-P2-023 promotes token issue/verify into `pkg/auth`, uses a mainstream JWT library, and keeps business code responsible only for user-to-claims mapping.
+- [CONFIRMED] `REQ-OPT-P2-014`: RBAC authorization must expose its reusable authorizer through `pkg/rbac` before business code uses it. User corrected the prior boundary and required a public infrastructure API first; TASK-P2-022 promotes the Casbin wrapper to `pkg/rbac`, keeps the model under `configs`, and updates main-service user authorization to call the public package.
+- [CONFIRMED] `REQ-OPT-P2-013`: RBAC authorization must use a mainstream library wrapper before business policy checks. User corrected the prior implementation and required a mainstream library; TASK-P2-021 uses Casbin behind a local authorizer wrapper, stores the Casbin model under `configs`, and keeps existing DB-backed roles/permissions and config seed behavior.
+- [CONFIRMED] `REQ-OPT-P2-012`: RBAC seed config under `configs`. User requested putting RBAC configuration under `configs`; TASK-P2-020 limits this to validated roles, permissions, and role-permission seed config plus optional idempotent startup application. Real users/passwords, OPA/Casbin, external IAM replacement, refresh/session/audit/password-reset work, production migrations, deployment, and plugin transport remain outside this slice.
+- [CONFIRMED] `REQ-OPT-P2-011`: Auth token config hardening. User selected `2+4`; TASK-P2-019 completed the auth-hardening foundation by adding configurable `auth.token_secret` and `auth.token_ttl` with env examples and tests. Real secret management, refresh-token/session revoke, audit logging, password reset, external IAM, OPA/Casbin, production migrations, deployment, and plugin WS/RPC/discovery remain outside this slice.
+
 ## 需求状态
 
 - 项目：go-scaffold
@@ -60,6 +68,7 @@
 | REQ-OPT-P2-007 | 配置环境变量动态前缀与字段标签覆盖 | 用户要求 `internal/config` 结合 `AppPrefix` 自动注入环境变量，并使用 `envname` 配置字段环境变量名；已实现 `RIN_APP_*` 动态前缀、未加前缀 fallback 和 `.env` 自动加载测试；重复 env-name 常量已删除，字段名以 `envname` 标签为唯一事实源 | [CONFIRMED] |
 | REQ-OPT-P2-008 | 远程插件显式注册、IAM hook JSON 上下文和 Blog 示例 | 用户通过 `/goal` 确认新范围；TASK-P2-016 已完成 HTTP 显式注册、IAM 安全主体上下文注入和 `remote_plugins/blog` 示例；真实 WS/RPC、JWT/login、数据库版权限或生产部署仍不实现 | [CONFIRMED] |
 | REQ-OPT-P2-009 | Plugin control-plane interface address configuration | User correction requires remote plugin services to expose standard `/plugin/v1/invoke`, register to host `/plugin/v1/register`, and align HTTP/WS protocol addresses through host plugin-system configuration. TASK-P2-017 implements configurable host HTTP interface exposure and reserved WS address placeholders only. | [CONFIRMED] |
+| REQ-OPT-P2-010 | 主服务用户、认证与 RBAC 服务 | 用户通过 `/goal` 确认并扩大新范围；TASK-P2-018 实现数据库用户 CRUD、密码哈希、安全响应、register/login/me bearer token flow、角色/权限 CRUD、用户角色与角色权限分配、权限门禁 HTTP 路由、sqlgen schema bootstrap 和测试；生产密钥管理、refresh token/session revoke、OPA/Casbin、生产迁移和部署仍不实现 | [CONFIRMED] |
 
 ## 非需求
 
@@ -67,7 +76,7 @@
 - [CONFIRMED] 当前不执行部署、生产命令或不可逆迁移。
 - [CONFIRMED] 当前不发布第一版、不创建 v1 release、不宣称 release-ready。
 - [CONFIRMED] 当前不删除插件系统历史记录。
-- [CONFIRMED] 当前不实现 JWT 中间件、数据库版权限、OPA/Casbin、Go `.so` 插件、插件发现、RPC/WS 传输、镜像发布、真实生产部署或密钥管理。
+- [CONFIRMED] 当前不实现 JWT 中间件、登录 token 签发、完整 RBAC、数据库版权限、OPA/Casbin、Go `.so` 插件、插件发现、RPC/WS 传输、镜像发布、真实生产部署或密钥管理。
 - [CONFIRMED] `types/*` 不作为 `pkg/*` 基础设施聚合入口；缓存、加密和 executor 等接口不通过 `types` 重新导出或直接依赖。
 
 ## 完成判断

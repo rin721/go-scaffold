@@ -27,6 +27,9 @@ func TestCopyConfigCoversAllFieldsAndDeepCopiesSlices(t *testing.T) {
 	got.IAM.Tokens[0].Principal.Attributes["team"] = "changed"
 	got.IAM.Policies[0].Action = "changed"
 	*got.IAM.DefaultDeny = false
+	got.RBAC.Roles[0].Description = "changed"
+	got.RBAC.Permissions[0].Description = "changed"
+	got.RBAC.RolePermissions[0].Permissions[0] = "changed"
 	got.CORS.AllowOrigins[0] = "https://changed.example.com"
 	got.CORS.AllowMethods[0] = "PATCH"
 	got.CORS.AllowHeaders[0] = "X-Changed"
@@ -58,6 +61,15 @@ func TestCopyConfigCoversAllFieldsAndDeepCopiesSlices(t *testing.T) {
 	}
 	if *src.IAM.DefaultDeny == *got.IAM.DefaultDeny {
 		t.Fatal("copyConfig() shares IAM.DefaultDeny pointer with source")
+	}
+	if src.RBAC.Roles[0].Description == got.RBAC.Roles[0].Description {
+		t.Fatal("copyConfig() shares RBAC.Roles slice with source")
+	}
+	if src.RBAC.Permissions[0].Description == got.RBAC.Permissions[0].Description {
+		t.Fatal("copyConfig() shares RBAC.Permissions slice with source")
+	}
+	if src.RBAC.RolePermissions[0].Permissions[0] == got.RBAC.RolePermissions[0].Permissions[0] {
+		t.Fatal("copyConfig() shares RBAC.RolePermissions permissions slice with source")
 	}
 	if src.CORS.AllowOrigins[0] == got.CORS.AllowOrigins[0] {
 		t.Fatal("copyConfig() shares CORS.AllowOrigins slice with source")
@@ -281,6 +293,11 @@ func TestOverrideWithEnvUsesEnvnameTagsForNonDatabaseConfigs(t *testing.T) {
 	setTaggedEnv(t, IAMConfig{}, "Enabled", "true")
 	setTaggedEnv(t, IAMConfig{}, "Mode", "memory")
 	setTaggedEnv(t, IAMConfig{}, "DefaultDeny", "false")
+	setTaggedEnv(t, AuthConfig{}, "TokenSecret", "0123456789abcdef0123456789abcdef")
+	setTaggedEnv(t, AuthConfig{}, "TokenTTL", "7200")
+	setTaggedEnv(t, RBACConfig{}, "Enabled", "false")
+	setTaggedEnv(t, RBACConfig{}, "ApplyOnStart", "false")
+	setTaggedEnv(t, RBACConfig{}, "ModelPath", "./configs/custom_rbac_model.conf")
 	setTaggedEnv(t, CORSConfig{}, "Enabled", "false")
 	setTaggedEnv(t, CORSConfig{}, "AllowOrigins", "https://app.example.com, https://admin.example.com")
 	setTaggedEnv(t, CORSConfig{}, "AllowMethods", "GET,POST")
@@ -331,6 +348,12 @@ func TestOverrideWithEnvUsesEnvnameTagsForNonDatabaseConfigs(t *testing.T) {
 	}
 	if !cfg.IAM.Enabled || cfg.IAM.Mode != "memory" || cfg.IAM.DefaultDenyEnabled() {
 		t.Fatalf("IAM override mismatch: %#v", cfg.IAM)
+	}
+	if cfg.Auth.TokenSecret != "0123456789abcdef0123456789abcdef" || cfg.Auth.TokenTTL != 7200 {
+		t.Fatalf("Auth override mismatch: %#v", cfg.Auth)
+	}
+	if cfg.RBAC.Enabled || cfg.RBAC.ApplyOnStart || cfg.RBAC.ModelPath != "./configs/custom_rbac_model.conf" {
+		t.Fatalf("RBAC override mismatch: %#v", cfg.RBAC)
 	}
 	if cfg.CORS.Enabled || !reflect.DeepEqual(cfg.CORS.AllowOrigins, []string{"https://app.example.com", "https://admin.example.com"}) ||
 		!reflect.DeepEqual(cfg.CORS.AllowMethods, []string{"GET", "POST"}) ||
@@ -516,6 +539,26 @@ func testCompleteConfig() *Config {
 				{Subject: "admin", Action: "read", Resource: "*", Effect: "allow"},
 			},
 		},
+		Auth: AuthConfig{
+			TokenSecret: "0123456789abcdef0123456789abcdef",
+			TokenTTL:    3600,
+		},
+		RBAC: RBACConfig{
+			Enabled:      true,
+			ApplyOnStart: true,
+			ModelPath:    "./configs/rbac_model.conf",
+			Roles: []RBACRoleConfig{
+				{Name: "admin", Description: "Admin role"},
+				{Name: "user", Description: "User role"},
+			},
+			Permissions: []RBACPermissionConfig{
+				{Code: "*:*", Description: "All permissions"},
+				{Code: "users:read", Description: "Read users"},
+			},
+			RolePermissions: []RBACRolePermissionConfig{
+				{Role: "admin", Permissions: []string{"*:*"}},
+			},
+		},
 		CORS: CORSConfig{
 			Enabled:          true,
 			AllowOrigins:     []string{"https://example.com"},
@@ -571,6 +614,9 @@ plugin:
   enabled: false
 iam:
   enabled: false
+auth:
+  token_secret: "0123456789abcdef0123456789abcdef"
+  token_ttl: 3600
 cors:
   enabled: false
 `

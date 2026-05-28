@@ -17,7 +17,12 @@ import (
 	demohandler "github.com/rei0721/go-scaffold/internal/modules/demo/handler"
 	"github.com/rei0721/go-scaffold/internal/modules/demo/model"
 	"github.com/rei0721/go-scaffold/internal/modules/demo/repository"
-	"github.com/rei0721/go-scaffold/internal/modules/demo/service"
+	demoservice "github.com/rei0721/go-scaffold/internal/modules/demo/service"
+	userhandler "github.com/rei0721/go-scaffold/internal/modules/user/handler"
+	userrepository "github.com/rei0721/go-scaffold/internal/modules/user/repository"
+	userservice "github.com/rei0721/go-scaffold/internal/modules/user/service"
+	authapi "github.com/rei0721/go-scaffold/pkg/auth"
+	passwordcrypto "github.com/rei0721/go-scaffold/pkg/crypto"
 	"github.com/rei0721/go-scaffold/pkg/database"
 	"github.com/rei0721/go-scaffold/pkg/logger"
 	apperrors "github.com/rei0721/go-scaffold/types/errors"
@@ -126,6 +131,108 @@ func TestNewRouterDemoTodoIntegration(t *testing.T) {
 	}
 }
 
+func TestNewRouterUserAuthRBACIntegration(t *testing.T) {
+	router, db := newUserIntegrationRouter(t)
+	defer func() {
+		if err := db.Close(); err != nil {
+			t.Fatalf("close database: %v", err)
+		}
+	}()
+
+	registerRecorder, registerBody := performIntegrationRequest(t, router, http.MethodPost, "/api/v1/auth/register", `{
+		"username": "admin",
+		"email": "admin@example.com",
+		"password": "password123"
+	}`, nil)
+	if registerRecorder.Code != http.StatusCreated {
+		t.Fatalf("expected register status %d, got %d with body %s", http.StatusCreated, registerRecorder.Code, registerRecorder.Body.String())
+	}
+	adminToken := decodeIntegrationData[userservice.AuthToken](t, registerBody)
+	if adminToken.Token == "" || len(adminToken.User.Roles) != 1 || adminToken.User.Roles[0].Name != "admin" {
+		t.Fatalf("expected first registered user to receive admin token and role, got %#v", adminToken)
+	}
+	if strings.Contains(registerRecorder.Body.String(), "passwordHash") || strings.Contains(registerRecorder.Body.String(), "password_hash") {
+		t.Fatalf("response leaked password hash: %s", registerRecorder.Body.String())
+	}
+
+	meRecorder, meBody := performIntegrationRequest(t, router, http.MethodGet, "/api/v1/auth/me", "", authHeader(adminToken.Token))
+	if meRecorder.Code != http.StatusOK {
+		t.Fatalf("expected me status %d, got %d with body %s", http.StatusOK, meRecorder.Code, meRecorder.Body.String())
+	}
+	me := decodeIntegrationData[userservice.AuthPrincipal](t, meBody)
+	if me.User.Username != "admin" || len(me.Permissions) == 0 {
+		t.Fatalf("expected admin principal with permissions, got %#v", me)
+	}
+
+	userRecorder, userBody := performIntegrationRequest(t, router, http.MethodPost, "/api/v1/users", `{
+		"username": "member",
+		"email": "member@example.com",
+		"password": "password123"
+	}`, authHeader(adminToken.Token))
+	if userRecorder.Code != http.StatusCreated {
+		t.Fatalf("expected create user status %d, got %d with body %s", http.StatusCreated, userRecorder.Code, userRecorder.Body.String())
+	}
+	member := decodeIntegrationData[userservice.UserDTO](t, userBody)
+	if member.ID == 0 || member.Username != "member" || len(member.Roles) != 1 || member.Roles[0].Name != "user" {
+		t.Fatalf("expected member with default user role, got %#v", member)
+	}
+
+	permissionRecorder, permissionBody := performIntegrationRequest(t, router, http.MethodPost, "/api/v1/permissions", `{
+		"code": "users:read",
+		"description": "Read users"
+	}`, authHeader(adminToken.Token))
+	if permissionRecorder.Code != http.StatusCreated {
+		t.Fatalf("expected create permission status %d, got %d with body %s", http.StatusCreated, permissionRecorder.Code, permissionRecorder.Body.String())
+	}
+	permission := decodeIntegrationData[userservice.PermissionDTO](t, permissionBody)
+
+	roleRecorder, roleBody := performIntegrationRequest(t, router, http.MethodPost, "/api/v1/roles", `{
+		"name": "reader",
+		"description": "Can read users",
+		"permissions": ["users:read"]
+	}`, authHeader(adminToken.Token))
+	if roleRecorder.Code != http.StatusCreated {
+		t.Fatalf("expected create role status %d, got %d with body %s", http.StatusCreated, roleRecorder.Code, roleRecorder.Body.String())
+	}
+	role := decodeIntegrationData[userservice.RoleDTO](t, roleBody)
+	if role.ID == 0 || len(role.Permissions) != 1 || role.Permissions[0].Code != permission.Code {
+		t.Fatalf("expected reader role with users:read permission, got %#v", role)
+	}
+
+	assignRecorder, _ := performIntegrationRequest(t, router, http.MethodPost, "/api/v1/users/"+uintPath(member.ID)+"/roles/"+uintPath(role.ID), "", authHeader(adminToken.Token))
+	if assignRecorder.Code != http.StatusOK {
+		t.Fatalf("expected assign role status %d, got %d with body %s", http.StatusOK, assignRecorder.Code, assignRecorder.Body.String())
+	}
+
+	loginRecorder, loginBody := performIntegrationRequest(t, router, http.MethodPost, "/api/v1/auth/login", `{
+		"identifier": "member",
+		"password": "password123"
+	}`, nil)
+	if loginRecorder.Code != http.StatusOK {
+		t.Fatalf("expected login status %d, got %d with body %s", http.StatusOK, loginRecorder.Code, loginRecorder.Body.String())
+	}
+	memberToken := decodeIntegrationData[userservice.AuthToken](t, loginBody)
+
+	listRecorder, listBody := performIntegrationRequest(t, router, http.MethodGet, "/api/v1/users", "", authHeader(memberToken.Token))
+	if listRecorder.Code != http.StatusOK {
+		t.Fatalf("expected member users:read status %d, got %d with body %s", http.StatusOK, listRecorder.Code, listRecorder.Body.String())
+	}
+	users := decodeIntegrationData[[]userservice.UserDTO](t, listBody)
+	if len(users) != 2 {
+		t.Fatalf("expected two users, got %#v", users)
+	}
+
+	forbiddenRecorder, forbiddenBody := performIntegrationRequest(t, router, http.MethodPost, "/api/v1/roles", `{
+		"name": "operator"
+	}`, authHeader(memberToken.Token))
+	if forbiddenRecorder.Code != http.StatusForbidden {
+		t.Fatalf("expected member role create status %d, got %d with body %s", http.StatusForbidden, forbiddenRecorder.Code, forbiddenRecorder.Body.String())
+	}
+	if forbiddenBody.Code != apperrors.ErrPermissionDenied {
+		t.Fatalf("expected permission denied code %d, got %d", apperrors.ErrPermissionDenied, forbiddenBody.Code)
+	}
+}
+
 func TestNewRouterRecoveryIncludesTraceID(t *testing.T) {
 	log := &recordingLogger{}
 	router := newTestRouter(RouterDeps{
@@ -174,7 +281,7 @@ func newDemoIntegrationRouter(t *testing.T) (*gin.Engine, database.Database) {
 		t.Fatalf("apply todo schema: %v", err)
 	}
 
-	todoService := service.NewTodoService(db, repository.NewTodoRepository())
+	todoService := demoservice.NewTodoService(db, repository.NewTodoRepository())
 	todoHandler := demohandler.NewTodoHandler(todoService, &recordingLogger{})
 
 	return newTestRouter(RouterDeps{
@@ -192,6 +299,50 @@ func newDemoIntegrationRouter(t *testing.T) (*gin.Engine, database.Database) {
 				AllowHeaders: []string{"Content-Type", "X-Trace-ID"},
 				MaxAge:       60,
 			},
+		},
+	}), db
+}
+
+func newUserIntegrationRouter(t *testing.T) (*gin.Engine, database.Database) {
+	t.Helper()
+
+	db, err := database.New(&database.Config{
+		Driver: database.DriverSQLite,
+		DBName: filepath.Join(t.TempDir(), "user-router.db"),
+	})
+	if err != nil {
+		t.Fatalf("create sqlite database: %v", err)
+	}
+	if _, err := dbapp.ApplyUserSchema(context.Background(), db, string(database.DriverSQLite)); err != nil {
+		_ = db.Close()
+		t.Fatalf("apply user schema: %v", err)
+	}
+
+	repo := userrepository.NewRepository()
+	hasher, err := passwordcrypto.NewBcrypt(passwordcrypto.WithBcryptCost(passwordcrypto.MinBcryptCost))
+	if err != nil {
+		_ = db.Close()
+		t.Fatalf("create password hasher: %v", err)
+	}
+	tokens, err := authapi.NewJWTService(authapi.JWTConfig{
+		Secret: []byte("0123456789abcdef0123456789abcdef"),
+		Issuer: "go-scaffold",
+	})
+	if err != nil {
+		_ = db.Close()
+		t.Fatalf("create token service: %v", err)
+	}
+	userService := userservice.NewUserService(db, repo, hasher, tokens, nil)
+	userHandler := userhandler.NewUserHandler(userService, &recordingLogger{})
+
+	return newTestRouter(RouterDeps{
+		Database:    db,
+		Logger:      &recordingLogger{},
+		UserHandler: userHandler,
+		Middleware: middleware.MiddlewareConfig{
+			Recovery: middleware.RecoveryConfig{Enabled: true},
+			Logger:   middleware.LoggerConfig{Enabled: true},
+			TraceID:  middleware.TraceIDConfig{Enabled: true, HeaderName: "X-Trace-ID"},
 		},
 	}), db
 }
@@ -248,6 +399,10 @@ func assertIntegrationSuccess(t *testing.T, response integrationResponse) {
 
 func uintPath(id uint) string {
 	return strconv.FormatUint(uint64(id), 10)
+}
+
+func authHeader(token string) map[string]string {
+	return map[string]string{"Authorization": "Bearer " + token}
 }
 
 type recordingLogger struct {

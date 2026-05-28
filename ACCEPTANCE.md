@@ -1,5 +1,70 @@
 # ACCEPTANCE.md
 
+## TASK-P2-023 Acceptance
+
+| ID | Acceptance Item | Method | Required | Status |
+|---|---|---|---|---|
+| ACC-P2-100 | Auth token public API lives under `pkg/auth` and does not depend on `internal/*` | Code review and package import scan | Yes | [CONFIRMED] |
+| ACC-P2-101 | Token signing/parsing uses a mainstream JWT library | `go test ./pkg/auth -count=1` and dependency review | Yes | [CONFIRMED] |
+| ACC-P2-102 | Main-service user auth imports and uses `pkg/auth` for token issue/verify | Code review and `go test ./internal/modules/user/... -count=1` | Yes | [CONFIRMED] |
+| ACC-P2-103 | Configured auth token secret and TTL still wire into the auth token service | `go test ./internal/app/initapp -count=1`; `go test ./internal/app/... -count=1` | Yes | [CONFIRMED] |
+| ACC-P2-104 | Existing register/login/me and router regressions remain compatible | `go test ./internal/transport/http -count=1`; `go test ./... -count=1` | Yes | [CONFIRMED] |
+| ACC-P2-105 | Scope does not implement refresh/session revoke, audit, password reset, external IAM, production secret management, production migration, deployment, real secrets/users, or plugin transport | Scope review and `git diff --check` | Yes | [CONFIRMED] |
+
+## TASK-P2-022 Acceptance
+
+| ID | Acceptance Item | Method | Required | Status |
+|---|---|---|---|---|
+| ACC-P2-094 | RBAC public API lives under `pkg/rbac` and does not depend on `internal/*` | Code review and package import scan | Yes | [CONFIRMED] |
+| ACC-P2-095 | `pkg/rbac` uses Casbin as the RBAC policy engine behind public contracts | `go test ./pkg/rbac -count=1` | Yes | [CONFIRMED] |
+| ACC-P2-096 | Main-service business authorization imports and uses `pkg/rbac` | Code review and `go test ./internal/modules/user/... -count=1` | Yes | [CONFIRMED] |
+| ACC-P2-097 | App composition creates the public RBAC authorizer from configured model path | `go test ./internal/app/initapp -count=1`; `go test ./internal/app/... -count=1` | Yes | [CONFIRMED] |
+| ACC-P2-098 | Existing config, router, and full regressions remain compatible | `go test ./internal/config -count=1`; `go test ./internal/transport/http -count=1`; `go test ./... -count=1` | Yes | [CONFIRMED] |
+| ACC-P2-099 | Scope does not implement external IAM replacement, refresh/session/audit/password-reset, production migration, deployment, real secrets/users, or plugin transport | Scope review and `git diff --check` | Yes | [CONFIRMED] |
+
+## TASK-P2-021 Acceptance
+
+| ID | Acceptance Item | Method | Required | Status |
+|---|---|---|---|---|
+| ACC-P2-088 | RBAC authorization uses a mainstream library wrapper instead of hand-written permission matching | Code review and `go test ./internal/modules/user/... -count=1` | Yes | [CONFIRMED] |
+| ACC-P2-089 | `configs/rbac_model.conf` contains the recoverable Casbin RBAC model | Manual review and `git diff --check` | Yes | [CONFIRMED] |
+| ACC-P2-090 | `rbac.model_path` is represented in config structs, env override, and config examples | `go test ./internal/config -count=1` | Yes | [CONFIRMED] |
+| ACC-P2-091 | Business authorization enforces DB-backed role-permission policies through Casbin | `go test ./internal/modules/user/... -count=1`; `go test ./internal/transport/http -count=1` | Yes | [CONFIRMED] |
+| ACC-P2-092 | Startup module wiring creates the Casbin authorizer without breaking RBAC seed behavior | `go test ./internal/app/initapp -count=1`; `go test ./internal/app/... -count=1` | Yes | [CONFIRMED] |
+| ACC-P2-093 | Scope does not implement external IAM replacement, refresh/session/audit/password-reset, production migration, deployment, real secrets/users, or plugin transport | Scope review and `git diff --check` | Yes | [CONFIRMED] |
+
+## TASK-P2-020 Acceptance
+
+| ID | Acceptance Item | Method | Required | Status |
+|---|---|---|---|---|
+| ACC-P2-082 | `internal/config` exposes and validates `rbac` roles, permissions, and role-permission grants | `go test ./internal/config -count=1` | Yes | [CONFIRMED] |
+| ACC-P2-083 | `configs` contains safe RBAC seed entries without real users, passwords, tokens, or secrets | Manual review and `git diff --check` | Yes | [CONFIRMED] |
+| ACC-P2-084 | User service applies RBAC seeds idempotently | `go test ./internal/modules/user/... -count=1` | Yes | [CONFIRMED] |
+| ACC-P2-085 | Startup applies configured RBAC seeds only when enabled | `go test ./internal/app/initapp -count=1` | Yes | [CONFIRMED] |
+| ACC-P2-086 | Existing app behavior remains compatible when RBAC config is absent or disabled | `go test ./internal/app/... -count=1`; `go test ./... -count=1` | Yes | [CONFIRMED] |
+| ACC-P2-087 | Scope does not implement OPA/Casbin, external IAM, real users/passwords, production migration, deployment, or plugin transport | Scope review and `git diff --check` | Yes | [CONFIRMED] |
+
+## TASK-P2-019 Acceptance
+
+| ID | Acceptance Item | Method | Required | Status |
+|---|---|---|---|---|
+| ACC-P2-077 | `internal/config` exposes `auth.token_secret` and `auth.token_ttl` with validation | `go test ./internal/config -count=1` | Yes | [CONFIRMED] |
+| ACC-P2-078 | Auth token env overrides use `RIN_APP_AUTH_TOKEN_SECRET` and `RIN_APP_AUTH_TOKEN_TTL` | Config env tests | Yes | [CONFIRMED] |
+| ACC-P2-079 | `NewUserModule` wires configured auth values into `TokenService` | `go test ./internal/app/initapp -count=1` | Yes | [CONFIRMED] |
+| ACC-P2-080 | Examples document placeholder auth secret and TTL without real secrets | Manual review and `git diff --check` | Yes | [CONFIRMED] |
+| ACC-P2-081 | Scope does not implement refresh/session revoke, audit, password reset, external IAM, OPA/Casbin, production migrations, deployment, or plugin WS/RPC/discovery | Scope review | Yes | [CONFIRMED] |
+
+## TASK-P2-018 Acceptance
+
+| ID | Acceptance Item | Method | Required | Status |
+|---|---|---|---|---|
+| ACC-P2-071 | Main service has an `internal/modules/user` model/repository/service/token/handler stack | Code review and `go test ./internal/modules/user/... -count=1` | Yes | [CONFIRMED] |
+| ACC-P2-072 | `/api/v1/auth`, `/api/v1/users`, `/api/v1/roles`, and `/api/v1/permissions` support auth, CRUD, and RBAC assignment through the main router | `go test ./internal/transport/http -count=1` | Yes | [CONFIRMED] |
+| ACC-P2-073 | User passwords are hashed through `pkg/crypto` and password hashes are never returned in API responses | Service and router tests | Yes | [CONFIRMED] |
+| ACC-P2-074 | Duplicate username/email, invalid input, unauthorized, forbidden, and not-found paths are covered | Service and router tests | Yes | [CONFIRMED] |
+| ACC-P2-075 | Server-start path creates user, role, permission, and join tables through `pkg/sqlgen` DDL bootstrap | `go test ./internal/app/... -count=1` | Yes | [CONFIRMED] |
+| ACC-P2-076 | Scope does not implement production secret/session management, refresh-token/session revocation, OPA/Casbin, production migrations, deployment, or plugin transport changes | Scope review and `git diff --check` | Yes | [CONFIRMED] |
+
 ## TASK-INFRA-004 Acceptance
 
 | ID | Acceptance Item | Method | Required | Status |

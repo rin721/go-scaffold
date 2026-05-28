@@ -435,6 +435,7 @@ func (m *manager) copyConfig(src *Config) *Config {
 		value := *src.IAM.DefaultDeny
 		dst.IAM.DefaultDeny = &value
 	}
+	dst.RBAC = copyRBACConfig(src.RBAC)
 	dst.CORS.AllowOrigins = append([]string(nil), src.CORS.AllowOrigins...)
 	dst.CORS.AllowMethods = append([]string(nil), src.CORS.AllowMethods...)
 	dst.CORS.AllowHeaders = append([]string(nil), src.CORS.AllowHeaders...)

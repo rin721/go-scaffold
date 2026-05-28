@@ -1,5 +1,25 @@
 # ARCHITECTURE.md
 
+## Current Architecture Addendum
+
+- [ACCEPT_WITH_RISK] Main-service auth token signing and verification is being reworked to use `pkg/auth`, a public infrastructure API backed by a mainstream JWT library. Business services should not own hand-written JWT signing/parsing logic.
+- [CONFIRMED] `pkg/auth` must not depend on `internal/*`; the main-service user module adapts database-backed users into public auth claims.
+- [ACCEPT_WITH_RISK] Main-service RBAC authorization uses Casbin behind `pkg/rbac`, a public infrastructure API. Business services should not own hand-written permission matching logic or a module-local RBAC engine wrapper.
+- [CONFIRMED] `pkg/rbac` must not depend on `internal/*`; the main-service user module adapts database-backed roles and permissions into the public `rbac.Principal` and `rbac.Policy` contracts.
+- [CONFIRMED] `configs/rbac_model.conf` is the recoverable Casbin RBAC model config for the main-service authorization wrapper.
+- [CONFIRMED] Database-backed roles, permissions, user-role assignments, and role-permission assignments remain the business source of policy data; Casbin evaluates the assembled policy at authorization time.
+- [CONFIRMED] `internal/config.RBAC` is the configuration source for recoverable RBAC seed data: roles, permissions, and role-permission grants.
+- [CONFIRMED] `configs/config.example.yaml` and `configs/config.yaml` carry safe RBAC seed entries; no user accounts, passwords, tokens, or production secrets are represented there.
+- [CONFIRMED] `internal/app/initapp.NewModules` applies configured RBAC seeds during startup only when `rbac.enabled` and `rbac.apply_on_start` are true. Application remains compatible when the `rbac` block is omitted or disabled.
+- [CONFIRMED] This is seed/config wiring only; OPA/Casbin, external IAM replacement, production migrations, refresh/session/audit/password-reset work, deployment, and plugin transport remain separate future slices.
+
+## Previous Architecture Addendum
+
+- [CONFIRMED] `internal/config.Auth` is the configuration source for the main-service user token service.
+- [CONFIRMED] `internal/app/initapp.NewModules` passes `core.Config.Auth` into `NewUserModule`, and `NewUserModule` creates `internal/modules/user/service.TokenService` from the configured token secret and TTL.
+- Empty `auth.token_secret` remains a local/dev fallback that generates a process-local random secret. A configured secret provides stable signing across process restarts but does not claim production secret management.
+- [CONFIRMED] Plugin WS/RPC/heartbeat/discovery remains a separate future architecture slice; it is not implemented by TASK-P2-019.
+
 ## 架构状态
 
 - 项目：go-scaffold
@@ -40,10 +60,12 @@ types/*
 | `internal/config` | 配置加载、`.env` 自动加载、动态环境变量覆盖和热重载配置快照 | [CONFIRMED] TASK-P2-011 已将固定/手写环境变量覆盖收拢为 `AppPrefix` 动态前缀 + `envname` 标签映射；TASK-P2-012 已删除重复 env-name 常量；未加前缀变量保留兼容 fallback | [CONFIRMED] |
 | `internal/transport/http` | HTTP router、middleware、health/ready、API 注册 | [CONFIRMED] health/ready、demo Todo HTTP 集成测试和 app 装配级路径均已补最小测试；TASK-P2-014 后 app server 装配与 DB CLI 分开覆盖 | [CONFIRMED] |
 | `internal/modules/demo` | 长期标准示例 | 生成 demo 分层验收和测试路线 | [CONFIRMED] |
+| `internal/modules/user` | [ACCEPT_WITH_RISK] 主服务用户、认证与 RBAC 模块，提供数据库用户、角色、权限、密码哈希、bearer token 和权限门禁 | TASK-P2-018 已实现模块、HTTP 路由、server-start sqlgen schema bootstrap 和测试；生产密钥管理、refresh token/session revoke、OPA/Casbin、生产迁移仍延后 | [CONFIRMED] |
 | `pkg/*` | 混合策略 | [CONFIRMED] TASK-P1-007 已逐包分类为公共基础设施 API、公共工具 API 或内部支撑工具包 | [CONFIRMED] |
 | 数据库 CLI / schema bootstrap | sqlgen toolchain | [CONFIRMED] TASK-P2-014 removes `initdb`/scripts/`AutoMigrate`; demo schema and Todo CRUD are generated through `pkg/sqlgen`; production migration framework remains deferred | [CONFIRMED] |
 | 插件系统 | v1 local/http 保留；注册责任已收拢为被动 registry/runtime；TASK-P2-005 至 TASK-P2-007 已增加 hooks、HTTP server helper 和 `RemoteHook` | [CONFIRMED] rpc/ws/discovery、插件发现和 Go `.so` 插件仍留在 Backlog | [CONFIRMED] |
 | IAM/auth/JWT | `pkg/iam` 公共接口与 memory 实现已完成；JWT 中间件和业务 RBAC 仍不实现 | 后续如需业务登录、HTTP 中间件或数据库版权限，必须单独提升任务 | [CONFIRMED] |
+| 用户、认证与 RBAC 服务 | [ACCEPT_WITH_RISK] 主服务需要数据库用户、登录 token、角色权限和路由级权限门禁，但不等于生产级 IAM/secret/session 平台 | TASK-P2-018 已实现 `/api/v1/auth`、`/api/v1/users`、`/api/v1/roles`、`/api/v1/permissions` 和 schema bootstrap；IAM 持久化、生产密钥、refresh token、审计和生产迁移需单独确认 | [CONFIRMED] |
 | 远程插件注册与 Blog 示例 | [CONFIRMED] 主服务新增显式 HTTP 注册入口，由远程插件服务主动上报 HTTP invoke endpoint；host 创建 HTTP adapter 并继续使用被动 `Manager.Register`。Hook JSON event 可携带安全 IAM principal 上下文。 | TASK-P2-016 已完成 HTTP 注册和 Blog 示例；真实 WS/RPC transport、自动发现服务、持久注册表、JWT/login 和生产密钥管理仍延后 | [CONFIRMED] |
 | 插件控制面独立接口 | [ACCEPT_WITH_RISK] 主服务插件系统需要可配置 HTTP 控制面地址，并由主服务选择是否开启 `/plugin/v1/register`；远程插件服务自身继续暴露标准 `/plugin/v1/invoke`。 | TASK-P2-017 已实现 HTTP 控制面配置、可选独立注册 server 和 reserved WS address placeholders，不实现真实 WS/RPC transport、心跳或持久发现。 | [CONFIRMED] |
 | CI/CD 与部署 | 先建立非生产质量门禁、手动部署说明、远程部署显式参数契约、手动远程部署 workflow、Docker production 制品和远程 Linux 统一 `deploy.sh` 入口；真实生产运行仍需单独确认 | [CONFIRMED] TASK-P2-001 已新增 CI workflow 和部署说明；TASK-P2-002 已新增 `deploy.sh` / `script/install.sh` 显式参数契约；TASK-P2-003 已新增手动 staging 远程部署 workflow；TASK-P2-004 已补 Dockerfile、production Compose 示例、统一 `deploy.sh` 部署入口、手动 production 闸门并完成 Docker build 验证；镜像发布和真实 production 运行仍需单独确认 | [CONFIRMED] |
@@ -57,6 +79,7 @@ types/*
 | `internal/config` | 环境覆盖已由动态前缀与 `envname` 标签统一，热更新会重新应用环境变量覆盖 | 后续如新增复杂 slice/map 环境覆盖需单独任务确认 |
 | `internal/transport/http` | health/ready、demo 路由和 app 装配级 server 路径均已补最小测试；DB CLI 单独覆盖 | 继续保持不启动真实 HTTP server 的测试边界 |
 | `internal/modules/demo` | 示例职责与生产约束需分离 | TASK-OPT-003 |
+| `internal/modules/user` | 主服务当前补齐用户、认证与 RBAC 服务；TASK-P2-018 覆盖用户/角色/权限表、密码哈希、bearer token、权限门禁和路由 | 完成本切片后再确认是否进入生产密钥管理、refresh token/session revoke、审计、密码重置、IAM 持久化或生产迁移 |
 | `pkg/*` | 公共/内部定位已在 TASK-P1-007 标记，`pkg/sqlgen` unsupported 边界已在 TASK-P1-008 标记 | 后续破坏性重构或新能力实现仍需单独确认 |
 | `types/*` | 跨层公共契约、HTTP/Gin 响应契约和应用层以上契约说明入口 | [ACCEPT] 用户修正 `types/*` 不得聚合 `pkg/*` 基础设施接口；`Crypto` 别名、`CacheInjectable` 和 executor typed constants 已移除或解耦 |
 

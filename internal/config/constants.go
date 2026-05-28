@@ -83,5 +83,7 @@ const (
 	AppStorageName  = "storage"
 	AppPluginName   = "plugin"
 	AppIAMName      = "iam"
+	AppAuthName     = "auth"
+	AppRBACName     = "rbac"
 	AppCORSName     = "cors"
 )

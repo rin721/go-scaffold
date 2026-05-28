@@ -1,5 +1,15 @@
 # TEST_MATRIX.md
 
+## Current Test Matrix Addendum
+
+| ID | Scope | Verification Goal | Suggested Files | Commands | Exit Condition | Related Risk |
+|---|---|---|---|---|---|---|
+| TM-P2-020 | pkg/auth public token API | Auth token API is reusable from `pkg/auth`, JWT-backed, and business authentication uses the public package | `pkg/auth/**/*`, `internal/modules/user/service/**/*`, `internal/app/initapp/**/*` | `go test ./pkg/auth -count=1`; `go test ./internal/modules/user/... -count=1`; `go test ./internal/app/initapp -count=1`; `go test ./internal/app/... -count=1`; `go test ./internal/transport/http -count=1`; `go test ./... -count=1`; `git diff --check` | [CONFIRMED] TASK-P2-023 completed | RISK-031 |
+| TM-P2-019 | pkg/rbac public RBAC API | RBAC public API is reusable from `pkg/rbac`, remains Casbin-backed, and business authorization uses the public package | `pkg/rbac/**/*`, `internal/modules/user/**/*`, `internal/app/initapp/**/*`, `configs/rbac_model.conf` | `go test ./pkg/rbac -count=1`; `go test ./internal/config -count=1`; `go test ./internal/modules/user/... -count=1`; `go test ./internal/app/initapp -count=1`; `go test ./internal/app/... -count=1`; `go test ./internal/transport/http -count=1`; `go test ./... -count=1`; `git diff --check` | [CONFIRMED] TASK-P2-022 completed | RISK-030 |
+| TM-P2-018 | Casbin-backed RBAC authorization wrapper | Authorization uses Casbin over DB-backed role-permission policies while config/model path wiring and app regressions stay compatible | `configs/rbac_model.conf`, `internal/modules/user/**/*`, `internal/config/**/*`, `internal/app/initapp/**/*` | `go test ./internal/config -count=1`; `go test ./internal/modules/user/... -count=1`; `go test ./internal/app/initapp -count=1`; `go test ./internal/app/... -count=1`; `go test ./internal/transport/http -count=1`; `go test ./... -count=1`; `git diff --check` | [CONFIRMED] TASK-P2-021 completed | RISK-029 |
+| TM-P2-017 | RBAC seed config under configs | `rbac` config validates seed data, startup applies seeds idempotently, and app/full regression stays compatible | `internal/config/**/*`, `internal/modules/user/service/**/*`, `internal/app/initapp/**/*`, `configs/*.yaml` | `go test ./internal/config -count=1`; `go test ./internal/modules/user/... -count=1`; `go test ./internal/app/initapp -count=1`; `go test ./internal/app/... -count=1`; `go test ./... -count=1`; `git diff --check` | [CONFIRMED] TASK-P2-020 completed | RISK-028 |
+| TM-P2-016 | Auth token config hardening | `auth.token_secret` and `auth.token_ttl` validate, override from env, and wire into the user token service | `internal/config/**/*`, `internal/app/initapp/**/*`, `.env.example`, `configs/config.example.yaml` | `go test ./internal/config -count=1`; `go test ./internal/app/initapp -count=1`; `go test ./internal/app/... -count=1`; `go test ./... -count=1`; `git diff --check` | [CONFIRMED] TASK-P2-019 completed | RISK-027 |
+
 ## 最新补充矩阵项
 
 | ID | 范围 | 验证目标 | 建议文件范围 | 验证命令 | 退出条件 | 关联风险 |
@@ -78,6 +88,7 @@
 | TM-P2-012 | 第一版发布验收清单 | 明确 v1 功能范围、真实环境验证、镜像发布、生产迁移、密钥管理、回滚和发布门禁 | 项目状态文档、发布说明、后续任务文档 | 待用户确认后定义 | [NOT_STARTED] 用户已纠正当前项目不应发布第一版；需单独确认后才能提升 | RISK-022 |
 | TM-P2-013 | 配置环境变量动态前缀 | `internal/config` 从 `AppPrefix` 派生环境变量前缀，字段通过 `envname` 自动覆盖，`.env` 自动加载可验证 | `internal/config/**/*`、`cmd/server/**/*`、配置示例和状态文档 | `go test ./internal/config -count=1`；`go test ./cmd/server ./internal/app/... -count=1`；`go test ./... -count=1`；`git diff --check` | [CONFIRMED] TASK-P2-011 已完成 | RISK-011 |
 | TM-P2-014 | 配置 env-name 单一事实源 | 删除 `internal/config` 中重复导出的字段环境变量名常量，测试从 `envname` 标签读取变量名 | `internal/config/constants.go`、`internal/config/manager_test.go`、状态文档 | `rg -n "Env(DB|Redis|Server|Log|I18n|CORS|Executor|Storage|Plugin|IAM)" internal cmd types deploy docs .env.example Dockerfile -S`；`go test ./internal/config -count=1`；`go test ./cmd/server ./internal/app/... -count=1`；`go test ./... -count=1`；`git diff --check` | [CONFIRMED] TASK-P2-012 已完成；InitDB config 已在 TASK-P2-014 移除 | RISK-011 |
+| TM-P2-015 | 主服务 user/auth/RBAC | 用户、角色、权限、密码哈希、bearer token 登录、认证中间件、权限门禁和 schema bootstrap 可验证 | `internal/modules/user/**/*`、`internal/app/dbapp/**/*`、`internal/app/initapp/**/*`、`internal/transport/http/**/*` | `go test ./internal/modules/user/... -count=1`；`go test ./internal/transport/http -count=1`；`go test ./internal/app/... -count=1`；`go test ./... -count=1`；`git diff --check` | [CONFIRMED] TASK-P2-018 已完成；生产密钥/会话管理、OPA/Casbin、审计、密码重置和生产迁移仍延后 | RISK-026 |
 
 ## P1 优化任务草案
 

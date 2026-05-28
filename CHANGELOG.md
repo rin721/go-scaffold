@@ -2,6 +2,71 @@
 
 ## Latest Addendum
 
+### 2026-05-28 - TASK-P2-023 - pkg/auth public token API
+
+- Change: Added `pkg/auth` as the public authentication token API with JWT issue/verify support backed by `github.com/golang-jwt/jwt/v5`.
+- Change: Removed hand-written token signing/parsing from the main-service user module; business code now maps users into `auth.Claims`.
+- Change: Updated app composition and focused tests so configured `auth.token_secret` and `auth.token_ttl` create the public auth token service.
+- Scope: No refresh/session revocation, audit, password reset, external IAM replacement, production secret manager, production migration, deployment, real secrets/users, or plugin transport implementation.
+- Verification: `go test ./pkg/auth -count=1`; `go test ./internal/modules/user/... -count=1`; `go test ./internal/app/initapp -count=1`; `go test ./internal/app/... -count=1`; `go test ./internal/transport/http -count=1`; `go test ./... -count=1`; `git diff --check` passed.
+- Status: TASK-P2-023 / TS-P2-023 completed; project remains `IN_DEVELOPMENT_NOT_RELEASE_READY`, legal next state is `NONE / NONE / PENDING_USER_CONFIRMATION`.
+
+## Previous Addendum
+
+### 2026-05-28 - TASK-P2-022 - pkg/rbac public RBAC API
+
+- Change: Promoted the Casbin-backed RBAC authorizer contracts and implementation from `internal/modules/user/rbac` to the public infrastructure package `pkg/rbac`.
+- Change: Added `pkg/rbac` docs, README, and focused Casbin authorization tests.
+- Change: Updated main-service user authorization and app composition to use `github.com/rei0721/go-scaffold/pkg/rbac`.
+- Scope: No external IAM replacement, refresh/session/audit/password-reset work, production migration, deployment, real secrets/users, or plugin transport implementation.
+- Verification: `go test ./pkg/rbac -count=1`; `go test ./internal/config -count=1`; `go test ./internal/modules/user/... -count=1`; `go test ./internal/app/initapp -count=1`; `go test ./internal/app/... -count=1`; `go test ./internal/transport/http -count=1`; `go test ./... -count=1`; `git diff --check` passed.
+- Status: TASK-P2-022 / TS-P2-022 completed; project remains `IN_DEVELOPMENT_NOT_RELEASE_READY`, legal next state is `NONE / NONE / PENDING_USER_CONFIRMATION`.
+
+## Previous Addendum
+
+### 2026-05-28 - TASK-P2-021 - Casbin-backed RBAC authorization wrapper
+
+- Change: Added `github.com/casbin/casbin/v2` and a local Casbin authorizer wrapper under `internal/modules/user/rbac`.
+- Change: Added `configs/rbac_model.conf` and `rbac.model_path` config/env support.
+- Change: Replaced business authorization's hand-written permission matcher with Casbin enforcement over DB-backed role-permission policy data.
+- Scope: No external IAM replacement, refresh/session/audit/password-reset work, production migration, deployment, real secrets/users, or plugin transport implementation.
+- Verification: `go test ./internal/config -count=1`; `go test ./internal/modules/user/... -count=1`; `go test ./internal/app/initapp -count=1`; `go test ./internal/app/... -count=1`; `go test ./internal/transport/http -count=1`; `go test ./... -count=1`; `git diff --check` passed.
+- Status: TASK-P2-021 / TS-P2-021 completed; project remains `IN_DEVELOPMENT_NOT_RELEASE_READY`, legal next state is `NONE / NONE / PENDING_USER_CONFIRMATION`.
+
+## Previous Addendum
+
+### 2026-05-28 - TASK-P2-020 - RBAC seed config under configs
+
+- Change: Added `rbac` config support for roles, permissions, and role-permission grants, including validation and config copy coverage.
+- Change: Added safe RBAC seed entries to `configs/config.example.yaml` and `configs/config.yaml`.
+- Change: Added idempotent startup RBAC seed application through the main-service user module when `rbac.enabled` and `rbac.apply_on_start` are true.
+- Scope: No seeded real users/passwords, OPA/Casbin, external IAM replacement, refresh/session/audit/password-reset work, production migration, deployment, or plugin transport implementation.
+- Verification: `go test ./internal/config -count=1`; `go test ./internal/modules/user/... -count=1`; `go test ./internal/app/initapp -count=1`; `go test ./internal/app/... -count=1`; `go test ./... -count=1`; `git diff --check` passed.
+- Status: TASK-P2-020 / TS-P2-020 completed; project remains `IN_DEVELOPMENT_NOT_RELEASE_READY`, legal next state is `NONE / NONE / PENDING_USER_CONFIRMATION`.
+
+## Previous Addendum
+
+### 2026-05-28 - TASK-P2-019 - Auth token config hardening
+
+- Change: Added `auth.token_secret` and `auth.token_ttl` config/env support and wired them into the existing main-service user token service.
+- Change: Added placeholder examples and tests for validation, env override, and token wiring.
+- Scope: Placeholder examples and focused tests only; no real secrets, refresh-token/session revocation, audit logging, password reset, external IAM, OPA/Casbin, production migrations, deployment, or plugin WS/RPC/discovery implementation.
+- Verification: `go test ./internal/config -count=1`; `go test ./internal/app/initapp -count=1`; `go test ./internal/app/... -count=1`; `go test ./... -count=1`; `git diff --check` passed.
+- Status: TASK-P2-019 / TS-P2-019 completed; project remains `IN_DEVELOPMENT_NOT_RELEASE_READY`, legal next state is `NONE / NONE / PENDING_USER_CONFIRMATION`.
+
+## Latest Addendum
+
+### 2026-05-28 - TASK-P2-018 - Main-service user/auth/RBAC
+
+- Change: Added `internal/modules/user` with users, roles, permissions, user-role and role-permission assignments, password hashing, HMAC bearer tokens, and permission checks.
+- Change: Added `/api/v1/auth/register`, `/api/v1/auth/login`, `/api/v1/auth/me`, `/api/v1/users`, `/api/v1/roles`, and `/api/v1/permissions` routes.
+- Change: Added sqlgen bootstrap for user/RBAC tables and app/router/service/schema regression tests.
+- Scope: No production secret/session management, refresh-token/session revocation, OPA/Casbin, audit logging, password reset, deployment, plugin transport changes, or production migration framework.
+- Verification: `go test ./internal/modules/user/... -count=1`; `go test ./internal/app/dbapp -count=1`; `go test ./internal/transport/http -count=1`; `go test ./internal/app/... -count=1`; `go test ./... -count=1`; `git diff --check` passed.
+- Status: TASK-P2-018 / TS-P2-018 completed; project remains `IN_DEVELOPMENT_NOT_RELEASE_READY`, legal next state is `NONE / NONE / PENDING_USER_CONFIRMATION`.
+
+## Previous Addendum
+
 ### 2026-05-28 - TASK-INFRA-004 - CI build target repair
 
 - Change: Updated `.github/workflows/ci.yml` so the `Build server` step builds the current `./cmd/main` entrypoint instead of removed `./cmd/server`.

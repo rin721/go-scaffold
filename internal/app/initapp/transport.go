@@ -8,6 +8,7 @@ import (
 	"github.com/rei0721/go-scaffold/internal/config"
 	"github.com/rei0721/go-scaffold/internal/middleware"
 	demohandler "github.com/rei0721/go-scaffold/internal/modules/demo/handler"
+	userhandler "github.com/rei0721/go-scaffold/internal/modules/user/handler"
 	httptransport "github.com/rei0721/go-scaffold/internal/transport/http"
 	"github.com/rei0721/go-scaffold/pkg/database"
 	"github.com/rei0721/go-scaffold/pkg/httpserver"
@@ -30,6 +31,7 @@ func NewTransport(core Core, infra Infrastructure, modules Modules) (Transport, 
 		corsConfig,
 		infra.Plugins,
 		modules.Demo.TodoHandler,
+		modules.User.Handler,
 	)
 	if err != nil {
 		return Transport{}, err
@@ -86,6 +88,7 @@ func NewHTTPServer(
 	corsConfig middleware.CORSConfig,
 	plugins plugin.Manager,
 	todoHandler *demohandler.TodoHandler,
+	userHandler *userhandler.UserHandler,
 ) (*gin.Engine, httpserver.HTTPServer, error) {
 	gin.SetMode(cfg.Server.Mode)
 
@@ -98,6 +101,7 @@ func NewHTTPServer(
 		Database:    db,
 		Middleware:  middlewareCfg,
 		TodoHandler: todoHandler,
+		UserHandler: userHandler,
 		PluginRegistration: NewMainPluginRegistrationHandler(
 			cfg,
 			plugins,

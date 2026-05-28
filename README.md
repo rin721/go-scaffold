@@ -2,7 +2,7 @@
 
 配置加载、动态环境变量前缀和 `envname` 字段约定见 [`docs/configuration.md`](docs/configuration.md)。
 
-当前阶段只保留基础设施启动链路和一个 demo CRUD 示例，暂不实现 auth/rbac。
+当前主服务已包含本地用户、认证与 RBAC 能力：`/api/v1/auth`、`/api/v1/users`、`/api/v1/roles` 和 `/api/v1/permissions`。该能力仍不代表生产级密钥管理、refresh token/session revoke、审计、密码重置或外部 IAM 已完成。
 
 注意：当前项目仍在开发中，未达第一版发布条件；Docker 构建、部署示例和 CI 门禁只是阶段性制品，不代表 v1 可发布。
 
@@ -20,9 +20,10 @@ go run ./cmd/server server
 ## 目录边界
 
 - `cmd/server`: 进程入口，只负责 CLI 参数和信号处理。
-- `internal/app`: 应用装配层，按顺序初始化配置、日志、数据库、demo schema、缓存、executor、HTTP server。
-- `internal/transport/http`: HTTP router、基础 health/ready 路由。
+- `internal/app`: 应用装配层，按顺序初始化配置、日志、数据库、demo/user schema、缓存、executor、HTTP server。
+- `internal/transport/http`: HTTP router、基础 health/ready 路由、demo API、用户/认证/RBAC API 注册。
 - `internal/modules/demo`: 示例业务模块，展示 `model -> repository -> service -> handler` 写法。
+- `internal/modules/user`: 主服务用户、认证与 RBAC 模块，包含用户/角色/权限模型、密码哈希、bearer token、权限门禁和 HTTP handler。
 - `internal/config`: 配置结构、加载、环境变量覆盖、校验。
 - `pkg/database`: 数据库连接、ping、关闭、事务。
 - `pkg/executor`: 独立 goroutine pool manager。

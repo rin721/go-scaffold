@@ -16,7 +16,7 @@ func TestNewHTTPServerDoesNotExposePluginRegistrationByDefault(t *testing.T) {
 	cfg := testPluginInterfaceConfig()
 	manager := plugin.NewManager()
 
-	router, _, err := NewHTTPServer(cfg, nil, nil, nil, middleware.CORSConfig{}, manager, nil)
+	router, _, err := NewHTTPServer(cfg, nil, nil, nil, middleware.CORSConfig{}, manager, nil, nil)
 	if err != nil {
 		t.Fatalf("NewHTTPServer() error = %v", err)
 	}
@@ -36,7 +36,7 @@ func TestNewHTTPServerCanExposePluginRegistrationOnMainHTTP(t *testing.T) {
 	cfg.Plugin.Registration.ExposeOnMainHTTP = true
 	manager := plugin.NewManager()
 
-	router, _, err := NewHTTPServer(cfg, nil, nil, nil, middleware.CORSConfig{}, manager, nil)
+	router, _, err := NewHTTPServer(cfg, nil, nil, nil, middleware.CORSConfig{}, manager, nil, nil)
 	if err != nil {
 		t.Fatalf("NewHTTPServer() error = %v", err)
 	}

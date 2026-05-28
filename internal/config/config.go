@@ -16,6 +16,8 @@ type Config struct {
 	Storage  StorageConfig  `mapstructure:"storage"`
 	Plugin   PluginConfig   `mapstructure:"plugin"`
 	IAM      IAMConfig      `mapstructure:"iam"`
+	Auth     AuthConfig     `mapstructure:"auth"`
+	RBAC     RBACConfig     `mapstructure:"rbac"`
 	CORS     CORSConfig     `mapstructure:"cors"`
 }
 
@@ -36,6 +38,8 @@ func (c *Config) Validate() error {
 		&c.Storage,
 		&c.Plugin,
 		&c.IAM,
+		&c.Auth,
+		&c.RBAC,
 		&c.CORS,
 	}
 	for _, validator := range validators {
@@ -67,6 +71,12 @@ func (c *Config) ValidateOld() error {
 	}
 	if err := c.Executor.Validate(); err != nil {
 		return fmt.Errorf("executor config: %w", err)
+	}
+	if err := c.Auth.Validate(); err != nil {
+		return fmt.Errorf("auth config: %w", err)
+	}
+	if err := c.RBAC.Validate(); err != nil {
+		return fmt.Errorf("rbac config: %w", err)
 	}
 	return nil
 }

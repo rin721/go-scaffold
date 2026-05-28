@@ -1,5 +1,27 @@
 # MODULES.md
 
+## Current Module Addendum
+
+- [CONFIRMED] `pkg/auth` owns the public auth token infrastructure API and JWT-backed token implementation used by main-service authentication.
+- [CONFIRMED] `internal/modules/user/service` owns business authentication composition: it authenticates database-backed users, maps user identity into `pkg/auth.Claims`, and delegates token issue/verify to the public auth API.
+- [CONFIRMED] `internal/modules/user/service` no longer owns hand-written JWT signing/parsing logic.
+- [CONFIRMED] `pkg/rbac` owns the public RBAC infrastructure API and Casbin-backed authorizer implementation used by main-service RBAC authorization.
+- [CONFIRMED] `configs/rbac_model.conf` owns the recoverable Casbin model; `internal/config.RBACConfig.ModelPath` points startup wiring at that model.
+- [CONFIRMED] `internal/modules/user/service` owns business authorization composition: it reads DB-backed role-permission assignments, adapts them into `pkg/rbac` contracts, and delegates enforcement to the public authorizer API.
+- [CONFIRMED] `internal/modules/user/rbac` has been removed; business modules must not own a module-local RBAC engine wrapper.
+
+## Previous Module Addendum
+
+- [CONFIRMED] `internal/config` owns the `rbac` configuration surface for RBAC seed roles, permissions, and role-permission grants.
+- [CONFIRMED] `configs/config.example.yaml` and `configs/config.yaml` now contain safe RBAC seed entries without real users or secrets.
+- [CONFIRMED] `internal/modules/user` owns idempotent RBAC seed application through `ApplyRBACSeed`; `internal/app/initapp` only maps config into that service during startup.
+
+## Previous Module Addendum
+
+- [CONFIRMED] `internal/config` owns the `auth` configuration surface for token secret and TTL.
+- [CONFIRMED] `internal/app/initapp` passes `core.Config.Auth` into the user module composition root.
+- [CONFIRMED] `internal/modules/user` remains the business user/auth/RBAC module; TASK-P2-019 changed only its token service construction, not user/role/permission behavior.
+
 ## 模块边界清单状态
 
 - 项目：go-scaffold
@@ -17,6 +39,7 @@ cmd/server
       -> internal/config
       -> internal/middleware
       -> internal/modules/demo
+      -> internal/modules/user
       -> internal/transport/http
       -> pkg/*
 types/*
@@ -24,7 +47,8 @@ types/*
 
 - [CONFIRMED] `cmd/server` 是进程入口和 CLI 边界。
 - [CONFIRMED] `internal/app` 是组合根，负责初始化、模式构建、热重载和生命周期。
-- [CONFIRMED] `internal/modules/demo` 是当前唯一业务示例模块。
+- [CONFIRMED] `internal/modules/demo` 是示例业务模块。
+- [CONFIRMED] `internal/modules/user` 是主服务用户、认证与 RBAC 业务模块。
 - [CONFIRMED] `pkg/*` 采用混合 API 策略，已逐包标注公共 API、内部支撑或待确认。
 - [CONFIRMED] `types/*` 当前承载应用层以上常量、错误码和 HTTP 响应契约，不聚合 `pkg/*` 基础设施接口。
 
@@ -36,10 +60,11 @@ types/*
 | `internal/app` | 组合根、启动模式、生命周期、热重载 | 应用装配层 | demo 迁移策略测试、真实 app 装配测试和 reload/config 分发测试已补 | 更大范围端到端启动仍需单独确认 |
 | `internal/config` | 配置结构、加载、环境变量覆盖、热重载 | 配置边界 | 有测试 | TASK-P1-001、TASK-P1-002 和 TASK-P1-016 已收拢 copy/update、环境变量策略和配置变更 hook/reload 分发 |
 | `internal/middleware` | Gin 中间件：i18n、CORS、logger、recovery、traceid | HTTP 横切层 | router 级 TraceID/CORS/Recovery 集成测试已补 | i18n/logger 细粒度行为仍可后续增强 |
-| `internal/transport/http` | Gin router、health/ready、demo API 注册 | 传输层 | health/ready smoke test、demo HTTP 集成测试和 app 装配级 server 测试已补；DB CLI 单独覆盖 | 真实 HTTP server 启动仍非当前测试目标 |
+| `internal/transport/http` | Gin router、health/ready、demo API、用户/认证/RBAC API 注册 | 传输层 | health/ready smoke test、demo HTTP 集成测试、user/auth/RBAC 集成测试和 app 装配级 server 测试已补；DB CLI 单独覆盖 | 真实 HTTP server 启动仍非当前测试目标 |
 | `internal/modules/demo` | Todo 示例业务模块 | 标准示例模块 | service/repository CRUD 基线和 handler/router HTTP 集成已补 | 示例与生产约束需继续保持分离 |
+| `internal/modules/user` | 用户、认证与 RBAC 业务模块 | 主服务业务模块 | service、router、schema、app 装配测试已补 | 当前 token secret 为应用启动期本地 secret；生产级密钥管理、refresh token/session revoke、审计、密码重置和外部 IAM 仍需单独确认 |
 | `pkg/*` | 可复用基础设施、公共工具和内部支撑工具 | 混合 API | 主要公共包与内部支撑路径已有最小测试 | [CONFIRMED] TASK-P1-017 已完成第一阶段包 README 中文化 |
-| `types/*` | 应用层以上常量、错误码、HTTP 响应结构 | 跨层契约和 HTTP/Gin 响应契约 | `types/constants`、`types/errors`、`types/result` 有测试 | auth 错误码仅为预留契约，auth/rbac 不在当前功能范围；`types/*` 不聚合 `pkg/*` 基础设施接口 |
+| `types/*` | 应用层以上常量、错误码、HTTP 响应结构 | 跨层契约和 HTTP/Gin 响应契约 | `types/constants`、`types/errors`、`types/result` 有测试 | auth 错误码已被 `internal/modules/user` HTTP 层使用；`types/*` 仍不聚合 `pkg/*` 基础设施接口 |
 
 ## `cmd/server`
 

@@ -1,6 +1,78 @@
 # STATUS.md
 
+## Current Auth Public API Rework Scope
+
+- 2026-05-28: TASK-P2-023 / TS-P2-023 COMPLETED.
+- User correction: after RBAC was moved to `pkg/rbac`, auth token capability also needs a public `pkg` infrastructure API before business code uses it.
+- Review Result: ACCEPT_WITH_RISK.
+- Current legal work after completion: `NONE / NONE / PENDING_USER_CONFIRMATION`.
+- Scope completed: introduced `pkg/auth` as a public JWT token API backed by `github.com/golang-jwt/jwt/v5`, replaced hand-written internal token signing/parsing with that public API, and kept main-service user business code responsible only for mapping users to token claims.
+- Allowed scope: `go.mod`, `go.sum`, `pkg/auth/**/*`, `internal/modules/user/service/**/*`, `internal/app/initapp/**/*`, focused router/app tests, and project status documents.
+- Strict non-goals: no refresh-token/session revocation, audit logging, password reset, external IAM replacement, production secret manager, production migration framework, real users/passwords/secrets, deployment, plugin transport work, or unrelated router/user CRUD rewrites.
+- Verification: `go test ./pkg/auth -count=1`, `go test ./internal/modules/user/... -count=1`, `go test ./internal/app/initapp -count=1`, `go test ./internal/app/... -count=1`, `go test ./internal/transport/http -count=1`, `go test ./... -count=1`, and `git diff --check` passed. `git diff --check` emitted only Git LF/CRLF notices.
+
+## Current RBAC Public API Rework Scope
+
+- 2026-05-28: TASK-P2-022 / TS-P2-022 COMPLETED.
+- User correction: RBAC must be packaged as a public `pkg` infrastructure API first, then business code must call that public API.
+- Review Result: ACCEPT_WITH_RISK.
+- Current legal work after completion: `NONE / NONE / PENDING_USER_CONFIRMATION`.
+- Scope completed: moved the Casbin-backed RBAC authorizer from `internal/modules/user/rbac` to `pkg/rbac`, added public package docs and tests, kept the Casbin model under `configs/rbac_model.conf`, and updated main-service user authorization plus app composition to depend on `pkg/rbac`.
+- Allowed scope: `pkg/rbac/**/*`, `internal/modules/user/**/*`, `internal/app/initapp/**/*`, `configs/rbac_model.conf`, config examples and config tests if needed, focused app/router tests, and project status documents.
+- Strict non-goals: no external IAM replacement, no refresh/session/audit/password-reset work, no production migration framework, no real users/passwords/secrets, no deployment, no plugin transport work, and no unrelated router/user CRUD rewrites.
+- Verification: `go test ./pkg/rbac -count=1`, `go test ./internal/config -count=1`, `go test ./internal/modules/user/... -count=1`, `go test ./internal/app/initapp -count=1`, `go test ./internal/app/... -count=1`, `go test ./internal/transport/http -count=1`, `go test ./... -count=1`, and `git diff --check` passed. `git diff --check` emitted only Git LF/CRLF notices.
+
+## Current RBAC Library Rework Scope
+
+- 2026-05-28: TASK-P2-021 / TS-P2-021 COMPLETED.
+- User correction: RBAC must be encapsulated through a mainstream library before business authorization logic is implemented.
+- Review Result: ACCEPT_WITH_RISK.
+- Current legal work after completion: `NONE / NONE / PENDING_USER_CONFIRMATION`.
+- Scope completed: replaced the hand-written permission matcher in the main-service user/RBAC module with a Casbin-backed authorizer wrapper, put the Casbin RBAC model under `configs/rbac_model.conf`, kept existing DB-backed role/permission CRUD and config seed behavior, and added focused tests.
+- Allowed scope: `go.mod`, `go.sum`, `configs/rbac_model.conf`, `configs/config.example.yaml`, `configs/config.yaml`, `internal/config/**/*`, `internal/modules/user/**/*`, `internal/app/initapp/**/*`, focused app/router tests, and project status documents.
+- Strict non-goals: no external IAM replacement, no OPA server, no refresh/session/audit/password-reset work, no production migration framework, no real users/passwords/secrets, no deployment, no plugin transport work, and no unrelated router/user CRUD rewrites.
+- Verification: `go test ./internal/config -count=1`, `go test ./internal/modules/user/... -count=1`, `go test ./internal/app/initapp -count=1`, `go test ./internal/app/... -count=1`, `go test ./internal/transport/http -count=1`, `go test ./... -count=1`, and `git diff --check` passed. `git diff --check` emitted only Git LF/CRLF notices.
+
+## Current RBAC Config Scope
+
+- 2026-05-28: TASK-P2-020 / TS-P2-020 COMPLETED.
+- User intent: put RBAC configuration under `configs` instead of leaving default roles/permissions only implicit in code.
+- Review Result: ACCEPT_WITH_RISK.
+- Current legal work after completion: `NONE / NONE / PENDING_USER_CONFIRMATION`.
+- Scope completed: added a recoverable RBAC seed configuration shape under `internal/config`, documented safe role/permission seed entries in `configs/config.example.yaml` and `configs/config.yaml`, and applied configured roles, permissions, and role-permission grants idempotently during main service startup when enabled.
+- Verification: `go test ./internal/config -count=1`, `go test ./internal/modules/user/... -count=1`, `go test ./internal/app/initapp -count=1`, `go test ./internal/app/... -count=1`, `go test ./... -count=1`, and `git diff --check` passed. `git diff --check` emitted only Git LF/CRLF notices.
+- Strict non-goals: no OPA/Casbin, no external IAM replacement, no refresh/session/audit/password-reset work, no production migration framework, no real users/passwords/secrets, no deployment, no plugin transport work, and no unrelated user/router rewrites.
+
+## Current Auth Hardening Scope
+
+- 2026-05-28: TASK-P2-019 / TS-P2-019 COMPLETED.
+- User selection: `2+4`, interpreted as promoting both `BL-026` auth hardening and `BL-028` plugin WS/RPC/discovery direction.
+- Review Result: ACCEPT_WITH_RISK.
+- Current legal work after completion: `NONE / NONE / PENDING_USER_CONFIRMATION`.
+- Scope completed: added stable auth token secret and token TTL configuration for the existing main-service user/auth/RBAC module, wired it into `internal/app/initapp`, documented example config/env placeholders, and covered config + wiring tests.
+- Verification: `go test ./internal/config -count=1`, `go test ./internal/app/initapp -count=1`, `go test ./internal/app/... -count=1`, `go test ./... -count=1`, and `git diff --check` passed. `git diff --check` emitted only Git LF/CRLF notices.
+- Deferred from this slice: `BL-028` real plugin WS/RPC transport, heartbeat, reconnect, and persistent discovery stay queued until auth/session boundaries are stable.
+- Strict non-goals: refresh tokens, session revoke, audit logging, password reset, external IAM, OPA/Casbin, production migrations, real secrets, deployment, and plugin transport implementation.
+
+## Current User Scope Review
+
+- 2026-05-28: TASK-P2-018 / TS-P2-018 started.
+- User intent: confirm whether the main service already implements user management, then implement complete user + auth + RBAC in the main service.
+- Current finding: the main service had no dedicated `internal/modules/user` module, no `/api/v1/users` routes, and no login/token/RBAC HTTP flow; existing `pkg/iam` remains a public infrastructure interface and memory implementation, not database-backed business user management.
+- Review Result: ACCEPT_WITH_RISK.
+- Current legal work: `NONE / NONE / PENDING_USER_CONFIRMATION`.
+- Scope: implement a main-service user/auth/RBAC module with database-backed users, roles, permissions, password hashing, bearer token login, authentication middleware, permission-gated routes, server-start sqlgen schema bootstrap, and focused tests.
+- Strict non-goals: production-grade secret management, refresh-token/session revocation, OPA/Casbin, production migration framework, real secrets, deployment, plugin transport changes, and broad cmd/entrypoint rewrites.
+
 ## Latest Current Slice
+
+- 2026-05-28: TASK-P2-018 / TS-P2-018 COMPLETED.
+- User correction accepted with risk: implement complete main-service user + auth + RBAC rather than only user CRUD.
+- Implemented `internal/modules/user` with users, roles, permissions, user-role and role-permission assignments, password hashing through `pkg/crypto`, HMAC bearer tokens, authentication middleware, and route-level permission checks.
+- Wired `/api/v1/auth/register`, `/api/v1/auth/login`, `/api/v1/auth/me`, `/api/v1/users`, `/api/v1/roles`, and `/api/v1/permissions` into the main router, and added sqlgen bootstrap for user/RBAC tables at server start.
+- Verification: `go test ./internal/modules/user/... -count=1`, `go test ./internal/transport/http -count=1`, `go test ./internal/app/... -count=1`, `go test ./... -count=1`, and `git diff --check` passed. `git diff --check` emitted only Git LF/CRLF notices.
+- Current legal work after completion: `NONE / NONE / PENDING_USER_CONFIRMATION`.
+- Residual non-goals: production secret/session management, refresh-token/session revocation, audit logging, password reset, OPA/Casbin, external IAM, production migrations, deployment, and plugin transport changes.
 
 - 2026-05-28: TASK-INFRA-004 / TS-INFRA-004 COMPLETED.
 - GitHub Actions push CI run `26531295923` failed in `CI / Go verify` at the `Build server` step.
@@ -22,7 +94,7 @@
 - Current Task ID: NONE
 - Current Time Slice ID: NONE
 - Current Status: PENDING_USER_CONFIRMATION
-- Why this is the only legal work now: TASK-INFRA-004 / TS-INFRA-004 and TASK-P2-017 / TS-P2-017 are completed and verified. The project remains `IN_DEVELOPMENT_NOT_RELEASE_READY`; any real WS/RPC transport, plugin heartbeat/discovery, production deployment, real secrets, database-backed IAM work, or broader entrypoint documentation rewrite requires a new confirmed task and time slice.
+- Why this is the only legal work now: TASK-P2-023 / TS-P2-023 completed and returned the project to `NONE / NONE / PENDING_USER_CONFIRMATION`. The completed slice promoted reusable auth token signing and verification into `pkg/auth` using `github.com/golang-jwt/jwt/v5`, updated business usage to the public API, and verified targeted plus full regressions; production IAM/session/audit/migration/deployment work remains out of scope.
 
 - 2026-05-28: TASK-P2-016 / TS-P2-016 COMPLETED.
 - User goal accepted with risk: implement a host-side remote plugin registration loop, inject safe IAM principal data into the plugin hook JSON event protocol, and add `remote_plugins/blog` as an independently deployable remote Blog plugin sample.
@@ -55,11 +127,11 @@
 
 ## 当前合法工作
 
-- 当前模块：项目优化路线
+- 当前模块：NONE
 - 当前任务 ID：NONE
 - 当前时间切片 ID：NONE
 - 当前状态：PENDING_USER_CONFIRMATION
-- 为什么这是当前唯一合法状态：[CONFIRMED] TASK-P2-016 / TS-P2-016 已完成：主服务可通过 `POST /plugin/v1/register` 接收显式远程插件注册并创建 HTTP adapter，插件 hook JSON event 会注入安全 IAM principal 上下文，`remote_plugins/blog` 已作为独立远程 Blog 插件示例。项目仍未达第一版发布条件；真实 WS/RPC 常连接、插件心跳/持久发现、JWT/login、数据库版权限、生产部署和真实密钥管理均需单独确认后再拆分任务。
+- 为什么这是当前唯一合法状态：TASK-P2-018 / TS-P2-018 已完成，当前合法状态回到 `NONE / NONE / PENDING_USER_CONFIRMATION`。本切片已实现数据库用户、角色、权限、密码哈希、bearer token 登录、认证中间件、权限门禁 HTTP 路由、sqlgen schema bootstrap 和测试；生产级密钥/会话管理、OPA/Casbin、生产迁移、真实密钥、部署和无关重构仍不属于当前范围。
 
 ## 阶段状态
 

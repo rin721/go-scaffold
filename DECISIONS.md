@@ -1,6 +1,72 @@
 # DECISIONS.md
 
+## Current Decision
+
+### DEC-044: Auth token engine belongs in pkg/auth before business use
+- Date: 2026-05-28
+- Status: ACCEPTED_WITH_RISK
+- Context: After RBAC was promoted to `pkg/rbac`, the user asked about auth. The existing main-service token implementation hand-built JWT-like HMAC signing and parsing inside `internal/modules/user/service`.
+- Decision: Add `pkg/auth` as the public token infrastructure API backed by a mainstream JWT library, and make the main-service user module map user data into that public API.
+- Alternatives: Keep the hand-written token implementation inside the user service; move token types into `types`; implement a full external IAM/session platform immediately.
+- Reason: `pkg/auth` matches the repository's public infrastructure package boundary and avoids hand-written token cryptography in business code.
+- Consequences: Token issue/verify becomes reusable and library-backed, but refresh/session revocation, audit, secret rotation, external IAM, and production migration strategy remain separate confirmed work.
+- Related Tasks: TASK-P2-023
+
+### DEC-043: RBAC engine wrapper belongs in pkg/rbac before business use
+- Date: 2026-05-28
+- Status: ACCEPTED_WITH_RISK
+- Context: The user corrected the previous Casbin wrapper placement and required a public `pkg` infrastructure API before implementing or wiring business RBAC behavior.
+- Decision: Promote the Casbin-backed authorizer contracts and implementation to `pkg/rbac`, keep the Casbin model config under `configs/rbac_model.conf`, and make the main-service user module depend on `pkg/rbac`.
+- Alternatives: Keep the wrapper under `internal/modules/user/rbac`; expose RBAC through `types`; replace the local module with external IAM immediately.
+- Reason: `pkg/rbac` matches the repository's public infrastructure package boundary and lets business code consume a reusable library API rather than owning policy-engine details.
+- Consequences: RBAC evaluation becomes reusable across modules, but production IAM hardening, session controls, audit, external policy services, and migration strategy remain separate confirmed work.
+- Related Tasks: TASK-P2-022
+
+### DEC-042: RBAC authorization uses a Casbin wrapper before business checks
+- Date: 2026-05-28
+- Status: ACCEPTED_WITH_RISK
+- Context: The user corrected the prior RBAC implementation and required a mainstream library wrapper before implementing business authorization behavior.
+- Decision: Add Casbin as the RBAC policy engine behind a local wrapper, keep the model config under `configs/rbac_model.conf`, and feed existing DB-backed role-permission assignments into Casbin for authorization decisions.
+- Alternatives: Keep hand-written permission matching; replace the local user module with external IAM; implement OPA server integration immediately.
+- Reason: Casbin is a mainstream Go authorization library and fits the current local RBAC model without forcing a larger IAM/session/migration rewrite.
+- Consequences: Authorization decisions become library-backed and recoverable through config, but production IAM hardening, audit, session controls, external policy services, and migration strategy remain separate confirmed work.
+- Related Tasks: TASK-P2-021
+
+### DEC-041: RBAC seed data is config-driven but remains a local startup seed
+- Date: 2026-05-28
+- Status: ACCEPTED_WITH_RISK
+- Context: The user requested moving RBAC configuration under `configs` after the main-service user/auth/RBAC module existed.
+- Decision: Add a top-level `rbac` config block for seed roles, permissions, and role-permission grants, and apply it idempotently during startup only when enabled.
+- Alternatives: Keep all default RBAC data implicit in code; seed real users/passwords from config; introduce OPA/Casbin or external IAM immediately.
+- Reason: Config-driven seed data is recoverable and operator-visible while preserving the existing local user/RBAC module boundary.
+- Consequences: RBAC seed entries can be reviewed in `configs`, but they are not a production policy engine and do not replace future IAM/session/audit/migration work.
+- Related Tasks: TASK-P2-020
+
+## Previous Decision
+
+### DEC-040: Auth token signing settings are config-driven before deeper IAM hardening
+- Date: 2026-05-28
+- Status: ACCEPTED_WITH_RISK
+- Context: After main-service user/auth/RBAC was implemented, the user selected both auth hardening and plugin WS/RPC/discovery directions. The existing token service was constructed with an in-process random secret and fixed TTL in `NewUserModule`.
+- Decision: Promote only the auth token configuration foundation first: add `auth.token_secret` and `auth.token_ttl`, validate them, expose env placeholders, and wire them into the existing token service.
+- Alternatives: Implement refresh-token/session revocation immediately; introduce external IAM or OPA/Casbin; implement plugin WS/RPC/discovery in the same slice.
+- Reason: Stable token signing configuration is a small prerequisite for deeper auth/session work and keeps the implementation recoverable.
+- Consequences: Tokens can be stable across process restarts when a configured secret is supplied, while production-grade secret management, rotation, refresh/session controls, audit, recovery, and plugin transport remain future confirmed work.
+- Related Tasks: TASK-P2-019
+
 ## Latest Decision
+
+### DEC-039: Main-service user/auth/RBAC is implemented locally, not as production IAM
+- Date: 2026-05-28
+- Status: ACCEPTED_WITH_RISK
+- Context: The user asked whether the main service already implements user management, then updated the goal to complete user + auth + RBAC. Code inspection found no `internal/modules/user`, no `/api/v1/users`, no login/token middleware, and no database-backed role/permission administration; existing `pkg/iam` is only infrastructure.
+- Decision: Implement a compact database-backed main-service user/auth/RBAC module with CRUD routes, password hashing via `pkg/crypto`, safe response DTOs, HMAC bearer tokens, auth middleware, role/permission administration, route-level permission checks, and sqlgen-based server-start schema bootstrap.
+- Alternatives: Treat `pkg/iam` memory principals as user management; integrate OPA/Casbin or a production IAM provider immediately; defer auth/RBAC to Backlog.
+- Reason: A local main-service module satisfies the requested product capability while preserving clear boundaries around production secret/session management and external policy engines.
+- Consequences: Main service gains usable user/auth/RBAC behavior, while production-grade secret management, refresh-token/session revocation, IAM persistence beyond this module, audit logging, password reset, and production migrations remain future confirmed work.
+- Related Tasks: TASK-P2-018
+
+## Previous Latest Decision
 
 ### DEC-038: Plugin control-plane endpoints are explicitly configured and optionally exposed
 - Date: 2026-05-28

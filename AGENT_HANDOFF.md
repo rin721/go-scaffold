@@ -1,6 +1,63 @@
 # AGENT_HANDOFF.md
 
+## Current Handoff Addendum
+
+- TASK-P2-023 / TS-P2-023: COMPLETED.
+- User asked `auth呢？` after RBAC was moved to `pkg/rbac`; this slice promotes reusable auth token issue/verify to `pkg/auth`.
+- Files changed in this slice: `go.mod`, `go.sum`, `pkg/auth`, `internal/modules/user/service`, `internal/app/initapp`, focused router/initapp tests, and project status documents.
+- Business authentication now maps database-backed users into `pkg/auth.Claims`; token signing and parsing are handled by the public JWT-backed auth API.
+- Verification completed: `go test ./pkg/auth -count=1`, `go test ./internal/modules/user/... -count=1`, `go test ./internal/app/initapp -count=1`, `go test ./internal/app/... -count=1`, `go test ./internal/transport/http -count=1`, `go test ./... -count=1`, and `git diff --check` passed. `git diff --check` emitted only Git LF/CRLF notices.
+- Residual non-goals: refresh/session revocation, audit logging, password reset, external IAM replacement, production secret management, production migrations, deployment, real secrets/users, and plugin transport changes.
+- Next legal state: `NONE / NONE / PENDING_USER_CONFIRMATION`.
+
+## Previous Handoff Addendum
+
+- TASK-P2-022 / TS-P2-022: COMPLETED.
+- User correction required RBAC to be encapsulated as a public `pkg` infrastructure API before business code uses it; this slice promotes the Casbin-backed authorizer to `pkg/rbac`.
+- Files changed in this slice: `pkg/rbac`, `internal/modules/user/service/user.go`, `internal/app/initapp/modules.go`, removed `internal/modules/user/rbac`, and project status documents.
+- Business authorization now loads DB-backed role-permission assignments and adapts them into `pkg/rbac.Policy`; app composition creates the public Casbin authorizer from `rbac.model_path`.
+- Verification completed: `go test ./pkg/rbac -count=1`, `go test ./internal/config -count=1`, `go test ./internal/modules/user/... -count=1`, `go test ./internal/app/initapp -count=1`, `go test ./internal/app/... -count=1`, `go test ./internal/transport/http -count=1`, `go test ./... -count=1`, and `git diff --check` passed. `git diff --check` emitted only Git LF/CRLF notices.
+- Residual non-goals: external IAM replacement, refresh/session/audit/password-reset work, production migrations, deployment, real secrets/users, and plugin transport changes.
+- Next legal state: `NONE / NONE / PENDING_USER_CONFIRMATION`.
+
+## Previous Handoff Addendum
+
+- TASK-P2-021 / TS-P2-021: COMPLETED.
+- User correction required a mainstream library wrapper before business RBAC logic; this slice uses Casbin through `internal/modules/user/rbac`.
+- Files changed in this slice: `go.mod`, `go.sum`, `configs/rbac_model.conf`, `configs/config.example.yaml`, `configs/config.yaml`, `internal/config`, `internal/modules/user`, `internal/app/initapp`, focused router/initapp tests, and project status documents.
+- Business authorization now loads DB-backed role-permission assignments and asks the Casbin wrapper to enforce them. Existing role/permission CRUD and config seed behavior remain in place.
+- Verification completed: `go test ./internal/config -count=1`, `go test ./internal/modules/user/... -count=1`, `go test ./internal/app/initapp -count=1`, `go test ./internal/app/... -count=1`, `go test ./internal/transport/http -count=1`, `go test ./... -count=1`, and `git diff --check` passed.
+- Residual non-goals: external IAM replacement, refresh/session/audit/password-reset work, production migrations, deployment, real secrets/users, and plugin transport changes.
+- Next legal state: `NONE / NONE / PENDING_USER_CONFIRMATION`.
+
+## Previous Handoff Addendum
+
+- TASK-P2-020 / TS-P2-020: COMPLETED.
+- User requested moving RBAC configuration under `configs`; this slice added validated `rbac` seed config for roles, permissions, and role-permission grants.
+- Files changed in this slice: `internal/config`, `configs/config.example.yaml`, `configs/config.yaml`, `internal/modules/user/service`, `internal/app/initapp`, `internal/app/app_integration_test.go`, and project status documents.
+- Startup now applies configured RBAC seeds idempotently when `rbac.enabled` and `rbac.apply_on_start` are true. No real users, passwords, tokens, or secrets are seeded.
+- Verification completed: `go test ./internal/config -count=1`, `go test ./internal/modules/user/... -count=1`, `go test ./internal/app/initapp -count=1`, `go test ./internal/app/... -count=1`, `go test ./... -count=1`, and `git diff --check` passed.
+- Residual non-goals: OPA/Casbin, external IAM replacement, refresh/session/audit/password-reset work, production migrations, deployment, and plugin transport changes.
+- Next legal state: `NONE / NONE / PENDING_USER_CONFIRMATION`.
+
+## Previous Handoff Addendum
+
+- TASK-P2-019 / TS-P2-019: COMPLETED.
+- User selected `2+4`; this slice implemented only the auth-hardening foundation by making user bearer token secret and TTL config-driven.
+- Files changed in this slice: `internal/config`, `internal/app/initapp`, `internal/app/app_integration_test.go`, `.env.example`, `configs/config.example.yaml`, and project status documents.
+- Verification completed: `go test ./internal/config -count=1`, `go test ./internal/app/initapp -count=1`, `go test ./internal/app/... -count=1`, `go test ./... -count=1`, and `git diff --check` passed.
+- `BL-028` plugin WS/RPC/heartbeat/persistent discovery remains deferred until a separate confirmed slice.
+- Next legal state: `NONE / NONE / PENDING_USER_CONFIRMATION`.
+
 ## Latest Current Handoff
+
+- TASK-P2-018 / TS-P2-018: COMPLETED.
+- Main service now has `internal/modules/user` with users, roles, permissions, assignment tables, password hashing via `pkg/crypto`, HMAC bearer tokens, authentication middleware, and route-level permission checks.
+- Main HTTP router exposes `/api/v1/auth/register`, `/api/v1/auth/login`, `/api/v1/auth/me`, `/api/v1/users`, `/api/v1/roles`, and `/api/v1/permissions`.
+- Server-start module construction applies user/RBAC tables through `pkg/sqlgen`; app integration tests assert those tables and module layers exist.
+- Verification completed: `go test ./internal/modules/user/... -count=1`, `go test ./internal/app/dbapp -count=1`, `go test ./internal/transport/http -count=1`, `go test ./internal/app -count=1`, `go test ./internal/app/initapp -count=1`, `go test ./internal/app/... -count=1`, `go test ./... -count=1`, and `git diff --check` passed.
+- Residual non-goals: production secret/session management, refresh-token/session revocation, audit logging, password reset, OPA/Casbin, external IAM, production migrations, deployment, and plugin transport changes.
+- Next legal state: `NONE / NONE / PENDING_USER_CONFIRMATION`.
 
 - TASK-INFRA-004 / TS-INFRA-004: COMPLETED.
 - GitHub Actions push CI failure was confirmed on run `26531295923`, job `78148329151`: tests passed, but `Build server` failed because CI still ran `go build ... ./cmd/server`.
@@ -28,6 +85,13 @@
 - Next legal state: `NONE / NONE / PENDING_USER_CONFIRMATION`.
 
 ## Latest Handoff Addendum
+
+- Date: 2026-05-28
+- Task: TASK-P2-018 / TS-P2-018
+- Summary: Added complete local main-service user/auth/RBAC capabilities with database-backed users, roles, permissions, password hashing, bearer token auth, route permission checks, sqlgen schema bootstrap, and tests.
+- Files changed in this addendum: `internal/modules/user`, `internal/app/dbapp`, `internal/app/initapp`, `internal/transport/http`, `internal/app/app_integration_test.go`, `README.md`, `MODULES.md`, `docs/specs/types_contract_boundary.md`, and project status documents.
+- Verification: user module, dbapp, router, app/initapp target tests PASS; full `go test ./... -count=1` PASS; `git diff --check` PASS with only Git LF/CRLF notices.
+- Legal next step returns to `NONE / NONE / PENDING_USER_CONFIRMATION`; project remains `IN_DEVELOPMENT_NOT_RELEASE_READY`.
 
 - Date: 2026-05-28
 - Task: TASK-INFRA-004 / TS-INFRA-004

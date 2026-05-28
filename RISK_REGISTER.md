@@ -1,6 +1,78 @@
 # RISK_REGISTER.md
 
+## Current Risk Addendum
+
+### RISK-031: pkg/auth can be mistaken for complete production IAM
+- Type: Security/Scope
+- Severity: High
+- Probability: Medium
+- Impact: Future operators or agents may assume that library-backed JWT token issue/verify completes production authentication, even though refresh-token/session revocation, audit logging, secret rotation, external IAM, production migration, and deployment controls remain separate work.
+- Trigger: TASK-P2-023 promotes auth token issue/verify into `pkg/auth`.
+- Mitigation: Keep scope limited to token issue/verify contracts; use placeholder config only; do not seed real users/passwords/secrets; keep production IAM and session work explicitly out of scope.
+- Owner: User/Agent
+- Status: [RISK]
+- Blocking: No for TASK-P2-023, but it blocks any production-ready IAM claim.
+
+### RISK-030: pkg/rbac can be mistaken for a complete IAM platform
+- Type: Security/Scope
+- Severity: High
+- Probability: Medium
+- Impact: Future operators or agents may assume that moving Casbin into `pkg/rbac` completes production IAM, even though session revocation, audit logging, secret rotation, external IAM, production migration, and deployment controls remain separate work.
+- Trigger: TASK-P2-022 promotes the Casbin-backed RBAC wrapper to a public package.
+- Mitigation: Keep scope limited to authorization evaluation contracts; use placeholder config only; do not seed real users/passwords/secrets; keep production IAM and migration work explicitly out of scope.
+- Owner: User/Agent
+- Status: [RISK]
+- Blocking: No for TASK-P2-022, but it blocks any production-ready IAM claim.
+
+### RISK-029: Casbin wrapper can be mistaken for complete IAM hardening
+- Type: Security/Scope
+- Severity: High
+- Probability: Medium
+- Impact: Future operators or agents may assume that using Casbin completes production authorization, even though session revocation, audit logging, secret rotation, external IAM, production migration, and deployment controls remain separate work.
+- Trigger: TASK-P2-021 introduces Casbin-backed RBAC authorization.
+- Mitigation: Keep scope limited to authorization evaluation; use placeholder config only; do not seed real users/passwords/secrets; keep production IAM and migration work explicitly out of scope.
+- Owner: User/Agent
+- Status: [RISK]
+- Blocking: No for TASK-P2-021, but it blocks any production-ready IAM claim.
+
+### RISK-028: RBAC seed config can be mistaken for a production policy engine
+- Type: Security/Scope
+- Severity: High
+- Probability: Medium
+- Impact: Operators or future agents may treat `configs` RBAC seed entries as complete production authorization policy management, even though OPA/Casbin, external IAM, session controls, audit, migrations, and deployment controls remain unimplemented.
+- Trigger: TASK-P2-020 adds `rbac` config and startup seed application.
+- Mitigation: Seed only roles, permissions, and grants; do not seed real users/passwords/secrets; keep application idempotent; explicitly exclude production IAM hardening and policy engine work from this slice.
+- Owner: User/Agent
+- Status: [RISK]
+- Blocking: No for TASK-P2-020, but it blocks any claim that authorization is production-ready.
+
+## Previous Risk Addendum
+
+### RISK-027: Configured auth token secret can be mistaken for complete secret management
+- Type: Security/Scope
+- Severity: High
+- Probability: Medium
+- Impact: Future operators or agents may treat `auth.token_secret` as production secret management, even though rotation, storage backend, session revocation, audit, recovery, and deployment controls remain unimplemented.
+- Trigger: TASK-P2-019 adds configurable token secret and TTL for the local main-service bearer token service.
+- Mitigation: Use placeholders only in examples, validate configured secrets, keep empty secret as local/dev fallback, and explicitly exclude production secret/session management from this slice.
+- Owner: User/Agent
+- Status: [RISK]
+- Blocking: No for TASK-P2-019, but it blocks any production-ready auth claim.
+
 ## Latest Risk Addendum
+
+### RISK-026: Main-service auth/RBAC can be mistaken for production-grade IAM
+- Type: Security/Scope
+- Severity: High
+- Probability: Medium
+- Impact: Operators or future agents may assume local bearer tokens plus database roles/permissions mean stable secret management, refresh-token/session revocation, audit, recovery, OPA/Casbin, and production-grade security are complete.
+- Trigger: TASK-P2-018 adds a main-service user/auth/RBAC module.
+- Mitigation: Explicitly exclude production secret/session management, refresh-token/session revocation, audit logging, password reset, OPA/Casbin, external IAM, production migration, real secrets, and deployment.
+- Owner: User/Agent
+- Status: [RISK]
+- Blocking: No for TASK-P2-018, but it blocks any claim that authentication/authorization is release-ready for production.
+
+## Previous Risk Addendum
 
 ### RISK-025: Plugin control-plane address exposure can widen the attack surface
 - Type: Security/Plugin
@@ -123,11 +195,11 @@
 - Type：Scope/Security
 - Severity：Medium
 - Probability：Medium
-- Impact：用户可能误认为 auth/rbac 已支持，带来安全误解。
-- Trigger：`.env.example` 包含 JWT 示例，而 README 说暂不实现 auth/rbac。
-- Mitigation：TASK-P1-002 已从 `.env.example` 移除 JWT 示例；auth/rbac 继续作为延后需求处理。
+- Impact：用户可能误认为未实现示例代表真实生产级 IAM 能力，带来安全误解。
+- Trigger：历史 `.env.example` 曾包含 JWT 示例；TASK-P2-018 后 README 已对齐本地主服务 user/auth/RBAC 能力。
+- Mitigation：TASK-P1-002 已从 `.env.example` 移除 JWT 示例；TASK-P2-018 已实现本地 user/auth/RBAC；生产级密钥/会话管理仍由 RISK-026 跟踪。
 - Owner：User/Agent
-- Status：[CONFIRMED] 示例风险已修复；auth/rbac 仍延后
+- Status：[CONFIRMED] 示例风险已修复；生产级 IAM hardening 仍延后
 - Blocking：No。
 
 ### RISK-008：测试覆盖不足
