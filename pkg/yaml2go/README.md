@@ -10,7 +10,7 @@ YAML 转 Go 结构体代码生成工具库
 
 - 定位：[CONFIRMED] 公共工具 API。
 - 稳定边界：`Converter`、`Config`、`New`、`Convert` 返回的代码内容结构。
-- 当前风险：[CONFIRMED] 包自身已有最小行为测试；原 `cmd/server tests` 演示依赖已在 TASK-P1-006 移除。
+- 当前风险：[CONFIRMED] 包自身已有最小行为测试；原命令演示测试依赖已在 TASK-P1-006 移除。
 - 非目标：[CONFIRMED] 本包不做文件写入、不管理 CLI 命令、不修改项目配置。
 
 > [!IMPORTANT]

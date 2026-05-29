@@ -1,0 +1,34 @@
+schema_id: CapabilityGroup
+id: cap_py_tools_001
+name: "Python engineering tools"
+status: candidate
+default_recommendation: "uv + pytest + ruff + typer + pydantic; Playwright Python only when browser automation is needed."
+official_source_refresh: "2026-05-29T19:07:53+08:00"
+current_year_policy: "Re-check official docs at adoption time using runtime date; avoid hard-coded calendar-year prompts."
+candidate_tools:
+  - uv
+  - pytest
+  - ruff
+  - typer
+  - pydantic
+  - pytest-playwright
+adoption_order:
+  - "uv as candidate project, script, dependency, and tool runner only after Python boundary confirmation"
+  - "pytest for tests"
+  - "ruff for lint/format"
+  - "typer for CLI tools"
+  - "pydantic for structured validation"
+  - "playwright-python for browser automation only after UI exists"
+requires_before_install:
+  - "Confirmed Python project boundary."
+  - "Confirmed pyproject or requirements strategy."
+  - "Confirmed browser automation need before Playwright install."
+  - "Confirmed whether uv may create pyproject.toml, uv.lock, or virtual environment files."
+source_urls:
+  - https://docs.astral.sh/uv/
+  - https://docs.astral.sh/uv/concepts/projects/dependencies/
+  - https://docs.pytest.org/en/stable/getting-started.html
+  - https://docs.astral.sh/ruff/formatter/
+  - https://typer.tiangolo.com/
+  - https://docs.pydantic.dev/latest/concepts/models/
+  - https://playwright.dev/python/docs/intro

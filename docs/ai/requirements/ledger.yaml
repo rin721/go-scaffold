@@ -1,0 +1,261 @@
+schema_id: RequirementLedger
+ledger_id: req_ledger_001
+updated_at: "2026-05-29T22:00:59+08:00"
+requirements:
+  - id: req_bootstrap_001
+    round_id: bootstrap
+    source: developer_message
+    raw_text: "Establish Vibe Coding runtime infrastructure before business work."
+    normalized_text: "Create core runtime artifacts: AGENTS.md, status, requirements, bootstrap task tree, current slice, evidence, knowledge, skills, and handoff."
+    type: infrastructure
+    priority_or_version: P0-runtime
+    status: confirmed_for_bootstrap
+    decision: "Proceed within AGENTS.md and docs/ai/* only."
+    related_research: []
+    related_task_analysis:
+      - task_bootstrap_001
+    related_architecture: []
+    related_slice:
+      - slice_bootstrap_B9
+    conflicts: []
+    evidence:
+      - evidence_001
+    next_action: "Verify bootstrap and then collect round_001 business goal."
+    updated_at: "2026-05-29T17:18:17+08:00"
+  - id: req_round_001_placeholder
+    round_id: infra_001
+    branch_id: branch_vibe_coding_infra
+    source: superseded_by_user_goal
+    raw_text: null
+    normalized_text: "Superseded by req_round_001_docs."
+    type: placeholder
+    priority_or_version: superseded
+    status: superseded_by_next_round
+    decision: "Replaced by explicit documentation goal in the active round."
+    related_research: []
+    related_task_analysis: []
+    related_architecture: []
+    related_slice: []
+    conflicts: []
+    evidence: []
+    next_action: "Track req_round_001_docs instead."
+    updated_at: "2026-05-29T17:18:17+08:00"
+  - id: req_round_001_docs
+    round_id: infra_001
+    branch_id: branch_vibe_coding_infra
+    source: developer_message
+    raw_text: "以及当前项目的食用（Tips：使用）教程等相关详细概述文件"
+    normalized_text: "Create current project usage tutorial and related detailed overview documentation."
+    type: documentation
+    priority_or_version: P0-round_001
+    status: confirmed
+    decision: "Proceed as a low-risk documentation slice within README.md and docs/*, while syncing docs/ai status and evidence."
+    related_research: []
+    related_task_analysis:
+      - task_001_human_docs
+    related_architecture: []
+    related_slice:
+      - slice_001_docs_guides
+    conflicts: []
+    evidence:
+      - evidence_012
+    next_action: "Verify docs exist, runtime validation passes, then mark docs slice completed pending developer acceptance."
+    updated_at: "2026-05-29T17:34:47+08:00"
+  - id: req_round_001_python_scripts
+    round_id: infra_001
+    branch_id: branch_vibe_coding_infra
+    source: developer_message
+    raw_text: "将项目中脚本，替换成py"
+    normalized_text: "Replace project scripts with Python equivalents."
+    type: infrastructure_maintenance
+    priority_or_version: P0-round_001
+    status: confirmed
+    decision: "Replace the runtime validator script with a Python implementation and update references."
+    related_research: []
+    related_task_analysis:
+      - task_002_python_scripts
+    related_architecture: []
+    related_slice:
+      - slice_002_python_scripts
+    conflicts: []
+    evidence:
+      - evidence_014
+    next_action: "Run Python runtime validation and confirm no legacy validator script remains."
+    updated_at: "2026-05-29T17:43:05+08:00"
+  - id: req_infra_003_task_forest_branching
+    round_id: infra_001
+    branch_id: branch_vibe_coding_infra
+    source: developer_message
+    raw_text: "请你先分析并优化下面这句话的逻辑能力，再使用沙盘能力推演，再实现其能力：将当前任务树林，实现新能力，像以上的操作实则是在迭代Vibe Coding仓库，而不是提出想法树建立主线任务树，所以应该为Vibe Coding建立一条单独的任务树支线，用于Vibe Coding仓库的基建设施建立"
+    normalized_text: "Introduce a task forest with a dedicated Vibe Coding infrastructure branch so repository infrastructure iterations are not mixed into the mainline idea task tree."
+    type: infrastructure_governance
+    priority_or_version: P0-infra_001
+    status: confirmed
+    decision: "Implement task forest routing and migrate current infrastructure tasks to branch_vibe_coding_infra."
+    related_research: []
+    related_task_analysis:
+      - task_003_task_forest_branching
+    related_architecture:
+      - docs/ai/analysis/task-forest-branching.md
+    related_slice:
+      - slice_003_task_forest_branching
+    conflicts: []
+    evidence:
+      - evidence_015
+    next_action: "Validate task forest consistency and mark the branch slice pending developer acceptance."
+    updated_at: "2026-05-29T17:54:03+08:00"
+  - id: req_infra_004_capability_groups
+    round_id: infra_001
+    branch_id: branch_vibe_coding_infra
+    source: developer_message
+    raw_text: "确认 A，进入阶段二，只建立能力目录、skills、知识库、依赖候选清单，不创建工程骨架，不安装依赖。"
+    normalized_text: "Implement and refresh strategy A as a catalog-only Vibe Coding infrastructure capability layer: create or update capability directories, project skills, knowledge entries, and dependency candidate lists; do not create an engineering skeleton and do not install dependencies; verify current official sources using runtime-derived current-year wording instead of hard-coding a year."
+    type: infrastructure_capability_catalog
+    priority_or_version: P0-infra_001
+    status: confirmed
+    decision: "Proceed with catalog-only physical artifacts under docs/ai, with no package manifests, lockfiles, src/app/components/tools skeletons, or dependency installation."
+    related_research:
+      - docs/ai/research/research_001_capability_groups.md
+    related_task_analysis:
+      - task_004_capability_groups
+    related_architecture:
+      - docs/ai/architecture/capability-group-strategy.md
+    related_slice:
+      - slice_004_capability_groups
+    conflicts: []
+    evidence:
+      - evidence_016
+      - evidence_017
+    next_action: "Validate refreshed catalog-only constraints and request developer acceptance or edits."
+    updated_at: "2026-05-29T19:07:53+08:00"
+  - id: req_infra_005_vibe_infra_action_workflow
+    round_id: infra_001
+    branch_id: branch_vibe_coding_infra
+    source: developer_message
+    raw_text: "新增 Vibe Coding 仓库基建设施建立任务线：为建立 Vibe Coding 仓库基建设施任务新增触发式双阶段 SOP，强制阶段一四维 X 光扫描、红绿灯熔断、阶段二仅在人工明确授权后物理产出。"
+    normalized_text: "Add a trigger-bound Vibe Coding repository infrastructure action workflow SOP that extracts `{{ 优化动作 }}` from the trigger prefix, performs phase-one four-dimensional diagnosis and strategy selection, hard-stops for human confirmation, and permits phase-two physical output only after explicit authorization."
+    type: infrastructure_workflow_sop
+    priority_or_version: P0-infra_001
+    status: confirmed
+    decision: "Proceed with docs/ai runtime artifacts only: a project skill, canonical SOP template, knowledge entry, task slice, status, evidence, and handoff updates."
+    related_research: []
+    related_task_analysis:
+      - task_005_vibe_infra_action_workflow
+    related_architecture: []
+    related_slice:
+      - slice_005_vibe_infra_action_workflow
+    conflicts: []
+    evidence:
+      - evidence_018
+    next_action: "Validate the new trigger-bound SOP skill and request developer acceptance or edits."
+    updated_at: "2026-05-29T19:32:05+08:00"
+  - id: req_infra_006_full_project_lifecycle
+    round_id: infra_001
+    branch_id: branch_vibe_coding_infra
+    source: developer_message
+    raw_text: "新增 Vibe Coding 仓库基建设施建立任务线：分析当前 Vibe Coding 流程为什么只概括性引导需求而没有细致驱动完整项目，并补全任务线判断、需求确认、联网研究验证技术栈、任务分析、架构确认、基建模式确认、Agent 驱动设施、任务树和切片、代码、测试、文档、状态、下一步协议、任务树完成和 n+1 轮循环。"
+    normalized_text: "Add a repository infrastructure workflow that repairs the mainline full-project lifecycle: every future mainline or confirmed project task line must route the task line, analyze and confirm requirements, perform current-source research for technology choices and confirm it, analyze and confirm tasks, design and confirm architecture and stack, recommend and confirm infrastructure mode, establish Agent Vibe Coding driving facilities, create task trees and slices, implement, test, document, update state and evidence, use the next-step protocol, close the tree, and re-enter the same flow for round n+1."
+    type: infrastructure_lifecycle_workflow
+    priority_or_version: P0-infra_001
+    status: confirmed
+    decision: "Proceed with docs/ai runtime artifacts only: gap analysis, architecture note, project skill, canonical SOP template, knowledge entry, task slice, validator, status, evidence, and handoff updates."
+    related_research: []
+    related_task_analysis:
+      - task_006_full_project_lifecycle
+    related_architecture:
+      - docs/ai/architecture/full-project-lifecycle-workflow.md
+    related_slice:
+      - slice_006_full_project_lifecycle
+    conflicts: []
+    evidence:
+      - evidence_019
+    next_action: "Validate the full-project lifecycle workflow and request developer acceptance or edits."
+    updated_at: "2026-05-29T21:04:30+08:00"
+  - id: req_infra_007_compiler_runtime_assimilation
+    round_id: infra_001
+    branch_id: branch_vibe_coding_infra
+    source: developer_message
+    raw_text: "新增 Vibe Coding 仓库基建设施建立任务线：请你深度分析并深度提炼下面内容语境并赋到当前项目仓库，以下是一份基建仓库生成器，不过当前项目以及是一个基建仓库了。"
+    normalized_text: "Deeply analyze and distill the provided Vibe Coding multi-round infrastructure compiler specification into this already-initialized infrastructure repository by adding recoverable runtime artifacts, while avoiding a new prompt.md or raw compiler prompt runtime dependency."
+    type: infrastructure_compiler_runtime_assimilation
+    priority_or_version: P0-infra_001
+    status: confirmed
+    decision: "Proceed with docs/ai runtime artifacts only: analysis, architecture note, project skill, canonical SOP template, knowledge entry, task slice, validator, status, evidence, and handoff updates."
+    related_research: []
+    related_task_analysis:
+      - task_007_compiler_runtime_assimilation
+    related_architecture:
+      - docs/ai/architecture/compiler-runtime-assimilation.md
+    related_slice:
+      - slice_007_compiler_runtime_assimilation
+    conflicts: []
+    evidence:
+      - evidence_020
+    next_action: "Validate the compiler-runtime assimilation workflow and request developer acceptance or edits."
+    updated_at: "2026-05-29T21:30:00+08:00"
+  - id: req_infra_008_project_requirement_discovery
+    round_id: infra_001
+    branch_id: branch_vibe_coding_infra
+    source: developer_message
+    raw_text: "Developer asked to add a Vibe Coding infrastructure task line that analyzes why the current mainline idea flow still only guides broad requirements, then refines it into an engineering process for idea analysis, required-requirement analysis, requirement planning, persistent requirement collection, and guided follow-up questions."
+    normalized_text: "Add a project requirement discovery workflow so future mainline ideas are not collapsed into generic MVP summaries. The workflow must decompose raw ideas into domains, candidate requirements, question backlogs, requirement plans, persistent intake records, and baseline readiness checks before requirement-baseline confirmation."
+    type: infrastructure_requirement_discovery
+    priority_or_version: P0-infra_001
+    status: confirmed
+    decision: "Proceed with docs/ai runtime artifacts only: gap analysis, architecture note, project skill, canonical SOP, durable intake record template, knowledge entry, task slice, validator, status, evidence, and handoff updates."
+    related_research: []
+    related_task_analysis:
+      - task_008_project_requirement_discovery
+    related_architecture:
+      - docs/ai/architecture/project-requirement-discovery-workflow.md
+    related_slice:
+      - slice_008_project_requirement_discovery
+    conflicts: []
+    evidence:
+      - evidence_021
+    next_action: "Validate the project requirement discovery workflow and request developer acceptance or edits."
+    updated_at: "2026-05-29T21:48:21+08:00"
+  - id: req_infra_009_project_lifecycle_downstream_detail
+    round_id: infra_001
+    branch_id: branch_vibe_coding_infra
+    source: developer_message
+    raw_text: "Developer asked to analyze the current Vibe Coding flow and make the later process follow the same detailed engineering approach as the requirement discovery repair, without drifting focus or reducing it to a few summary sentences."
+    normalized_text: "Add a downstream lifecycle detailing workflow so future project rounds after requirement-baseline confirmation must use detailed gates, durable records, evidence packets, confirmation packets, and next conditions for research, task analysis, architecture, mode, Agent driving infrastructure, slice contracts, implementation, verification, closure, and n+1 reentry."
+    type: infrastructure_downstream_lifecycle_workflow
+    priority_or_version: P0-infra_001
+    status: confirmed
+    decision: "Proceed with docs/ai runtime artifacts only: gap analysis, architecture note, project skill, canonical SOP, durable downstream record template, lifecycle record guide, knowledge entry, task slice, validator, status, evidence, and handoff updates."
+    related_research: []
+    related_task_analysis:
+      - task_009_project_lifecycle_downstream_detail
+    related_architecture:
+      - docs/ai/architecture/project-lifecycle-downstream-workflow.md
+    related_slice:
+      - slice_009_project_lifecycle_downstream_detail
+    conflicts: []
+    evidence:
+      - evidence_022
+    next_action: "Validate the downstream lifecycle detailing workflow and request developer acceptance or edits."
+    updated_at: "2026-05-29T22:00:59+08:00"
+  - id: req_infra_010_requirement_workflow_engine
+    round_id: infra_001
+    branch_id: branch_vibe_coding_infra
+    source: developer_confirmation
+    raw_text: "确认方案 C，进入阶段二"
+    normalized_text: "Implement strategy C as a complete declarative requirement workflow engine for Vibe Coding requirement discovery: create a probe template catalog, a REQUIREMENTS_GATHERING state lock, a workflow engine graph, PM-style question loop rules, follow-up triggers, schema/validator coverage, and synchronized runtime state."
+    type: infrastructure_requirement_workflow_engine
+    priority_or_version: P0-infra_001
+    status: confirmed
+    decision: "Proceed with docs/ai runtime artifacts only. Implement the complete workflow engine as declarative YAML, skill, SOP, schema, validator, knowledge, task, evidence, status, and handoff updates without creating business code, package manifests, dependencies, or application skeletons."
+    related_research: []
+    related_task_analysis:
+      - task_010_requirement_workflow_engine
+    related_architecture:
+      - docs/ai/architecture/requirement-workflow-engine.md
+    related_slice:
+      - slice_010_requirement_workflow_engine
+    conflicts: []
+    evidence:
+      - evidence_023
+    next_action: "Validate the strategy C requirement workflow engine and request developer acceptance or edits."
+    updated_at: "2026-05-29T22:24:00+08:00"

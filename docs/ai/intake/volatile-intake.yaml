@@ -1,0 +1,18 @@
+schema_id: VolatileIntake
+intake_id: intake_001
+source: developer_message
+raw_text: "Developer provided Vibe Coding multi-round infrastructure compiler v1.8.0 and directed the repository to establish runtime infrastructure before business work."
+captured_at: "2026-05-29T17:18:17+08:00"
+initial_goal_guess: "Compile the macro collaboration principles into lightweight repository runtime artifacts."
+initial_constraints:
+  - "Do not make the original compiler prompt a runtime dependency."
+  - "Create core infrastructure before business implementation."
+  - "Keep state, evidence, knowledge, skills, and handoff recoverable."
+obvious_risks:
+  - "Overbuilding process before a concrete business goal exists."
+  - "Accidentally treating compiler text as a confirmed product requirement."
+authorization_hint: "Explicit compiler run request; bootstrap writes constrained to AGENTS.md and docs/ai/*."
+not_confirmed_notice: "This intake is not a confirmed business requirement or product scope."
+migration_target: docs/ai/requirements/ledger.yaml
+discard_condition: "After round_001 requirement baseline is confirmed or the developer rejects this bootstrap."
+

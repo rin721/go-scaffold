@@ -1,0 +1,20 @@
+schema_id: RiskRegister
+updated_at: "2026-05-29T17:18:17+08:00"
+risks:
+  - id: risk_001
+    title: "No confirmed business goal yet"
+    level: medium
+    applies_to: round_001
+    status: open
+    mitigation: "Keep round_001 in intake until the developer confirms goals, non-goals, risks, and acceptance."
+    evidence:
+      - evidence_001
+  - id: risk_002
+    title: "Prompt runtime dependency"
+    level: high
+    applies_to: runtime_infrastructure
+    status: mitigated
+    mitigation: "AGENTS.md and runtime entries explicitly forbid relying on the original compiler prompt."
+    evidence:
+      - evidence_005
+

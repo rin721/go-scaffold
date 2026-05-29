@@ -75,6 +75,24 @@ func TestUserSchemaSQLUsesSQLGenDDL(t *testing.T) {
 	}
 }
 
+func TestUserSchemaSQLUsesCompositeMySQLIndexes(t *testing.T) {
+	sql, err := UserSchemaSQL(string(database.DriverMySQL))
+	if err != nil {
+		t.Fatalf("UserSchemaSQL(mysql) error = %v", err)
+	}
+	for _, want := range []string{
+		"UNIQUE INDEX `uk_user_roles_user_role` (`user_id`, `role_id`)",
+		"UNIQUE INDEX `uk_role_permissions_role_permission` (`role_id`, `permission_id`)",
+	} {
+		if !strings.Contains(sql, want) {
+			t.Fatalf("schema SQL %q does not contain %q", sql, want)
+		}
+	}
+	if strings.Count(sql, "`uk_user_roles_user_role`") != 1 {
+		t.Fatalf("schema SQL %q should contain one grouped user-role unique index", sql)
+	}
+}
+
 func TestTodoOperationsUseSQLGenCRUD(t *testing.T) {
 	ctx := context.Background()
 	db := newSQLiteDatabase(t)

@@ -1,0 +1,44 @@
+schema_id: CapabilityGroup
+id: cap_ui_001
+name: "UI library and design system"
+status: candidate
+default_recommendation: "React + TypeScript + Vite + Tailwind CSS + shadcn/ui + Radix UI"
+why_default: "Good for copy-owned components, accessible primitives, and flexible product-specific design systems."
+official_source_refresh: "2026-05-29T19:07:53+08:00"
+current_year_policy: "Use the runtime date or source refresh timestamp for current-year wording; do not hard-code the year in future prompts."
+source_findings:
+  - "React official docs recommend starting new apps with a framework; Vite remains suitable when a scratch SPA or local web tool is the chosen boundary."
+  - "shadcn/ui current docs support shadcn/create, CLI templates, and existing-project setup; the Vite path uses Tailwind CSS with @tailwindcss/vite."
+  - "Radix Primitives remain the accessibility-focused primitive layer behind many copy-owned component systems."
+alternatives:
+  - id: ui_mui
+    name: "MUI"
+    best_for: "Fast enterprise dashboards and Material Design alignment."
+    tradeoff: "Strong visual opinion and heavier design-system coupling."
+  - id: ui_antd
+    name: "Ant Design"
+    best_for: "Dense back-office systems and form/table-heavy admin tools."
+    tradeoff: "Strong enterprise style and less brand-neutral by default."
+  - id: ui_mantine_or_chakra
+    name: "Mantine or Chakra UI"
+    best_for: "Ready-to-use React components and hooks."
+    tradeoff: "Component-library theming model may constrain custom design direction."
+selection_questions:
+  - "Is the future business UI an internal tool, public product, dashboard, or content app?"
+  - "Do we need a custom visual identity or a conventional enterprise UI?"
+  - "Should components be owned in source code or imported from a package?"
+requires_before_install:
+  - "Confirmed business mainline requirement."
+  - "Confirmed package manager."
+  - "Confirmed UI direction and acceptance criteria."
+forbidden_in_strategy_A:
+  - "Do not install UI packages."
+  - "Do not create frontend source directories."
+  - "Do not create lockfiles."
+source_urls:
+  - https://ui.shadcn.com/docs/installation
+  - https://ui.shadcn.com/docs/installation/vite
+  - https://www.radix-ui.com/primitives/docs
+  - https://tailwindcss.com/docs/installation/using-vite
+  - https://mui.com/material-ui/
+  - https://ant.design/docs/react/introduce/

@@ -1,0 +1,117 @@
+schema_id: ExecutionSlice
+id: slice_009_project_lifecycle_downstream_detail
+branch_id: branch_vibe_coding_infra
+round_id: infra_001
+task_id: task_009_project_lifecycle_downstream_detail
+phase: full_agent_driving_infra
+module: project_lifecycle_downstream_detail
+goal: "Add detailed downstream lifecycle gates so future project rounds after requirement-baseline confirmation proceed through research, task analysis, architecture, mode, Agent infrastructure, slice contracts, implementation, verification, closure, and n+1 with durable records and evidence."
+inputs:
+  - "Developer goal: analyze the current Vibe Coding flow and make the later process as detailed and engineering-grade as the requirement discovery flow."
+  - docs/ai/runtime-rule-index.md
+  - docs/ai/status/current.yaml
+  - docs/ai/tasks/forest.yaml
+  - docs/ai/tasks/main-tree.yaml
+  - docs/ai/tasks/branches/vibe-coding-infra/tree.yaml
+  - docs/ai/skills/full-project-lifecycle/SKILL.md
+  - docs/ai/templates/full-project-lifecycle-workflow-sop.md
+  - docs/ai/skills/project-requirement-discovery/SKILL.md
+outputs:
+  - docs/ai/analysis/project-lifecycle-downstream-gap-analysis.md
+  - docs/ai/architecture/project-lifecycle-downstream-workflow.md
+  - docs/ai/skills/project-lifecycle-downstream-detailing/SKILL.md
+  - docs/ai/templates/project-lifecycle-downstream-gates-sop.md
+  - docs/ai/templates/project-lifecycle-downstream-record.yaml
+  - docs/ai/lifecycle/README.md
+  - docs/ai/knowledge/entries/kb_010_project_lifecycle_downstream.md
+  - docs/ai/tasks/slices/slice_009_project_lifecycle_downstream_detail.yaml
+allowed_files:
+  - docs/ai/analysis/project-lifecycle-downstream-gap-analysis.md
+  - docs/ai/architecture/index.md
+  - docs/ai/architecture/full-project-lifecycle-workflow.md
+  - docs/ai/architecture/project-lifecycle-downstream-workflow.md
+  - docs/ai/skills/full-project-lifecycle/SKILL.md
+  - docs/ai/skills/project-lifecycle-downstream-detailing/SKILL.md
+  - docs/ai/skills/index.md
+  - docs/ai/templates/full-project-lifecycle-workflow-sop.md
+  - docs/ai/templates/project-lifecycle-downstream-gates-sop.md
+  - docs/ai/templates/project-lifecycle-downstream-record.yaml
+  - docs/ai/lifecycle/README.md
+  - docs/ai/knowledge/index.md
+  - docs/ai/knowledge/entries/kb_007_full_project_lifecycle.md
+  - docs/ai/knowledge/entries/kb_010_project_lifecycle_downstream.md
+  - docs/ai/status/current.yaml
+  - docs/ai/tasks/forest.yaml
+  - docs/ai/tasks/main-tree.yaml
+  - docs/ai/tasks/branches/vibe-coding-infra/tree.yaml
+  - docs/ai/tasks/current-slice.yaml
+  - docs/ai/tasks/slices/slice_009_project_lifecycle_downstream_detail.yaml
+  - docs/ai/requirements/ledger.yaml
+  - docs/ai/authorizations/records.md
+  - docs/ai/decisions/records.md
+  - docs/ai/evidence/index.md
+  - docs/ai/handoff/current.md
+  - docs/ai/manifest.yaml
+  - docs/ai/runtime-rule-index.md
+  - docs/ai/changelog.md
+  - docs/ai/scripts/validate_runtime.py
+  - docs/ai/schemas/core.schema.yaml
+forbidden_files:
+  - prompt.md
+  - package.json
+  - package-lock.json
+  - pnpm-lock.yaml
+  - yarn.lock
+  - pyproject.toml
+  - requirements.txt
+  - src/**
+  - app/**
+  - components/**
+  - tools/**
+allowed_tools:
+  - shell_read
+  - shell_validation
+  - apply_patch
+approval_required_actions:
+  - "Dependency installation"
+  - "Creating application or package skeletons"
+  - "Creating package manifests or lockfiles"
+  - "Business implementation"
+  - "Selecting a future mainline technology stack without research and confirmation"
+  - "Proceeding from a downstream stage using only a narrative summary"
+risk_level: low
+agency_level: controlled_execution
+verification_commands:
+  - "python docs/ai/scripts/validate_runtime.py"
+  - "rg -n \"project_lifecycle_downstream|research_plan_gate|task_graph_analysis_gate|architecture_dossier_gate|implementation_iteration_ledger_gate|acceptance_closure_packet_gate|skill_project_lifecycle_downstream_detailing|kb_010\" docs/ai"
+  - "Test-Path prompt.md, package.json, package-lock.json, pnpm-lock.yaml, yarn.lock, pyproject.toml, requirements.txt, src, app, components, tools"
+manual_checks:
+  - "The analysis explains why downstream stages after requirement discovery were still too summary-level."
+  - "The SOP defines detailed gates for research, task analysis, architecture, mode, Agent infrastructure, slice contracts, implementation ledger, verification packet, closure packet, and n+1 reentry."
+  - "The downstream record template provides durable state for future per-round lifecycle work."
+  - "The workflow does not create product code, select a final mainline stack, install dependencies, or start a business project."
+acceptance_criteria:
+  - "A project skill exists for downstream lifecycle detailing."
+  - "A canonical SOP exists for detailed downstream lifecycle gates."
+  - "A durable downstream lifecycle record template exists."
+  - "A lifecycle record directory guide exists for future per-round downstream records."
+  - "The full-project lifecycle points to downstream detailing after requirement-baseline confirmation."
+  - "Knowledge, task tree, current slice, evidence, status, validator, and handoff references are synchronized."
+  - "Runtime validation passes."
+  - "No prompt.md, package manifest, lockfile, dependency installation, application skeleton, or business code is created."
+rollback_plan: "Remove the downstream lifecycle detail skill, SOP, record template, analysis, architecture note, kb_010, slice_009, and related index/status/evidence references if the workflow is rejected."
+max_iteration_count: 3
+max_retry_count: 3
+retry_count: 0
+last_failure_reason: null
+next_human_decision: "Developer can accept the downstream lifecycle detailing workflow or request edits."
+audit_evidence:
+  - evidence_022
+human_override: null
+status: pending_acceptance
+knowledge_updates:
+  - kb_010
+skill_updates:
+  - skill_project_lifecycle_downstream_detailing
+next_condition: "Wait for developer acceptance or requested edits for the downstream lifecycle detailing workflow."
+updated_at: "2026-05-29T22:00:59+08:00"

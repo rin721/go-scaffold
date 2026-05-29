@@ -12,6 +12,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/rei0721/go-scaffold/pkg/database"
 	"github.com/rei0721/go-scaffold/pkg/plugin"
+	apperrors "github.com/rei0721/go-scaffold/types/errors"
 	"gorm.io/gorm"
 )
 
@@ -66,6 +67,8 @@ func TestNewRouterReadyEndpoint(t *testing.T) {
 		name           string
 		db             database.Database
 		wantHTTPStatus int
+		wantCode       int
+		wantMessage    string
 		wantStatus     string
 		wantDBCheck    string
 	}{
@@ -73,6 +76,8 @@ func TestNewRouterReadyEndpoint(t *testing.T) {
 			name:           "missing database",
 			db:             nil,
 			wantHTTPStatus: http.StatusServiceUnavailable,
+			wantCode:       apperrors.ErrDatabaseError,
+			wantMessage:    "not ready",
 			wantStatus:     "not_ready",
 			wantDBCheck:    "missing",
 		},
@@ -80,6 +85,8 @@ func TestNewRouterReadyEndpoint(t *testing.T) {
 			name:           "ping failure",
 			db:             &fakeDatabase{pingErr: errors.New("db offline")},
 			wantHTTPStatus: http.StatusServiceUnavailable,
+			wantCode:       apperrors.ErrDatabaseError,
+			wantMessage:    "not ready",
 			wantStatus:     "not_ready",
 			wantDBCheck:    "db offline",
 		},
@@ -87,6 +94,8 @@ func TestNewRouterReadyEndpoint(t *testing.T) {
 			name:           "ready",
 			db:             &fakeDatabase{},
 			wantHTTPStatus: http.StatusOK,
+			wantCode:       0,
+			wantMessage:    "success",
 			wantStatus:     "ready",
 			wantDBCheck:    "ok",
 		},
@@ -101,7 +110,15 @@ func TestNewRouterReadyEndpoint(t *testing.T) {
 			if recorder.Code != tt.wantHTTPStatus {
 				t.Fatalf("expected /ready status %d, got %d with body %s", tt.wantHTTPStatus, recorder.Code, recorder.Body.String())
 			}
-			assertSuccessResponse(t, body)
+			if body.Code != tt.wantCode {
+				t.Fatalf("expected response code %d, got %d", tt.wantCode, body.Code)
+			}
+			if body.Message != tt.wantMessage {
+				t.Fatalf("expected response message %q, got %q", tt.wantMessage, body.Message)
+			}
+			if body.Data == nil {
+				t.Fatal("expected response data to be present")
+			}
 			assertDataValue(t, body.Data, "status", tt.wantStatus)
 			checks, ok := body.Data["checks"].(map[string]any)
 			if !ok {

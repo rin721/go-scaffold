@@ -14,6 +14,7 @@ type Config struct {
 	I18n     I18nConfig     `mapstructure:"i18n"`
 	Executor ExecutorConfig `mapstructure:"executor"`
 	Storage  StorageConfig  `mapstructure:"storage"`
+	Demo     DemoConfig     `mapstructure:"demo"`
 	Plugin   PluginConfig   `mapstructure:"plugin"`
 	IAM      IAMConfig      `mapstructure:"iam"`
 	Auth     AuthConfig     `mapstructure:"auth"`
@@ -36,6 +37,7 @@ func (c *Config) Validate() error {
 		&c.I18n,
 		&c.Executor,
 		&c.Storage,
+		&c.Demo,
 		&c.Plugin,
 		&c.IAM,
 		&c.Auth,

@@ -1,0 +1,32 @@
+schema_id: CapabilityGroup
+id: cap_agent_scripts_001
+name: "AI Agent script tools"
+status: candidate
+default_recommendation: "Python CLI tools with typed inputs, structured outputs, and evidence-friendly logs."
+official_source_refresh: "2026-05-29T19:07:53+08:00"
+current_year_policy: "For future source refreshes, derive current year from runtime date or checked_at rather than fixed wording."
+candidate_use_cases:
+  - "Validate runtime artifacts."
+  - "Check Markdown links."
+  - "Generate status diagnostics."
+  - "Prepare dependency adoption reports."
+  - "Repair state pointers inside docs/ai only."
+candidate_tools:
+  - python
+  - uv
+  - typer
+  - pydantic
+  - pytest
+  - ruff
+design_rules:
+  - "Scripts must be deterministic where possible."
+  - "Scripts must avoid secrets and production operations."
+  - "Scripts should print concise machine-readable success/failure output."
+  - "Any script that mutates files needs an execution slice and rollback plan."
+  - "Use uv as a candidate runner/project manager only after Python project boundaries are confirmed; do not create pyproject.toml or uv.lock from this catalog."
+source_urls:
+  - https://docs.astral.sh/uv/
+  - https://typer.tiangolo.com/
+  - https://docs.pydantic.dev/latest/concepts/models/
+  - https://docs.pytest.org/en/stable/getting-started.html
+  - https://docs.astral.sh/ruff/linter/

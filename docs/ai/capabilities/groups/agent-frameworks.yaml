@@ -1,0 +1,29 @@
+schema_id: CapabilityGroup
+id: cap_agent_frameworks_001
+name: "Agent framework candidates"
+status: candidate
+default_recommendation: "Start with direct tool scripts and structured prompts; consider OpenAI Agents SDK or Pydantic AI only when product requirements justify an agent runtime."
+official_source_refresh: "2026-05-29T19:07:53+08:00"
+current_year_policy: "Before choosing an agent framework, re-check current official docs using the runtime date/current checked_at."
+candidate_tools:
+  - openai-agents-python
+  - pydantic-ai
+  - langgraph
+selection_guidance:
+  - "Use OpenAI Agents SDK when OpenAI-native orchestration, tools, guardrails, handoffs, sessions, streaming, and tracing are needed."
+  - "Use Pydantic AI when Python-first type safety, dependency injection, structured outputs, evals, MCP/A2A, and provider flexibility are central."
+  - "Use LangGraph when graph workflows, persistence, human-in-the-loop interruptions, memory, replay, and long-running state become explicit requirements."
+  - "Use direct scripts and structured prompts before adopting any framework when the need is only repository validation or catalog maintenance."
+requires_before_install:
+  - "Confirmed agent use case."
+  - "Confirmed model/provider boundary."
+  - "Confirmed secret management plan."
+  - "Confirmed evaluation and HITL strategy."
+source_urls:
+  - https://platform.openai.com/docs/guides/agents-sdk/
+  - https://openai.github.io/openai-agents-python/agents/
+  - https://openai.github.io/openai-agents-python/sessions/
+  - https://openai.github.io/openai-agents-python/tracing/
+  - https://pydantic.dev/docs/ai/overview/
+  - https://docs.langchain.com/oss/python/langgraph/workflows-agents
+  - https://docs.langchain.com/oss/python/langgraph/persistence

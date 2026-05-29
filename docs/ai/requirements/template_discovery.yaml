@@ -1,0 +1,229 @@
+schema_id: RequirementDiscoveryTemplateCatalog
+catalog_id: requirement_discovery_template_catalog_001
+version: 0.1.0
+updated_at: "2026-05-29T22:24:00+08:00"
+purpose: "Reusable project-type probe templates for requirement discovery before requirement-baseline confirmation."
+batch_policy:
+  min_questions_per_batch: 5
+  max_questions_per_batch: 7
+  ask_numbered_questions: true
+  require_domain_and_reason: true
+  allow_freeform_answer: true
+  stop_when_critical_domains_are: [confirmed, deferred, out_of_scope, blocked_by_named_decision]
+storage:
+  default_record_pattern: docs/ai/requirements/intake/round_<nnn>_<feature_slug>.yaml
+  confirmed_items_sync_to: docs/ai/requirements/ledger.yaml
+  open_questions_sync_to: docs/ai/handoff/current.md
+templates:
+  - template_id: commerce
+    label: "Commerce system"
+    aliases: [shop, store, ecommerce, marketplace, mall, ordering]
+    required_domains:
+      - business_model
+      - target_users_and_roles
+      - catalog_and_sku
+      - cart_checkout_order
+      - payment_fulfillment_refund
+      - admin_operations
+      - inventory
+      - auth_privacy_security
+      - development_topology
+      - testing_acceptance_docs
+      - non_goals
+    first_batch:
+      - id: commerce_q001
+        domain: business_model
+        question: "Commerce type: self-operated single store / brand store / multi-merchant marketplace / internal wholesale ordering?"
+        why_it_matters: "The business model changes roles, admin scope, settlement, permissions, and data model."
+        options: [self_operated_single_store, brand_store, multi_merchant_marketplace, internal_wholesale_ordering]
+      - id: commerce_q002
+        domain: release_target
+        question: "First-round target: quick runnable MVP / clear extensible structure / near-production readiness?"
+        why_it_matters: "The answer controls assurance depth, seed data, tests, security, and documentation expectations."
+        options: [quick_runnable_mvp, extensible_structure, near_production_ready]
+      - id: commerce_q003
+        domain: buyer_workflows
+        question: "Frontend flow: product list and detail + cart + order creation only, or also payment, order lookup, address book, refund, and account center?"
+        why_it_matters: "Buyer workflow scope determines page map, API boundaries, and acceptance criteria."
+        options: [list_detail_cart_order, include_payment_and_order_lookup, include_address_refund_account_center]
+      - id: commerce_q004
+        domain: admin_operations
+        question: "Admin scope: product/category/order basics only, or also inventory, users, coupons, banners, audit, and import/export?"
+        why_it_matters: "Admin scope often dominates the project task graph and permission model."
+        options: [basic_product_category_order, include_inventory_users_promotions, include_audit_import_export]
+      - id: commerce_q005
+        domain: catalog_and_sku
+        question: "Product model: simple products, or SKU/spec combinations with stock and different prices?"
+        why_it_matters: "SKU support changes catalog schema, cart identity, stock locking, and order snapshot rules."
+        options: [simple_products, sku_specs_stock_prices, decide_later]
+      - id: commerce_q006
+        domain: integrations
+        question: "Payment, logistics, and notifications: all simulated in round one, or connect real payment/logistics/SMS/email?"
+        why_it_matters: "External integrations change risk, research needs, secrets handling, testing, and mode selection."
+        options: [all_simulated, real_payment_later, real_logistics_or_notifications_later, connect_real_services_now]
+    followup_rules:
+      - id: commerce_followup_sku
+        when_answer_mentions: [sku, specs, variants, stock, different_prices]
+        enqueue_questions:
+          - id: commerce_sku_q001
+            domain: catalog_and_sku
+            question: "Which SKU dimensions exist in round one, and can a product have multiple independent dimensions such as color and size?"
+          - id: commerce_sku_q002
+            domain: inventory
+            question: "When should stock be deducted: when adding to cart, when submitting an unpaid order, when payment succeeds, or manually by admin?"
+          - id: commerce_sku_q003
+            domain: cart_checkout_order
+            question: "Should orders store immutable product/SKU snapshots so later product edits do not change historical orders?"
+      - id: commerce_followup_payment_real
+        when_answer_mentions: [real_payment, payment_provider, alipay, wechat, stripe, paypal]
+        enqueue_questions:
+          - id: commerce_payment_q001
+            domain: integrations
+            question: "Which payment provider should be researched, and is sandbox-only acceptable for round one?"
+          - id: commerce_payment_q002
+            domain: security_and_privacy
+            question: "What secrets, callback URLs, refund permissions, and audit logs are required?"
+      - id: commerce_followup_multi_merchant
+        when_answer_mentions: [multi_merchant_marketplace, merchant, settlement, commission]
+        enqueue_questions:
+          - id: commerce_merchant_q001
+            domain: roles_and_permissions
+            question: "What can merchants manage themselves: products, inventory, orders, refunds, coupons, or store profile?"
+          - id: commerce_merchant_q002
+            domain: data_model
+            question: "Does round one need settlement, commission, merchant withdrawal, or only catalog isolation?"
+  - template_id: saas
+    label: "SaaS product"
+    aliases: [saas, subscription, tenant, dashboard, b2b]
+    required_domains:
+      - target_customer
+      - tenant_model
+      - roles_and_permissions
+      - billing_plan
+      - core_workflows
+      - data_isolation
+      - integrations
+      - onboarding
+      - observability
+      - support_and_ops
+      - non_goals
+    first_batch:
+      - id: saas_q001
+        domain: target_customer
+        question: "Who is the first customer profile: solo user, small team, department, or external businesses?"
+        why_it_matters: "Customer profile changes tenancy, onboarding, permissions, and billing assumptions."
+        options: [solo_user, small_team, department, external_businesses]
+      - id: saas_q002
+        domain: tenant_model
+        question: "Is round one single-tenant, team workspace, or true multi-tenant with strict organization isolation?"
+        why_it_matters: "Tenancy affects database keys, authorization, testing, backups, and risk mode."
+        options: [single_tenant, team_workspace, strict_multi_tenant]
+      - id: saas_q003
+        domain: billing_plan
+        question: "Should billing be out of scope, simulated plans, or real subscription integration later?"
+        why_it_matters: "Billing introduces money, provider research, webhook handling, and stronger audit needs."
+        options: [out_of_scope, simulated_plans, real_subscription_later]
+      - id: saas_q004
+        domain: roles_and_permissions
+        question: "Which roles are required first: owner, admin, member, viewer, support operator, or custom roles?"
+        why_it_matters: "Roles shape authorization guards, UI navigation, and test coverage."
+        options: [owner_admin_member, add_viewer, add_support_operator, custom_roles]
+      - id: saas_q005
+        domain: core_workflows
+        question: "What is the one workflow that must feel complete in round one?"
+        why_it_matters: "SaaS projects drift without a primary job-to-be-done."
+        options: []
+  - template_id: blog
+    label: "Blog or content system"
+    aliases: [blog, cms, content, article, publishing]
+    required_domains:
+      - audience
+      - content_model
+      - authoring_workflow
+      - publishing_states
+      - media_and_assets
+      - comments_and_moderation
+      - search_and_taxonomy
+      - seo
+      - admin_operations
+      - non_goals
+    first_batch:
+      - id: blog_q001
+        domain: audience
+        question: "Is this personal publishing, team editorial, marketing content, documentation, or community content?"
+        why_it_matters: "Audience and ownership drive content workflow, roles, and SEO depth."
+        options: [personal, team_editorial, marketing, documentation, community]
+      - id: blog_q002
+        domain: content_model
+        question: "What content types are required first: posts only, posts + pages, series, tags/categories, or custom content types?"
+        why_it_matters: "The content model controls routes, schema, editor UI, and migration needs."
+        options: [posts_only, posts_and_pages, series_tags_categories, custom_content_types]
+      - id: blog_q003
+        domain: authoring_workflow
+        question: "Publishing flow: direct publish, draft/review/publish, scheduled publish, or approvals?"
+        why_it_matters: "Publishing state affects permissions, timestamps, preview, and acceptance tests."
+        options: [direct_publish, draft_review_publish, scheduled_publish, approvals]
+      - id: blog_q004
+        domain: comments_and_moderation
+        question: "Are comments out of scope, local-only, moderated, or connected to an external discussion system?"
+        why_it_matters: "Comments introduce spam, moderation, auth, notification, and privacy concerns."
+        options: [out_of_scope, local_comments, moderated_comments, external_discussion]
+      - id: blog_q005
+        domain: seo
+        question: "What SEO features are required in round one: metadata, sitemap, canonical URLs, redirects, or analytics?"
+        why_it_matters: "SEO scope affects routing, build/runtime behavior, and verification."
+        options: [metadata_only, metadata_sitemap, canonical_redirects, analytics_later]
+  - template_id: generic_app
+    label: "Generic application"
+    aliases: [app, system, tool, platform, dashboard]
+    required_domains:
+      - problem_and_success
+      - users_and_roles
+      - core_workflows
+      - data_model
+      - integrations
+      - auth_privacy_security
+      - operations
+      - non_functional_quality
+      - development_topology
+      - tests_docs_acceptance
+      - non_goals
+    first_batch:
+      - id: generic_q001
+        domain: problem_and_success
+        question: "What concrete problem should round one solve, and what observable result proves success?"
+        why_it_matters: "A project needs a measurable first outcome before architecture or implementation."
+        options: []
+      - id: generic_q002
+        domain: users_and_roles
+        question: "Who uses the system first, and are there distinct roles or permission boundaries?"
+        why_it_matters: "Roles determine auth, navigation, workflows, and tests."
+        options: []
+      - id: generic_q003
+        domain: core_workflows
+        question: "What are the 1-3 end-to-end workflows that must work in the first round?"
+        why_it_matters: "Workflow boundaries define feature scope and acceptance criteria."
+        options: []
+      - id: generic_q004
+        domain: data_model
+        question: "What data entities are created, read, updated, deleted, imported, exported, or audited?"
+        why_it_matters: "Data lifecycle controls schema, API shape, privacy, and rollback strategy."
+        options: []
+      - id: generic_q005
+        domain: integrations
+        question: "Are external services, payments, AI APIs, email/SMS, storage, analytics, or maps required now or later?"
+        why_it_matters: "Integrations require current-source research, secrets handling, and risk escalation."
+        options: [none_now, simulated_now, research_later, real_integration_now]
+      - id: generic_q006
+        domain: non_goals
+        question: "What should explicitly not be built in round one?"
+        why_it_matters: "Non-goals prevent scope drift and make baseline confirmation meaningful."
+        options: []
+selection_rules:
+  - if_raw_idea_mentions_any: [shop, store, commerce, ecommerce, mall, sku, order, cart]
+    select_template: commerce
+  - if_raw_idea_mentions_any: [saas, tenant, subscription, workspace, dashboard]
+    select_template: saas
+  - if_raw_idea_mentions_any: [blog, cms, article, post, publishing]
+    select_template: blog
+  - default_template: generic_app

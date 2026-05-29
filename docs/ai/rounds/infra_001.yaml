@@ -1,0 +1,28 @@
+schema_id: RoundLedger
+round_id: infra_001
+round_type: vibe_coding_infra_branch
+goal_summary: "Build and iterate the Vibe Coding repository infrastructure branch."
+status: pending_acceptance
+confirmed_requirement_baseline:
+  - req_round_001_docs
+  - req_round_001_python_scripts
+  - req_infra_003_task_forest_branching
+  - req_infra_004_capability_groups
+  - req_infra_005_vibe_infra_action_workflow
+  - req_infra_006_full_project_lifecycle
+  - req_infra_007_compiler_runtime_assimilation
+research_status: not_required_for_low_risk_infra
+task_analysis_status: confirmed
+architecture_status: confirmed_compiler_runtime_assimilation
+infra_mode_status: standard_light_for_repository_infra
+task_tree_status: pending_acceptance
+acceptance_status: pending_developer_acceptance
+task_tree_closure_status: pending_acceptance
+next_round_trigger: "Do not start a mainline idea task tree until the active infrastructure branch slices are accepted, migrated, or explicitly closed."
+developer_participation:
+  requirement_analysis: confirmed_by_user_goal
+  sandbox_reasoning: requested
+  task_forest_branching: requested
+  compiler_runtime_assimilation: requested
+  acceptance: pending
+updated_at: "2026-05-29T21:30:00+08:00"

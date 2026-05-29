@@ -12,7 +12,7 @@
 
 ```bash
 go test ./... -count=1
-go build -o ./bin/go-scaffold-server ./cmd/server
+go build -o ./bin/go-scaffold-server ./cmd/main
 git diff --check
 ```
 
@@ -52,6 +52,7 @@ bash deploy.sh \
   --port 9999 \
   --db-driver sqlite \
   --db-name ./data/app.db \
+  --auth-token-secret replace-with-at-least-32-character-secret \
   --confirm
 ```
 
@@ -66,6 +67,7 @@ bash deploy.sh \
   --ref main \
   --env production \
   --image go-scaffold:local \
+  --auth-token-secret replace-with-at-least-32-character-secret \
   --confirm
 ```
 
@@ -87,6 +89,9 @@ bash deploy.sh \
   --redis-enabled true \
   --redis-host redis.internal \
   --redis-password "***" \
+  --auth-token-secret "$RIN_APP_AUTH_TOKEN_SECRET" \
+  --auth-public-registration false \
+  --demo-enabled false \
   --confirm
 ```
 
@@ -106,6 +111,8 @@ sudo chown -R 10001:10001 data logs
 ```
 
 Compose 示例读取 `DEPLOY_IMAGE`、`APP_PORT`、`DEPLOY_CONTAINER_NAME` 以及 `RIN_APP_*` 配置覆盖环境变量，并对 `/health` 配置容器内 healthcheck。
+
+`RIN_APP_AUTH_TOKEN_SECRET` 是 production Compose 的必填项，长度至少 32 bytes；缺失时 Compose 或 `deploy.sh` 会失败，而不是让服务回退到进程内随机 token secret。production 示例默认 `RIN_APP_DEMO_ENABLED=false`，用于避免生产环境暴露 demo Todo 路由和隐式创建 demo schema。
 
 ## 配置边界
 
@@ -155,6 +162,7 @@ workflow 支持 `staging` 和 `production` 两个环境。production 必须在 G
 | `DEPLOY_SSH_KNOWN_HOSTS` | 否 | 推荐提供远程主机 known_hosts；缺省时 workflow 会用 `ssh-keyscan` 生成 |
 | `RIN_APP_DB_PASSWORD` | 否 | 数据库密码 |
 | `RIN_APP_REDIS_PASSWORD` | 否 | Redis 密码 |
+| `RIN_APP_AUTH_TOKEN_SECRET` | 是 | JWT token HMAC secret，至少 32 bytes |
 | `GHCR_USERNAME` | 否 | 私有 GHCR 镜像需要；公开镜像可不填 |
 | `GHCR_TOKEN` | 否 | 私有 GHCR 镜像需要；只授予拉取镜像所需权限 |
 
@@ -183,14 +191,14 @@ production 运行前必须确认 GitHub Environment 审批已生效、显式 Var
 ## 本地运行
 
 ```bash
-go run ./cmd/server server --config=configs/config.yaml
+go run ./cmd/main server --config=configs/config.yaml
 ```
 
 Windows PowerShell 可使用：
 
 ```powershell
 $env:RIN_CONFIG_PATH = "configs/config.yaml"
-go run ./cmd/server server
+go run ./cmd/main server
 ```
 
 服务启动后检查：
@@ -203,9 +211,9 @@ curl http://127.0.0.1:9999/ready
 ## 初始化数据库
 
 ```bash
-go run ./cmd/server db --config=configs/config.yaml --operation=schema
-go run ./cmd/server db --config=configs/config.yaml --operation=schema --apply
-go run ./cmd/server db --config=configs/config.yaml --operation=database
+go run ./cmd/main db --config=configs/config.yaml --operation=schema
+go run ./cmd/main db --config=configs/config.yaml --operation=schema --apply
+go run ./cmd/main db --config=configs/config.yaml --operation=database
 ```
 
 Current rule: `db --operation=database` and `db --operation=schema` print sqlgen-generated DDL. Add `--apply` only when the target connection should execute that generated DDL and the environment has been explicitly confirmed. The removed `initdb` command, SQL script directory, and runtime `AutoMigrate` path must not be restored without a new confirmed task. Production schema changes still require a separately confirmed migration flow.
@@ -217,7 +225,7 @@ For command usage and extension rules, see [`db-cli.md`](db-cli.md).
 1. 从干净工作区构建二进制。
 2. 在目标环境准备配置文件或环境变量。
 3. 先在目标环境执行只读健康检查所需依赖验证。
-4. 如需要初始化 demo schema，显式执行 `cmd/server db --operation=schema --apply`。
+4. 如需要初始化 demo schema，显式执行 `cmd/main db --operation=schema --apply`。
 5. 启动 server。
 6. 检查 `/health` 和 `/ready`。
 7. 保留上一版本二进制和配置以便回滚。

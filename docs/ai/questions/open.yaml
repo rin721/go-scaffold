@@ -1,0 +1,19 @@
+schema_id: OpenQuestions
+updated_at: "2026-05-29T17:18:17+08:00"
+questions:
+  - id: q_001
+    round_id: round_001
+    stage: round_intake
+    question: "What is the first business or project goal this repository should serve?"
+    status: open
+  - id: q_002
+    round_id: round_001
+    stage: requirement_analysis
+    question: "Who is the target user or maintainer, and what first outcome should be visible?"
+    status: open
+  - id: q_003
+    round_id: round_001
+    stage: requirement_analysis
+    question: "Are there privacy, account, payment, production, data-loss, or external-service risks?"
+    status: open
+

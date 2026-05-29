@@ -23,6 +23,16 @@ func (TestUser) TableName() string {
 	return "users"
 }
 
+type TestUserRole struct {
+	ID     uint `gorm:"column:id;primaryKey;autoIncrement"`
+	UserID uint `gorm:"column:user_id;not null;uniqueIndex:uk_user_roles_user_role"`
+	RoleID uint `gorm:"column:role_id;not null;uniqueIndex:uk_user_roles_user_role"`
+}
+
+func (TestUserRole) TableName() string {
+	return "user_roles"
+}
+
 // ============================================================================
 // Generator 测试
 // ============================================================================
@@ -76,6 +86,23 @@ func TestTableIfNotExists(t *testing.T) {
 	}
 	if !strings.Contains(sql, `"id" INTEGER PRIMARY KEY AUTOINCREMENT`) {
 		t.Fatalf("SQL = %q, want inline SQLite primary key autoincrement", sql)
+	}
+}
+
+func TestTableGroupsCompositeUniqueIndexes(t *testing.T) {
+	gen := New(&Config{Dialect: MySQL})
+
+	sql, err := gen.TableIfNotExists(&TestUserRole{})
+	if err != nil {
+		t.Fatalf("TableIfNotExists() failed: %v", err)
+	}
+
+	want := "UNIQUE INDEX `uk_user_roles_user_role` (`user_id`, `role_id`)"
+	if !strings.Contains(sql, want) {
+		t.Fatalf("SQL = %q, want composite unique index %q", sql, want)
+	}
+	if strings.Count(sql, "`uk_user_roles_user_role`") != 1 {
+		t.Fatalf("SQL = %q, want one grouped unique index", sql)
 	}
 }
 

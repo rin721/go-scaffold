@@ -147,7 +147,7 @@ func RegisterRemoteHTTP(manager Manager, req RegistrationRequest, httpOptions ..
 
 func registrationAuthorized(r *http.Request, token string) bool {
 	if token == "" {
-		return true
+		return false
 	}
 	if subtleTokenEqual(r.Header.Get(registrationTokenHeader), token) {
 		return true

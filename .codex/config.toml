@@ -1,6 +1,0 @@
-# go-scaffold project-level Codex rules.
-# 不包含密钥、机器私有路径或会话信息。
-
-[project]
-rules = ["AGENTS.md", "AGENT_RULES.md", "docs/ai/prompt.md"]
-status_files = ["STATUS.md", "TASKS.md", "TIME_SLICES.md", "TEST_REPORT.md", "AGENT_HANDOFF.md"]

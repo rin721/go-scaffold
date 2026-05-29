@@ -1,0 +1,93 @@
+schema_id: ProjectLifecycleDownstreamRecord
+record_id: project_lifecycle_downstream_record_example
+round_id: replace_with_round_id
+branch_id: branch_mainline_idea
+status: downstream_planning
+created_at: "YYYY-MM-DDTHH:MM:SS+08:00"
+updated_at: "YYYY-MM-DDTHH:MM:SS+08:00"
+source_baseline:
+  requirement_baseline_status: confirmed
+  requirement_ids: []
+  discovery_record: null
+research:
+  status: not_started
+  questions: []
+  source_matrix: []
+  findings_by_decision: []
+  rejected_options: []
+  recommendation: null
+  confirmation_status: pending_hard_confirmation
+task_analysis:
+  status: not_started
+  deliverables: []
+  dependency_graph: []
+  critical_path: []
+  slice_candidates: []
+  risk_to_slice_map: []
+  test_strategy: []
+  documentation_strategy: []
+  evidence_strategy: []
+  closure_criteria: []
+  confirmation_status: pending_hard_confirmation
+architecture:
+  status: not_started
+  overview: null
+  requirement_to_design_coverage: []
+  data_model: []
+  api_boundaries: []
+  ui_model: []
+  security_privacy_permissions: []
+  rollback_strategy: []
+  quality_gates: []
+  alternatives: []
+  confirmation_status: pending_hard_confirmation
+infra_mode:
+  status: not_started
+  risk_matrix: []
+  recommended_mode: null
+  why_this_mode: null
+  why_not_other_mode: null
+  escalation_triggers: []
+  artifact_depth: null
+  confirmation_status: pending_hard_confirmation
+agent_driving_infra:
+  status: not_started
+  skills: []
+  knowledge_entries: []
+  schemas: []
+  templates: []
+  validation_commands: []
+  evidence_packet_shape: []
+  handoff_anchors: []
+task_tree_and_slices:
+  status: not_started
+  task_tree_path: null
+  slices: []
+implementation_iteration_ledger:
+  status: not_started
+  iterations: []
+verification_evidence_packet:
+  status: not_started
+  acceptance_coverage: []
+  commands: []
+  tests: []
+  manual_checks: []
+  known_gaps: []
+  residual_risks: []
+  evidence_links: []
+acceptance_closure_packet:
+  status: not_started
+  requirement_coverage_summary: []
+  delivered_artifacts: []
+  validation_summary: []
+  rollback_notes: []
+  documentation_updates: []
+  developer_acceptance_status: pending
+  closure_recommendation: null
+next_round_reentry:
+  status: not_started
+  next_allowed_phase: null
+  next_round_trigger: null
+  next_action: null
+evidence:
+  - replace_with_evidence_id

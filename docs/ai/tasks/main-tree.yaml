@@ -1,0 +1,13 @@
+schema_id: TaskTree
+tree_id: task_tree_mainline_idea
+branch_id: branch_mainline_idea
+branch_type: mainline_idea
+round_id: mainline_pending
+created_at: "2026-05-29T17:54:03+08:00"
+updated_at: "2026-05-29T22:24:00+08:00"
+status: waiting_for_confirmed_idea
+purpose: "Reserved task tree for future developer product, business, application, or feature ideas."
+blocked_by: "No confirmed mainline product or business idea exists yet."
+tasks: []
+next_action: "When the developer provides a product or business idea, use docs/ai/skills/full-project-lifecycle/SKILL.md, docs/ai/skills/requirement-workflow-engine/SKILL.md, docs/ai/skills/project-requirement-discovery/SKILL.md, docs/ai/skills/project-lifecycle-downstream-detailing/SKILL.md, docs/ai/templates/full-project-lifecycle-workflow-sop.md, docs/ai/templates/requirement-workflow-engine-sop.md, docs/ai/templates/project-requirement-discovery-sop.md, and docs/ai/templates/project-lifecycle-downstream-gates-sop.md: route the task line, run the declarative requirement workflow engine, enter REQUIREMENTS_GATHERING with code generation locked, select a probe template, persist a requirement discovery record, ask 5-7 numbered questions, collect and overwrite answers, generate follow-up questions until coverage is ready, analyze and confirm the requirement baseline, then run detailed downstream lifecycle gates for current-source research, research confirmation, task graph analysis, task-analysis confirmation, architecture dossier, architecture confirmation, mode risk matrix, mode confirmation, Agent driving infrastructure, task tree/slice contracts, implementation ledger, verification evidence, closure, and n+1 reentry."
+no_prompt_runtime_dependency: true

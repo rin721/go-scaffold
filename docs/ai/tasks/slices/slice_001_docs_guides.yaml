@@ -1,0 +1,84 @@
+schema_id: ExecutionSlice
+id: slice_001_docs_guides
+branch_id: branch_vibe_coding_infra
+round_id: infra_001
+task_id: task_001_human_docs
+phase: docs_knowledge_status_sync
+module: human_documentation
+goal: "Create current project usage tutorial and detailed overview documentation."
+inputs:
+  - README.md
+  - docs/index.md
+  - docs/ai/status/current.yaml
+  - docs/ai/tasks/current-slice.yaml
+outputs:
+  - README.md
+  - docs/index.md
+  - docs/project-overview.md
+  - docs/usage-guide.md
+  - docs/maintenance-guide.md
+  - docs/agent-workflow-guide.md
+  - docs/ai/evidence/index.md
+  - docs/ai/status/current.yaml
+  - docs/ai/handoff/current.md
+allowed_files:
+  - README.md
+  - docs/index.md
+  - docs/project-overview.md
+  - docs/usage-guide.md
+  - docs/maintenance-guide.md
+  - docs/agent-workflow-guide.md
+  - docs/ai/status/current.yaml
+  - docs/ai/tasks/current-slice.yaml
+  - docs/ai/tasks/tree.yaml
+  - docs/ai/tasks/slices/slice_001_docs_guides.yaml
+  - docs/ai/requirements/ledger.yaml
+  - docs/ai/rounds/round_001.yaml
+  - docs/ai/decisions/records.md
+  - docs/ai/evidence/index.md
+  - docs/ai/handoff/current.md
+  - docs/ai/knowledge/index.md
+  - docs/ai/knowledge/entries/kb_002_human_docs.md
+forbidden_files:
+  - "business implementation files"
+  - "dependency lockfiles"
+  - "production configuration"
+allowed_tools:
+  - shell_read
+  - shell_validation
+  - apply_patch
+approval_required_actions:
+  - "Any business implementation"
+  - "Dependency installation"
+  - "Destructive file operations"
+risk_level: low
+agency_level: controlled_execution
+verification_commands:
+  - "python docs/ai/scripts/validate_runtime.py"
+  - "Test-Path README.md; Test-Path docs/index.md; Test-Path docs/project-overview.md; Test-Path docs/usage-guide.md; Test-Path docs/maintenance-guide.md; Test-Path docs/agent-workflow-guide.md"
+manual_checks:
+  - "Human docs explain project purpose, usage, maintenance, and Agent workflow."
+  - "Docs do not instruct agents to rely on the original compiler prompt."
+acceptance_criteria:
+  - "README.md gives a fast project overview and links to detailed docs."
+  - "docs/index.md indexes all human-facing docs."
+  - "docs/project-overview.md explains current project structure and runtime infrastructure."
+  - "docs/usage-guide.md gives practical usage steps."
+  - "docs/maintenance-guide.md explains ongoing maintenance."
+  - "docs/agent-workflow-guide.md explains human-Agent workflow."
+  - "Runtime validation passes."
+rollback_plan: "Revert or amend only the documentation files and docs/ai records created by this slice."
+max_iteration_count: 3
+max_retry_count: 3
+retry_count: 0
+last_failure_reason: null
+next_human_decision: null
+audit_evidence:
+  - evidence_012
+human_override: null
+status: pending_acceptance
+knowledge_updates:
+  - kb_002
+skill_updates: []
+next_condition: "Wait for developer acceptance, requested documentation edits, or explicit migration before starting another task tree."
+updated_at: "2026-05-29T17:54:03+08:00"

@@ -1,0 +1,9 @@
+# Docs Directory Rules
+
+- Keep durable human-facing documentation under `docs/`.
+- Keep AI runtime state, process records, evidence, skills, schemas, and
+  temporary execution artifacts under `docs/ai/`.
+- Use UTF-8, stable Markdown/YAML/JSON, ISO 8601 timestamps, and repository
+  relative paths with `/`.
+- Do not mix unverified external input into durable project facts.
+

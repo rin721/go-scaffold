@@ -2,7 +2,7 @@
 
 ## Current DB CLI Note
 
-As of 2026-05-27, database DDL, demo schema, and demo Todo CRUD are generated through `pkg/sqlgen` and exposed through `cmd/server db`. The removed `initdb` command and InitDB config section must not be restored without a new confirmed task.
+As of 2026-05-27, database DDL, demo schema, and demo Todo CRUD are generated through `pkg/sqlgen` and exposed through `cmd/main db`. The removed `initdb` command and InitDB config section must not be restored without a new confirmed task.
 
 DB CLI usage and extension notes live in [`db-cli.md`](db-cli.md).
 
@@ -13,16 +13,16 @@ DB CLI usage and extension notes live in [`db-cli.md`](db-cli.md).
 应用默认读取 `configs/config.yaml`。`server` 和 `db` 命令都支持显式传入配置文件：
 
 ```bash
-go run ./cmd/server server --config=configs/config.yaml
-go run ./cmd/server db --config=configs/config.yaml --operation=schema
-go run ./cmd/server db --config=configs/config.yaml --operation=schema --apply
+go run ./cmd/main server --config=configs/config.yaml
+go run ./cmd/main db --config=configs/config.yaml --operation=schema
+go run ./cmd/main db --config=configs/config.yaml --operation=schema --apply
 ```
 
 也可以通过配置路径环境变量指定：
 
 ```bash
 export RIN_CONFIG_PATH=configs/config.yaml
-go run ./cmd/server server
+go run ./cmd/main server
 ```
 
 `RIN_CONFIG_PATH` 由 `internal/config.EnvConfigPathName()` 基于 `types/constants.AppPrefix` 动态生成。当前 `AppPrefix = "Rin"`，因此配置路径变量是 `RIN_CONFIG_PATH`。
@@ -116,8 +116,10 @@ DB_HOST
 | I18n | `RIN_APP_I18N_DEFAULT`, `RIN_APP_I18N_SUPPORTED`, `RIN_APP_I18N_MESSAGES_DIR` |
 | Executor | `RIN_APP_EXECUTOR_ENABLED` |
 | Storage | `RIN_APP_STORAGE_ENABLED`, `RIN_APP_STORAGE_FS_TYPE`, `RIN_APP_STORAGE_BASE_PATH`, `RIN_APP_STORAGE_ENABLE_WATCH`, `RIN_APP_STORAGE_WATCH_BUFFER_SIZE` |
+| Demo | `RIN_APP_DEMO_ENABLED`, `RIN_APP_DEMO_APPLY_SCHEMA_ON_START` |
 | Plugin | `RIN_APP_PLUGIN_ENABLED`, `RIN_APP_PLUGIN_DEFAULT_TIMEOUT`, `RIN_APP_PLUGIN_MAX_RESPONSE_BYTES` |
 | IAM | `RIN_APP_IAM_ENABLED`, `RIN_APP_IAM_MODE`, `RIN_APP_IAM_DEFAULT_DENY` |
+| Auth | `RIN_APP_AUTH_TOKEN_SECRET`, `RIN_APP_AUTH_TOKEN_TTL` |
 | CORS | `RIN_APP_CORS_ENABLED`, `RIN_APP_CORS_ALLOW_ORIGINS`, `RIN_APP_CORS_ALLOW_METHODS`, `RIN_APP_CORS_ALLOW_HEADERS`, `RIN_APP_CORS_EXPOSE_HEADERS`, `RIN_APP_CORS_ALLOW_CREDENTIALS`, `RIN_APP_CORS_MAX_AGE` |
 
 ## .env 示例

@@ -1,0 +1,101 @@
+schema_id: ExecutionSlice
+id: slice_006_full_project_lifecycle
+branch_id: branch_vibe_coding_infra
+round_id: infra_001
+task_id: task_006_full_project_lifecycle
+phase: full_agent_driving_infra
+module: mainline_lifecycle_workflow
+goal: "Add a full-project lifecycle workflow so future mainline ideas are routed, confirmed, researched, architected, mode-selected, sliced, implemented, tested, documented, closed, and continued into round n+1."
+inputs:
+  - "Developer goal: repair the current Vibe Coding flow because it guided requirement expression but did not fully and finely drive a complete project lifecycle."
+  - docs/ai/runtime-rule-index.md
+  - docs/ai/status/current.yaml
+  - docs/ai/tasks/forest.yaml
+  - docs/ai/tasks/main-tree.yaml
+  - docs/ai/tasks/branches/vibe-coding-infra/tree.yaml
+outputs:
+  - docs/ai/analysis/mainline-full-project-lifecycle-gap-analysis.md
+  - docs/ai/architecture/full-project-lifecycle-workflow.md
+  - docs/ai/skills/full-project-lifecycle/SKILL.md
+  - docs/ai/templates/full-project-lifecycle-workflow-sop.md
+  - docs/ai/knowledge/entries/kb_007_full_project_lifecycle.md
+  - docs/ai/tasks/slices/slice_006_full_project_lifecycle.yaml
+allowed_files:
+  - docs/ai/analysis/mainline-full-project-lifecycle-gap-analysis.md
+  - docs/ai/architecture/index.md
+  - docs/ai/architecture/full-project-lifecycle-workflow.md
+  - docs/ai/skills/full-project-lifecycle/SKILL.md
+  - docs/ai/skills/index.md
+  - docs/ai/templates/full-project-lifecycle-workflow-sop.md
+  - docs/ai/knowledge/index.md
+  - docs/ai/knowledge/entries/kb_007_full_project_lifecycle.md
+  - docs/ai/status/current.yaml
+  - docs/ai/tasks/forest.yaml
+  - docs/ai/tasks/main-tree.yaml
+  - docs/ai/tasks/branches/vibe-coding-infra/tree.yaml
+  - docs/ai/tasks/current-slice.yaml
+  - docs/ai/tasks/slices/slice_006_full_project_lifecycle.yaml
+  - docs/ai/requirements/ledger.yaml
+  - docs/ai/decisions/records.md
+  - docs/ai/evidence/index.md
+  - docs/ai/handoff/current.md
+  - docs/ai/manifest.yaml
+  - docs/ai/runtime-rule-index.md
+  - docs/ai/changelog.md
+  - docs/ai/scripts/validate_runtime.py
+  - docs/ai/schemas/core.schema.yaml
+forbidden_files:
+  - package.json
+  - package-lock.json
+  - pnpm-lock.yaml
+  - yarn.lock
+  - pyproject.toml
+  - requirements.txt
+  - src/**
+  - app/**
+  - components/**
+  - tools/**
+allowed_tools:
+  - shell_read
+  - shell_validation
+  - apply_patch
+approval_required_actions:
+  - "Dependency installation"
+  - "Creating application or package skeletons"
+  - "Creating package manifests or lockfiles"
+  - "Business implementation"
+  - "Selecting a future mainline technology stack without developer confirmation"
+  - "Skipping requirement, research, task analysis, architecture, or mode confirmation"
+risk_level: low
+agency_level: controlled_execution
+verification_commands:
+  - "python docs/ai/scripts/validate_runtime.py"
+  - "rg -n \"full_project_lifecycle|task_006_full_project_lifecycle|kb_007|skill_full_project_lifecycle|standard_light_risk_escalated|enterprise_high_assurance\" docs/ai"
+  - "Test-Path package.json, package-lock.json, pnpm-lock.yaml, yarn.lock, pyproject.toml, requirements.txt, src, app, components, tools"
+manual_checks:
+  - "The gap analysis explains why the previous flow was too summarized and could skip detailed lifecycle gates."
+  - "The SOP includes task-line routing, requirement confirmation, current-source research, task analysis, architecture, mode confirmation, agent driving infrastructure, slice loop, next-step protocol, closure, and n+1 loop."
+  - "The workflow does not start business implementation or select a concrete future technology stack."
+acceptance_criteria:
+  - "A project skill exists for the full-project lifecycle workflow."
+  - "A canonical SOP exists for the full-project lifecycle gates."
+  - "The runtime rule index requires detailed lifecycle gates for future mainline or project task lines."
+  - "Knowledge, task tree, current slice, evidence, status, and handoff references are synchronized."
+  - "Runtime validation passes."
+  - "No package manifest, lockfile, dependency installation, application skeleton, or business code is created."
+rollback_plan: "Remove the full-project lifecycle skill, SOP, analysis, architecture note, kb_007, slice_006, and related index/status/evidence references if the workflow is rejected."
+max_iteration_count: 3
+max_retry_count: 3
+retry_count: 0
+last_failure_reason: null
+next_human_decision: "Developer can accept the full-project lifecycle workflow or request edits."
+audit_evidence:
+  - evidence_019
+human_override: null
+status: pending_acceptance
+knowledge_updates:
+  - kb_007
+skill_updates:
+  - skill_full_project_lifecycle
+next_condition: "Wait for developer acceptance or requested edits for the full-project lifecycle workflow."
+updated_at: "2026-05-29T21:12:37+08:00"

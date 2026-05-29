@@ -21,11 +21,11 @@ Usage:
 Clone first:
   git clone <repo-address>
   cd <repo-address>
-  bash deploy.sh --docker y --image go-scaffold:local --confirm
+  bash deploy.sh --docker y --image go-scaffold:local --auth-token-secret replace-with-at-least-32-character-secret --confirm
 
 Direct install:
   curl -fsSL -o deploy.sh https://raw-githubusercontent-com-gh.helloworlds.eu.org/rin721/go-scaffold/main/script/install.sh
-  bash deploy.sh --docker y --image go-scaffold:local --confirm
+  bash deploy.sh --docker y --image go-scaffold:local --auth-token-secret replace-with-at-least-32-character-secret --confirm
 
 Deployment options:
   --docker <y|n>              Use Docker Compose deployment. Only "y" is supported.
@@ -78,6 +78,11 @@ Application options:
   --storage-base-path <value>
   --storage-enable-watch <value>
   --storage-watch-buffer-size <value>
+  --demo-enabled <value>
+  --demo-apply-schema-on-start <value>
+  --auth-token-secret <value> Required by the production Compose template.
+  --auth-token-ttl <value>
+  --auth-public-registration <value>
   --cors-enabled <value>
   --cors-allow-origins <value>
   --cors-allow-methods <value>
@@ -400,6 +405,31 @@ while [ "$#" -gt 0 ]; do
 		set_app_env STORAGE_WATCH_BUFFER_SIZE "$2"
 		shift 2
 		;;
+	--demo-enabled)
+		require_arg "$1" "${2:-}"
+		set_app_env DEMO_ENABLED "$2"
+		shift 2
+		;;
+	--demo-apply-schema-on-start)
+		require_arg "$1" "${2:-}"
+		set_app_env DEMO_APPLY_SCHEMA_ON_START "$2"
+		shift 2
+		;;
+	--auth-token-secret)
+		require_arg "$1" "${2:-}"
+		set_app_env AUTH_TOKEN_SECRET "$2"
+		shift 2
+		;;
+	--auth-token-ttl)
+		require_arg "$1" "${2:-}"
+		set_app_env AUTH_TOKEN_TTL "$2"
+		shift 2
+		;;
+	--auth-public-registration)
+		require_arg "$1" "${2:-}"
+		set_app_env AUTH_PUBLIC_REGISTRATION "$2"
+		shift 2
+		;;
 	--cors-enabled)
 		require_arg "$1" "${2:-}"
 		set_app_env CORS_ENABLED "$2"
@@ -465,6 +495,14 @@ validate_value SOURCE_DIR "$SOURCE_DIR"
 validate_value REGISTRY_HOST "$REGISTRY_HOST"
 validate_value REGISTRY_USERNAME "$REGISTRY_USERNAME"
 validate_value REGISTRY_TOKEN "$REGISTRY_TOKEN"
+
+auth_token_secret_key="${APP_ENV_PREFIX}_AUTH_TOKEN_SECRET"
+auth_token_secret="${APP_ENV[$auth_token_secret_key]:-}"
+if [ -z "$auth_token_secret" ]; then
+	auth_token_secret="${!auth_token_secret_key:-}"
+fi
+[ -n "$auth_token_secret" ] || die "--auth-token-secret or $auth_token_secret_key is required"
+[ "${#auth_token_secret}" -ge 32 ] || die "auth token secret must be at least 32 bytes"
 
 if [ "$DEPLOY_PULL" = "y" ] && [ "$DEPLOY_BUILD_SET" = "n" ]; then
 	DEPLOY_BUILD="n"

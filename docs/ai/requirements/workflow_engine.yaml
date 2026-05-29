@@ -1,0 +1,101 @@
+schema_id: RequirementDiscoveryWorkflowEngine
+engine_id: requirement_discovery_workflow_engine_001
+version: 0.1.0
+strategy: complete_declarative_workflow_engine
+updated_at: "2026-05-29T22:24:00+08:00"
+purpose: "A declarative engine for turning raw project ideas into durable requirement discovery records, question loops, and baseline readiness gates."
+scope:
+  engine_type: docs_ai_runtime_control_plane
+  not_an_application_framework: true
+  no_dependency_installation: true
+  no_business_code_generation: true
+  authoritative_files:
+    template_catalog: docs/ai/requirements/template_discovery.yaml
+    state_machine: docs/ai/requirements/state_machine.yaml
+    intake_records: docs/ai/requirements/intake/
+    requirement_ledger: docs/ai/requirements/ledger.yaml
+inputs:
+  - raw_developer_idea
+  - current_status
+  - task_forest
+  - requirement_ledger
+  - template_discovery_catalog
+outputs:
+  - requirement_discovery_record
+  - numbered_question_batch
+  - updated_requirement_inventory
+  - followup_question_backlog
+  - baseline_readiness_packet
+entry_conditions:
+  - "Developer provides a raw or compact project idea."
+  - "The full-project lifecycle reaches idea intake or requirement analysis."
+  - "A future project request has no confirmed requirement baseline."
+nodes:
+  - node_id: route_task_line
+    kind: gate
+    action: "Route product or business ideas to branch_mainline_idea and workflow repairs to branch_vibe_coding_infra."
+    output: selected_task_line
+  - node_id: capture_intent
+    kind: action
+    action: "Capture raw developer intent and normalize it without turning assumptions into requirements."
+    output: idea_interpretation
+  - node_id: select_probe_template
+    kind: decision
+    action: "Select the best template from template_discovery.yaml using aliases and selection rules."
+    fallback: generic_app
+    output: probe_template_id
+  - node_id: create_requirement_record
+    kind: action
+    action: "Create docs/ai/requirements/intake/round_<nnn>_<feature_slug>.yaml from the discovery record template."
+    output: requirement_discovery_record
+  - node_id: enter_requirements_gathering_lock
+    kind: guard
+    action: "Activate REQUIREMENTS_GATHERING lock from state_machine.yaml."
+    enforced_permissions:
+      code_generation_allowed: false
+      business_code_generation_allowed: false
+      dependency_installation_allowed: false
+  - node_id: ask_question_batch
+    kind: action
+    action: "Ask 5-7 numbered, domain-bound questions from the selected template and current open-question backlog."
+    output: numbered_question_batch
+  - node_id: absorb_answers
+    kind: action
+    action: "Record developer answers, contradictions, deferrals, rejected items, and new assumptions in the intake YAML."
+    output: updated_requirement_record
+  - node_id: generate_followups
+    kind: loop
+    action: "Use followup_rules and newly confirmed answers to enqueue finer-grained questions."
+    examples:
+      - "If SKU is required, ask dimensions, combination rules, stock deduction timing, and order snapshot behavior."
+      - "If real payment is required, ask provider, sandbox, callback, secrets, refunds, and audit rules."
+      - "If multi-tenant SaaS is required, ask tenant isolation, roles, invitations, billing, and support access."
+    output: followup_question_backlog
+  - node_id: coverage_check
+    kind: gate
+    action: "Evaluate every required domain from the selected template."
+    passes_when: "Each critical domain is confirmed, deferred, out of scope, or blocked by a named decision."
+    fails_to: ask_question_batch
+  - node_id: requirement_plan
+    kind: action
+    action: "Produce ready domains, domains needing answers, research-needed items, first-round scope, non-goals, and acceptance criteria draft."
+    output: requirement_plan
+  - node_id: baseline_readiness
+    kind: gate
+    action: "Produce a baseline readiness packet and ask for hard confirmation only when ready."
+    passes_to: downstream_lifecycle_entry
+    fails_to: ask_question_batch
+  - node_id: downstream_lifecycle_entry
+    kind: handoff
+    action: "After hard confirmation, initialize downstream lifecycle detailing before implementation can be authorized."
+loop_controls:
+  max_repeated_same_blocker: 3
+  repeated_same_blocker_action: human_decision_required
+  finite_loop_rule: "Requirement collection can repeat, but each loop must add an answer, a new question, a deferral, or a named blocker."
+  no_progress_rule: "If no durable state changes after a collection round, stop and ask the smallest human decision."
+permission_invariants:
+  - "REQUIREMENTS_GATHERING forbids business code generation."
+  - "All AI-inferred requirements remain candidates until confirmed."
+  - "Question batches must be numbered and limited to 5-7 questions unless the developer asks otherwise."
+  - "Open questions and non-goals are persisted, not left in chat."
+  - "Implementation remains impossible until downstream confirmations authorize an executable slice."

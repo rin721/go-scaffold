@@ -3,6 +3,7 @@ package httptransport
 import (
 	"context"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rei0721/go-scaffold/internal/middleware"
@@ -13,6 +14,7 @@ import (
 	"github.com/rei0721/go-scaffold/pkg/i18n"
 	"github.com/rei0721/go-scaffold/pkg/logger"
 	"github.com/rei0721/go-scaffold/pkg/plugin"
+	apperrors "github.com/rei0721/go-scaffold/types/errors"
 	"github.com/rei0721/go-scaffold/types/result"
 )
 
@@ -107,17 +109,27 @@ func health(c *gin.Context) {
 func ready(db database.Database) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if db == nil {
-			c.JSON(http.StatusServiceUnavailable, result.Success(gin.H{
-				"status": "not_ready",
-				"checks": gin.H{"database": "missing"},
-			}))
+			c.JSON(http.StatusServiceUnavailable, &result.Result[gin.H]{
+				Code:    apperrors.ErrDatabaseError,
+				Message: "not ready",
+				Data: gin.H{
+					"status": "not_ready",
+					"checks": gin.H{"database": "missing"},
+				},
+				ServerTime: time.Now().Unix(),
+			})
 			return
 		}
 		if err := db.Ping(c.Request.Context()); err != nil {
-			c.JSON(http.StatusServiceUnavailable, result.Success(gin.H{
-				"status": "not_ready",
-				"checks": gin.H{"database": err.Error()},
-			}))
+			c.JSON(http.StatusServiceUnavailable, &result.Result[gin.H]{
+				Code:    apperrors.ErrDatabaseError,
+				Message: "not ready",
+				Data: gin.H{
+					"status": "not_ready",
+					"checks": gin.H{"database": err.Error()},
+				},
+				ServerTime: time.Now().Unix(),
+			})
 			return
 		}
 		c.JSON(http.StatusOK, result.Success(gin.H{

@@ -16,7 +16,7 @@ RUN --mount=type=cache,target=/go/pkg/mod,sharing=locked \
 COPY . .
 RUN --mount=type=cache,target=/go/pkg/mod,sharing=locked \
     --mount=type=cache,target=/root/.cache/go-build,sharing=locked \
-    go build -trimpath -ldflags="-s -w" -o /out/go-scaffold-server ./cmd/server
+    go build -trimpath -ldflags="-s -w" -o /out/go-scaffold-server ./cmd/main
 
 FROM debian:bookworm-slim AS runtime
 

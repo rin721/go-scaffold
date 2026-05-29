@@ -1,0 +1,22 @@
+schema_id: RoundLedger
+round_id: round_001
+round_type: mainline_idea_placeholder
+goal_summary: "Reserved for future developer product or business idea work."
+status: waiting_for_confirmed_idea
+confirmed_requirement_baseline: null
+research_status: not_started
+task_analysis_status: not_started
+architecture_status: not_started
+infra_mode_status: not_started
+task_tree_status: waiting_for_confirmed_idea
+acceptance_status: not_started
+task_tree_closure_status: not_started
+next_round_trigger: "Start only after the developer provides and confirms a mainline product or business idea. Vibe Coding infrastructure work belongs to branch_vibe_coding_infra."
+developer_participation:
+  requirement_analysis: pending
+  research_validation: pending
+  task_analysis: pending
+  architecture_design: pending
+  infra_mode_selection: pending
+  acceptance: pending
+updated_at: "2026-05-29T17:54:03+08:00"

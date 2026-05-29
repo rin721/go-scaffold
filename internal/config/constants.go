@@ -81,6 +81,7 @@ const (
 	AppI18nName     = "i18n"
 	AppExecutorName = "executor"
 	AppStorageName  = "storage"
+	AppDemoName     = "demo"
 	AppPluginName   = "plugin"
 	AppIAMName      = "iam"
 	AppAuthName     = "auth"

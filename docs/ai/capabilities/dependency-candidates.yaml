@@ -1,0 +1,131 @@
+schema_id: DependencyCandidateCatalog
+catalog_id: dependency_candidates_001
+branch_id: branch_vibe_coding_infra
+created_at: "2026-05-29T18:50:41+08:00"
+last_official_source_refresh: "2026-05-29T19:07:53+08:00"
+status: candidate_only
+strategy: confirmed_A_catalog_only
+install_allowed: false
+scaffold_allowed: false
+package_manager_selected: null
+current_year_policy: "Derive the current year from checked_at/runtime date; do not hard-code a calendar year into future research or selection prompts."
+groups:
+  - id: cap_ui_001
+    name: "UI library and design system"
+    default_stack:
+      - react
+      - typescript
+      - vite
+      - tailwindcss
+      - "@tailwindcss/vite"
+      - shadcn/ui
+      - radix-ui
+      - lucide-react
+    alternatives:
+      - mui
+      - antd
+      - chakra-ui
+      - mantine
+    confirmation_required_before_install: hard_confirmation
+    source_urls:
+      - https://react.dev/learn/start-a-new-react-project
+      - https://vite.dev/guide/
+      - https://ui.shadcn.com/docs/installation
+      - https://ui.shadcn.com/docs/installation/vite
+      - https://tailwindcss.com/docs/installation/using-vite
+      - https://www.radix-ui.com/primitives/docs
+  - id: cap_arch_001
+    name: "Frontend engineering architecture"
+    default_stack:
+      - react
+      - typescript
+      - vite
+      - react-router
+      - "@tanstack/react-query"
+      - storybook
+      - zod
+    alternatives:
+      - tanstack-router
+      - nextjs
+      - biome
+    confirmation_required_before_install: hard_confirmation
+    source_urls:
+      - https://react.dev/learn/start-a-new-react-project
+      - https://vite.dev/guide/
+      - https://reactrouter.com/start/data/routing
+      - https://tanstack.com/query/docs/docs
+      - https://storybook.js.org/docs/10/get-started
+      - https://zod.dev/
+      - https://pnpm.io/
+  - id: cap_agent_scripts_001
+    name: "AI Agent script tools"
+    default_stack:
+      - python
+      - uv
+      - typer
+      - pydantic
+      - pytest
+      - ruff
+    alternatives:
+      - click
+      - argparse
+    confirmation_required_before_install: hard_confirmation
+    source_urls:
+      - https://docs.astral.sh/uv/
+      - https://typer.tiangolo.com/
+      - https://docs.pydantic.dev/latest/concepts/models/
+      - https://docs.pytest.org/en/stable/getting-started.html
+      - https://docs.astral.sh/ruff/linter/
+  - id: cap_py_tools_001
+    name: "Python engineering tools"
+    default_stack:
+      - uv
+      - pytest
+      - ruff
+      - pydantic
+      - typer
+      - pytest-playwright
+    alternatives:
+      - mypy
+      - pyright
+    confirmation_required_before_install: hard_confirmation
+    source_urls:
+      - https://docs.astral.sh/uv/
+      - https://docs.astral.sh/uv/concepts/projects/dependencies/
+      - https://playwright.dev/python/docs/intro
+      - https://docs.pytest.org/en/stable/getting-started.html
+      - https://docs.astral.sh/ruff/formatter/
+  - id: cap_agent_frameworks_001
+    name: "Agent framework candidates"
+    default_stack:
+      - openai-agents-python
+      - pydantic-ai
+    alternatives:
+      - langgraph
+    confirmation_required_before_install: hard_confirmation
+    source_urls:
+      - https://platform.openai.com/docs/guides/agents-sdk/
+      - https://openai.github.io/openai-agents-python/agents/
+      - https://openai.github.io/openai-agents-python/sessions/
+      - https://pydantic.dev/docs/ai/overview/
+      - https://docs.langchain.com/oss/python/langgraph/workflows-agents
+      - https://docs.langchain.com/oss/python/langgraph/persistence
+  - id: cap_quality_001
+    name: "Quality and verification"
+    default_stack:
+      - runtime-validator
+      - markdown-link-check
+      - dependency-audit-before-install
+      - build-test-lint-after-install
+      - official-source-refresh-before-adoption
+    alternatives: []
+    confirmation_required_before_install: auto_recordable_for_checks_only
+    source_urls:
+      - https://docs.pytest.org/en/stable/getting-started.html
+      - https://docs.astral.sh/ruff/linter/
+      - https://playwright.dev/python/docs/intro
+notes:
+  - "This file is a candidate catalog, not an installation manifest."
+  - "Do not infer package manager or install dependencies from this catalog alone."
+  - "Any package install, lockfile, project skeleton, or tool bootstrap requires a new confirmed execution slice."
+  - "Future research prompts must say current official sources/current year from runtime date, not a fixed calendar year."

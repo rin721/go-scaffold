@@ -1,0 +1,79 @@
+schema_id: StatusReport
+project_id: vibecoding2labs
+compiler_version: vibe-coding-infra-compiler-v1.8.0
+runtime_version: vibe-runtime-0.1.0
+updated_at: "2026-05-30T02:32:38+08:00"
+lifecycle_phase: verification
+state: pending_acceptance
+state_machine_version: vibe-state-machine-0.1.0
+current_round: infra_001
+current_workstream: vibe_coding_infra
+current_branch: branch_vibe_coding_infra
+current_tree: docs/ai/tasks/branches/vibe-coding-infra/tree.yaml
+task_forest: docs/ai/tasks/forest.yaml
+mainline_idea_tree: docs/ai/tasks/main-tree.yaml
+current_mode: go_scaffold_engineering_repair_validated
+candidate_mode: null
+agency_level: controlled_execution
+current_bootstrap_node: null
+current_slice: slice_011_go_scaffold_engineering_repair
+requirement_baseline_status: confirmed
+research_status: not_required_for_runtime_workflow_update
+task_analysis_status: confirmed_phase_one_diagnosis
+architecture_status: confirmed_go_scaffold_repair_scope
+infra_mode_status: standard_light_for_engineering_repair
+task_tree_status: pending_acceptance
+acceptance_status: validation_passed_with_local_environment_gaps
+task_tree_closure_status: pending_human_acceptance
+next_allowed_phase: acceptance[go_scaffold_engineering_repair]
+blocked: false
+retry_count: 0
+last_failure_reason: null
+next_human_decision: "Review phase-two repair result; Docker and bash validation remain environment-blocked on this host."
+memory_anchor_files:
+  - AGENTS.md
+  - docs/ai/runtime-rule-index.md
+  - docs/ai/tasks/forest.yaml
+  - docs/ai/tasks/main-tree.yaml
+  - docs/ai/tasks/branches/vibe-coding-infra/tree.yaml
+  - docs/ai/tasks/bootstrap-tree.yaml
+  - docs/ai/tasks/current-slice.yaml
+  - docs/ai/requirements/ledger.yaml
+  - docs/ai/authorizations/records.md
+  - docs/ai/evidence/index.md
+  - docs/ai/handoff/current.md
+  - docs/ai/analysis/mainline-full-project-lifecycle-gap-analysis.md
+  - docs/ai/architecture/full-project-lifecycle-workflow.md
+  - docs/ai/skills/full-project-lifecycle/SKILL.md
+  - docs/ai/templates/full-project-lifecycle-workflow-sop.md
+  - docs/ai/knowledge/entries/kb_007_full_project_lifecycle.md
+  - docs/ai/analysis/compiler-runtime-assimilation.md
+  - docs/ai/architecture/compiler-runtime-assimilation.md
+  - docs/ai/skills/compiler-runtime-assimilation/SKILL.md
+  - docs/ai/templates/compiler-runtime-assimilation-sop.md
+  - docs/ai/knowledge/entries/kb_008_compiler_runtime_assimilation.md
+  - docs/ai/analysis/project-requirement-discovery-gap-analysis.md
+  - docs/ai/architecture/project-requirement-discovery-workflow.md
+  - docs/ai/skills/project-requirement-discovery/SKILL.md
+  - docs/ai/templates/project-requirement-discovery-sop.md
+  - docs/ai/templates/project-requirement-discovery-record.yaml
+  - docs/ai/requirements/intake/README.md
+  - docs/ai/knowledge/entries/kb_009_project_requirement_discovery.md
+  - docs/ai/analysis/project-lifecycle-downstream-gap-analysis.md
+  - docs/ai/architecture/project-lifecycle-downstream-workflow.md
+  - docs/ai/skills/project-lifecycle-downstream-detailing/SKILL.md
+  - docs/ai/templates/project-lifecycle-downstream-gates-sop.md
+  - docs/ai/templates/project-lifecycle-downstream-record.yaml
+  - docs/ai/lifecycle/README.md
+  - docs/ai/knowledge/entries/kb_010_project_lifecycle_downstream.md
+  - docs/ai/requirements/workflow_engine.yaml
+  - docs/ai/requirements/template_discovery.yaml
+  - docs/ai/requirements/state_machine.yaml
+  - docs/ai/analysis/requirement-workflow-engine-gap-analysis.md
+  - docs/ai/architecture/requirement-workflow-engine.md
+  - docs/ai/skills/requirement-workflow-engine/SKILL.md
+  - docs/ai/templates/requirement-workflow-engine-sop.md
+  - docs/ai/knowledge/entries/kb_011_requirement_workflow_engine.md
+  - docs/ai/skills/vibe-infra-action-workflow/SKILL.md
+  - docs/ai/templates/vibe-infra-action-workflow-sop.md
+no_prompt_runtime_dependency: true

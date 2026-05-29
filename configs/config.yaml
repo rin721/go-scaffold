@@ -38,6 +38,10 @@ executor:
 storage:
   enabled: false
 
+demo:
+  enabled: true
+  apply_schema_on_start: true
+
 rbac:
   enabled: true
   apply_on_start: true

@@ -1,0 +1,14 @@
+schema_id: IdeaIntake
+inbox_id: idea_inbox_001
+created_at: "2026-05-29T17:18:17+08:00"
+items:
+  - id: idea_001
+    round_id: round_001
+    source: developer_message
+    raw_text: "Use the Vibe Coding infrastructure compiler to establish repository runtime infrastructure."
+    normalized_text: "Bootstrap Vibe Coding runtime infrastructure for this repository."
+    status: migrated_to_requirement_ledger
+    evidence:
+      - evidence_001
+next_action: "Ask for the first business or project goal after bootstrap verification."
+

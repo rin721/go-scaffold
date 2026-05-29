@@ -17,8 +17,17 @@ import (
 const principalContextKey = "user.principal"
 
 type UserHandler struct {
-	service service.UserService
-	logger  logger.Logger
+	service                 service.UserService
+	logger                  logger.Logger
+	allowPublicRegistration bool
+}
+
+type UserHandlerOption func(*UserHandler)
+
+func WithPublicRegistration(enabled bool) UserHandlerOption {
+	return func(h *UserHandler) {
+		h.allowPublicRegistration = enabled
+	}
 }
 
 type createUserRequest struct {
@@ -66,11 +75,19 @@ type updatePermissionRequest struct {
 	Description *string `json:"description"`
 }
 
-func NewUserHandler(service service.UserService, logger logger.Logger) *UserHandler {
-	return &UserHandler{service: service, logger: logger}
+func NewUserHandler(service service.UserService, logger logger.Logger, opts ...UserHandlerOption) *UserHandler {
+	h := &UserHandler{service: service, logger: logger, allowPublicRegistration: true}
+	for _, opt := range opts {
+		opt(h)
+	}
+	return h
 }
 
 func (h *UserHandler) Register(c *gin.Context) {
+	if !h.allowPublicRegistration {
+		result.Forbidden(c, "public registration disabled")
+		return
+	}
 	var req createUserRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		result.BadRequest(c, err.Error())

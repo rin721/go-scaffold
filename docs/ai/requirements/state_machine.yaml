@@ -1,0 +1,120 @@
+schema_id: RequirementDiscoveryStateMachine
+machine_id: requirement_discovery_state_machine_001
+version: 0.1.0
+updated_at: "2026-05-29T22:24:00+08:00"
+purpose: "Runtime lock and transition model for requirement discovery before project implementation is allowed."
+active_lock:
+  state: REQUIREMENTS_GATHERING
+  applies_when: "A raw or compact project idea is being converted into a requirement discovery record before baseline confirmation."
+  code_generation_allowed: false
+  business_code_generation_allowed: false
+  package_manifest_allowed: false
+  dependency_installation_allowed: false
+  application_skeleton_allowed: false
+  allowed_write_scopes:
+    - docs/ai/requirements/intake/**
+    - docs/ai/requirements/ledger.yaml
+    - docs/ai/tasks/**
+    - docs/ai/status/**
+    - docs/ai/evidence/**
+    - docs/ai/handoff/**
+    - docs/ai/decisions/**
+  forbidden_write_scopes:
+    - prompt.md
+    - package.json
+    - package-lock.json
+    - pnpm-lock.yaml
+    - yarn.lock
+    - pyproject.toml
+    - requirements.txt
+    - src/**
+    - app/**
+    - components/**
+    - tools/**
+states:
+  - state: IDEA_CAPTURED
+    description: "Raw developer idea is captured as source data, not a confirmed requirement set."
+    allowed_actions: [normalize_intent, select_probe_template]
+    next: [REQUIREMENTS_GATHERING]
+  - state: REQUIREMENTS_GATHERING
+    description: "Agent may create or update requirement records, ask numbered question batches, and synchronize confirmed facts."
+    allowed_actions:
+      - create_requirement_discovery_record
+      - select_probe_template
+      - ask_question_batch
+      - record_developer_answers
+      - overwrite_requirement_yaml
+      - enqueue_followup_questions
+      - sync_confirmed_items_to_ledger
+      - update_status_evidence_handoff
+    forbidden_actions:
+      - generate_business_code
+      - create_application_skeleton
+      - create_package_manifest
+      - install_dependencies
+      - select_final_stack_without_research
+      - ask_for_broad_baseline_confirmation_with_open_critical_domains
+    transition_guards:
+      baseline_ready:
+        requires:
+          - critical_domains_are_confirmed_deferred_out_of_scope_or_blocked
+          - ai_inferences_are_not_marked_confirmed_without_developer_answer
+          - question_backlog_has_no_blocking_open_questions
+          - proposed_scope_and_non_goals_exist
+          - acceptance_criteria_draft_exists
+        next_state: BASELINE_READY
+      needs_more_answers:
+        requires:
+          - open_questions_include_blocking_domain
+        next_state: REQUIREMENTS_GATHERING
+      repeated_blocker:
+        requires:
+          - same_blocker_seen_three_times
+        next_state: HUMAN_DECISION_REQUIRED
+  - state: HUMAN_DECISION_REQUIRED
+    description: "Agent must stop and ask the smallest concrete decision when a blocker or contradiction prevents progress."
+    allowed_actions: [ask_minimal_blocking_question, record_handoff]
+    next: [REQUIREMENTS_GATHERING, BLOCKED]
+  - state: BASELINE_READY
+    description: "Requirement baseline candidate is complete enough to ask for hard confirmation."
+    allowed_actions: [present_baseline_packet, request_hard_confirmation]
+    next: [BASELINE_CONFIRMED, REQUIREMENTS_GATHERING]
+  - state: BASELINE_CONFIRMED
+    description: "Developer has explicitly confirmed the requirement baseline; downstream lifecycle may begin."
+    code_generation_allowed: false
+    allowed_actions: [initialize_downstream_record, plan_current_source_research]
+    next: [DOWNSTREAM_RESEARCH]
+  - state: DOWNSTREAM_RESEARCH
+    description: "Research, task analysis, architecture, and mode confirmation still gate implementation."
+    code_generation_allowed: false
+    allowed_actions: [run_project_lifecycle_downstream_detailing]
+    next: [IMPLEMENTATION_AUTHORIZED]
+  - state: IMPLEMENTATION_AUTHORIZED
+    description: "Only reachable after requirement, research, task analysis, architecture, and mode confirmations."
+    code_generation_allowed: true
+    allowed_actions: [execute_confirmed_slice]
+  - state: BLOCKED
+    description: "No meaningful progress is possible until developer input or external state changes."
+    allowed_actions: [record_blocker]
+transition_rules:
+  - from: IDEA_CAPTURED
+    to: REQUIREMENTS_GATHERING
+    require_artifacts: [docs/ai/requirements/intake/<round_id>_<feature_slug>.yaml]
+  - from: REQUIREMENTS_GATHERING
+    to: BASELINE_READY
+    require_artifacts:
+      - docs/ai/requirements/intake/<round_id>_<feature_slug>.yaml
+      - docs/ai/requirements/ledger.yaml
+  - from: BASELINE_READY
+    to: BASELINE_CONFIRMED
+    require_human_confirmation: hard_confirmation
+  - from: BASELINE_CONFIRMED
+    to: DOWNSTREAM_RESEARCH
+    require_artifacts: [docs/ai/lifecycle/<round_id>-downstream.yaml]
+  - from: DOWNSTREAM_RESEARCH
+    to: IMPLEMENTATION_AUTHORIZED
+    require_human_confirmation:
+      - research_confirmation
+      - task_analysis_confirmation
+      - architecture_confirmation
+      - infra_mode_confirmation

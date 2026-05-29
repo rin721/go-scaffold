@@ -85,7 +85,6 @@ func (g *Generator) buildCreateTable(tableName string, fields []FieldInfo, ifNot
 
 	var columnDefs []string
 	var primaryKeys []string
-	var indexes []string
 
 	for _, field := range fields {
 		colDef := g.buildColumnDef(field)
@@ -95,24 +94,8 @@ func (g *Generator) buildCreateTable(tableName string, fields []FieldInfo, ifNot
 			primaryKeys = append(primaryKeys, g.dialect.Quote(field.ColumnName))
 		}
 
-		if field.Tag.Index != "" && g.supportsInlineIndexes() {
-			indexName := field.Tag.Index
-			if indexName == "" || indexName == "true" {
-				indexName = "idx_" + tableName + "_" + field.ColumnName
-			}
-			indexes = append(indexes, fmt.Sprintf("INDEX %s (%s)",
-				g.dialect.Quote(indexName), g.dialect.Quote(field.ColumnName)))
-		}
-
-		if field.Tag.UniqueIndex != "" && g.supportsInlineIndexes() {
-			indexName := field.Tag.UniqueIndex
-			if indexName == "" || indexName == "true" {
-				indexName = "uk_" + tableName + "_" + field.ColumnName
-			}
-			indexes = append(indexes, fmt.Sprintf("UNIQUE INDEX %s (%s)",
-				g.dialect.Quote(indexName), g.dialect.Quote(field.ColumnName)))
-		}
 	}
+	indexes := g.buildInlineIndexes(tableName, fields)
 
 	sb.WriteString(strings.Join(columnDefs, ",\n"))
 
@@ -143,6 +126,63 @@ func (g *Generator) buildCreateTable(tableName string, fields []FieldInfo, ifNot
 }
 
 // buildColumnDef 构建列定义
+type inlineIndexSpec struct {
+	name    string
+	unique  bool
+	columns []string
+}
+
+func (g *Generator) buildInlineIndexes(tableName string, fields []FieldInfo) []string {
+	if !g.supportsInlineIndexes() {
+		return nil
+	}
+
+	order := make([]string, 0)
+	specs := make(map[string]*inlineIndexSpec)
+	add := func(rawName string, unique bool, field FieldInfo) {
+		if rawName == "" {
+			return
+		}
+		name := rawName
+		if name == "true" {
+			prefix := "idx"
+			if unique {
+				prefix = "uk"
+			}
+			name = prefix + "_" + tableName + "_" + field.ColumnName
+		}
+		key := fmt.Sprintf("%t:%s", unique, name)
+		spec := specs[key]
+		if spec == nil {
+			spec = &inlineIndexSpec{name: name, unique: unique}
+			specs[key] = spec
+			order = append(order, key)
+		}
+		spec.columns = append(spec.columns, field.ColumnName)
+	}
+
+	for _, field := range fields {
+		add(field.Tag.Index, false, field)
+		add(field.Tag.UniqueIndex, true, field)
+	}
+
+	indexes := make([]string, 0, len(order))
+	for _, key := range order {
+		spec := specs[key]
+		quotedColumns := make([]string, 0, len(spec.columns))
+		for _, column := range spec.columns {
+			quotedColumns = append(quotedColumns, g.dialect.Quote(column))
+		}
+		kind := "INDEX"
+		if spec.unique {
+			kind = "UNIQUE INDEX"
+		}
+		indexes = append(indexes, fmt.Sprintf("%s %s (%s)",
+			kind, g.dialect.Quote(spec.name), strings.Join(quotedColumns, ", ")))
+	}
+	return indexes
+}
+
 func (g *Generator) buildColumnDef(field FieldInfo) string {
 	var parts []string
 

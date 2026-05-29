@@ -1,0 +1,232 @@
+schema_id: BootstrapTaskTree
+tree_id: task_bootstrap_001
+created_at: "2026-05-29T17:18:17+08:00"
+source_intake: intake_001
+write_authorization:
+  authorization_id: auth_001
+  source: developer_message
+  scope:
+    - AGENTS.md
+    - docs/ai/**
+  status: inferred_for_bootstrap_from_explicit_compiler_run
+nodes:
+  - id: B0_preflight_readonly
+    objective: "Scan repository structure, existing rules, dependencies, tests, CI, TODOs, and git status without writing business code."
+    inputs: ["developer compiler request", "repository root"]
+    outputs: ["docs/ai/reports/preflight-readonly.md"]
+    allowed_files: []
+    forbidden_files: ["business implementation files"]
+    risk_level: low
+    confirmation_required: auto_recordable
+    acceptance_criteria:
+      - "Repository shape and git status recorded."
+      - "Existing runtime rules or dependencies identified if present."
+    evidence_target: evidence_001
+    status: completed
+    next_node: B1_bootstrap_scope_and_write_authorization
+  - id: B1_bootstrap_scope_and_write_authorization
+    objective: "Constrain bootstrap writes to runtime infrastructure files."
+    inputs: ["B0 report", "developer compiler request"]
+    outputs: ["authorization record", "bootstrap write scope"]
+    allowed_files:
+      - AGENTS.md
+      - docs/ai/**
+      - docs/.cursorrules
+    forbidden_files: ["source code", "production config", "dependency lockfiles"]
+    risk_level: low
+    confirmation_required: auto_recordable
+    acceptance_criteria:
+      - "Write scope is explicit."
+      - "No business code files are in scope."
+    evidence_target: evidence_002
+    status: completed
+    next_node: B2_minimum_viable_governance
+  - id: B2_minimum_viable_governance
+    objective: "Create INV-14 minimum governance entries."
+    inputs: ["B1 scope"]
+    outputs:
+      - docs/ai/status/current.yaml
+      - docs/ai/requirements/ledger.yaml
+      - docs/ai/tasks/bootstrap-tree.yaml
+      - docs/ai/tasks/current-slice.yaml
+      - docs/ai/evidence/index.md
+      - docs/ai/handoff/current.md
+    allowed_files:
+      - docs/ai/status/**
+      - docs/ai/requirements/**
+      - docs/ai/tasks/**
+      - docs/ai/evidence/**
+      - docs/ai/handoff/**
+    forbidden_files: ["business implementation files"]
+    risk_level: low
+    confirmation_required: auto_recordable
+    acceptance_criteria:
+      - "Minimum governance files exist."
+      - "Each entry points to the next recovery artifact."
+    evidence_target: evidence_003
+    status: completed
+    next_node: B3_schema_and_path_protocol
+  - id: B3_schema_and_path_protocol
+    objective: "Create schema, ID, timestamp, path, and readability protocol."
+    inputs: ["compiler schema requirements"]
+    outputs:
+      - docs/ai/schemas/core.schema.yaml
+    allowed_files:
+      - docs/ai/schemas/**
+    forbidden_files: ["business implementation files"]
+    risk_level: low
+    confirmation_required: auto_recordable
+    acceptance_criteria:
+      - "Core schema field definitions and validation path exist."
+      - "Upgrade path to machine validation is documented."
+    evidence_target: evidence_004
+    status: completed
+    next_node: B4_runtime_rule_index_and_agents_entry
+  - id: B4_runtime_rule_index_and_agents_entry
+    objective: "Create AGENTS.md short entry and runtime rule index without prompt dependency."
+    inputs: ["runtime invariants", "schema protocol"]
+    outputs:
+      - AGENTS.md
+      - docs/ai/runtime-rule-index.md
+      - docs/.cursorrules
+      - docs/ai/.cursorrules
+    allowed_files:
+      - AGENTS.md
+      - docs/.cursorrules
+      - docs/ai/.cursorrules
+      - docs/ai/runtime-rule-index.md
+    forbidden_files: ["original compiler prompt as runtime dependency"]
+    risk_level: low
+    confirmation_required: auto_recordable
+    acceptance_criteria:
+      - "AGENTS.md is a short index."
+      - "Runtime rule index includes invariants and forbidden matrix."
+      - "No artifact instructs agents to read the original prompt."
+    evidence_target: evidence_005
+    status: completed
+    next_node: B5_intake_migration_and_requirement_anchors
+  - id: B5_intake_migration_and_requirement_anchors
+    objective: "Migrate volatile intake into formal requirement anchors without treating it as a business requirement."
+    inputs: ["developer compiler request"]
+    outputs:
+      - docs/ai/intake/volatile-intake.yaml
+      - docs/ai/intake/idea-inbox.yaml
+      - docs/ai/requirements/ledger.yaml
+      - docs/ai/rounds/round_001.yaml
+    allowed_files:
+      - docs/ai/intake/**
+      - docs/ai/requirements/**
+      - docs/ai/rounds/**
+    forbidden_files: ["business implementation files"]
+    risk_level: low
+    confirmation_required: auto_recordable
+    acceptance_criteria:
+      - "Developer text, agent inference, and pending confirmations are separated."
+      - "round_001 is waiting for an actual business or project goal."
+    evidence_target: evidence_006
+    status: completed
+    next_node: B6_quality_gate_and_evidence_entry
+  - id: B6_quality_gate_and_evidence_entry
+    objective: "Create minimum quality gate and evidence entries."
+    inputs: ["minimum governance files"]
+    outputs:
+      - docs/ai/quality/gates.md
+      - docs/ai/evidence/index.md
+      - docs/ai/scripts/validate_runtime.py
+    allowed_files:
+      - docs/ai/quality/**
+      - docs/ai/evidence/**
+      - docs/ai/scripts/**
+    forbidden_files: ["business implementation files"]
+    risk_level: low
+    confirmation_required: auto_recordable
+    acceptance_criteria:
+      - "Validation command exists."
+      - "Evidence index records preflight and bootstrap verification."
+    evidence_target: evidence_007
+    status: completed
+    next_node: B7_knowledge_and_skill_minimum_entries
+  - id: B7_knowledge_and_skill_minimum_entries
+    objective: "Create minimum knowledge base and project skill entries."
+    inputs: ["runtime rules", "quality gate"]
+    outputs:
+      - docs/ai/knowledge/index.md
+      - docs/ai/knowledge/entries/kb_001_vibe_runtime.md
+      - docs/ai/skills/index.md
+      - docs/ai/skills/context-recovery/SKILL.md
+      - docs/ai/skills/slice-execution/SKILL.md
+    allowed_files:
+      - docs/ai/knowledge/**
+      - docs/ai/skills/**
+    forbidden_files: ["hidden memory", "prompt-dependent recovery"]
+    risk_level: low
+    confirmation_required: auto_recordable
+    acceptance_criteria:
+      - "Knowledge entry has trust and source fields."
+      - "Skills are runbook style and do not expand agency silently."
+    evidence_target: evidence_008
+    status: completed
+    next_node: B8_context_recovery_and_handoff
+  - id: B8_context_recovery_and_handoff
+    objective: "Create recovery and handoff entry."
+    inputs: ["status", "current slice", "knowledge", "skills"]
+    outputs:
+      - docs/ai/handoff/current.md
+    allowed_files:
+      - docs/ai/handoff/**
+    forbidden_files: ["original compiler prompt as recovery path"]
+    risk_level: low
+    confirmation_required: auto_recordable
+    acceptance_criteria:
+      - "Handoff states current phase, next condition, key files, and forbidden actions."
+    evidence_target: evidence_009
+    status: completed
+    next_node: B9_bootstrap_acceptance_and_next_round_gate
+  - id: B9_bootstrap_acceptance_and_next_round_gate
+    objective: "Verify bootstrap infrastructure and open the gate to round intake."
+    inputs: ["all bootstrap artifacts"]
+    outputs:
+      - "bootstrap verification result"
+      - "status update"
+    allowed_files:
+      - docs/ai/status/current.yaml
+      - docs/ai/tasks/current-slice.yaml
+      - docs/ai/evidence/index.md
+      - docs/ai/handoff/current.md
+    forbidden_files: ["business implementation files"]
+    risk_level: low
+    confirmation_required: auto_recordable
+    acceptance_criteria:
+      - "Minimum governance artifacts exist."
+      - "Validation script passes."
+      - "Status points to `round_intake[round_001]` as next allowed phase."
+    evidence_target: evidence_010
+    status: completed
+    next_node: round_intake[round_001]
+current_node: B9_bootstrap_acceptance_and_next_round_gate
+node_statuses:
+  B0_preflight_readonly: completed
+  B1_bootstrap_scope_and_write_authorization: completed
+  B2_minimum_viable_governance: completed
+  B3_schema_and_path_protocol: completed
+  B4_runtime_rule_index_and_agents_entry: completed
+  B5_intake_migration_and_requirement_anchors: completed
+  B6_quality_gate_and_evidence_entry: completed
+  B7_knowledge_and_skill_minimum_entries: completed
+  B8_context_recovery_and_handoff: completed
+  B9_bootstrap_acceptance_and_next_round_gate: completed
+context_budget_risk: low
+drift_control_rules:
+  - "Bootstrap artifacts must point back to this tree."
+  - "Do not create business implementation during bootstrap."
+  - "Do not rely on original compiler prompt for runtime recovery."
+acceptance_criteria:
+  - "INV-14 minimum governance entry files exist."
+  - "AGENTS.md is a short runtime index."
+  - "Evidence and handoff paths exist."
+  - "Knowledge and skill minimum entries exist."
+  - "Validation command passes."
+evidence_targets:
+  - evidence_001
+  - evidence_010
+next_allowed_phase: round_intake[round_001]

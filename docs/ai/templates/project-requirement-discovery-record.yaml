@@ -1,0 +1,133 @@
+schema_id: ProjectRequirementDiscoveryRecord
+record_id: requirement_discovery_record_example
+round_id: replace_with_round_id
+branch_id: branch_mainline_idea
+status: discovery
+created_at: "YYYY-MM-DDTHH:MM:SS+08:00"
+updated_at: "YYYY-MM-DDTHH:MM:SS+08:00"
+source:
+  type: developer_message
+  raw_text: "Replace with the developer's raw idea."
+  normalized_intent: "Replace with a one-sentence reversible interpretation."
+storage_rules:
+  ai_inferences_are_confirmed: false
+  confirmed_items_sync_to: docs/ai/requirements/ledger.yaml
+  open_questions_sync_to: docs/ai/handoff/current.md
+workflow_engine:
+  engine_id: requirement_discovery_workflow_engine_001
+  definition: docs/ai/requirements/workflow_engine.yaml
+  state_machine: docs/ai/requirements/state_machine.yaml
+  template_catalog: docs/ai/requirements/template_discovery.yaml
+  active_state: REQUIREMENTS_GATHERING
+  code_generation_allowed: false
+probe_template_id: null
+idea_interpretation:
+  product_intent: null
+  system_category: null
+  known_constraints: []
+  unconfirmed_assumptions: []
+  risk_flags: []
+domain_surface_map:
+  - domain: goal_and_users
+    known: []
+    inferred_candidates: []
+    open_questions: []
+    status: pending_confirmation
+  - domain: roles_and_permissions
+    known: []
+    inferred_candidates: []
+    open_questions: []
+    status: pending_confirmation
+  - domain: core_workflows
+    known: []
+    inferred_candidates: []
+    open_questions: []
+    status: pending_confirmation
+  - domain: data_model
+    known: []
+    inferred_candidates: []
+    open_questions: []
+    status: pending_confirmation
+  - domain: integrations
+    known: []
+    inferred_candidates: []
+    open_questions: []
+    status: pending_confirmation
+  - domain: admin_and_operations
+    known: []
+    inferred_candidates: []
+    open_questions: []
+    status: pending_confirmation
+  - domain: security_and_privacy
+    known: []
+    inferred_candidates: []
+    open_questions: []
+    status: pending_confirmation
+  - domain: non_functional_quality
+    known: []
+    inferred_candidates: []
+    open_questions: []
+    status: pending_confirmation
+  - domain: development_topology
+    known: []
+    inferred_candidates: []
+    open_questions: []
+    status: pending_confirmation
+  - domain: testing_acceptance_docs
+    known: []
+    inferred_candidates: []
+    open_questions: []
+    status: pending_confirmation
+requirement_inventory:
+  functional: []
+  non_functional: []
+  data: []
+  constraints: []
+  non_goals: []
+  risks: []
+  research_needed: []
+question_backlog:
+  - id: q_001
+    domain: goal_and_users
+    question: "Replace with a high-leverage question."
+    why_it_matters: "Replace with the blocking decision."
+    options: []
+    status: pending
+    developer_answer: null
+    ledger_sync_target: null
+question_rounds:
+  - round_index: 1
+    asked_at: "YYYY-MM-DDTHH:MM:SS+08:00"
+    template_id: null
+    questions: []
+    developer_answers: []
+    durable_update: null
+coverage_matrix:
+  - domain: goal_and_users
+    status: pending_confirmation
+    blocking: true
+    evidence: []
+followup_triggers:
+  - trigger_id: replace_with_trigger_id
+    source_question_id: null
+    matched_answer_terms: []
+    generated_question_ids: []
+    status: pending
+requirement_plan:
+  ready_domains: []
+  domains_needing_answers: []
+  domains_requiring_research: []
+  deferred_to_later_rounds: []
+  proposed_first_round_scope: []
+  proposed_non_goals: []
+  acceptance_criteria_draft: []
+baseline_readiness:
+  status: not_ready
+  blockers: []
+  confirmation_prompt: null
+ledger_sync:
+  synced_requirement_ids: []
+  pending_requirement_ids: []
+evidence:
+  - replace_with_evidence_id
+next_action: "Ask the next requirement collection question batch."

@@ -1,0 +1,148 @@
+schema_id: TaskTree
+tree_id: task_tree_vibe_coding_infra
+branch_id: branch_vibe_coding_infra
+branch_type: vibe_coding_infra
+round_id: infra_001
+created_at: "2026-05-29T17:54:03+08:00"
+updated_at: "2026-05-29T22:24:00+08:00"
+status: pending_acceptance
+purpose: "Task tree branch for building and iterating this repository's Vibe Coding infrastructure."
+tasks:
+  - id: task_001_human_docs
+    title: "Create usage tutorial and detailed overview documentation"
+    status: pending_acceptance
+    requirements:
+      - req_round_001_docs
+    slices:
+      - slice_001_docs_guides
+    acceptance_criteria:
+      - "README.md gives a fast project overview."
+      - "docs/index.md indexes human-facing docs."
+      - "Detailed usage, overview, maintenance, and Agent workflow docs exist."
+      - "Runtime validation passes and evidence is recorded."
+  - id: task_002_python_scripts
+    title: "Replace runtime scripts with Python"
+    status: pending_acceptance
+    requirements:
+      - req_round_001_python_scripts
+    slices:
+      - slice_002_python_scripts
+    acceptance_criteria:
+      - "Runtime validator exists as a Python script."
+      - "Legacy PowerShell validator file is removed."
+      - "Runtime validation passes through Python."
+      - "Command references point to the Python script."
+  - id: task_003_task_forest_branching
+    title: "Introduce task forest and Vibe Coding infrastructure branch"
+    status: pending_acceptance
+    requirements:
+      - req_infra_003_task_forest_branching
+    slices:
+      - slice_003_task_forest_branching
+    acceptance_criteria:
+      - "Task forest entry exists."
+      - "Mainline idea tree exists and is reserved for future product or business ideas."
+      - "Vibe Coding infrastructure branch owns current infrastructure tasks."
+      - "Current state points to the infrastructure branch."
+      - "Runtime validation passes."
+  - id: task_004_capability_groups
+    title: "Create capability catalog, skills, knowledge, and dependency candidates without scaffolding"
+    status: pending_acceptance
+    requirements:
+      - req_infra_004_capability_groups
+    slices:
+      - slice_004_capability_groups
+    acceptance_criteria:
+      - "Capability directory and grouped candidate lists exist."
+      - "Knowledge and skill entries describe how to use the catalog later."
+      - "Dependency candidates are only candidates and are not installed."
+      - "No application skeleton, package manifest, Python project skeleton, or lockfile is created."
+      - "Current official sources are refreshed with dynamic current-year wording."
+      - "Runtime validation passes."
+  - id: task_005_vibe_infra_action_workflow
+    title: "Add trigger-bound Vibe infrastructure action workflow SOP"
+    status: pending_acceptance
+    requirements:
+      - req_infra_005_vibe_infra_action_workflow
+    slices:
+      - slice_005_vibe_infra_action_workflow
+    acceptance_criteria:
+      - "A project skill exists for the exact trigger prefix."
+      - "A canonical Markdown SOP template exists and binds `{{ 优化动作 }}`."
+      - "The SOP preserves the four-dimensional X-ray scan framework and red-light fuse."
+      - "Phase two requires explicit human authorization before physical output."
+      - "Runtime validation passes."
+  - id: task_006_full_project_lifecycle
+    title: "Add full-project lifecycle workflow for mainline and future task lines"
+    status: pending_acceptance
+    requirements:
+      - req_infra_006_full_project_lifecycle
+    slices:
+      - slice_006_full_project_lifecycle
+    acceptance_criteria:
+      - "A gap analysis explains why the previous mainline flow could stay too summarized and skip detailed gates."
+      - "A project skill exists for the full-project lifecycle workflow."
+      - "A canonical SOP defines task-line routing, requirement confirmation, current-source research, task analysis, architecture, mode confirmation, agent driving infrastructure, task tree and slices, implementation/test/docs/state loop, next-step protocol, closure, and round n+1."
+      - "Runtime rule index and knowledge entries point to the new workflow."
+      - "Runtime validation passes."
+  - id: task_007_compiler_runtime_assimilation
+    title: "Assimilate compiler and generator specifications into runtime artifacts"
+    status: pending_acceptance
+    requirements:
+      - req_infra_007_compiler_runtime_assimilation
+    slices:
+      - slice_007_compiler_runtime_assimilation
+    acceptance_criteria:
+      - "A four-dimensional analysis explains why the provided compiler specification should be distilled into runtime artifacts instead of copied into prompt.md."
+      - "A project skill and canonical SOP exist for compiler-runtime assimilation."
+      - "Runtime rule index adds `INV-18-COMPILER-CONTEXT-ASSIMILATION` and assimilation gates."
+      - "Knowledge, architecture, task slice, status, evidence, validator, and handoff references are synchronized."
+      - "Runtime validation passes."
+  - id: task_008_project_requirement_discovery
+    title: "Add persistent project requirement discovery workflow"
+    status: pending_acceptance
+    requirements:
+      - req_infra_008_project_requirement_discovery
+    slices:
+      - slice_008_project_requirement_discovery
+    acceptance_criteria:
+      - "A gap analysis explains why idea-to-MVP summarization is still too shallow for complete projects."
+      - "A project skill and canonical SOP exist for detailed requirement discovery."
+      - "A durable requirement discovery record template exists for future mainline rounds."
+      - "A requirement intake directory guide exists for future per-round records."
+      - "The full-project lifecycle points to requirement discovery before baseline confirmation."
+      - "Knowledge, task slice, status, evidence, validator, and handoff references are synchronized."
+      - "Runtime validation passes."
+  - id: task_009_project_lifecycle_downstream_detail
+    title: "Add detailed downstream project lifecycle gates"
+    status: pending_acceptance
+    requirements:
+      - req_infra_009_project_lifecycle_downstream_detail
+    slices:
+      - slice_009_project_lifecycle_downstream_detail
+    acceptance_criteria:
+      - "A gap analysis explains why downstream stages after requirement discovery were still too summarized."
+      - "A project skill and canonical SOP exist for detailed downstream lifecycle gates."
+      - "A durable downstream lifecycle record template exists for future mainline rounds."
+      - "A lifecycle record directory guide exists for future per-round downstream records."
+      - "The full-project lifecycle points to downstream detailing after requirement-baseline confirmation."
+      - "Knowledge, task slice, status, evidence, validator, and handoff references are synchronized."
+      - "Runtime validation passes."
+  - id: task_010_requirement_workflow_engine
+    title: "Implement declarative requirement workflow engine"
+    status: pending_acceptance
+    requirements:
+      - req_infra_010_requirement_workflow_engine
+    slices:
+      - slice_010_requirement_workflow_engine
+    acceptance_criteria:
+      - "Requirement workflow engine YAML exists."
+      - "Template discovery YAML exists with commerce, SaaS, blog, and generic app templates."
+      - "State machine YAML exists with REQUIREMENTS_GATHERING and code_generation_allowed false."
+      - "A project skill and canonical SOP exist for the requirement workflow engine."
+      - "Schema and validator coverage include the new engine artifacts."
+      - "Knowledge, task tree, current slice, evidence, status, validator, and handoff references are synchronized."
+      - "Runtime validation passes."
+      - "No prompt.md, package manifest, lockfile, dependency installation, application skeleton, or business code is created."
+next_action: "Wait for developer acceptance or requested edits for the strategy C requirement workflow engine."
+no_prompt_runtime_dependency: true

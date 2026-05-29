@@ -1,0 +1,13 @@
+schema_id: TaskTreeCompatibilityPointer
+entry_id: task_tree_pointer_001
+updated_at: "2026-05-29T17:54:03+08:00"
+status: migrated_to_task_forest
+reason: "The repository now uses a task forest so Vibe Coding infrastructure work does not pollute the mainline idea task tree."
+task_forest: docs/ai/tasks/forest.yaml
+current_branch: branch_vibe_coding_infra
+current_tree: docs/ai/tasks/branches/vibe-coding-infra/tree.yaml
+mainline_idea_tree: docs/ai/tasks/main-tree.yaml
+vibe_coding_infra_tree: docs/ai/tasks/branches/vibe-coding-infra/tree.yaml
+compatibility_note: "Read this file as an entry pointer. The authoritative task tree for current work is selected by docs/ai/tasks/forest.yaml and docs/ai/status/current.yaml."
+no_prompt_runtime_dependency: true
+

@@ -518,6 +518,24 @@ func TestHTTPRegistrationHandlerRegistersRemotePluginAndHook(t *testing.T) {
 	}
 }
 
+func TestHTTPRegistrationHandlerRequiresConfiguredToken(t *testing.T) {
+	server := httptest.NewServer(NewHTTPRegistrationHandler(NewManager()))
+	defer server.Close()
+
+	req, err := http.NewRequest(http.MethodPost, server.URL+HTTPRegisterPath, strings.NewReader(`{}`))
+	if err != nil {
+		t.Fatalf("NewRequest: %v", err)
+	}
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		t.Fatalf("POST registration: %v", err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusUnauthorized {
+		t.Fatalf("registration status = %d, want 401", resp.StatusCode)
+	}
+}
+
 func TestHTTPRegistrationHandlerRequiresToken(t *testing.T) {
 	server := httptest.NewServer(NewHTTPRegistrationHandler(NewManager(), WithRegistrationToken("secret")))
 	defer server.Close()

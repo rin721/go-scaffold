@@ -46,3 +46,14 @@ func TestAuthConfigHelpersReturnConfiguredValues(t *testing.T) {
 		t.Fatalf("TokenTTLDuration() = %v, want %v", got, time.Hour)
 	}
 }
+
+func TestAuthConfigPublicRegistrationDefaultsToEnabled(t *testing.T) {
+	if !((AuthConfig{}).PublicRegistrationEnabled()) {
+		t.Fatal("PublicRegistrationEnabled() = false, want default true")
+	}
+	disabled := false
+	cfg := AuthConfig{PublicRegistration: &disabled}
+	if cfg.PublicRegistrationEnabled() {
+		t.Fatal("PublicRegistrationEnabled() = true, want false")
+	}
+}

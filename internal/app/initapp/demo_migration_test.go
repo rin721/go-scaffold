@@ -6,6 +6,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/rei0721/go-scaffold/internal/config"
 	"github.com/rei0721/go-scaffold/internal/modules/demo/model"
 	"github.com/rei0721/go-scaffold/pkg/database"
 	"github.com/rei0721/go-scaffold/pkg/logger"
@@ -76,6 +77,53 @@ func TestApplyDemoSchemaKeepsServerStartDefault(t *testing.T) {
 	}
 	if !db.DB().Migrator().HasTable(&model.Todo{}) {
 		t.Fatal("ApplyDemoSchema() should create the demo todo table")
+	}
+}
+
+func TestNewModulesRespectsDemoConfig(t *testing.T) {
+	tests := []struct {
+		name        string
+		enabled     bool
+		applySchema bool
+		wantHandler bool
+		wantTable   bool
+	}{
+		{name: "demo disabled", enabled: false, applySchema: true, wantHandler: false, wantTable: false},
+		{name: "demo enabled without schema apply", enabled: true, applySchema: false, wantHandler: true, wantTable: false},
+		{name: "demo enabled with schema apply", enabled: true, applySchema: true, wantHandler: true, wantTable: true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			db := newTestDatabase(t)
+			enabled := tt.enabled
+			applySchema := tt.applySchema
+			core := Core{
+				Config: &config.Config{
+					Database: config.DatabaseConfig{Driver: string(database.DriverSQLite)},
+					Demo: config.DemoConfig{
+						Enabled:            &enabled,
+						ApplySchemaOnStart: &applySchema,
+					},
+					Auth: config.AuthConfig{
+						TokenSecret: "0123456789abcdef0123456789abcdef",
+						TokenTTL:    60,
+					},
+				},
+				Logger: testLogger{},
+			}
+
+			modules, err := NewModules(core, Infrastructure{Database: db})
+			if err != nil {
+				t.Fatalf("NewModules() error = %v", err)
+			}
+			if got := modules.Demo.TodoHandler != nil; got != tt.wantHandler {
+				t.Fatalf("TodoHandler present = %v, want %v", got, tt.wantHandler)
+			}
+			if got := db.DB().Migrator().HasTable(&model.Todo{}); got != tt.wantTable {
+				t.Fatalf("HasTable(Todo) = %v, want %v", got, tt.wantTable)
+			}
+		})
 	}
 }
 

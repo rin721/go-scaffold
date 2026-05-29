@@ -1,0 +1,26 @@
+schema_id: SandboxRun
+id: sandbox_001_task_forest_branching
+round_id: infra_001
+slice_id: slice_003_task_forest_branching
+iteration_index: 1
+hypothesis: "Vibe Coding repository infrastructure work needs a separate task tree branch so it does not pollute future mainline idea task trees."
+risk_checked:
+  - "Existing docs and script replacement tasks are currently in the ambiguous round_001 tree."
+  - "Moving them without a compatibility pointer could break recovery."
+  - "Adding a new branch model without validation could create state drift."
+problem_found:
+  - "docs/ai/tasks/tree.yaml currently mixes Vibe Coding infrastructure tasks with the main round task tree."
+  - "Status has no explicit task forest, current branch, or current tree fields."
+adjustment:
+  - "Introduce docs/ai/tasks/forest.yaml as the task forest entry."
+  - "Create docs/ai/tasks/main-tree.yaml as the reserved mainline idea tree."
+  - "Create docs/ai/tasks/branches/vibe-coding-infra/tree.yaml as the Vibe Coding infrastructure branch."
+  - "Convert docs/ai/tasks/tree.yaml into a compatibility pointer."
+  - "Update current status, slices, schema, validator, evidence, knowledge, and handoff."
+result: "Proceed with implementation inside the Vibe Coding infrastructure branch."
+retry_count: 0
+last_failure_reason: null
+next_human_decision: null
+continue_or_stop: continue
+updated_at: "2026-05-29T17:54:03+08:00"
+

@@ -1,0 +1,43 @@
+schema_id: CapabilityGroup
+id: cap_arch_001
+name: "Frontend engineering architecture"
+status: candidate
+default_recommendation: "Make a React framework-first decision; use React + TypeScript + Vite for SPA/local-tool boundaries, with feature modules and explicit UI/domain/data boundaries."
+official_source_refresh: "2026-05-29T19:07:53+08:00"
+current_year_policy: "Use checked_at/runtime date to express current-year research; do not write a fixed year into reusable prompts."
+target_boundaries:
+  - "app shell and routing"
+  - "pages or routes"
+  - "features"
+  - "shared UI components"
+  - "domain models"
+  - "data access and server-state hooks"
+  - "tests and stories"
+candidate_tools:
+  - react
+  - typescript
+  - vite
+  - react-router
+  - "@tanstack/react-query"
+  - storybook
+  - zod
+  - pnpm-candidate
+  - biome-candidate
+selection_notes:
+  - "React official docs recommend frameworks for new apps and allow scratch builds when framework constraints do not fit."
+  - "React Router data routing, TanStack Query, and Storybook remain candidate additions only after a confirmed UI/application boundary."
+  - "Zod is a candidate for TypeScript runtime schema validation when forms, config, API payloads, or Agent IO require validation."
+  - "pnpm and Biome are candidate tooling choices, not adopted repository tooling."
+requires_before_install:
+  - "A confirmed mainline business goal."
+  - "A chosen rendering model: SPA, local tool, SSR, or static."
+  - "A chosen package manager and test/build commands."
+source_urls:
+  - https://react.dev/learn/start-a-new-react-project
+  - https://vite.dev/guide/
+  - https://reactrouter.com/start/data/routing
+  - https://tanstack.com/query/docs/docs
+  - https://storybook.js.org/docs/10/get-started
+  - https://zod.dev/
+  - https://pnpm.io/
+  - https://biomejs.dev/linter

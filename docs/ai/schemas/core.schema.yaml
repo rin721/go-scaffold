@@ -1,0 +1,191 @@
+schema_bundle_id: schema_bundle_core_001
+version: 0.1.0
+created_at: "2026-05-29T17:18:17+08:00"
+timestamp_format: ISO-8601
+path_convention: "Repository relative paths use `/`."
+id_pattern: "^[a-z]+(_[a-z0-9]+)*_[0-9]{3}$|^(round|req|task|slice|evidence|decision|auth|kb|skill)_[A-Za-z0-9_\\-]+$"
+validation_command_or_manual_check: "python docs/ai/scripts/validate_runtime.py"
+migration_notes:
+  - "This lightweight schema bundle is a field contract and can be upgraded to JSON Schema."
+schemas:
+  - schema_id: InfrastructureManifest
+    version: 0.1.0
+    required_fields: [project_id, compiler_version, runtime_version, generated_at, runtime_artifacts, required_artifacts, knowledgebase_entry, skills_entry, validation, migration_notes, no_prompt_runtime_dependency]
+    optional_fields: []
+    enum_fields: { no_prompt_runtime_dependency: [true] }
+    evidence_fields: [validation]
+  - schema_id: BootstrapTaskTree
+    version: 0.1.0
+    required_fields: [tree_id, created_at, source_intake, write_authorization, nodes, current_node, node_statuses, context_budget_risk, drift_control_rules, acceptance_criteria, evidence_targets, next_allowed_phase]
+    optional_fields: []
+    enum_fields:
+      node_statuses: [not_started, in_progress, pending_verification, completed, blocked, skipped]
+    evidence_fields: [evidence_target, evidence_targets]
+  - schema_id: TaskForest
+    version: 0.1.0
+    required_fields: [forest_id, created_at, updated_at, purpose, current_branch, current_tree, branches, routing_rules, compatibility_entry, no_prompt_runtime_dependency]
+    optional_fields: []
+    enum_fields:
+      branch_type: [mainline_idea, vibe_coding_infra, custom]
+      no_prompt_runtime_dependency: [true]
+    evidence_fields: []
+  - schema_id: TaskTreeBranch
+    version: 0.1.0
+    required_fields: [branch_id, branch_type, tree_id, path, status, owns, does_not_own, next_allowed_phase]
+    optional_fields: []
+    enum_fields:
+      branch_type: [mainline_idea, vibe_coding_infra, custom]
+      status: [waiting_for_confirmed_idea, in_progress, pending_verification, pending_acceptance, completed, blocked, archived]
+    evidence_fields: []
+  - schema_id: VolatileIntake
+    version: 0.1.0
+    required_fields: [intake_id, source, raw_text, captured_at, initial_goal_guess, initial_constraints, obvious_risks, authorization_hint, not_confirmed_notice, migration_target, discard_condition]
+    optional_fields: []
+    enum_fields: {}
+    evidence_fields: []
+  - schema_id: AgentRuntimeBootstrap
+    version: 0.1.0
+    required_fields: [lifecycle_phase, state_machine_version, created_at, current_mode, agency_level, memory_anchor_files, idea_intake, requirement_inbox, decision_record, authorization_record, open_questions, risk_register, context_recovery_index, persistence_rules, quality_gate_placeholder, knowledgebase_placeholder, skills_placeholder, known_unknowns, next_allowed_phase, bootstrap_status]
+    optional_fields: []
+    enum_fields:
+      agency_level: [readonly, advisory, collaborative, controlled_execution, approval_gated]
+    evidence_fields: [decision_record, authorization_record]
+  - schema_id: RoundLedger
+    version: 0.1.0
+    required_fields: [round_id, round_type, goal_summary, status, confirmed_requirement_baseline, research_status, task_analysis_status, architecture_status, infra_mode_status, task_tree_status, acceptance_status, task_tree_closure_status, next_round_trigger]
+    optional_fields: [developer_participation]
+    enum_fields:
+      status: [pending_round_intake, requirement_analysis, research_validation, task_analysis, architecture_and_stack_design, infra_mode_confirmation, implementation_slice_loop, verification, acceptance, closed, blocked]
+    evidence_fields: []
+  - schema_id: RequirementLedger
+    version: 0.1.0
+    required_fields: [id, round_id, source, raw_text, normalized_text, type, priority_or_version, status, decision, related_research, related_task_analysis, related_architecture, related_slice, conflicts, evidence, next_action, updated_at]
+    optional_fields: []
+    enum_fields:
+      status: [confirmed, confirmed_for_bootstrap, pending_confirmation, ai_inferred, research_needed, rejected, deferred, out_of_scope, backlog, decision_needed, superseded_by_next_round]
+    evidence_fields: [evidence]
+  - schema_id: ProjectRequirementDiscoveryRecord
+    version: 0.1.0
+    required_fields: [record_id, round_id, branch_id, status, source, storage_rules, workflow_engine, probe_template_id, idea_interpretation, domain_surface_map, requirement_inventory, question_backlog, question_rounds, coverage_matrix, followup_triggers, requirement_plan, baseline_readiness, ledger_sync, evidence, next_action, updated_at]
+    optional_fields: [created_at]
+    enum_fields:
+      status: [discovery, collecting_answers, ready_for_baseline_confirmation, blocked, archived]
+      baseline_status: [not_ready, ready, blocked]
+    evidence_fields: [evidence]
+  - schema_id: RequirementDiscoveryTemplateCatalog
+    version: 0.1.0
+    required_fields: [catalog_id, version, updated_at, purpose, batch_policy, storage, templates, selection_rules]
+    optional_fields: []
+    enum_fields: {}
+    evidence_fields: []
+  - schema_id: RequirementDiscoveryStateMachine
+    version: 0.1.0
+    required_fields: [machine_id, version, updated_at, purpose, active_lock, states, transition_rules]
+    optional_fields: []
+    enum_fields:
+      state: [IDEA_CAPTURED, REQUIREMENTS_GATHERING, HUMAN_DECISION_REQUIRED, BASELINE_READY, BASELINE_CONFIRMED, DOWNSTREAM_RESEARCH, IMPLEMENTATION_AUTHORIZED, BLOCKED]
+    evidence_fields: []
+  - schema_id: RequirementDiscoveryWorkflowEngine
+    version: 0.1.0
+    required_fields: [engine_id, version, strategy, updated_at, purpose, scope, inputs, outputs, entry_conditions, nodes, loop_controls, permission_invariants]
+    optional_fields: []
+    enum_fields:
+      strategy: [complete_declarative_workflow_engine]
+    evidence_fields: []
+  - schema_id: ProjectLifecycleDownstreamRecord
+    version: 0.1.0
+    required_fields: [record_id, round_id, branch_id, status, source_baseline, research, task_analysis, architecture, infra_mode, agent_driving_infra, task_tree_and_slices, implementation_iteration_ledger, verification_evidence_packet, acceptance_closure_packet, next_round_reentry, evidence, updated_at]
+    optional_fields: [created_at]
+    enum_fields:
+      status: [downstream_planning, in_progress, pending_confirmation, pending_acceptance, closed, blocked, archived]
+      section_status: [not_started, in_progress, pending_confirmation, confirmed, completed, blocked, skipped]
+    evidence_fields: [evidence]
+  - schema_id: ResearchNote
+    version: 0.1.0
+    required_fields: [id, round_id, question, trigger, search_paths, knowledge_hits, sources, trust_level, checked_at, key_evidence, conclusion, confidence, applies_to, risks, needs_developer_confirmation, knowledge_import_status, options_considered, pros_cons_summary, updated_at]
+    optional_fields: []
+    enum_fields:
+      trust_level: [official, high, medium, low, unverified]
+      confidence: [high, medium, low, unknown]
+    evidence_fields: [sources, key_evidence]
+  - schema_id: FeasibilitySpike
+    version: 0.1.0
+    required_fields: [id, round_id, trigger, blocking_unknown, allowed_scope, sources_checked, candidate_findings, non_authoritative_notice, recommended_next_requirement_question, expires_at, developer_confirmation_needed]
+    optional_fields: []
+    enum_fields: {}
+    evidence_fields: [sources_checked]
+  - schema_id: TaskAnalysis
+    version: 0.1.0
+    required_fields: [id, round_id, confirmed_requirements, research_inputs, deliverables, module_candidates, dependency_map, risk_map, task_candidates, non_goals, verification_implications, open_questions, developer_confirmation_status, updated_at]
+    optional_fields: []
+    enum_fields:
+      developer_confirmation_status: [pending_soft_confirmation, confirmed, rejected, needs_rework]
+    evidence_fields: [research_inputs]
+  - schema_id: ArchitectureDraft
+    version: 0.1.0
+    required_fields: [id, round_id, goal, requirement_coverage, module_boundaries, data_flow, technology_stack, external_dependencies, quality_gates, risks, rollback_strategy, migration_strategy, alternatives, confirmation_status]
+    optional_fields: []
+    enum_fields:
+      confirmation_status: [pending_hard_confirmation, confirmed, rejected, needs_rework]
+    evidence_fields: [requirement_coverage, quality_gates]
+  - schema_id: InfraModeDecision
+    version: 0.1.0
+    required_fields: [candidate_mode, why_this_mode, why_not_lighter, why_not_heavier, risk_drivers, cost_impact, artifact_depth, knowledgebase_depth, skills_depth, developer_confirmation, confirmed_mode, confirmed_at]
+    optional_fields: []
+    enum_fields:
+      candidate_mode: [standard_light, risk_scaled_strict, standard_light_risk_escalated, enterprise_high_assurance, custom]
+      confirmed_mode: [standard_light, risk_scaled_strict, standard_light_risk_escalated, enterprise_high_assurance, custom, null]
+    evidence_fields: [developer_confirmation]
+  - schema_id: CompilerRuntimeAssimilation
+    version: 0.1.0
+    required_fields: [source_context, repository_fit, extracted_layers, runtime_artifact_targets, no_prompt_runtime_dependency, validation, evidence, next_condition]
+    optional_fields: [deferred_semantics, escalation_conditions]
+    enum_fields:
+      repository_fit: [branch_vibe_coding_infra, branch_mainline_idea, split_required, out_of_scope]
+      no_prompt_runtime_dependency: [true]
+    evidence_fields: [validation, evidence]
+  - schema_id: ExecutionSlice
+    version: 0.1.0
+    required_fields: [id, branch_id, round_id, task_id, phase, module, goal, inputs, outputs, allowed_files, forbidden_files, allowed_tools, approval_required_actions, risk_level, agency_level, verification_commands, manual_checks, acceptance_criteria, rollback_plan, max_iteration_count, max_retry_count, retry_count, last_failure_reason, next_human_decision, audit_evidence, human_override, status, knowledge_updates, skill_updates, next_condition, updated_at]
+    optional_fields: []
+    enum_fields:
+      risk_level: [low, medium, high, critical]
+      status: [not_started, in_progress, pending_verification, pending_acceptance, completed, archived, blocked, rework, skipped, risk_escalated, needs_human_decision, moved_to_next_round, superseded_with_confirmation]
+      agency_level: [readonly, advisory, collaborative, controlled_execution, approval_gated]
+    evidence_fields: [audit_evidence]
+  - schema_id: SandboxRun
+    version: 0.1.0
+    required_fields: [id, round_id, slice_id, iteration_index, hypothesis, risk_checked, problem_found, adjustment, result, retry_count, last_failure_reason, next_human_decision, continue_or_stop]
+    optional_fields: []
+    enum_fields:
+      continue_or_stop: [continue, stop, needs_human_decision]
+    evidence_fields: [result]
+  - schema_id: KnowledgeEntry
+    version: 0.1.0
+    required_fields: [id, source, trust_level, applies_to, fact, evidence, sensitive_info_check, prompt_injection_check, version, deprecated, related_requirements, related_tasks, related_skills, updated_at]
+    optional_fields: []
+    enum_fields:
+      trust_level: [official, high, medium, low, candidate, unverified]
+      sensitive_info_check: [passed, failed, not_applicable]
+      prompt_injection_check: [passed, failed, not_applicable]
+    evidence_fields: [evidence]
+  - schema_id: SkillSpec
+    version: 0.1.0
+    required_fields: [id, trigger_conditions, use_cases, inputs, outputs, boundaries, forbidden_actions, steps, verification, dependent_knowledge_entries, changes_agency_level, confirmation_status, deprecation_condition]
+    optional_fields: []
+    enum_fields:
+      confirmation_status: [auto_recordable, pending_soft_confirmation, pending_hard_confirmation, confirmed, deprecated]
+    evidence_fields: [verification]
+  - schema_id: HandoffNote
+    version: 0.1.0
+    required_fields: [project_goal, current_round, current_mode, agency_level, confirmed_requirements, current_slice, completed, unfinished, blocked, risks, verification_commands, key_files, knowledgebase_entry, skills_entry, recent_decisions, next_condition, forbidden_actions]
+    optional_fields: []
+    enum_fields: {}
+    evidence_fields: [verification_commands, recent_decisions]
+  - schema_id: AGENTS.md
+    version: 0.1.0
+    required_fields: [role, rule_priority, runtime_rule_index, state_entry, current_slice_entry, knowledgebase_entry, skills_entry, handoff_entry, no_prompt_runtime_dependency]
+    optional_fields: []
+    enum_fields:
+      no_prompt_runtime_dependency: [true]
+    evidence_fields: []

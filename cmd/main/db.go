@@ -47,7 +47,7 @@ type dbOptions struct {
 	PrintSQL    bool
 }
 
-// NewDBCommand builds the cmd/server db command. Keep command wiring here and
+// NewDBCommand builds the cmd/main db command. Keep command wiring here and
 // SQL generation/execution in internal/app/dbapp so the CLI remains thin.
 func NewDBCommand() *DBCommand {
 	return &DBCommand{}

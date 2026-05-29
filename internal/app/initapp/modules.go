@@ -20,8 +20,16 @@ import (
 )
 
 func NewModules(core Core, infra Infrastructure) (Modules, error) {
-	if _, err := ApplyDemoSchemaForTrigger(infra.Database, core.Config.Database.Driver, core.Logger, DemoSchemaTriggerServerStart); err != nil {
-		return Modules{}, err
+	var demoModule DemoModule
+	if core.Config.Demo.EnabledValue() {
+		if core.Config.Demo.ApplySchemaOnStartValue() {
+			if _, err := ApplyDemoSchemaForTrigger(infra.Database, core.Config.Database.Driver, core.Logger, DemoSchemaTriggerServerStart); err != nil {
+				return Modules{}, err
+			}
+		}
+		demoModule = NewDemoModule(infra.Database, core.Logger)
+	} else if core.Logger != nil {
+		core.Logger.Info("demo module disabled")
 	}
 	if err := ApplyUserSchema(infra.Database, core.Config.Database.Driver, core.Logger); err != nil {
 		return Modules{}, err
@@ -34,7 +42,7 @@ func NewModules(core Core, infra Infrastructure) (Modules, error) {
 		return Modules{}, err
 	}
 	return Modules{
-		Demo: NewDemoModule(infra.Database, core.Logger),
+		Demo: demoModule,
 		User: userModule,
 	}, nil
 }
@@ -150,7 +158,8 @@ func NewUserModule(db database.Database, log logger.Logger, authCfg config.AuthC
 		return UserModule{}, fmt.Errorf("create rbac authorizer: %w", err)
 	}
 	userService := userservice.NewUserService(db, repo, hasher, tokens, authorizer)
-	userHandler := userhandler.NewUserHandler(userService, log)
+	userHandler := userhandler.NewUserHandler(userService, log,
+		userhandler.WithPublicRegistration(authCfg.PublicRegistrationEnabled()))
 	return UserModule{
 		Repository: repo,
 		Service:    userService,

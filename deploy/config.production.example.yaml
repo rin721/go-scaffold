@@ -42,10 +42,19 @@ executor:
 
 storage:
   enabled: false
-  fs_type: os
+  fs_type: basepath
   base_path: ./data
   enable_watch: false
   watch_buffer_size: 100
+
+demo:
+  enabled: false
+  apply_schema_on_start: false
+
+auth:
+  token_secret: ${RIN_APP_AUTH_TOKEN_SECRET}
+  token_ttl: ${RIN_APP_AUTH_TOKEN_TTL:86400}
+  public_registration: ${RIN_APP_AUTH_PUBLIC_REGISTRATION:false}
 
 cors:
   enabled: true

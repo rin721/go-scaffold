@@ -20,6 +20,7 @@ func TestCopyConfigCoversAllFieldsAndDeepCopiesSlices(t *testing.T) {
 
 	got.I18n.Supported[0] = "ja-JP"
 	got.Executor.Pools[0].Name = "changed"
+	*got.Demo.Enabled = false
 	got.Plugin.Plugins[0].Headers["X-Test"] = "changed"
 	got.Plugin.Plugins[0].Capabilities[0] = "changed"
 	got.Plugin.Hooks[0].Point = "changed"
@@ -27,6 +28,7 @@ func TestCopyConfigCoversAllFieldsAndDeepCopiesSlices(t *testing.T) {
 	got.IAM.Tokens[0].Principal.Attributes["team"] = "changed"
 	got.IAM.Policies[0].Action = "changed"
 	*got.IAM.DefaultDeny = false
+	*got.Auth.PublicRegistration = false
 	got.RBAC.Roles[0].Description = "changed"
 	got.RBAC.Permissions[0].Description = "changed"
 	got.RBAC.RolePermissions[0].Permissions[0] = "changed"
@@ -40,6 +42,9 @@ func TestCopyConfigCoversAllFieldsAndDeepCopiesSlices(t *testing.T) {
 	}
 	if src.Executor.Pools[0].Name == got.Executor.Pools[0].Name {
 		t.Fatal("copyConfig() shares Executor.Pools slice with source")
+	}
+	if *src.Demo.Enabled == *got.Demo.Enabled {
+		t.Fatal("copyConfig() shares Demo.Enabled pointer with source")
 	}
 	if src.Plugin.Plugins[0].Headers["X-Test"] == got.Plugin.Plugins[0].Headers["X-Test"] {
 		t.Fatal("copyConfig() shares Plugin.Plugins headers map with source")
@@ -61,6 +66,9 @@ func TestCopyConfigCoversAllFieldsAndDeepCopiesSlices(t *testing.T) {
 	}
 	if *src.IAM.DefaultDeny == *got.IAM.DefaultDeny {
 		t.Fatal("copyConfig() shares IAM.DefaultDeny pointer with source")
+	}
+	if *src.Auth.PublicRegistration == *got.Auth.PublicRegistration {
+		t.Fatal("copyConfig() shares Auth.PublicRegistration pointer with source")
 	}
 	if src.RBAC.Roles[0].Description == got.RBAC.Roles[0].Description {
 		t.Fatal("copyConfig() shares RBAC.Roles slice with source")
@@ -487,6 +495,10 @@ func testCompleteConfig() *Config {
 			EnableWatch:     true,
 			WatchBufferSize: 16,
 		},
+		Demo: DemoConfig{
+			Enabled:            boolPtr(true),
+			ApplySchemaOnStart: boolPtr(true),
+		},
 		Plugin: PluginConfig{
 			Enabled:          true,
 			DefaultTimeout:   10,
@@ -540,8 +552,9 @@ func testCompleteConfig() *Config {
 			},
 		},
 		Auth: AuthConfig{
-			TokenSecret: "0123456789abcdef0123456789abcdef",
-			TokenTTL:    3600,
+			TokenSecret:        "0123456789abcdef0123456789abcdef",
+			TokenTTL:           3600,
+			PublicRegistration: boolPtr(true),
 		},
 		RBAC: RBACConfig{
 			Enabled:      true,

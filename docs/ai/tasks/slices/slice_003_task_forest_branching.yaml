@@ -1,0 +1,89 @@
+schema_id: ExecutionSlice
+id: slice_003_task_forest_branching
+branch_id: branch_vibe_coding_infra
+round_id: infra_001
+task_id: task_003_task_forest_branching
+phase: task_forest_branching
+module: runtime_task_governance
+goal: "Introduce a task forest with a dedicated Vibe Coding infrastructure branch separate from the future mainline idea task tree."
+inputs:
+  - docs/ai/tasks/tree.yaml
+  - docs/ai/status/current.yaml
+  - docs/ai/tasks/current-slice.yaml
+outputs:
+  - docs/ai/tasks/forest.yaml
+  - docs/ai/tasks/main-tree.yaml
+  - docs/ai/tasks/branches/vibe-coding-infra/tree.yaml
+  - docs/ai/tasks/tree.yaml
+  - docs/ai/tasks/current-slice.yaml
+  - docs/ai/evidence/index.md
+  - docs/ai/status/current.yaml
+  - docs/ai/handoff/current.md
+allowed_files:
+  - AGENTS.md
+  - README.md
+  - docs/project-overview.md
+  - docs/agent-workflow-guide.md
+  - docs/ai/analysis/task-forest-branching.md
+  - docs/ai/sandbox/sandbox_001_task_forest_branching.yaml
+  - docs/ai/runtime-rule-index.md
+  - docs/ai/schemas/core.schema.yaml
+  - docs/ai/scripts/validate_runtime.py
+  - docs/ai/status/current.yaml
+  - docs/ai/tasks/forest.yaml
+  - docs/ai/tasks/main-tree.yaml
+  - docs/ai/tasks/tree.yaml
+  - docs/ai/tasks/branches/vibe-coding-infra/tree.yaml
+  - docs/ai/tasks/current-slice.yaml
+  - docs/ai/tasks/slices/slice_001_docs_guides.yaml
+  - docs/ai/tasks/slices/slice_002_python_scripts.yaml
+  - docs/ai/tasks/slices/slice_003_task_forest_branching.yaml
+  - docs/ai/requirements/ledger.yaml
+  - docs/ai/rounds/round_001.yaml
+  - docs/ai/rounds/infra_001.yaml
+  - docs/ai/decisions/records.md
+  - docs/ai/evidence/index.md
+  - docs/ai/handoff/current.md
+  - docs/ai/knowledge/index.md
+  - docs/ai/knowledge/entries/kb_004_task_forest_branching.md
+forbidden_files:
+  - "business implementation files"
+  - "dependency lockfiles"
+  - "production configuration"
+allowed_tools:
+  - shell_read
+  - shell_validation
+  - apply_patch
+approval_required_actions:
+  - "Any business implementation"
+  - "Dependency installation"
+  - "Destructive file operations"
+risk_level: low
+agency_level: controlled_execution
+verification_commands:
+  - "python docs/ai/scripts/validate_runtime.py"
+  - "rg -n \"branch_vibe_coding_infra|branch_mainline_idea|TaskForest\" docs/ai/tasks docs/ai/status/current.yaml docs/ai/runtime-rule-index.md"
+manual_checks:
+  - "Current infrastructure tasks are in the Vibe Coding infrastructure branch."
+  - "Mainline idea tree is reserved and empty until a confirmed product or business idea exists."
+acceptance_criteria:
+  - "Task forest entry exists."
+  - "Mainline idea tree exists."
+  - "Vibe Coding infrastructure branch owns current infrastructure tasks."
+  - "Current state points to the infrastructure branch and current slice."
+  - "Runtime validation passes."
+rollback_plan: "Restore docs/ai/tasks/tree.yaml as the sole task tree and remove task forest files if the branch model is rejected."
+max_iteration_count: 3
+max_retry_count: 3
+retry_count: 0
+last_failure_reason: null
+next_human_decision: null
+audit_evidence:
+  - evidence_015
+human_override: null
+status: pending_acceptance
+knowledge_updates:
+  - kb_004
+skill_updates: []
+next_condition: "Wait for developer acceptance or requested edits before starting a mainline idea task tree."
+updated_at: "2026-05-29T17:58:59+08:00"

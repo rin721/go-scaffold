@@ -73,6 +73,10 @@ func parseGormTag(tag string) *ParsedTag {
 				result.AutoIncrement = true
 			case "not null", "notnull":
 				result.NotNull = true
+			case "index":
+				result.Index = "true"
+			case "uniqueindex", "unique_index":
+				result.UniqueIndex = "true"
 			case "-":
 				result.Ignore = true
 			}

@@ -8,8 +8,9 @@ import (
 const minimumAuthTokenSecretBytes = 32
 
 type AuthConfig struct {
-	TokenSecret string `mapstructure:"token_secret" envname:"AUTH_TOKEN_SECRET" json:"token_secret" yaml:"token_secret" toml:"token_secret"`
-	TokenTTL    int    `mapstructure:"token_ttl" envname:"AUTH_TOKEN_TTL" json:"token_ttl" yaml:"token_ttl" toml:"token_ttl"`
+	TokenSecret        string `mapstructure:"token_secret" envname:"AUTH_TOKEN_SECRET" json:"token_secret" yaml:"token_secret" toml:"token_secret"`
+	TokenTTL           int    `mapstructure:"token_ttl" envname:"AUTH_TOKEN_TTL" json:"token_ttl" yaml:"token_ttl" toml:"token_ttl"`
+	PublicRegistration *bool  `mapstructure:"public_registration" envname:"AUTH_PUBLIC_REGISTRATION" json:"public_registration" yaml:"public_registration" toml:"public_registration"`
 }
 
 func (c *AuthConfig) ValidateName() string {
@@ -35,6 +36,13 @@ func (c AuthConfig) TokenSecretBytes() []byte {
 		return nil
 	}
 	return []byte(c.TokenSecret)
+}
+
+func (c AuthConfig) PublicRegistrationEnabled() bool {
+	if c.PublicRegistration == nil {
+		return true
+	}
+	return *c.PublicRegistration
 }
 
 func (c AuthConfig) TokenTTLDuration() time.Duration {

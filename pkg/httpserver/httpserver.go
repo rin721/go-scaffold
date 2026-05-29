@@ -3,6 +3,7 @@ package httpserver
 import (
 	"context"
 	"fmt"
+	"net"
 	"net/http"
 	"sync"
 	"sync/atomic"
@@ -46,7 +47,6 @@ type httpServer struct {
 //
 //	HTTPServer: 服务器实例
 //	error: 创建失败时的错误
-//
 func New(handler Handler, cfg *Config, log logger.Logger) (HTTPServer, error) {
 	if handler == nil {
 		return nil, &ServerError{
@@ -86,6 +86,13 @@ func New(handler Handler, cfg *Config, log logger.Logger) (HTTPServer, error) {
 
 // Start 启动 HTTP 服务器（非阻塞）
 func (s *httpServer) Start(ctx context.Context) error {
+	if err := ctx.Err(); err != nil {
+		return &ServerError{
+			Op:      "start",
+			Message: ErrMsgServerStartFailed,
+			Err:     err,
+		}
+	}
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -126,6 +133,16 @@ func (s *httpServer) Start(ctx context.Context) error {
 	}
 
 	// 创建 HTTP 服务器实例
+	listener, err := net.Listen("tcp", addr)
+	if err != nil {
+		s.state.Store(int32(stateStopped))
+		return &ServerError{
+			Op:      "start",
+			Message: ErrMsgServerStartFailed,
+			Err:     err,
+		}
+	}
+
 	s.server = &http.Server{
 		Addr:         addr,
 		Handler:      s.handler,
@@ -136,6 +153,7 @@ func (s *httpServer) Start(ctx context.Context) error {
 
 	// 记录启动信息
 	s.logger.Info(fmt.Sprintf("starting HTTP server on http://%s", addr), "addr", addr)
+	s.state.Store(int32(stateRunning))
 
 	// 在新的 goroutine 中启动服务器
 	go func() {
@@ -143,7 +161,7 @@ func (s *httpServer) Start(ctx context.Context) error {
 		s.state.Store(int32(stateRunning))
 
 		// 启动服务器并开始监听
-		if err := s.server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		if err := s.server.Serve(listener); err != nil && err != http.ErrServerClosed {
 			// ErrServerClosed 是正常的关闭，不是错误
 			s.logger.Error("HTTP server error", "error", err)
 			s.errChan <- &ServerError{
@@ -266,6 +284,29 @@ func (s *httpServer) Reload(ctx context.Context, cfg *Config) error {
 		newAddr = fmt.Sprintf("%s:%d", DefaultHost, cfg.Port)
 	}
 
+	if !portChanged && oldServer != nil {
+		shutdownCtx, cancel := context.WithTimeout(context.Background(), DefaultWriteTimeout)
+		defer cancel()
+
+		if err := oldServer.Shutdown(shutdownCtx); err != nil {
+			s.logger.Error("failed to shutdown old server during reload", "error", err)
+			return &ServerError{
+				Op:      "reload",
+				Message: ErrMsgReloadFailed,
+				Err:     err,
+			}
+		}
+	}
+
+	listener, err := net.Listen("tcp", newAddr)
+	if err != nil {
+		return &ServerError{
+			Op:      "reload",
+			Message: ErrMsgReloadFailed,
+			Err:     err,
+		}
+	}
+
 	// 创建新的服务器实例
 	s.server = &http.Server{
 		Addr:         newAddr,
@@ -278,7 +319,7 @@ func (s *httpServer) Reload(ctx context.Context, cfg *Config) error {
 	// 启动新服务器
 	go func() {
 		s.logger.Info(fmt.Sprintf("restarting HTTP server on http://%s", newAddr), "addr", newAddr)
-		if err := s.server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		if err := s.server.Serve(listener); err != nil && err != http.ErrServerClosed {
 			s.logger.Error("reloaded HTTP server error", "error", err)
 			s.errChan <- &ServerError{
 				Op:      "reload",
@@ -289,17 +330,6 @@ func (s *httpServer) Reload(ctx context.Context, cfg *Config) error {
 	}()
 
 	// 如果端口未变化，现在关闭旧服务器
-	if !portChanged && oldServer != nil {
-		go func() {
-			shutdownCtx, cancel := context.WithTimeout(context.Background(), DefaultWriteTimeout)
-			defer cancel()
-
-			if err := oldServer.Shutdown(shutdownCtx); err != nil {
-				s.logger.Error("failed to shutdown old server after reload", "error", err)
-			}
-		}()
-	}
-
 	s.logger.Info("HTTP server reloaded successfully")
 	return nil
 }

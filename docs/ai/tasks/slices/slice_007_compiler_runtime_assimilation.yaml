@@ -1,0 +1,104 @@
+schema_id: ExecutionSlice
+id: slice_007_compiler_runtime_assimilation
+branch_id: branch_vibe_coding_infra
+round_id: infra_001
+task_id: task_007_compiler_runtime_assimilation
+phase: full_agent_driving_infra
+module: compiler_runtime_assimilation
+goal: "Assimilate the Vibe Coding infrastructure compiler specification into this already-initialized repository as recoverable runtime artifacts, without creating a new prompt runtime dependency."
+inputs:
+  - "Developer goal: deeply analyze and distill a Vibe Coding multi-round infrastructure compiler specification, then assign the useful context to the current repository because the project is already an infrastructure repository."
+  - docs/ai/runtime-rule-index.md
+  - docs/ai/status/current.yaml
+  - docs/ai/tasks/forest.yaml
+  - docs/ai/tasks/branches/vibe-coding-infra/tree.yaml
+  - docs/ai/skills/vibe-infra-action-workflow/SKILL.md
+  - docs/ai/skills/full-project-lifecycle/SKILL.md
+outputs:
+  - docs/ai/analysis/compiler-runtime-assimilation.md
+  - docs/ai/architecture/compiler-runtime-assimilation.md
+  - docs/ai/skills/compiler-runtime-assimilation/SKILL.md
+  - docs/ai/templates/compiler-runtime-assimilation-sop.md
+  - docs/ai/knowledge/entries/kb_008_compiler_runtime_assimilation.md
+  - docs/ai/tasks/slices/slice_007_compiler_runtime_assimilation.yaml
+allowed_files:
+  - docs/ai/analysis/compiler-runtime-assimilation.md
+  - docs/ai/architecture/index.md
+  - docs/ai/architecture/compiler-runtime-assimilation.md
+  - docs/ai/skills/compiler-runtime-assimilation/SKILL.md
+  - docs/ai/skills/index.md
+  - docs/ai/templates/compiler-runtime-assimilation-sop.md
+  - docs/ai/knowledge/index.md
+  - docs/ai/knowledge/entries/kb_008_compiler_runtime_assimilation.md
+  - docs/ai/status/current.yaml
+  - docs/ai/tasks/forest.yaml
+  - docs/ai/tasks/branches/vibe-coding-infra/tree.yaml
+  - docs/ai/tasks/current-slice.yaml
+  - docs/ai/tasks/slices/slice_007_compiler_runtime_assimilation.yaml
+  - docs/ai/requirements/ledger.yaml
+  - docs/ai/authorizations/records.md
+  - docs/ai/decisions/records.md
+  - docs/ai/evidence/index.md
+  - docs/ai/handoff/current.md
+  - docs/ai/manifest.yaml
+  - docs/ai/runtime-rule-index.md
+  - docs/ai/changelog.md
+  - docs/ai/scripts/validate_runtime.py
+  - docs/ai/schemas/core.schema.yaml
+forbidden_files:
+  - prompt.md
+  - package.json
+  - package-lock.json
+  - pnpm-lock.yaml
+  - yarn.lock
+  - pyproject.toml
+  - requirements.txt
+  - src/**
+  - app/**
+  - components/**
+  - tools/**
+allowed_tools:
+  - shell_read
+  - shell_validation
+  - apply_patch
+approval_required_actions:
+  - "Creating prompt.md as a runtime authority"
+  - "Dependency installation"
+  - "Creating application or package skeletons"
+  - "Creating package manifests or lockfiles"
+  - "Business implementation"
+  - "Changing agent confirmation boundaries beyond compiler-runtime assimilation"
+  - "Treating the raw compiler specification as a future recovery dependency"
+risk_level: low
+agency_level: controlled_execution
+verification_commands:
+  - "python docs/ai/scripts/validate_runtime.py"
+  - "rg -n \"compiler_runtime_assimilation|INV-18|compiler_context_intake_gate|no_prompt_runtime_dependency_recheck_gate|skill_compiler_runtime_assimilation|kb_008\" docs/ai"
+  - "Test-Path prompt.md, package.json, package-lock.json, pnpm-lock.yaml, yarn.lock, pyproject.toml, requirements.txt, src, app, components, tools"
+manual_checks:
+  - "The analysis explains why the source compiler specification must be distilled into runtime artifacts instead of becoming a raw prompt dependency."
+  - "The skill and SOP define a repeatable compiler-runtime assimilation workflow for already-initialized infrastructure repositories."
+  - "The runtime rule index adds `INV-18-COMPILER-CONTEXT-ASSIMILATION` and the validator checks the new artifacts."
+  - "No prompt.md, package manifest, lockfile, dependency, application skeleton, or business code is created."
+acceptance_criteria:
+  - "A project skill exists for compiler-runtime assimilation."
+  - "A canonical SOP exists for compiler-runtime assimilation."
+  - "Knowledge, architecture, task tree, current slice, evidence, status, validator, and handoff references are synchronized."
+  - "Runtime validation passes."
+  - "No runtime artifact requires reading the original compiler prompt."
+rollback_plan: "Remove the compiler-runtime assimilation skill, SOP, analysis, architecture note, kb_008, slice_007, and related index/status/evidence references if the workflow is rejected."
+max_iteration_count: 3
+max_retry_count: 3
+retry_count: 0
+last_failure_reason: null
+next_human_decision: "Developer can accept the compiler-runtime assimilation workflow or request edits."
+audit_evidence:
+  - evidence_020
+human_override: null
+status: pending_acceptance
+knowledge_updates:
+  - kb_008
+skill_updates:
+  - skill_compiler_runtime_assimilation
+next_condition: "Wait for developer acceptance or requested edits for the compiler-runtime assimilation workflow."
+updated_at: "2026-05-29T21:30:00+08:00"

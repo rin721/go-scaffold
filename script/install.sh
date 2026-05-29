@@ -13,7 +13,7 @@ usage() {
 	cat <<'USAGE'
 Usage:
   curl -fsSL -o deploy.sh https://raw-githubusercontent-com-gh.helloworlds.eu.org/rin721/go-scaffold/main/script/install.sh
-  bash deploy.sh --docker y --confirm [deploy options]
+  bash deploy.sh --docker y --auth-token-secret replace-with-at-least-32-character-secret --confirm [deploy options]
 
 This bootstrap script clones the repository, then delegates to the repository
 root deploy.sh with the same arguments. Use --repo and --ref to override the

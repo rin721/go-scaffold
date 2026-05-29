@@ -1,0 +1,89 @@
+schema_id: ExecutionSlice
+id: slice_005_vibe_infra_action_workflow
+branch_id: branch_vibe_coding_infra
+round_id: infra_001
+task_id: task_005_vibe_infra_action_workflow
+phase: full_agent_driving_infra
+module: workflow_sop
+goal: "Add a trigger-bound, two-stage SOP skill for Vibe Coding repository infrastructure establishment actions."
+inputs:
+  - "Developer goal: add an action workflow for `新增 Vibe Coding 仓库基建设施建立任务线：[具体动作]` with forced phase-one diagnosis, red-light confirmation, and phase-two physical output only after explicit authorization."
+  - docs/ai/runtime-rule-index.md
+  - docs/ai/status/current.yaml
+  - docs/ai/tasks/forest.yaml
+  - docs/ai/tasks/branches/vibe-coding-infra/tree.yaml
+outputs:
+  - docs/ai/skills/vibe-infra-action-workflow/SKILL.md
+  - docs/ai/templates/vibe-infra-action-workflow-sop.md
+  - docs/ai/knowledge/entries/kb_006_vibe_infra_action_workflow.md
+  - docs/ai/tasks/slices/slice_005_vibe_infra_action_workflow.yaml
+allowed_files:
+  - docs/ai/skills/vibe-infra-action-workflow/SKILL.md
+  - docs/ai/skills/index.md
+  - docs/ai/templates/vibe-infra-action-workflow-sop.md
+  - docs/ai/knowledge/index.md
+  - docs/ai/knowledge/entries/kb_006_vibe_infra_action_workflow.md
+  - docs/ai/status/current.yaml
+  - docs/ai/tasks/branches/vibe-coding-infra/tree.yaml
+  - docs/ai/tasks/current-slice.yaml
+  - docs/ai/tasks/slices/slice_005_vibe_infra_action_workflow.yaml
+  - docs/ai/requirements/ledger.yaml
+  - docs/ai/decisions/records.md
+  - docs/ai/evidence/index.md
+  - docs/ai/handoff/current.md
+  - docs/ai/manifest.yaml
+  - docs/ai/runtime-rule-index.md
+  - docs/ai/changelog.md
+forbidden_files:
+  - package.json
+  - package-lock.json
+  - pnpm-lock.yaml
+  - yarn.lock
+  - pyproject.toml
+  - requirements.txt
+  - src/**
+  - app/**
+  - components/**
+  - tools/**
+allowed_tools:
+  - shell_read
+  - shell_validation
+  - apply_patch
+approval_required_actions:
+  - "Dependency installation"
+  - "Creating application or package skeletons"
+  - "Creating package manifests or lockfiles"
+  - "Business implementation"
+  - "Any phase-two physical output produced by the SOP itself before explicit human authorization"
+risk_level: low
+agency_level: controlled_execution
+verification_commands:
+  - "python docs/ai/scripts/validate_runtime.py"
+  - "rg -n \"新增 Vibe Coding 仓库基建设施建立任务线|{{ 优化动作 }}|强制红绿灯|阶段二：物理产出\" docs/ai/skills docs/ai/templates docs/ai/runtime-rule-index.md"
+  - "Test-Path package.json, package-lock.json, pnpm-lock.yaml, yarn.lock, pyproject.toml, requirements.txt, src, app, components, tools"
+manual_checks:
+  - "The SOP inherits the supplied four-dimensional X-ray scan structure."
+  - "Phase one contains a hard stop before physical output."
+  - "Phase two requires explicit human authorization."
+acceptance_criteria:
+  - "A project skill exists for the exact trigger prefix."
+  - "A canonical Markdown SOP template exists and binds `{{ 优化动作 }}`."
+  - "The SOP preserves the four-dimensional scan framework and red-light fuse."
+  - "Runtime validation passes."
+  - "No package manifest, lockfile, dependency installation, application skeleton, or business code is created."
+rollback_plan: "Remove the skill, SOP template, kb_006, slice_005, and related index/status/evidence references if the workflow is rejected."
+max_iteration_count: 3
+max_retry_count: 3
+retry_count: 0
+last_failure_reason: null
+next_human_decision: "Developer can accept the Vibe infrastructure action workflow SOP or request edits."
+audit_evidence:
+  - evidence_018
+human_override: null
+status: pending_acceptance
+knowledge_updates:
+  - kb_006
+skill_updates:
+  - skill_vibe_infra_action_workflow
+next_condition: "Wait for developer acceptance or requested edits for the new trigger-bound action workflow SOP."
+updated_at: "2026-05-29T19:32:05+08:00"

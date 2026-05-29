@@ -1,0 +1,120 @@
+schema_id: ExecutionSlice
+id: slice_010_requirement_workflow_engine
+branch_id: branch_vibe_coding_infra
+round_id: infra_001
+task_id: task_010_requirement_workflow_engine
+phase: full_agent_driving_infra
+module: requirement_workflow_engine
+goal: "Implement strategy C as a complete declarative requirement workflow engine with template probes, a REQUIREMENTS_GATHERING state lock, PM-style question loops, schema/validator coverage, evidence, state, and handoff synchronization."
+inputs:
+  - "Developer confirmation: Confirm strategy C and enter phase two."
+  - docs/ai/runtime-rule-index.md
+  - docs/ai/status/current.yaml
+  - docs/ai/tasks/forest.yaml
+  - docs/ai/tasks/main-tree.yaml
+  - docs/ai/tasks/branches/vibe-coding-infra/tree.yaml
+  - docs/ai/skills/project-requirement-discovery/SKILL.md
+  - docs/ai/templates/project-requirement-discovery-sop.md
+outputs:
+  - docs/ai/requirements/workflow_engine.yaml
+  - docs/ai/requirements/template_discovery.yaml
+  - docs/ai/requirements/state_machine.yaml
+  - docs/ai/analysis/requirement-workflow-engine-gap-analysis.md
+  - docs/ai/architecture/requirement-workflow-engine.md
+  - docs/ai/skills/requirement-workflow-engine/SKILL.md
+  - docs/ai/templates/requirement-workflow-engine-sop.md
+  - docs/ai/knowledge/entries/kb_011_requirement_workflow_engine.md
+  - docs/ai/tasks/slices/slice_010_requirement_workflow_engine.yaml
+allowed_files:
+  - docs/ai/requirements/workflow_engine.yaml
+  - docs/ai/requirements/template_discovery.yaml
+  - docs/ai/requirements/state_machine.yaml
+  - docs/ai/requirements/ledger.yaml
+  - docs/ai/requirements/intake/README.md
+  - docs/ai/analysis/requirement-workflow-engine-gap-analysis.md
+  - docs/ai/architecture/index.md
+  - docs/ai/architecture/project-requirement-discovery-workflow.md
+  - docs/ai/architecture/requirement-workflow-engine.md
+  - docs/ai/skills/project-requirement-discovery/SKILL.md
+  - docs/ai/skills/requirement-workflow-engine/SKILL.md
+  - docs/ai/skills/index.md
+  - docs/ai/templates/project-requirement-discovery-sop.md
+  - docs/ai/templates/project-requirement-discovery-record.yaml
+  - docs/ai/templates/requirement-workflow-engine-sop.md
+  - docs/ai/knowledge/index.md
+  - docs/ai/knowledge/entries/kb_009_project_requirement_discovery.md
+  - docs/ai/knowledge/entries/kb_011_requirement_workflow_engine.md
+  - docs/ai/status/current.yaml
+  - docs/ai/tasks/forest.yaml
+  - docs/ai/tasks/main-tree.yaml
+  - docs/ai/tasks/branches/vibe-coding-infra/tree.yaml
+  - docs/ai/tasks/current-slice.yaml
+  - docs/ai/tasks/slices/slice_010_requirement_workflow_engine.yaml
+  - docs/ai/authorizations/records.md
+  - docs/ai/decisions/records.md
+  - docs/ai/evidence/index.md
+  - docs/ai/handoff/current.md
+  - docs/ai/manifest.yaml
+  - docs/ai/runtime-rule-index.md
+  - docs/ai/changelog.md
+  - docs/ai/scripts/validate_runtime.py
+  - docs/ai/schemas/core.schema.yaml
+forbidden_files:
+  - prompt.md
+  - package.json
+  - package-lock.json
+  - pnpm-lock.yaml
+  - yarn.lock
+  - pyproject.toml
+  - requirements.txt
+  - src/**
+  - app/**
+  - components/**
+  - tools/**
+allowed_tools:
+  - shell_read
+  - shell_validation
+  - apply_patch
+approval_required_actions:
+  - "Dependency installation"
+  - "Creating application or package skeletons"
+  - "Creating package manifests or lockfiles"
+  - "Business implementation"
+  - "Selecting a future mainline technology stack without research and confirmation"
+risk_level: low
+agency_level: controlled_execution
+verification_commands:
+  - "python docs/ai/scripts/validate_runtime.py"
+  - "python -m py_compile docs/ai/scripts/validate_runtime.py"
+  - "rg -n \"requirement_workflow_engine|RequirementDiscoveryWorkflowEngine|REQUIREMENTS_GATHERING|template_discovery|skill_requirement_workflow_engine|kb_011\" docs/ai"
+  - "Test-Path prompt.md, package.json, package-lock.json, pnpm-lock.yaml, yarn.lock, pyproject.toml, requirements.txt, src, app, components, tools"
+manual_checks:
+  - "The workflow engine is declarative docs/ai runtime infrastructure, not an executable framework or package."
+  - "The template catalog covers commerce, SaaS, blog, and generic app probes with 5-7 question batches."
+  - "The state machine locks business code generation during REQUIREMENTS_GATHERING."
+  - "The PM-style loop creates intake records, records answers, generates follow-ups, checks coverage, and waits for baseline confirmation."
+acceptance_criteria:
+  - "Requirement workflow engine YAML exists."
+  - "Template discovery YAML exists with commerce, SaaS, blog, and generic app templates."
+  - "State machine YAML exists with REQUIREMENTS_GATHERING and code_generation_allowed false."
+  - "A project skill and canonical SOP exist for the requirement workflow engine."
+  - "Schema and validator coverage include the new engine artifacts."
+  - "Runtime state, task tree, ledger, decisions, authorization, evidence, knowledge, manifest, changelog, and handoff are synchronized."
+  - "Runtime validation passes."
+  - "No prompt.md, package manifest, lockfile, dependency installation, application skeleton, or business code is created."
+rollback_plan: "Remove the requirement workflow engine artifacts, kb_011, slice_010, and related index/status/evidence references if the confirmed strategy C implementation is rejected."
+max_iteration_count: 3
+max_retry_count: 3
+retry_count: 0
+last_failure_reason: null
+next_human_decision: "Developer can accept the strategy C requirement workflow engine or request edits."
+audit_evidence:
+  - evidence_023
+human_override: "Developer confirmed strategy C and phase-two execution."
+status: pending_acceptance
+knowledge_updates:
+  - kb_011
+skill_updates:
+  - skill_requirement_workflow_engine
+next_condition: "Wait for developer acceptance or requested edits for the strategy C requirement workflow engine."
+updated_at: "2026-05-29T22:24:00+08:00"

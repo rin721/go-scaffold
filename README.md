@@ -9,7 +9,7 @@
 ## 启动
 
 ```bash
-go run ./cmd/server server
+go run ./cmd/main server
 ```
 
 默认配置使用本地 SQLite：`./data/app.db`，Redis 关闭。启动后访问：
@@ -19,7 +19,7 @@ go run ./cmd/server server
 
 ## 目录边界
 
-- `cmd/server`: 进程入口，只负责 CLI 参数和信号处理。
+- `cmd/main`: 进程入口，只负责 CLI 参数和信号处理。
 - `internal/app`: 应用装配层，按顺序初始化配置、日志、数据库、demo/user schema、缓存、executor、HTTP server。
 - `internal/transport/http`: HTTP router、基础 health/ready 路由、demo API、用户/认证/RBAC API 注册。
 - `internal/modules/demo`: 示例业务模块，展示 `model -> repository -> service -> handler` 写法。
@@ -54,6 +54,7 @@ go test ./... -count=1
 - CI 质量门禁见 `.github/workflows/ci.yml`。
 - Linux Docker 镜像构建见 `Dockerfile`。
 - production Compose 示例见 `deploy/docker-compose.production.example.yml`，production 配置样例见 `deploy/config.production.example.yaml`。
+- production 运行必须通过 `RIN_APP_AUTH_TOKEN_SECRET` 注入至少 32 bytes 的 token secret；production 示例默认关闭 demo 模块。
 - 统一部署入口见 `deploy.sh`，支持 clone 后执行 `bash deploy.sh --docker y --confirm ...`。
 - 直接下载安装入口见 `script/install.sh`，可通过 `curl -fsSL -o deploy.sh <raw-url>` 后执行。
 - 手动远程部署 workflow 见 `.github/workflows/deploy-remote.yml`，支持 `staging` / `production` 手动环境选择。

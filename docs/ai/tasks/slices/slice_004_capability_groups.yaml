@@ -1,0 +1,93 @@
+schema_id: ExecutionSlice
+id: slice_004_capability_groups
+branch_id: branch_vibe_coding_infra
+round_id: infra_001
+task_id: task_004_capability_groups
+phase: full_agent_driving_infra
+module: capability_catalog
+goal: "Build a catalog-only capability layer with skills, knowledge entries, and dependency candidates for future developer selection, without creating an engineering skeleton or installing dependencies."
+inputs:
+  - "Developer confirmation: A strategy, catalog only, no skeleton, no dependency installation."
+  - "Developer green-light A confirmation: enter phase two, update only catalog-only infrastructure, and verify current official sources using current year dynamically rather than hard-coding it."
+outputs:
+  - docs/ai/capabilities/index.md
+  - docs/ai/capabilities/dependency-candidates.yaml
+  - docs/ai/capabilities/groups/*.yaml
+  - docs/ai/research/research_001_capability_groups.md
+  - docs/ai/architecture/capability-group-strategy.md
+  - docs/ai/skills/capability-selection/SKILL.md
+  - docs/ai/knowledge/entries/kb_005_capability_groups.md
+allowed_files:
+  - docs/ai/capabilities/**
+  - docs/ai/research/research_001_capability_groups.md
+  - docs/ai/architecture/capability-group-strategy.md
+  - docs/ai/skills/capability-selection/SKILL.md
+  - docs/ai/skills/index.md
+  - docs/ai/knowledge/index.md
+  - docs/ai/knowledge/entries/kb_005_capability_groups.md
+  - docs/ai/status/current.yaml
+  - docs/ai/tasks/branches/vibe-coding-infra/tree.yaml
+  - docs/ai/tasks/current-slice.yaml
+  - docs/ai/tasks/slices/slice_004_capability_groups.yaml
+  - docs/ai/requirements/ledger.yaml
+  - docs/ai/decisions/records.md
+  - docs/ai/evidence/index.md
+  - docs/ai/handoff/current.md
+  - docs/ai/manifest.yaml
+  - docs/ai/runtime-rule-index.md
+  - docs/ai/scripts/validate_runtime.py
+forbidden_files:
+  - package.json
+  - package-lock.json
+  - pnpm-lock.yaml
+  - yarn.lock
+  - pyproject.toml
+  - requirements.txt
+  - src/**
+  - app/**
+  - components/**
+  - tools/**
+allowed_tools:
+  - shell_read
+  - shell_validation
+  - apply_patch
+approval_required_actions:
+  - "Dependency installation"
+  - "Creating application or package skeletons"
+  - "Creating package manifests or lockfiles"
+  - "Selecting a candidate as installed technology"
+  - "Business implementation"
+risk_level: low
+agency_level: controlled_execution
+verification_commands:
+  - "python docs/ai/scripts/validate_runtime.py"
+  - "Test-Path package.json, pyproject.toml, requirements.txt, src, app, components, tools"
+  - "rg -n \"capability_catalog_001|req_infra_004_capability_groups|slice_004_capability_groups|skill_capability_selection|kb_005\" docs/ai"
+  - "rg -n \"current_year_policy|Current-Year Policy|official_source_refresh|last_official_source_refresh|uv|zod|ui.shadcn.com\" docs/ai"
+manual_checks:
+  - "Capability catalog remains a developer choice surface, not an implementation decision."
+  - "No dependency installation, package manifest, lockfile, or application skeleton exists."
+  - "Current-year research wording is dynamic and derived from runtime/source-refresh time."
+acceptance_criteria:
+  - "Capability directory and grouped candidate lists exist."
+  - "Knowledge and skill entries describe future catalog usage."
+  - "Dependency candidates keep `install_allowed: false` and `scaffold_allowed: false`."
+  - "No engineering skeleton or dependency installation artifacts exist."
+  - "Runtime validation passes."
+rollback_plan: "Remove docs/ai/capabilities, research_001_capability_groups.md, capability-group-strategy.md, skill_capability_selection, kb_005, and revert status/task references to slice_003 if the catalog-only strategy is rejected."
+max_iteration_count: 3
+max_retry_count: 3
+retry_count: 0
+last_failure_reason: null
+next_human_decision: null
+audit_evidence:
+  - evidence_016
+  - evidence_017
+human_override: null
+status: pending_acceptance
+knowledge_updates:
+  - kb_005
+skill_updates:
+  - skill_capability_selection
+next_condition: "Wait for developer acceptance or requested edits for the refreshed catalog-only A strategy."
+updated_at: "2026-05-29T19:07:53+08:00"

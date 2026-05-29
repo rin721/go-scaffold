@@ -3,7 +3,9 @@ package httpserver
 import (
 	"context"
 	"errors"
+	"net"
 	"net/http"
+	"strconv"
 	"testing"
 	"time"
 
@@ -82,6 +84,31 @@ func TestStartRejectsAlreadyRunningServer(t *testing.T) {
 	got.state.Store(int32(stateRunning))
 	if err := srv.Start(context.Background()); err == nil {
 		t.Fatal("Start(already running) error = nil, want error")
+	}
+}
+
+func TestStartReturnsBindError(t *testing.T) {
+	listener, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatalf("listen occupied port: %v", err)
+	}
+	defer listener.Close()
+
+	_, portValue, err := net.SplitHostPort(listener.Addr().String())
+	if err != nil {
+		t.Fatalf("split listener addr: %v", err)
+	}
+	port, err := strconv.Atoi(portValue)
+	if err != nil {
+		t.Fatalf("parse listener port: %v", err)
+	}
+
+	srv, err := New(http.NewServeMux(), &Config{Host: "127.0.0.1", Port: port}, noopLogger{})
+	if err != nil {
+		t.Fatalf("New() error = %v", err)
+	}
+	if err := srv.Start(context.Background()); err == nil {
+		t.Fatal("Start(occupied port) error = nil, want bind error")
 	}
 }
 
