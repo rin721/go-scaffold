@@ -1,62 +1,92 @@
 # go-scaffold
 
-配置加载、动态环境变量前缀和 `envname` 字段约定见 [`docs/configuration.md`](docs/configuration.md)。
+`go-scaffold` 是一个 Go 后端服务脚手架。当前仓库已经包含可运行的 HTTP
+服务、配置加载、日志、数据库访问、Demo Todo API、本地用户认证、RBAC、插件注册、存储工具、SQL
+生成、Docker 构建、CI 检查和部署示例。
 
-当前主服务已包含本地用户、认证与 RBAC 能力：`/api/v1/auth`、`/api/v1/users`、`/api/v1/roles` 和 `/api/v1/permissions`。该能力仍不代表生产级密钥管理、refresh token/session revoke、审计、密码重置或外部 IAM 已完成。
+项目尚未达到 v1 发布条件。Docker、CI、部署脚本和运行文档都是当前阶段的工程基线，不等同于生产发布承诺。
 
-注意：当前项目仍在开发中，未达第一版发布条件；Docker 构建、部署示例和 CI 门禁只是阶段性制品，不代表 v1 可发布。
-
-## 启动
+## 快速启动
 
 ```bash
 go run ./cmd/main server
 ```
 
-默认配置使用本地 SQLite：`./data/app.db`，Redis 关闭。启动后访问：
+默认配置使用本地 SQLite `./data/app.db`，关闭 Redis，启用 demo 模块，并把 HTTP 服务绑定到
+`127.0.0.1:9999`。
 
-- `GET http://127.0.0.1:9999/health`
-- `GET http://127.0.0.1:9999/ready`
+```bash
+curl http://127.0.0.1:9999/health
+curl http://127.0.0.1:9999/ready
+```
 
-## 目录边界
-
-- `cmd/main`: 进程入口，只负责 CLI 参数和信号处理。
-- `internal/app`: 应用装配层，按顺序初始化配置、日志、数据库、demo/user schema、缓存、executor、HTTP server。
-- `internal/transport/http`: HTTP router、基础 health/ready 路由、demo API、用户/认证/RBAC API 注册。
-- `internal/modules/demo`: 示例业务模块，展示 `model -> repository -> service -> handler` 写法。
-- `internal/modules/user`: 主服务用户、认证与 RBAC 模块，包含用户/角色/权限模型、密码哈希、bearer token、权限门禁和 HTTP handler。
-- `internal/config`: 配置结构、加载、环境变量覆盖、校验。
-- `pkg/database`: 数据库连接、ping、关闭、事务。
-- `pkg/executor`: 独立 goroutine pool manager。
-- `pkg/logger`, `pkg/httpserver`, `pkg/cache`, `pkg/i18n`, `pkg/storage`, `pkg/sqlgen`, `pkg/plugin`, `pkg/utils`: 可复用基础设施库。
-
-## Demo Todo API
-
-- `POST /api/v1/demo/todos`
-- `GET /api/v1/demo/todos`
-- `GET /api/v1/demo/todos/:id`
-- `PUT /api/v1/demo/todos/:id`
-- `DELETE /api/v1/demo/todos/:id`
-
-分层规则：
-
-- handler 只做参数绑定、HTTP 状态码和响应转换。
-- service 只做业务校验、事务编排和调用 repository。
-- repository 只做 GORM 数据访问，不写业务判断。
-
-## 测试
+运行测试：
 
 ```bash
 go test ./... -count=1
+cd remote_plugins/blog && go test ./... -count=1
 ```
 
-## CI 与部署
+构建服务：
 
-- CI 质量门禁见 `.github/workflows/ci.yml`。
-- Linux Docker 镜像构建见 `Dockerfile`。
-- production Compose 示例见 `deploy/docker-compose.production.example.yml`，production 配置样例见 `deploy/config.production.example.yaml`。
-- production 运行必须通过 `RIN_APP_AUTH_TOKEN_SECRET` 注入至少 32 bytes 的 token secret；production 示例默认关闭 demo 模块。
-- 统一部署入口见 `deploy.sh`，支持 clone 后执行 `bash deploy.sh --docker y --confirm ...`。
-- 直接下载安装入口见 `script/install.sh`，可通过 `curl -fsSL -o deploy.sh <raw-url>` 后执行。
-- 手动远程部署 workflow 见 `.github/workflows/deploy-remote.yml`，支持 `staging` / `production` 手动环境选择。
-- 部署边界、Secrets 配置和发布前检查见 `docs/deployment.md`。
-- 当前不发布第一版；发布验收清单、真实 production 运行、镜像发布、生产迁移和密钥管理仍需单独确认。
+```bash
+go build -trimpath -ldflags="-s -w" -o bin/go-scaffold-server ./cmd/main
+```
+
+## 主要入口
+
+| 范围 | 路径 |
+| --- | --- |
+| CLI 入口 | `cmd/main` |
+| 应用装配 | `internal/app` |
+| 配置 | `internal/config`, `configs` |
+| HTTP 传输层 | `internal/transport/http` |
+| Demo 模块 | `internal/modules/demo` |
+| 用户、认证、RBAC | `internal/modules/user`, `pkg/auth`, `pkg/rbac` |
+| 基础设施包 | `pkg/database`, `pkg/cache`, `pkg/logger`, `pkg/httpserver`, `pkg/storage`, `pkg/plugin`, `pkg/sqlgen` |
+| 共享响应和错误类型 | `types` |
+| 远程插件示例 | `remote_plugins/blog` |
+| Docker 与部署 | `Dockerfile`, `deploy`, `deploy.sh`, `script/install.sh` |
+| 人类工程文档 | `docs/index.md` |
+| AI 运行态 | `AGENTS.md`, `docs/ai` |
+
+## API 范围
+
+主服务当前注册的核心路由：
+
+| 路由 | 用途 |
+| --- | --- |
+| `GET /health` | 进程存活检查 |
+| `GET /ready` | 包含数据库 ping 的就绪检查 |
+| `POST /api/v1/demo/todos` | 创建 demo Todo |
+| `GET /api/v1/demo/todos` | 查询 demo Todo 列表 |
+| `GET /api/v1/demo/todos/:id` | 读取单个 demo Todo |
+| `PUT /api/v1/demo/todos/:id` | 更新 demo Todo |
+| `DELETE /api/v1/demo/todos/:id` | 删除 demo Todo |
+| `POST /api/v1/auth/register` | 在允许公开注册时创建本地用户 |
+| `POST /api/v1/auth/login` | 登录并签发 bearer token |
+| `GET /api/v1/auth/me` | 读取当前登录主体 |
+| `/api/v1/users`, `/api/v1/roles`, `/api/v1/permissions` | 需要认证和权限的用户/RBAC 管理 |
+
+## 数据库 CLI
+
+`db` 命令当前聚焦于生成 SQL 和 demo Todo CRUD。
+
+```bash
+go run ./cmd/main db --operation=schema
+go run ./cmd/main db --operation=schema --apply
+go run ./cmd/main db --operation=todo-list
+```
+
+已移除的 `initdb` 命令和 InitDB 配置段不得在没有新确认任务的情况下恢复。
+
+## 文档
+
+从 [`docs/index.md`](docs/index.md) 开始阅读。文档按真实工程边界组织：项目概览、目录地图、配置、架构、运行流程、模块、工作流、测试、构建、发布、扩展、维护、AI 协作和已知缺口。
+
+## 生产注意事项
+
+生产配置必须注入至少 32 bytes 的 `RIN_APP_AUTH_TOKEN_SECRET`。本地配置在没有显式 auth secret 时可以回退到进程内随机 token
+secret，这只适合开发调试；服务重启后旧 token 会失效。
+
+生产示例默认关闭 demo 模块。除非有明确确认，不要在生产环境暴露 demo 路由或隐式创建 demo schema。
