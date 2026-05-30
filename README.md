@@ -68,8 +68,49 @@ docker build -t go-scaffold:local .
 | 基础设施包 | `pkg/database`, `pkg/cache`, `pkg/logger`, `pkg/httpserver`, `pkg/storage`, `pkg/sqlgen` |
 | 共享响应和错误类型 | `types` |
 | Docker 和部署 | `Dockerfile`, `deploy`, `deploy.sh`, `script/install.sh` |
-| 工程文档 | `docs/index.md` |
+| 工程文档 | `README.md`, `docs` |
 | AI 运行时 | `AGENTS.md`, `docs/ai` |
+
+## 工程文档索引
+
+`README.md` 是当前工程文档入口。`docs/ai` 是独立的 AI 运行时状态树，用于保存任务状态、证据、决策、知识和交接信息；普通工程阅读优先从下面的结构化文档开始。
+
+### 推荐阅读顺序
+
+1. [项目概述](docs/overview/project.md)
+2. [目录地图](docs/structure/directory-map.md)
+3. [配置说明](docs/environment/configuration.md)
+4. [分层架构](docs/architecture/layers.md)
+5. [启动流程](docs/runtime/startup-flow.md)
+6. [HTTP 流程](docs/runtime/http-flow.md)
+7. [配置流程](docs/runtime/config-flow.md)
+8. [错误流程](docs/runtime/error-flow.md)
+9. [Demo 模块](docs/modules/demo.md)
+10. [测试矩阵](docs/testing/test-matrix.md)
+11. [Docker 和 CI](docs/build/docker-and-ci.md)
+12. [部署说明](docs/release/deployment.md)
+13. [维护指南](docs/maintenance/maintenance-guide.md)
+14. [AI 运行时状态](docs/ai-agent/runtime-state.md)
+15. [已知缺口](docs/backlog/known-gaps.md)
+
+### 文档地图
+
+| 分区 | 内容概述 |
+| --- | --- |
+| [overview](docs/overview/project.md) | 当前能力、非目标和运行时默认假设 |
+| [structure](docs/structure/directory-map.md) | 目录职责和依赖方向 |
+| [environment](docs/environment/configuration.md) | 配置文件、环境变量、`.env` 和生产示例 |
+| [architecture](docs/architecture/layers.md) | 应用分层和装配方式 |
+| [runtime](docs/runtime/startup-flow.md) | 启动、HTTP、配置重载、状态和错误流程 |
+| [modules](docs/modules/demo.md) | Demo 模块说明 |
+| [workflows](docs/workflows/db-cli.md) | DB CLI 和运维型命令 |
+| [testing](docs/testing/test-matrix.md) | 测试归属和验证命令 |
+| [build](docs/build/docker-and-ci.md) | CI、本地构建、Docker 构建和质量门禁 |
+| [release](docs/release/deployment.md) | 生产配置、部署脚本和发布检查 |
+| [extension](docs/extension/adding-modules.md) | 新增模块、配置和 API 的方式 |
+| [maintenance](docs/maintenance/maintenance-guide.md) | 长期维护工作流 |
+| [ai-agent](docs/ai-agent/runtime-state.md) | `AGENTS.md` 和 `docs/ai` 运行时说明 |
+| [backlog](docs/backlog/known-gaps.md) | 当前已知实现和文档缺口 |
 
 ## API 范围
 
