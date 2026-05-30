@@ -29,6 +29,7 @@ Generated: `2026-05-29T17:18:17+08:00`
 | `INV-19` | Future project ideas require a persistent requirement discovery loop before baseline confirmation; an agent must decompose the idea into domains, candidates, questions, a requirement plan, and a durable intake record instead of jumping from idea to MVP summary. |
 | `INV-20` | Future project rounds require detailed downstream lifecycle gates after requirement-baseline confirmation; research, task analysis, architecture, mode, Agent infrastructure, slices, implementation, verification, closure, and n+1 must use durable records and evidence, not narrative summaries. |
 | `INV-21` | Future raw project ideas must use the declarative requirement_workflow_engine when present; `REQUIREMENTS_GATHERING` locks business code generation, package manifests, dependency installation, and application skeleton creation until requirement baseline and downstream confirmations authorize implementation. |
+| `INV-22` | 默认使用中文交付面向人的产物；新增或修改代码的注释使用中文；文档以中文概述为主。技术标识符、命令、协议字段、包名、文件名和外部专有名词可保持原文。 |
 
 ## State Machine
 
@@ -291,3 +292,4 @@ authorization and must record validation, evidence, state, and handoff updates.
   downstream detailing skill before research, task analysis, architecture, mode
   selection, task tree creation, implementation, verification, closure, or
   next-round planning.
+- 面向人的交付内容默认使用中文；新增或修改代码中的解释性注释使用中文；文档应以中文概述当前事实。技术标识符、API 路由、命令、配置键、文件路径、包名和外部专有名词可保留原文以避免破坏兼容性。

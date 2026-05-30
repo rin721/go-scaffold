@@ -32,9 +32,8 @@ type CORSConfig struct {
 	// 常用头:
 	//   - Origin: 必需,标识请求来源
 	//   - Content-Type: 必需,指定请求体类型
-	//   - Authorization: 用于身份认证
 	//   - X-Request-ID: 用于请求追踪
-	// 示例: ["Origin", "Content-Type", "Authorization", "X-Request-ID"]
+	// 示例: ["Origin", "Content-Type", "X-Request-ID"]
 	AllowHeaders []string `mapstructure:"allow_headers" envname:"CORS_ALLOW_HEADERS" json:"allow_headers" yaml:"allow_headers" toml:"allow_headers"`
 
 	// ExposeHeaders 暴露给浏览器的响应头
@@ -128,7 +127,7 @@ func (c *CORSConfig) DefaultConfig() {
 
 	// 如果未配置允许的请求头,使用常用请求头
 	if len(c.AllowHeaders) == 0 {
-		c.AllowHeaders = []string{"Origin", "Content-Type", "Authorization", "X-Request-ID"}
+		c.AllowHeaders = []string{"Origin", "Content-Type", "X-Request-ID"}
 	}
 
 	// 如果未配置暴露的响应头,默认暴露请求追踪ID

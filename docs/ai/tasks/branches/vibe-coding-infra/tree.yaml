@@ -4,7 +4,7 @@ branch_id: branch_vibe_coding_infra
 branch_type: vibe_coding_infra
 round_id: infra_001
 created_at: "2026-05-29T17:54:03+08:00"
-updated_at: "2026-05-29T22:24:00+08:00"
+updated_at: "2026-05-30T13:33:57+08:00"
 status: pending_acceptance
 purpose: "Task tree branch for building and iterating this repository's Vibe Coding infrastructure."
 tasks:
@@ -144,5 +144,28 @@ tasks:
       - "Knowledge, task tree, current slice, evidence, status, validator, and handoff references are synchronized."
       - "Runtime validation passes."
       - "No prompt.md, package manifest, lockfile, dependency installation, application skeleton, or business code is created."
-next_action: "Wait for developer acceptance or requested edits for the strategy C requirement workflow engine."
+  - id: task_012_user_management_stack_removal
+    title: "移除 IAM、auth、RBAC 和相关用户管理服务"
+    status: validation_passed
+    requirements: []
+    slices:
+      - slice_012_user_management_stack_removal
+    acceptance_criteria:
+      - "删除内置用户模块、IAM、auth、RBAC、RBAC model 和用户表结构辅助代码。"
+      - "清理应用装配、reload、HTTP 路由、配置、环境变量、部署示例和过期测试。"
+      - "go.mod/go.sum 不再包含直接 Casbin/JWT 依赖。"
+      - "Go 测试、服务构建、残留引用扫描和运行时校验通过。"
+  - id: task_013_chinese_delivery_rule
+    title: "新增中文交付规则并同步上一轮文档"
+    status: validation_passed
+    requirements:
+      - req_infra_013_chinese_delivery_rule
+    slices:
+      - slice_013_chinese_delivery_rule
+    acceptance_criteria:
+      - "运行时规则索引记录默认中文交付、中文代码注释、中文文档概述。"
+      - "上一轮用户管理栈移除相关文档改为中文概述。"
+      - "配置示例、部署帮助和代码注释符合中文交付规则。"
+      - "Go 测试、服务构建和运行时校验通过。"
+next_action: "Wait for developer acceptance or requested edits for the Chinese delivery rule and user-management removal follow-up."
 no_prompt_runtime_dependency: true

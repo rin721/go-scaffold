@@ -15,37 +15,37 @@ die() {
 
 usage() {
 	cat <<'USAGE'
-Usage:
+用法:
   bash deploy.sh --docker y --confirm [options]
 
-Clone first:
+先克隆仓库:
   git clone <repo-address>
   cd <repo-address>
-  bash deploy.sh --docker y --image go-scaffold:local --auth-token-secret replace-with-at-least-32-character-secret --confirm
+  bash deploy.sh --docker y --image go-scaffold:local --confirm
 
-Direct install:
+直接安装:
   curl -fsSL -o deploy.sh https://raw-githubusercontent-com-gh.helloworlds.eu.org/rin721/go-scaffold/main/script/install.sh
-  bash deploy.sh --docker y --image go-scaffold:local --auth-token-secret replace-with-at-least-32-character-secret --confirm
+  bash deploy.sh --docker y --image go-scaffold:local --confirm
 
-Deployment options:
-  --docker <y|n>              Use Docker Compose deployment. Only "y" is supported.
-  --repo <url>                Repository to clone when the script is not run inside a checkout.
-  --ref <ref>                 Git ref to clone, default main.
-  --path <path>               Runtime directory, default /opt/go-scaffold.
-  --image <image>             Image to build or run, default go-scaffold:local.
-  --build <y|n>               Build image from source, default y.
-  --pull <y|n>                Pull image before Compose up, default n.
-  --port <port>               Host port mapped to container port 9999, default 9999.
-  --container-name <name>     Docker container name, default go-scaffold.
-  --env <staging|production>  Deployment environment label, default production.
-  --confirm                   Required confirmation flag.
+部署选项:
+  --docker <y|n>              使用 Docker Compose 部署；当前仅支持 "y"。
+  --repo <url>                脚本不在仓库目录内运行时要克隆的仓库地址。
+  --ref <ref>                 要克隆的 Git ref，默认 main。
+  --path <path>               运行目录，默认 /opt/go-scaffold。
+  --image <image>             要构建或运行的镜像，默认 go-scaffold:local。
+  --build <y|n>               是否从源码构建镜像，默认 y。
+  --pull <y|n>                Compose up 前是否拉取镜像，默认 n。
+  --port <port>               映射到容器 9999 端口的宿主机端口，默认 9999。
+  --container-name <name>     Docker 容器名，默认 go-scaffold。
+  --env <staging|production>  部署环境标签，默认 production。
+  --confirm                   必需的确认标记。
 
-Registry options:
-  --registry-host <host>      Registry host, default ghcr.io.
-  --registry-username <name>  Optional registry username for docker login.
-  --registry-token <token>    Optional registry token for docker login.
+镜像仓库选项:
+  --registry-host <host>      镜像仓库地址，默认 ghcr.io。
+  --registry-username <name>  docker login 可选用户名。
+  --registry-token <token>    docker login 可选令牌。
 
-Application options:
+应用选项:
   --db-driver <value>
   --db-host <value>
   --db-port <value>
@@ -80,9 +80,6 @@ Application options:
   --storage-watch-buffer-size <value>
   --demo-enabled <value>
   --demo-apply-schema-on-start <value>
-  --auth-token-secret <value> Required by the production Compose template.
-  --auth-token-ttl <value>
-  --auth-public-registration <value>
   --cors-enabled <value>
   --cors-allow-origins <value>
   --cors-allow-methods <value>
@@ -91,10 +88,10 @@ Application options:
   --cors-allow-credentials <value>
   --cors-max-age <value>
 
-Security note:
-  Password, token and secret flags can be visible in shell history or process
-  listings. Prefer a locked-down shell session, CI secret masking, or a host
-  secret manager. This script never prints sensitive values.
+安全提示:
+  密码、令牌和密钥类参数可能出现在 shell 历史或进程列表中。
+  优先使用受控 shell 会话、CI secret masking 或主机密钥管理服务。
+  本脚本不会主动打印敏感值。
 USAGE
 }
 
@@ -415,21 +412,6 @@ while [ "$#" -gt 0 ]; do
 		set_app_env DEMO_APPLY_SCHEMA_ON_START "$2"
 		shift 2
 		;;
-	--auth-token-secret)
-		require_arg "$1" "${2:-}"
-		set_app_env AUTH_TOKEN_SECRET "$2"
-		shift 2
-		;;
-	--auth-token-ttl)
-		require_arg "$1" "${2:-}"
-		set_app_env AUTH_TOKEN_TTL "$2"
-		shift 2
-		;;
-	--auth-public-registration)
-		require_arg "$1" "${2:-}"
-		set_app_env AUTH_PUBLIC_REGISTRATION "$2"
-		shift 2
-		;;
 	--cors-enabled)
 		require_arg "$1" "${2:-}"
 		set_app_env CORS_ENABLED "$2"
@@ -495,14 +477,6 @@ validate_value SOURCE_DIR "$SOURCE_DIR"
 validate_value REGISTRY_HOST "$REGISTRY_HOST"
 validate_value REGISTRY_USERNAME "$REGISTRY_USERNAME"
 validate_value REGISTRY_TOKEN "$REGISTRY_TOKEN"
-
-auth_token_secret_key="${APP_ENV_PREFIX}_AUTH_TOKEN_SECRET"
-auth_token_secret="${APP_ENV[$auth_token_secret_key]:-}"
-if [ -z "$auth_token_secret" ]; then
-	auth_token_secret="${!auth_token_secret_key:-}"
-fi
-[ -n "$auth_token_secret" ] || die "--auth-token-secret or $auth_token_secret_key is required"
-[ "${#auth_token_secret}" -ge 32 ] || die "auth token secret must be at least 32 bytes"
 
 if [ "$DEPLOY_PULL" = "y" ] && [ "$DEPLOY_BUILD_SET" = "n" ]; then
 	DEPLOY_BUILD="n"

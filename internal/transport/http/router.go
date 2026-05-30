@@ -8,8 +8,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/rei0721/go-scaffold/internal/middleware"
 	demohandler "github.com/rei0721/go-scaffold/internal/modules/demo/handler"
-	userhandler "github.com/rei0721/go-scaffold/internal/modules/user/handler"
-	userservice "github.com/rei0721/go-scaffold/internal/modules/user/service"
 	"github.com/rei0721/go-scaffold/pkg/database"
 	"github.com/rei0721/go-scaffold/pkg/i18n"
 	"github.com/rei0721/go-scaffold/pkg/logger"
@@ -23,7 +21,6 @@ type RouterDeps struct {
 	Database    database.Database
 	Middleware  middleware.MiddlewareConfig
 	TodoHandler *demohandler.TodoHandler
-	UserHandler *userhandler.UserHandler
 }
 
 func NewRouter(deps RouterDeps) *gin.Engine {
@@ -53,37 +50,6 @@ func NewRouter(deps RouterDeps) *gin.Engine {
 		todos.GET("/:id", deps.TodoHandler.Get)
 		todos.PUT("/:id", deps.TodoHandler.Update)
 		todos.DELETE("/:id", deps.TodoHandler.Delete)
-	}
-	if deps.UserHandler != nil {
-		auth := v1.Group("/auth")
-		auth.POST("/register", deps.UserHandler.Register)
-		auth.POST("/login", deps.UserHandler.Login)
-		auth.GET("/me", deps.UserHandler.Authenticate(), deps.UserHandler.Me)
-
-		users := v1.Group("/users", deps.UserHandler.Authenticate())
-		users.POST("", deps.UserHandler.RequirePermission(userservice.PermissionUsersCreate), deps.UserHandler.CreateUser)
-		users.GET("", deps.UserHandler.RequirePermission(userservice.PermissionUsersRead), deps.UserHandler.ListUsers)
-		users.GET("/:id", deps.UserHandler.RequirePermission(userservice.PermissionUsersRead), deps.UserHandler.GetUser)
-		users.PUT("/:id", deps.UserHandler.RequirePermission(userservice.PermissionUsersUpdate), deps.UserHandler.UpdateUser)
-		users.DELETE("/:id", deps.UserHandler.RequirePermission(userservice.PermissionUsersDelete), deps.UserHandler.DeleteUser)
-		users.POST("/:id/roles/:roleID", deps.UserHandler.RequirePermission(userservice.PermissionUsersAssignRoles), deps.UserHandler.AssignRoleToUser)
-		users.DELETE("/:id/roles/:roleID", deps.UserHandler.RequirePermission(userservice.PermissionUsersAssignRoles), deps.UserHandler.RemoveRoleFromUser)
-
-		roles := v1.Group("/roles", deps.UserHandler.Authenticate())
-		roles.POST("", deps.UserHandler.RequirePermission(userservice.PermissionRolesCreate), deps.UserHandler.CreateRole)
-		roles.GET("", deps.UserHandler.RequirePermission(userservice.PermissionRolesRead), deps.UserHandler.ListRoles)
-		roles.GET("/:id", deps.UserHandler.RequirePermission(userservice.PermissionRolesRead), deps.UserHandler.GetRole)
-		roles.PUT("/:id", deps.UserHandler.RequirePermission(userservice.PermissionRolesUpdate), deps.UserHandler.UpdateRole)
-		roles.DELETE("/:id", deps.UserHandler.RequirePermission(userservice.PermissionRolesDelete), deps.UserHandler.DeleteRole)
-		roles.POST("/:id/permissions/:permissionID", deps.UserHandler.RequirePermission(userservice.PermissionRolesAssignPermission), deps.UserHandler.AssignPermissionToRole)
-		roles.DELETE("/:id/permissions/:permissionID", deps.UserHandler.RequirePermission(userservice.PermissionRolesAssignPermission), deps.UserHandler.RemovePermissionFromRole)
-
-		permissions := v1.Group("/permissions", deps.UserHandler.Authenticate())
-		permissions.POST("", deps.UserHandler.RequirePermission(userservice.PermissionPermissionsCreate), deps.UserHandler.CreatePermission)
-		permissions.GET("", deps.UserHandler.RequirePermission(userservice.PermissionPermissionsRead), deps.UserHandler.ListPermissions)
-		permissions.GET("/:id", deps.UserHandler.RequirePermission(userservice.PermissionPermissionsRead), deps.UserHandler.GetPermission)
-		permissions.PUT("/:id", deps.UserHandler.RequirePermission(userservice.PermissionPermissionsUpdate), deps.UserHandler.UpdatePermission)
-		permissions.DELETE("/:id", deps.UserHandler.RequirePermission(userservice.PermissionPermissionsDelete), deps.UserHandler.DeletePermission)
 	}
 
 	return r

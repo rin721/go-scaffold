@@ -7,7 +7,7 @@ server:
   idle_timeout: 30
 
 database:
-  # Local default. Change to mysql/postgres only when the service is available.
+  # 本地默认使用 SQLite。只有在目标数据库可用时才切换到 mysql/postgres。
   driver: sqlite
   dbname: ./data/app.db
   max_open_conns: 1
@@ -50,63 +50,6 @@ demo:
   enabled: true
   apply_schema_on_start: true
 
-iam:
-  enabled: false
-  mode: memory
-  default_deny: true
-  tokens: []
-  policies: []
-
-auth:
-  token_secret: "replace-with-at-least-32-character-secret"
-  token_ttl: 86400
-  public_registration: true
-
-rbac:
-  enabled: true
-  apply_on_start: true
-  model_path: ./configs/rbac_model.conf
-  roles:
-    - name: admin
-      description: Built-in administrator role
-    - name: user
-      description: Built-in default user role
-  permissions:
-    - code: "*:*"
-      description: All permissions
-    - code: users:create
-      description: Create users
-    - code: users:read
-      description: Read users
-    - code: users:update
-      description: Update users
-    - code: users:delete
-      description: Delete users
-    - code: users:assign_roles
-      description: Assign roles to users
-    - code: roles:create
-      description: Create roles
-    - code: roles:read
-      description: Read roles
-    - code: roles:update
-      description: Update roles
-    - code: roles:delete
-      description: Delete roles
-    - code: roles:assign_permissions
-      description: Assign permissions to roles
-    - code: permissions:create
-      description: Create permissions
-    - code: permissions:read
-      description: Read permissions
-    - code: permissions:update
-      description: Update permissions
-    - code: permissions:delete
-      description: Delete permissions
-  role_permissions:
-    - role: admin
-      permissions:
-        - "*:*"
-
 cors:
   enabled: true
   allow_origins:
@@ -121,7 +64,6 @@ cors:
   allow_headers:
     - Origin
     - Content-Type
-    - Authorization
     - X-Request-ID
   expose_headers:
     - X-Request-ID

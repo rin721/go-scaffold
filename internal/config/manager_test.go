@@ -21,14 +21,6 @@ func TestCopyConfigCoversAllFieldsAndDeepCopiesSlices(t *testing.T) {
 	got.I18n.Supported[0] = "ja-JP"
 	got.Executor.Pools[0].Name = "changed"
 	*got.Demo.Enabled = false
-	got.IAM.Tokens[0].Principal.Roles[0] = "changed"
-	got.IAM.Tokens[0].Principal.Attributes["team"] = "changed"
-	got.IAM.Policies[0].Action = "changed"
-	*got.IAM.DefaultDeny = false
-	*got.Auth.PublicRegistration = false
-	got.RBAC.Roles[0].Description = "changed"
-	got.RBAC.Permissions[0].Description = "changed"
-	got.RBAC.RolePermissions[0].Permissions[0] = "changed"
 	got.CORS.AllowOrigins[0] = "https://changed.example.com"
 	got.CORS.AllowMethods[0] = "PATCH"
 	got.CORS.AllowHeaders[0] = "X-Changed"
@@ -42,30 +34,6 @@ func TestCopyConfigCoversAllFieldsAndDeepCopiesSlices(t *testing.T) {
 	}
 	if *src.Demo.Enabled == *got.Demo.Enabled {
 		t.Fatal("copyConfig() shares Demo.Enabled pointer with source")
-	}
-	if src.IAM.Tokens[0].Principal.Roles[0] == got.IAM.Tokens[0].Principal.Roles[0] {
-		t.Fatal("copyConfig() shares IAM token roles slice with source")
-	}
-	if src.IAM.Tokens[0].Principal.Attributes["team"] == got.IAM.Tokens[0].Principal.Attributes["team"] {
-		t.Fatal("copyConfig() shares IAM token attributes map with source")
-	}
-	if src.IAM.Policies[0].Action == got.IAM.Policies[0].Action {
-		t.Fatal("copyConfig() shares IAM.Policies slice with source")
-	}
-	if *src.IAM.DefaultDeny == *got.IAM.DefaultDeny {
-		t.Fatal("copyConfig() shares IAM.DefaultDeny pointer with source")
-	}
-	if *src.Auth.PublicRegistration == *got.Auth.PublicRegistration {
-		t.Fatal("copyConfig() shares Auth.PublicRegistration pointer with source")
-	}
-	if src.RBAC.Roles[0].Description == got.RBAC.Roles[0].Description {
-		t.Fatal("copyConfig() shares RBAC.Roles slice with source")
-	}
-	if src.RBAC.Permissions[0].Description == got.RBAC.Permissions[0].Description {
-		t.Fatal("copyConfig() shares RBAC.Permissions slice with source")
-	}
-	if src.RBAC.RolePermissions[0].Permissions[0] == got.RBAC.RolePermissions[0].Permissions[0] {
-		t.Fatal("copyConfig() shares RBAC.RolePermissions permissions slice with source")
 	}
 	if src.CORS.AllowOrigins[0] == got.CORS.AllowOrigins[0] {
 		t.Fatal("copyConfig() shares CORS.AllowOrigins slice with source")
@@ -275,18 +243,10 @@ func TestOverrideWithEnvUsesEnvnameTagsForNonDatabaseConfigs(t *testing.T) {
 	setTaggedEnv(t, StorageConfig{}, "BasePath", "./env-data")
 	setTaggedEnv(t, StorageConfig{}, "EnableWatch", "false")
 	setTaggedEnv(t, StorageConfig{}, "WatchBufferSize", "32")
-	setTaggedEnv(t, IAMConfig{}, "Enabled", "true")
-	setTaggedEnv(t, IAMConfig{}, "Mode", "memory")
-	setTaggedEnv(t, IAMConfig{}, "DefaultDeny", "false")
-	setTaggedEnv(t, AuthConfig{}, "TokenSecret", "0123456789abcdef0123456789abcdef")
-	setTaggedEnv(t, AuthConfig{}, "TokenTTL", "7200")
-	setTaggedEnv(t, RBACConfig{}, "Enabled", "false")
-	setTaggedEnv(t, RBACConfig{}, "ApplyOnStart", "false")
-	setTaggedEnv(t, RBACConfig{}, "ModelPath", "./configs/custom_rbac_model.conf")
 	setTaggedEnv(t, CORSConfig{}, "Enabled", "false")
 	setTaggedEnv(t, CORSConfig{}, "AllowOrigins", "https://app.example.com, https://admin.example.com")
 	setTaggedEnv(t, CORSConfig{}, "AllowMethods", "GET,POST")
-	setTaggedEnv(t, CORSConfig{}, "AllowHeaders", "Origin,Authorization")
+	setTaggedEnv(t, CORSConfig{}, "AllowHeaders", "Origin,X-Request-ID")
 	setTaggedEnv(t, CORSConfig{}, "ExposeHeaders", "X-Request-ID,X-Total-Count")
 	setTaggedEnv(t, CORSConfig{}, "AllowCredentials", "false")
 	setTaggedEnv(t, CORSConfig{}, "MaxAge", "7200")
@@ -323,18 +283,9 @@ func TestOverrideWithEnvUsesEnvnameTagsForNonDatabaseConfigs(t *testing.T) {
 		cfg.Storage.EnableWatch || cfg.Storage.WatchBufferSize != 32 {
 		t.Fatalf("Storage override mismatch: %#v", cfg.Storage)
 	}
-	if !cfg.IAM.Enabled || cfg.IAM.Mode != "memory" || cfg.IAM.DefaultDenyEnabled() {
-		t.Fatalf("IAM override mismatch: %#v", cfg.IAM)
-	}
-	if cfg.Auth.TokenSecret != "0123456789abcdef0123456789abcdef" || cfg.Auth.TokenTTL != 7200 {
-		t.Fatalf("Auth override mismatch: %#v", cfg.Auth)
-	}
-	if cfg.RBAC.Enabled || cfg.RBAC.ApplyOnStart || cfg.RBAC.ModelPath != "./configs/custom_rbac_model.conf" {
-		t.Fatalf("RBAC override mismatch: %#v", cfg.RBAC)
-	}
 	if cfg.CORS.Enabled || !reflect.DeepEqual(cfg.CORS.AllowOrigins, []string{"https://app.example.com", "https://admin.example.com"}) ||
 		!reflect.DeepEqual(cfg.CORS.AllowMethods, []string{"GET", "POST"}) ||
-		!reflect.DeepEqual(cfg.CORS.AllowHeaders, []string{"Origin", "Authorization"}) ||
+		!reflect.DeepEqual(cfg.CORS.AllowHeaders, []string{"Origin", "X-Request-ID"}) ||
 		!reflect.DeepEqual(cfg.CORS.ExposeHeaders, []string{"X-Request-ID", "X-Total-Count"}) ||
 		cfg.CORS.AllowCredentials || cfg.CORS.MaxAge != 7200 {
 		t.Fatalf("CORS override mismatch: %#v", cfg.CORS)
@@ -468,45 +419,6 @@ func testCompleteConfig() *Config {
 			Enabled:            boolPtr(true),
 			ApplySchemaOnStart: boolPtr(true),
 		},
-		IAM: IAMConfig{
-			Enabled:     true,
-			Mode:        "memory",
-			DefaultDeny: boolPtr(true),
-			Tokens: []IAMTokenConfig{
-				{
-					Token: "admin-token",
-					Principal: IAMPrincipalConfig{
-						ID:         "admin",
-						Roles:      []string{"admin"},
-						Attributes: map[string]string{"team": "platform"},
-					},
-				},
-			},
-			Policies: []IAMPolicyConfig{
-				{Subject: "admin", Action: "read", Resource: "*", Effect: "allow"},
-			},
-		},
-		Auth: AuthConfig{
-			TokenSecret:        "0123456789abcdef0123456789abcdef",
-			TokenTTL:           3600,
-			PublicRegistration: boolPtr(true),
-		},
-		RBAC: RBACConfig{
-			Enabled:      true,
-			ApplyOnStart: true,
-			ModelPath:    "./configs/rbac_model.conf",
-			Roles: []RBACRoleConfig{
-				{Name: "admin", Description: "Admin role"},
-				{Name: "user", Description: "User role"},
-			},
-			Permissions: []RBACPermissionConfig{
-				{Code: "*:*", Description: "All permissions"},
-				{Code: "users:read", Description: "Read users"},
-			},
-			RolePermissions: []RBACRolePermissionConfig{
-				{Role: "admin", Permissions: []string{"*:*"}},
-			},
-		},
 		CORS: CORSConfig{
 			Enabled:          true,
 			AllowOrigins:     []string{"https://example.com"},
@@ -558,11 +470,6 @@ executor:
   enabled: false
 storage:
   enabled: false
-iam:
-  enabled: false
-auth:
-  token_secret: "0123456789abcdef0123456789abcdef"
-  token_ttl: 3600
 cors:
   enabled: false
 `

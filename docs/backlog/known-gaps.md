@@ -1,28 +1,26 @@
 # 已知缺口
 
-本文记录工程文档整理期间发现的已知缺口。它用于让未来工作可见，同时避免把尚未完成的能力写成已经完成。
+本文记录已知缺口，避免未来工作被遗漏，也避免把未完成能力描述成已完成能力。
 
 ## 实现漂移
 
 | 缺口 | 影响 | 建议验证 |
 | --- | --- | --- |
-| middleware 使用 `traceId`，result helper 读取 `trace_id` | 普通错误响应可能缺少 trace ID | 增加真实 middleware + result helper 集成测试，再统一键名 |
-| HTTP server 启动后的异步 serve 错误没有通过 app interface 暴露 | 后续 server 错误可能只被日志记录，不能传回 `cmd/main` | 复核 `pkg/httpserver` interface 和 lifecycle 行为 |
-| DB CLI 聚焦 demo，而 user schema 在 server 启动时应用 | 运维者可能误以为一个 CLI 覆盖所有 schema | 确认这是设计选择，或扩展 DB CLI |
+| 中间件使用 `traceId`，result helper 读取 `trace_id` | 普通错误响应可能缺少 trace ID | 增加真实 middleware + result helper 集成测试，再统一 key |
+| HTTP 服务启动后的异步 serve 错误当前只通过应用接口记录日志 | 后续服务错误可能无法传播到 `cmd/main` | 审查 `pkg/httpserver` 接口和生命周期行为 |
 
-## 文档债
+## 文档债务
 
 | 缺口 | 影响 | 建议动作 |
 | --- | --- | --- |
-| 部分 package README 含有过时 API 示例 | 读者可能复制不存在的方法或错误签名 | 中心文档稳定后，统一修正 package README |
-| 部署 workflow 变量混用 `RIN_APP_*` 应用变量和未加前缀 GitHub Variables | 运维配置容易混淆 | 在部署专项任务中对齐 workflow 和文档变量 |
-| `docs/ai` 对 slice 011 的索引可能不完整 | 未来 Agent 可能缺少 task/evidence 上下文 | 通过已确认的运行态修复任务补齐 artifact |
+| 部分 package README 仍包含较宽泛的 API 示例 | 代码演进后读者可能复制过期示例 | 核心文档稳定后刷新 package README |
+| 部署工作流变量混用 `RIN_APP_*` 应用环境变量和未加前缀的 GitHub Variables | 运维配置容易混淆 | 在独立部署任务中统一变量和部署文档 |
+| `docs/ai` 对近期脚手架修复 slice 的索引可能不完整 | 后续 agents 可能缺少任务/证据上下文 | 通过确认后的运行时维护任务修复运行时制品 |
 
 ## 生产就绪缺口
 
 | 缺口 | 影响 |
 | --- | --- |
-| 没有 refresh token、session revoke、密码重置流程 | 当前 auth 是本地脚手架级能力，不是完整账户生命周期 |
-| 没有完整迁移框架 | 生成 schema 是有用基线，不等于生产迁移体系 |
-| 没有外部扩展运行时 | 当前项目只保留内建模块装配，未来如需扩展能力应重新设计 |
-| 发布/回滚证据尚未形成稳定 v1 流程 | v1 发布仍需验收工作 |
+| 没有完整迁移框架 | 生成表结构适合作为基线能力，不等于生产迁移治理 |
+| 没有外部扩展运行时 | 后续扩展能力应从新需求重新设计 |
+| 发布/回滚证据还不是稳定 v1 流程 | v1 发布仍需要独立验收工作 |

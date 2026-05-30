@@ -15,9 +15,6 @@ type Config struct {
 	Executor ExecutorConfig `mapstructure:"executor"`
 	Storage  StorageConfig  `mapstructure:"storage"`
 	Demo     DemoConfig     `mapstructure:"demo"`
-	IAM      IAMConfig      `mapstructure:"iam"`
-	Auth     AuthConfig     `mapstructure:"auth"`
-	RBAC     RBACConfig     `mapstructure:"rbac"`
 	CORS     CORSConfig     `mapstructure:"cors"`
 }
 
@@ -37,9 +34,6 @@ func (c *Config) Validate() error {
 		&c.Executor,
 		&c.Storage,
 		&c.Demo,
-		&c.IAM,
-		&c.Auth,
-		&c.RBAC,
 		&c.CORS,
 	}
 	for _, validator := range validators {
@@ -71,12 +65,6 @@ func (c *Config) ValidateOld() error {
 	}
 	if err := c.Executor.Validate(); err != nil {
 		return fmt.Errorf("executor config: %w", err)
-	}
-	if err := c.Auth.Validate(); err != nil {
-		return fmt.Errorf("auth config: %w", err)
-	}
-	if err := c.RBAC.Validate(); err != nil {
-		return fmt.Errorf("rbac config: %w", err)
 	}
 	return nil
 }

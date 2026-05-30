@@ -29,9 +29,6 @@ func Reload(core *initapp.Core, infra *initapp.Infrastructure, transport *initap
 	if initapp.IsStorageConfigChanged(old, new) {
 		reloadStorage(core, infra, new)
 	}
-	if initapp.IsIAMConfigChanged(old, new) {
-		reloadIAM(core, infra, new)
-	}
 }
 
 func reloadCache(core *initapp.Core, infra *initapp.Infrastructure, cfg *config.Config) {
@@ -173,14 +170,4 @@ func reloadStorage(core *initapp.Core, infra *initapp.Infrastructure, cfg *confi
 		return
 	}
 	core.Logger.Info("storage reloaded")
-}
-
-func reloadIAM(core *initapp.Core, infra *initapp.Infrastructure, cfg *config.Config) {
-	service, err := initapp.NewIAM(cfg, core.Logger)
-	if err != nil {
-		core.Logger.Error("failed to reload iam", "error", err)
-		return
-	}
-	infra.IAM = service
-	core.Logger.Info("iam reloaded", "enabled", cfg.IAM.Enabled)
 }

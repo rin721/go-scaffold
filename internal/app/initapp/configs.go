@@ -56,13 +56,6 @@ func IsStorageConfigChanged(oldCfg, newCfg *config.Config) bool {
 	return oldCfg.Storage != newCfg.Storage
 }
 
-func IsIAMConfigChanged(oldCfg, newCfg *config.Config) bool {
-	if oldCfg == newCfg {
-		return false
-	}
-	return !reflect.DeepEqual(oldCfg.IAM, newCfg.IAM)
-}
-
 func RedisCacheConfig(cfg *config.Config) *cache.Config {
 	return &cache.Config{
 		Host:         cfg.Redis.Host,

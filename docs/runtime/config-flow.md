@@ -1,6 +1,6 @@
-# 配置流
+# 配置流程
 
-配置是运行时状态。它在基础设施和模块创建前加载，并在 server 模式下被 watch。
+配置是运行时状态。它先于基础设施和模块加载，并在 server 模式下被监听。
 
 ## 首次加载
 
@@ -16,33 +16,28 @@ command flag/env/default path
   -> atomic store
 ```
 
-config manager 向应用装配代码暴露当前配置。各 package 通常只接收自己需要的
-配置片段，而不是整份 app config。
+配置管理器向装配代码暴露当前配置。各包通常只接收自己需要的配置片段。
 
-## Watch 与 Reload
+## 监听和重载
 
-server 模式会注册配置 watcher。配置变化时，manager 会 shadow-load 新文件，
-应用环境变量覆盖，完成校验，然后存储新配置并调用变更处理器。
+server 模式会注册配置监听器。文件变化后，管理器会影子加载新文件、应用环境变量覆盖、完成校验、写入存储，并调用变更处理器。
 
-`reloadapp` 比较新旧配置，并 reload 受影响子系统：
+`reloadapp` 对比新旧配置并重载受影响的子系统：
 
-- logger；
-- database；
-- cache；
-- executor；
-- HTTP server；
-- storage；
-- IAM。
+- 日志；
+- 数据库；
+- 缓存；
+- 执行器；
+- HTTP 服务；
+- 存储。
 
-demo schema 应用属于启动关注点，不会在普通 reload 中重新执行。
+Demo 表结构应用属于启动行为，普通配置重载不会重新执行。
 
 ## 维护清单
 
-修改配置结构时：
-
-1. 更新 `internal/config` 中的结构体、tag 和校验；
-2. 更新 `configs` 和 `deploy` 下的示例；
-3. 字段面向环境变量时更新 `.env.example`；
-4. 更新运行文档；
-5. 增加 env override 和校验测试；
-6. 判断是否需要 reload 行为。
+1. 更新对应的 `internal/config` 结构体、标签和校验。
+2. 更新 `configs` 和 `deploy` 下的示例。
+3. 环境变量面向使用者时同步 `.env.example`。
+4. 更新运行时文档。
+5. 补充环境变量覆盖和配置校验测试。
+6. 判断字段是否需要重载行为。

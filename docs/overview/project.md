@@ -1,38 +1,42 @@
-# 项目概览
+# 项目概述
 
-`go-scaffold` 是围绕真实可运行服务构建的 Go 后端脚手架。它包含应用代码、基础设施包、测试、Docker 构建文件、部署示例和 AI 运行态产物。
+`go-scaffold` 是一个可运行的 Go 后端脚手架，包含服务代码、基础设施包、测试、Docker 构建文件、部署示例和 AI 运行时制品。
 
 ## 当前能力
 
-| 能力 | 当前状态 |
+| 能力 | 状态 |
 | --- | --- |
-| HTTP 服务 | 通过 `internal/transport/http` 和 `pkg/httpserver` 实现 |
-| 配置 | 支持 YAML、`.env`、环境变量覆盖、校验和 watch/reload |
-| 数据库 | 通过 `pkg/database` 支持 SQLite/MySQL/PostgreSQL |
-| Demo 模块 | Todo CRUD，展示 handler/service/repository/model 分层 |
-| 用户模块 | 本地用户、密码哈希、bearer token、角色、权限和 RBAC 检查 |
-| RBAC | 基于 Casbin 的授权器，支持配置化种子数据 |
-| 存储 | 本地文件系统抽象和可选 watcher 工具 |
-| SQL 生成 | Go struct 到 SQL 的辅助工具，用于 DB CLI 和启动 schema 应用 |
-| CI/构建 | 根模块测试、服务构建、Docker 构建和空白检查 |
-| 部署 | 生产配置示例、Docker Compose 示例、本地部署脚本、远程 workflow |
+| HTTP 服务 | 由 `internal/transport/http` 和 `pkg/httpserver` 实现 |
+| 配置 | 支持 YAML、`.env`、环境变量覆盖、校验和监听重载 |
+| 数据库 | `pkg/database` 支持 SQLite、MySQL、PostgreSQL |
+| Demo 模块 | Todo CRUD，采用 handler/service/repository/model 分层 |
+| 存储 | 本地文件系统抽象和可选 watcher 辅助能力 |
+| SQL 生成 | Go 结构体到 SQL 的辅助工具，用于 DB CLI 和表结构应用 |
+| CI/构建 | Go 测试、服务构建、Docker 构建和空白字符检查 |
+| 部署 | 生产配置示例、Docker Compose 示例、本地部署脚本和远程工作流 |
+
+## 已移除范围
+
+脚手架不再内置用户管理栈。以下内容有意不存在：
+
+- 本地用户模块；
+- IAM 服务；
+- JWT 认证令牌包；
+- Casbin RBAC 包；
+- 用户、角色、权限表结构；
+- `/api/v1/auth`、`/api/v1/users`、`/api/v1/roles`、`/api/v1/permissions` 路由。
+
+后续身份认证或访问控制能力应从新的需求基线开始，不应默认复活已删除实现。
 
 ## 当前非目标
 
-当前脚手架尚不承诺这些生产级能力：
+- 完整生产迁移框架；
+- 外部扩展运行时；
+- v1 发布保证；
+- 内置账号生命周期管理。
 
-- refresh token、session revoke、token rotation、审计流或密码重置；
-- 外部 IAM 集成；
-- 完整生产迁移体系；
-- 外部扩展运行时和独立扩展示例；
-- v1 发布契约。
+## 运行时默认值
 
-## 运行默认值
+本地默认配置是 `configs/config.yaml`。服务监听 `127.0.0.1:9999`，使用 SQLite `./data/app.db`，关闭 Redis，并启用 Demo Todo 模块。
 
-本地默认配置是 `configs/config.yaml`。它监听 `127.0.0.1:9999`，使用 SQLite `./data/app.db`，关闭 Redis，启用 demo Todo，并且在未显式配置 auth secret 时使用进程内随机 token secret。
-
-生产示例位于 `deploy`。生产路径要求显式提供 `RIN_APP_AUTH_TOKEN_SECRET`，并默认关闭 demo 模块。
-
-## 事实来源
-
-代码和当前配置是首要事实来源。README 可作局部说明，但工程定位、目录边界和维护流程应优先以结构化文档为准。
+生产示例位于 `deploy` 目录，默认关闭 Demo 模块。

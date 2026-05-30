@@ -105,10 +105,6 @@ func TestNewModulesRespectsDemoConfig(t *testing.T) {
 						Enabled:            &enabled,
 						ApplySchemaOnStart: &applySchema,
 					},
-					Auth: config.AuthConfig{
-						TokenSecret: "0123456789abcdef0123456789abcdef",
-						TokenTTL:    60,
-					},
 				},
 				Logger: testLogger{},
 			}

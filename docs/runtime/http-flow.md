@@ -1,33 +1,28 @@
 # HTTP 流程
 
-HTTP 路由位于 `internal/transport/http`。router 在应用启动期间创建，此时模块
-和基础设施已经可用。
+HTTP 路由位于 `internal/transport/http`。路由器在应用启动期间创建，此时模块和基础设施已经就绪。
 
 ## 中间件顺序
 
-主 router 安装这些 middleware：
-
 1. i18n，可用时启用；
-2. request trace ID；
+2. 请求 trace ID；
 3. CORS；
-4. request logging；
+4. 请求日志；
 5. panic recovery。
 
-传输层 middleware 只处理 HTTP 关注点，业务判断属于模块 service。
+传输层中间件只处理 HTTP 关注点。业务决策应放在模块 service 中。
 
 ## 路由组
 
-| 路由 | handler 来源 |
+| 路由 | Handler 来源 |
 | --- | --- |
 | `GET /health` | transport router |
-| `GET /ready` | transport router，并执行 database ping |
+| `GET /ready` | transport router，包含数据库 ping |
 | `/api/v1/demo/todos` | demo handler |
-| `/api/v1/auth/*` | user auth handler |
-| `/api/v1/users` | user handler，带认证和权限检查 |
-| `/api/v1/roles` | role handler，带认证和权限检查 |
-| `/api/v1/permissions` | permission handler，带认证和权限检查 |
 
-## 请求处理形态
+脚手架不再注册本地身份认证或用户管理路由。
+
+## 请求形态
 
 ```text
 HTTP request
@@ -40,10 +35,4 @@ HTTP request
   -> JSON response
 ```
 
-handler 不应直接隐藏事务或业务规则。service 负责业务校验和事务边界。
-
-## 认证与授权
-
-用户相关路由通过 user 模块 token service 解析 bearer token。principal 会写入
-Gin context，也会注入 request context。权限检查调用 user service，再委托给配置
-的 authorizer。
+handler 不应隐藏事务或业务规则。service 负责业务校验和事务边界。

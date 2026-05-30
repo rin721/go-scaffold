@@ -209,28 +209,11 @@ func cloneReloadConfig(src *config.Config) *config.Config {
 	dst := *src
 	dst.I18n.Supported = append([]string(nil), src.I18n.Supported...)
 	dst.Executor.Pools = append([]config.ExecutorPoolConfig(nil), src.Executor.Pools...)
-	dst.IAM.Tokens = append([]config.IAMTokenConfig(nil), src.IAM.Tokens...)
-	for i := range dst.IAM.Tokens {
-		dst.IAM.Tokens[i].Principal.Roles = append([]string(nil), src.IAM.Tokens[i].Principal.Roles...)
-		dst.IAM.Tokens[i].Principal.Attributes = copyReloadStringMap(src.IAM.Tokens[i].Principal.Attributes)
-	}
-	dst.IAM.Policies = append([]config.IAMPolicyConfig(nil), src.IAM.Policies...)
 	dst.CORS.AllowOrigins = append([]string(nil), src.CORS.AllowOrigins...)
 	dst.CORS.AllowMethods = append([]string(nil), src.CORS.AllowMethods...)
 	dst.CORS.AllowHeaders = append([]string(nil), src.CORS.AllowHeaders...)
 	dst.CORS.ExposeHeaders = append([]string(nil), src.CORS.ExposeHeaders...)
 	return &dst
-}
-
-func copyReloadStringMap(src map[string]string) map[string]string {
-	if len(src) == 0 {
-		return nil
-	}
-	dst := make(map[string]string, len(src))
-	for k, v := range src {
-		dst[k] = v
-	}
-	return dst
 }
 
 type reloadFixture struct {

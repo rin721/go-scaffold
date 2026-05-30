@@ -482,3 +482,49 @@
 - Summary: The current project no longer contains the old extension runtime,
   remote sample service, registration endpoint, config/env/CI surface, or docs
   page. Future extension work should start from fresh requirements.
+
+## evidence_025: 用户管理栈移除
+
+- Date: `2026-05-30T13:12:40+08:00`
+- Type: `engineering_removal`
+- Status: `completed`
+- Slice: `slice_012_user_management_stack_removal`
+- Trigger: 开发者明确要求删除 IAM、auth、RBAC 和相关用户管理服务。
+- Files:
+  - 删除 `internal/modules/user`、`pkg/auth`、`pkg/iam`、`pkg/rbac` 和 `configs/rbac_model.conf`。
+  - 移除 auth/IAM/RBAC 配置结构、校验、环境变量覆盖测试、应用装配、reload 接线、用户 schema helper、路由注册、集成测试、配置块、部署环境变量和部署脚本认证密钥要求。
+  - 通过 `go mod tidy` 清理 `go.mod` 和 `go.sum`。
+  - 更新面向人的文档，说明当前脚手架不再内置用户管理栈；后续身份或访问控制能力需要从新需求开始。
+- Validation:
+  - `gofmt -w ./cmd ./internal ./pkg ./types` -> passed.
+  - `go test ./internal/config ./internal/app/initapp ./internal/app/reloadapp ./internal/app ./internal/transport/http -count=1` -> passed.
+  - `go test ./cmd/main ./internal/app/dbapp ./internal/modules/demo/... -count=1` -> passed.
+  - `go test ./... -count=1 -mod=readonly` -> passed.
+  - `go build -mod=readonly -o ./tmp/go-scaffold-server.exe ./cmd/main` -> passed.
+  - `rg -n "github.com/rei0721/go-scaffold/(internal/modules/user|pkg/auth|pkg/rbac|pkg/iam)|RIN_APP_(AUTH|IAM|RBAC)|rbac_model|\\b(AuthConfig|RBACConfig|IAMConfig|AppAuthName|AppRBACName|AppIAMName|NewIAM|ApplyUserSchema|UserSchemaSQL|NewUserModule|ApplyConfiguredRBAC|IsIAMConfigChanged|reloadIAM|UserModule)\\b" --glob "!docs/ai/**" . -S` -> no matches.
+- Summary: Go 脚手架不再包含旧的本地用户管理栈、路由面、配置面、schema helper 或直接 Casbin/JWT 依赖。后续身份认证或访问控制能力应从新的需求基线重新设计。
+
+## evidence_026: 中文交付规则和文档同步
+
+- Date: `2026-05-30T13:33:57+08:00`
+- Type: `runtime_rule_and_documentation_sync`
+- Status: `completed`
+- Requirement: `req_infra_013_chinese_delivery_rule`
+- Slice: `slice_013_chinese_delivery_rule`
+- Trigger: 开发者要求新增以后中文交付的规则，并将上一轮修改内容调整为代码中文注释、文档中文概述。
+- Files:
+  - `docs/ai/runtime-rule-index.md` 新增 `INV-22` 中文交付规则。
+  - README 和上一轮移除栈相关工程文档改为中文概述。
+  - `.env.example`、配置示例、部署帮助文本清理英文说明和旧认证口径。
+  - `internal/config/app_cors.go` 的修改注释保持中文，并移除默认 Authorization header 说明。
+  - 同步 `docs/ai` 的 requirement、current slice、task tree、status、evidence 和 handoff。
+- Validation:
+  - `gofmt -w internal/config/app_cors.go internal/config/manager_test.go internal/app/app_integration_test.go` -> passed.
+  - `rg -n "\\b(The|This|Current|Future|Removed|Deployment|Configuration|Testing|Known|Project|Directory|Startup|Layered|Adding|Usage:|Security note|Application options|Deployment options|Registry options|Local default|Replace with|user management stack|built-in)\\b" README.md docs .env.example configs deploy deploy.sh --glob "!docs/ai/**" -S` -> no matches.
+  - `python docs/ai/scripts/validate_runtime.py` -> `Runtime validation passed.`
+  - `go test ./... -count=1 -mod=readonly` -> passed.
+  - `go build -mod=readonly -o .\\tmp\\go-scaffold-server.exe .\\cmd\\main` -> passed.
+  - `git diff --check` -> passed.
+  - Removed-stack residual `rg` outside `docs/ai` -> no matches.
+  - Added/changed Go comment scan -> only Chinese CORS example comment found.
+- Summary: 后续面向人的交付默认使用中文；新增或修改代码中的解释性注释使用中文；文档以中文概述当前事实，技术标识符和外部专有名词可保留原文。

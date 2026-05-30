@@ -82,8 +82,5 @@ const (
 	AppExecutorName = "executor"
 	AppStorageName  = "storage"
 	AppDemoName     = "demo"
-	AppIAMName      = "iam"
-	AppAuthName     = "auth"
-	AppRBACName     = "rbac"
 	AppCORSName     = "cors"
 )

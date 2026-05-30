@@ -6,16 +6,11 @@ import (
 	demohandler "github.com/rei0721/go-scaffold/internal/modules/demo/handler"
 	demorepository "github.com/rei0721/go-scaffold/internal/modules/demo/repository"
 	demoservice "github.com/rei0721/go-scaffold/internal/modules/demo/service"
-	userhandler "github.com/rei0721/go-scaffold/internal/modules/user/handler"
-	userrepository "github.com/rei0721/go-scaffold/internal/modules/user/repository"
-	userservice "github.com/rei0721/go-scaffold/internal/modules/user/service"
-	authapi "github.com/rei0721/go-scaffold/pkg/auth"
 	"github.com/rei0721/go-scaffold/pkg/cache"
 	"github.com/rei0721/go-scaffold/pkg/database"
 	"github.com/rei0721/go-scaffold/pkg/executor"
 	"github.com/rei0721/go-scaffold/pkg/httpserver"
 	"github.com/rei0721/go-scaffold/pkg/i18n"
-	"github.com/rei0721/go-scaffold/pkg/iam"
 	"github.com/rei0721/go-scaffold/pkg/logger"
 	"github.com/rei0721/go-scaffold/pkg/storage"
 	"github.com/rei0721/go-scaffold/pkg/utils"
@@ -35,25 +30,16 @@ type Infrastructure struct {
 	Cache    cache.Cache
 	Executor executor.Manager
 	Storage  storage.Storage
-	IAM      iam.Service
 }
 
 type Modules struct {
 	Demo DemoModule
-	User UserModule
 }
 
 type DemoModule struct {
 	TodoRepository demorepository.TodoRepository
 	TodoService    demoservice.TodoService
 	TodoHandler    *demohandler.TodoHandler
-}
-
-type UserModule struct {
-	Repository userrepository.Repository
-	Service    userservice.UserService
-	Handler    *userhandler.UserHandler
-	Tokens     authapi.TokenService
 }
 
 type Transport struct {

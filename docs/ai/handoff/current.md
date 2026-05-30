@@ -1,4 +1,4 @@
-# Current Handoff
+# 当前交接
 
 - Project: `vibecoding2labs`
 - Runtime version: `vibe-runtime-0.1.0`
@@ -6,203 +6,62 @@
 - Current round: `infra_001`
 - Current branch: `branch_vibe_coding_infra`
 - Current tree: `docs/ai/tasks/branches/vibe-coding-infra/tree.yaml`
-- Current mode: `go_scaffold_extension_runtime_removed`
+- Current mode: `chinese_delivery_rule_synced`
 - Agency level: `controlled_execution`
-- Current slice: `slice_011_go_scaffold_engineering_repair`
+- Current slice: `slice_013_chinese_delivery_rule`
 
-## Current Reality
+## 当前事实
 
-- The repository now contains an existing Go backend scaffold, not only Vibe
-  Coding runtime documentation.
-- The active developer instruction is to remove the current extension system
-  and related services. The authorized scope covers source deletion, service
-  composition cleanup, HTTP registration removal, lifecycle/reload cleanup,
-  configuration/env/CI cleanup, human docs cleanup, and validation.
-- Do not treat older notes that say "no business code exists" as authoritative;
-  they were superseded by the physical Go scaffold and this repair slice.
+- 仓库当前是一个可运行的 Go 后端脚手架，同时包含 Vibe Coding 的 `docs/ai` 运行时制品。
+- 已移除内置 IAM、auth、RBAC 和相关本地用户管理服务。当前服务只保留 Demo Todo、基础设施包、配置、HTTP、Docker/CI/部署示例和 AI 运行时文档。
+- 最新开发者规则：以后面向人的交付内容默认使用中文；新增或修改代码中的解释性注释使用中文；文档以中文概述当前事实。技术标识符、命令、配置键、包名、路径和外部专有名词可保留原文。
+- 不要把旧记录里“没有业务代码”的说法当作当前事实；该说法已被当前 Go 脚手架实物状态取代。
 
-## Completed
+## 已完成
 
-- Readonly preflight found an empty repository except `.git`.
-- Core runtime entries were created under `AGENTS.md` and `docs/ai/*`.
-- Minimum knowledge and skills entries were created.
-- Bootstrap verification passed; the legacy validator command has since been
-  superseded by the Python validator.
-- Human-facing docs were created for project overview, usage, maintenance, and
-  Agent workflow.
-- Runtime validation passed after the documentation slice.
-- Runtime validator was replaced with `docs/ai/scripts/validate_runtime.py`.
-- Task forest branching was introduced so Vibe Coding infrastructure work lives
-  in `branch_vibe_coding_infra`, while future product or business ideas use
-  `branch_mainline_idea`.
-- The developer confirmed strategy A for capability infrastructure: create only
-  capability directories, skills, knowledge, and dependency candidate lists; do
-  not create an engineering skeleton or install dependencies.
-- The developer green-lit phase two for strategy A with the added rule that
-  current official source research must derive the current year dynamically
-  instead of hard-coding it.
-- The capability catalog was refreshed against current official docs and now
-  records `uv`, `Zod 4`, current shadcn/ui install paths, OpenAI Agents SDK
-  sessions/tracing, and LangGraph persistence as candidate-only details.
-- Added a trigger-bound Vibe infrastructure action workflow skill and canonical
-  SOP template; the workflow binds the trigger suffix to
-  `{{ optimization_action }}`, enforces phase-one four-dimensional diagnosis and
-  red-light stop, and allows phase-two physical output only after explicit
-  human authorization.
-- Added a full-project lifecycle gap analysis, architecture note, project skill,
-  canonical SOP, and knowledge entry so future mainline or project task lines
-  must route the task line, analyze and confirm requirements, perform
-  current-source research for technology choices, confirm research, analyze and
-  confirm tasks, design and confirm architecture/stack, recommend and confirm
-  infrastructure mode, establish Agent Vibe Coding driving infrastructure,
-  create task trees and slices, implement, test, document, update state and
-  evidence, use the `next step` protocol, close the task tree, and continue into
-  round `n+1`.
-- Added a compiler-runtime assimilation analysis, architecture note, project
-  skill, canonical SOP, and knowledge entry so future compiler, generator, or
-  macro governance specifications are routed to `branch_vibe_coding_infra` and
-  distilled into local runtime artifacts instead of becoming `prompt.md` or a
-  raw prompt runtime dependency.
-- Added a project requirement discovery gap analysis, architecture note,
-  project skill, canonical SOP, durable intake record template, and knowledge
-  entry so future raw project ideas are interpreted, mapped into requirement
-  domains, guided through question backlogs, persisted, planned, and checked for
-  baseline readiness before requirement-baseline confirmation.
-- Added a project lifecycle downstream gap analysis, architecture note, project
-  skill, canonical SOP, durable downstream record template, lifecycle record
-  guide, and knowledge entry so post-baseline research, task analysis,
-  architecture, mode selection, Agent driving infrastructure, slice contracts,
-  implementation ledgers, verification evidence, closure, and n+1 reentry are
-  detailed, evidence-backed, and recoverable.
-- Added a strategy C declarative requirement workflow engine with
-  `workflow_engine.yaml`, `template_discovery.yaml`, `state_machine.yaml`, a
-  project skill, canonical SOP, schema, validator coverage, and knowledge entry
-  so future raw project ideas enter `REQUIREMENTS_GATHERING`, ask 5-7 numbered
-  template-driven questions, persist answers, generate follow-ups, and keep
-  business code generation locked until the proper confirmation gates pass.
-- Completed the authorized phase-two Go scaffold engineering repair for
-  Docker/CI/deploy drift, production auth config, demo defaults, HTTP lifecycle
-  errors, ready response semantics, SQL DDL generation, docs/runtime drift, and
-  obsolete initdb residue.
-- Removed the current extension runtime and related services: source package,
-  remote blog sample, config block, environment variables, CI step, HTTP
-  registration endpoint, lifecycle/reload wiring, stale tests, and docs page.
-  Targeted Go tests, full Go tests, service build, and runtime validation passed.
+- 建立 `AGENTS.md` 和 `docs/ai/*` 最小运行时治理入口。
+- 建立任务森林，区分主线产品任务和 `branch_vibe_coding_infra` 基建任务。
+- 增加完整项目生命周期、需求发现、下游生命周期、编译器上下文吸收、声明式需求工作流等运行时规则和技能。
+- 完成 Go 脚手架维护修复：Docker/CI/部署漂移、生产配置示例、Demo 默认值、HTTP 生命周期、SQL DDL、运行时文档漂移等已被整理。
+- 移除旧扩展运行时和相关服务，并通过 Go 测试、构建和运行时校验。
+- 移除 IAM/auth/RBAC/用户管理栈：删除 `internal/modules/user`、`pkg/auth`、`pkg/iam`、`pkg/rbac`、RBAC model、用户 schema helper、路由注册、配置/env/deploy 入口、过期测试，并清理 `go.mod`/`go.sum`。
+- 新增中文交付规则，并将上一轮移除工作涉及的 README、工程文档、配置示例、部署帮助和 CORS 注释同步为中文口径。
 
-## Unfinished
+## 未完成
 
-- Extension runtime removal is pending developer acceptance after validation
-  passed locally.
-- Future product expansion still requires the full-project lifecycle workflow,
-  but maintenance of the existing Go scaffold is now an acknowledged repository
-  responsibility.
+- 用户管理栈移除和中文交付规则同步都处于本地验证通过、等待开发者验收状态。
+- 未来身份认证、访问控制、扩展运行时或产品能力扩展都应从新的需求基线开始，不应默认恢复已删除实现。
 
-## Key Files
+## 关键文件
 
 - `AGENTS.md`
 - `docs/ai/runtime-rule-index.md`
 - `docs/ai/status/current.yaml`
-- `docs/ai/tasks/bootstrap-tree.yaml`
 - `docs/ai/tasks/current-slice.yaml`
+- `docs/ai/tasks/branches/vibe-coding-infra/tree.yaml`
 - `docs/ai/requirements/ledger.yaml`
-- `docs/ai/authorizations/records.md`
 - `docs/ai/evidence/index.md`
-- `docs/ai/knowledge/index.md`
-- `docs/ai/skills/index.md`
+- `docs/ai/handoff/current.md`
 - `README.md`
 - `docs/index.md`
-- `docs/project-overview.md`
-- `docs/usage-guide.md`
-- `docs/maintenance-guide.md`
-- `docs/agent-workflow-guide.md`
-- `docs/ai/scripts/validate_runtime.py`
-- `docs/ai/tasks/forest.yaml`
-- `docs/ai/tasks/main-tree.yaml`
-- `docs/ai/tasks/branches/vibe-coding-infra/tree.yaml`
-- `docs/ai/analysis/task-forest-branching.md`
-- `docs/ai/sandbox/sandbox_001_task_forest_branching.yaml`
-- `docs/ai/capabilities/index.md`
-- `docs/ai/capabilities/dependency-candidates.yaml`
-- `docs/ai/architecture/capability-group-strategy.md`
-- `docs/ai/research/research_001_capability_groups.md`
-- `docs/ai/skills/capability-selection/SKILL.md`
-- `docs/ai/skills/vibe-infra-action-workflow/SKILL.md`
-- `docs/ai/templates/vibe-infra-action-workflow-sop.md`
-- `docs/ai/knowledge/entries/kb_005_capability_groups.md`
-- `docs/ai/knowledge/entries/kb_006_vibe_infra_action_workflow.md`
-- `docs/ai/analysis/mainline-full-project-lifecycle-gap-analysis.md`
-- `docs/ai/architecture/full-project-lifecycle-workflow.md`
-- `docs/ai/skills/full-project-lifecycle/SKILL.md`
-- `docs/ai/templates/full-project-lifecycle-workflow-sop.md`
-- `docs/ai/knowledge/entries/kb_007_full_project_lifecycle.md`
-- `docs/ai/analysis/compiler-runtime-assimilation.md`
-- `docs/ai/architecture/compiler-runtime-assimilation.md`
-- `docs/ai/skills/compiler-runtime-assimilation/SKILL.md`
-- `docs/ai/templates/compiler-runtime-assimilation-sop.md`
-- `docs/ai/knowledge/entries/kb_008_compiler_runtime_assimilation.md`
-- `docs/ai/analysis/project-requirement-discovery-gap-analysis.md`
-- `docs/ai/architecture/project-requirement-discovery-workflow.md`
-- `docs/ai/skills/project-requirement-discovery/SKILL.md`
-- `docs/ai/templates/project-requirement-discovery-sop.md`
-- `docs/ai/templates/project-requirement-discovery-record.yaml`
-- `docs/ai/requirements/intake/README.md`
-- `docs/ai/knowledge/entries/kb_009_project_requirement_discovery.md`
-- `docs/ai/analysis/project-lifecycle-downstream-gap-analysis.md`
-- `docs/ai/architecture/project-lifecycle-downstream-workflow.md`
-- `docs/ai/skills/project-lifecycle-downstream-detailing/SKILL.md`
-- `docs/ai/templates/project-lifecycle-downstream-gates-sop.md`
-- `docs/ai/templates/project-lifecycle-downstream-record.yaml`
-- `docs/ai/lifecycle/README.md`
-- `docs/ai/knowledge/entries/kb_010_project_lifecycle_downstream.md`
-- `docs/ai/requirements/workflow_engine.yaml`
-- `docs/ai/requirements/template_discovery.yaml`
-- `docs/ai/requirements/state_machine.yaml`
-- `docs/ai/analysis/requirement-workflow-engine-gap-analysis.md`
-- `docs/ai/architecture/requirement-workflow-engine.md`
-- `docs/ai/skills/requirement-workflow-engine/SKILL.md`
-- `docs/ai/templates/requirement-workflow-engine-sop.md`
-- `docs/ai/knowledge/entries/kb_011_requirement_workflow_engine.md`
+- `docs/overview/project.md`
+- `docs/environment/configuration.md`
+- `docs/architecture/layers.md`
+- `docs/runtime/startup-flow.md`
+- `docs/runtime/http-flow.md`
+- `docs/runtime/config-flow.md`
+- `.env.example`
+- `deploy.sh`
 
-## Next Condition
+## 下一条件
 
-Developer reviews the extension runtime removal result for
-`slice_011_go_scaffold_engineering_repair`. If accepted, future work can move to
-fresh extension capability design or product expansion while keeping unrelated
-pre-existing worktree changes untouched.
+开发者验收 `slice_013_chinese_delivery_rule`。验收后，后续产物默认中文交付；如需英文或双语，应由开发者明确提出。
 
-## Forbidden Actions
+## 禁止事项
 
-- Do not read the original compiler prompt as a normal recovery path.
-- Do not create `prompt.md` as a runtime authority when a compiler or generator
-  specification is provided after bootstrap; distill it into local runtime
-  artifacts through the compiler-runtime assimilation workflow.
-- Do not start a mainline idea task tree until `branch_vibe_coding_infra`
-  active slices are accepted, migrated, discarded, or partially closed with
-  confirmation.
-- Do not create business implementation before requirement, research, task
-  analysis, architecture, and mode confirmation.
-- Do not create `package.json`, `pyproject.toml`, lockfiles, `src/`, `app/`,
-  `components/`, or `tools/` from the capability catalog alone.
-- Do not install dependencies from the candidate catalog without a future
-  confirmed execution slice.
-- Do not hard-code a calendar year into future capability research prompts; use
-  runtime date or source refresh timestamp.
-- Do not treat the Vibe infrastructure action workflow trigger as
-  authorization for phase-two physical output; it only starts phase-one
-  diagnosis until explicit human confirmation is received.
-- Do not let a future mainline idea skip the full-project lifecycle skill:
-  task-line routing, requirement confirmation, current-source research,
-  task-analysis confirmation, architecture confirmation, and mode confirmation
-  must happen before implementation.
-- Do not let a future raw project idea skip the project requirement discovery
-  skill: idea interpretation, domain mapping, requirement inventory, question
-  backlog, persistent intake record, requirement planning, and baseline
-  readiness must happen before requirement-baseline confirmation.
-- Do not let a future raw project idea skip the requirement workflow engine
-  when present: select a probe template, enter `REQUIREMENTS_GATHERING`, create
-  or update the durable intake record, ask 5-7 numbered questions, persist
-  answers, generate follow-ups, and keep code generation locked.
-- Do not let a future post-baseline project round skip the downstream
-  lifecycle detailing skill: research, task analysis, architecture, mode,
-  Agent infrastructure, slice contracts, implementation ledger, verification
-  packet, closure packet, and n+1 reentry must use durable records and evidence.
+- 不要把原始编译器提示词作为普通恢复路径。
+- 不要创建 `prompt.md` 作为运行时权威；外部治理规格必须提炼进本地运行时制品。
+- 不要在未确认需求、研究、任务分析、架构和模式前启动新的主线业务实现。
+- 不要从候选能力目录直接安装依赖、创建工程骨架或引入包管理清单。
+- 不要在没有新确认任务时恢复已删除的 IAM/auth/RBAC/用户管理实现。
+- 不要忽略中文交付规则；技术标识符可保留原文，但解释性内容应使用中文。

@@ -12,7 +12,6 @@ import (
 
 	"github.com/rei0721/go-scaffold/internal/config"
 	"github.com/rei0721/go-scaffold/internal/modules/demo/model"
-	usermodel "github.com/rei0721/go-scaffold/internal/modules/user/model"
 )
 
 func TestNewServerModeBuildsMinimalApplication(t *testing.T) {
@@ -57,9 +56,6 @@ func TestNewServerModeBuildsMinimalApplication(t *testing.T) {
 	if application.Infra.Storage != nil {
 		t.Fatal("expected storage to be disabled")
 	}
-	if application.Infra.IAM != nil {
-		t.Fatal("expected iam to be disabled")
-	}
 
 	if application.Modules.Demo.TodoRepository == nil {
 		t.Fatal("expected demo repository")
@@ -69,18 +65,6 @@ func TestNewServerModeBuildsMinimalApplication(t *testing.T) {
 	}
 	if application.Modules.Demo.TodoHandler == nil {
 		t.Fatal("expected demo handler")
-	}
-	if application.Modules.User.Repository == nil {
-		t.Fatal("expected user repository")
-	}
-	if application.Modules.User.Service == nil {
-		t.Fatal("expected user service")
-	}
-	if application.Modules.User.Handler == nil {
-		t.Fatal("expected user handler")
-	}
-	if application.Modules.User.Tokens == nil {
-		t.Fatal("expected user token service")
 	}
 
 	if application.Transport.Router == nil {
@@ -92,17 +76,6 @@ func TestNewServerModeBuildsMinimalApplication(t *testing.T) {
 
 	if !application.Infra.Database.DB().Migrator().HasTable(&model.Todo{}) {
 		t.Fatal("expected demo todo schema to be created in server mode")
-	}
-	for _, table := range []interface{}{
-		&usermodel.User{},
-		&usermodel.Role{},
-		&usermodel.Permission{},
-		&usermodel.UserRole{},
-		&usermodel.RolePermission{},
-	} {
-		if !application.Infra.Database.DB().Migrator().HasTable(table) {
-			t.Fatalf("expected user schema table for %#v to be created in server mode", table)
-		}
 	}
 
 	if err := application.Core.ConfigManager.Update(func(cfg *config.Config) {
@@ -182,9 +155,6 @@ storage:
   base_path: %s
   enable_watch: false
   watch_buffer_size: 1
-auth:
-  token_secret: "0123456789abcdef0123456789abcdef"
-  token_ttl: 60
 cors:
   enabled: true
   allow_origins:
@@ -199,7 +169,6 @@ cors:
   allow_headers:
     - "Origin"
     - "Content-Type"
-    - "Authorization"
     - "X-Request-ID"
   expose_headers:
     - "X-Request-ID"
@@ -272,13 +241,6 @@ func clearAppIntegrationEnv(t *testing.T) {
 		"STORAGE_BASE_PATH",
 		"STORAGE_ENABLE_WATCH",
 		"STORAGE_WATCH_BUFFER_SIZE",
-		"IAM_ENABLED",
-		"IAM_MODE",
-		"IAM_DEFAULT_DENY",
-		"AUTH_TOKEN_SECRET",
-		"AUTH_TOKEN_TTL",
-		"RBAC_ENABLED",
-		"RBAC_APPLY_ON_START",
 		"CORS_ENABLED",
 		"CORS_ALLOW_ORIGINS",
 		"CORS_ALLOW_METHODS",

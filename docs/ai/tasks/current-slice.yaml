@@ -1,97 +1,93 @@
 schema_id: ExecutionSlice
-id: slice_011_go_scaffold_engineering_repair
+id: slice_013_chinese_delivery_rule
 branch_id: branch_vibe_coding_infra
 round_id: infra_001
-task_id: task_011_go_scaffold_engineering_repair
-phase: implementation
-module: go_scaffold_engineering_repair
-goal: "Remove the current external extension runtime and related service wiring while keeping the Go scaffold runnable, documented, and verifiable."
+task_id: task_013_chinese_delivery_rule
+phase: verification
+module: delivery_language_and_docs_sync
+goal: "新增中文交付规则，并将上一轮用户管理栈移除的代码注释、文档概述、配置示例和运行时状态同步为中文口径。"
 inputs:
-  - "Developer request: remove the current extension system and related services."
+  - "Developer request: 新增一条规则，以后用中文内容交付产物，并把上述修改的内容，代码用中文注释，文档用中文概述"
   - AGENTS.md
-  - README.md
-  - go.mod
-  - configs/config.yaml
-  - configs/config.example.yaml
-  - docs/ai/status/current.yaml
-outputs:
-  - .env.example
-  - .github/workflows/ci.yml
-  - README.md
-  - configs/config.example.yaml
-  - internal/config/*
-  - internal/app/*
-  - internal/app/initapp/*
-  - internal/app/lifecycleapp/*
-  - internal/app/reloadapp/*
-  - internal/transport/http/*
-  - pkg/iam/*
-  - docs/*.md
-  - docs/**/*.md
+  - docs/ai/runtime-rule-index.md
   - docs/ai/status/current.yaml
   - docs/ai/tasks/current-slice.yaml
+  - README.md
+  - docs/**/*.md
+  - .env.example
+  - configs/config.example.yaml
+  - deploy/config.production.example.yaml
+  - deploy.sh
+outputs:
+  - README.md
+  - docs/**/*.md
+  - .env.example
+  - configs/config.example.yaml
+  - deploy/config.production.example.yaml
+  - deploy.sh
+  - internal/config/app_cors.go
+  - docs/ai/runtime-rule-index.md
+  - docs/ai/requirements/ledger.yaml
+  - docs/ai/tasks/current-slice.yaml
+  - docs/ai/tasks/branches/vibe-coding-infra/tree.yaml
+  - docs/ai/status/current.yaml
   - docs/ai/evidence/index.md
   - docs/ai/handoff/current.md
 allowed_files:
-  - .env.example
-  - .github/workflows/ci.yml
   - README.md
-  - configs/config.example.yaml
-  - internal/config/*
-  - internal/app/*
-  - internal/app/initapp/*
-  - internal/app/lifecycleapp/*
-  - internal/app/reloadapp/*
-  - internal/transport/http/*
-  - pkg/iam/*
-  - docs/*.md
   - docs/**/*.md
-  - docs/ai/status/current.yaml
+  - .env.example
+  - configs/config.example.yaml
+  - deploy/config.production.example.yaml
+  - deploy.sh
+  - internal/config/app_cors.go
+  - internal/config/manager_test.go
+  - internal/app/app_integration_test.go
+  - docs/ai/runtime-rule-index.md
+  - docs/ai/requirements/ledger.yaml
   - docs/ai/tasks/current-slice.yaml
+  - docs/ai/tasks/branches/vibe-coding-infra/tree.yaml
+  - docs/ai/status/current.yaml
   - docs/ai/evidence/index.md
   - docs/ai/handoff/current.md
 forbidden_files:
   - prompt.md
-  - go.mod
-  - go.sum
 allowed_tools:
   - shell_read
   - shell_validation
   - apply_patch
 approval_required_actions:
+  - "Changing public API identifiers only for language localization"
   - "Adding third-party dependencies"
-  - "Changing public module path"
-  - "Production deployment or secret handling outside examples"
-risk_level: medium
+  - "Production deployment"
+risk_level: low
 agency_level: controlled_execution
 verification_commands:
   - "gofmt on touched Go files"
-  - "rg project extension runtime leftovers outside docs/ai"
-  - "go test ./internal/config ./internal/app/initapp ./internal/app/lifecycleapp ./internal/app/reloadapp ./internal/app ./internal/transport/http ./pkg/iam/... -count=1"
   - "go test ./... -count=1 -mod=readonly"
   - "go build -mod=readonly -o ./tmp/go-scaffold-server.exe ./cmd/main"
+  - "rg English delivery leftovers in touched docs/examples"
   - "python docs/ai/scripts/validate_runtime.py"
 manual_checks:
-  - "Old external extension package directory and remote example directory are absent."
-  - "HTTP router exposes no extension registration endpoint."
-  - "Lifecycle and reload code no longer start or reload extension services."
-  - "Configuration, environment examples, CI, and human docs no longer advertise the removed runtime."
+  - "新增运行时规则明确中文交付、中文代码注释、中文文档概述。"
+  - "上一轮用户管理栈移除相关文档改为中文概述。"
+  - "配置示例和部署帮助文本不再保留旧的英文认证说明。"
 acceptance_criteria:
-  - "Extension runtime source, hooks, HTTP registration, sample remote service, config block, env vars, CI step, and docs page are removed."
-  - "Application composition, lifecycle, reload, and router code compile without removed service dependencies."
+  - "Runtime rule index records the Chinese delivery rule."
+  - "Human-facing docs touched by the removal slice are summarized in Chinese."
+  - "New or changed explanatory code comments are Chinese."
   - "Go tests, service build, and runtime validation pass."
-  - "Validation failures, if any, are reported honestly."
-rollback_plan: "Revert this removal slice's touched files only; do not revert pre-existing unrelated worktree changes."
+rollback_plan: "Revert this language-rule synchronization slice only; keep the user-management stack removal intact unless explicitly requested."
 max_iteration_count: 3
 max_retry_count: 3
 retry_count: 0
 last_failure_reason: null
-next_human_decision: "Developer can review the extension runtime removal result and request follow-up fixes."
+next_human_decision: "Developer reviews the Chinese delivery rule and localized removal follow-up."
 audit_evidence:
-  - evidence_024_extension_runtime_removal
-human_override: "Developer explicitly requested removal of the current extension system and related services."
-status: pending_acceptance
+  - evidence_026_chinese_delivery_rule
+human_override: "Developer explicitly requested Chinese delivery as future rule and Chinese documentation/comment cleanup for the previous changes."
+status: validation_passed
 knowledge_updates: []
 skill_updates: []
-next_condition: "Developer reviews the removal result; future extension capabilities should be redesigned from fresh requirements."
-updated_at: "2026-05-30T12:21:38+08:00"
+next_condition: "Future human-facing deliverables default to Chinese; code comments and docs follow the new language rule."
+updated_at: "2026-05-30T13:33:57+08:00"

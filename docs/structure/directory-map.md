@@ -1,62 +1,51 @@
 # 目录地图
 
-项目采用务实分层布局：`cmd/main` 启动进程，`internal/app` 装配应用，
-`internal` 保存应用特有实现，`pkg` 保存可复用支撑包，`types` 保存共享响应、
-错误和常量辅助。
+项目采用务实的分层目录：`cmd/main` 启动进程，`internal/app` 装配应用，`internal` 存放应用专属代码，`pkg` 存放可复用支撑包，`types` 存放共享响应和错误辅助类型。
 
 ## 根目录
 
-| 路径 | 职责 | 被谁使用 |
+| 路径 | 职责 | 使用者 |
 | --- | --- | --- |
-| `README.md` | 仓库快速入口 | 人类和 AI Agent |
-| `go.mod`, `go.sum` | 根 Go module 依赖声明 | 根模块下所有包 |
+| `README.md` | 仓库快速入口 | 人类维护者和 AI agents |
+| `go.mod`, `go.sum` | Go 模块依赖 | 全部 Go 包 |
 | `Dockerfile` | 多阶段 Linux 镜像构建 | CI 和发布流程 |
 | `.github/workflows/ci.yml` | 分支/PR 质量检查 | 维护者 |
-| `.github/workflows/deploy-remote.yml` | 手动远程部署 workflow | 维护者 |
-| `deploy.sh` | Bash 部署包装器 | 远程安装和手动部署 |
+| `deploy.sh` | Bash 部署包装脚本 | 手动部署 |
 
 ## 应用代码
 
-| 路径 | 职责 | 说明 |
+| 路径 | 职责 | 备注 |
 | --- | --- | --- |
-| `cmd/main` | CLI 命令、进程入口、信号处理 | 保持轻量，不放业务逻辑 |
-| `internal/app` | 组合根、生命周期、reload 编排 | 负责装配顺序和模块组装 |
-| `internal/config` | 配置结构、加载、环境覆盖、校验、watch | `envname` 映射的单一事实来源 |
-| `internal/transport/http` | Gin 路由和 HTTP handler 注册 | 通过 handler 接入模块 |
-| `internal/middleware` | trace、logger、recovery、i18n、CORS 等 HTTP 中间件 | 只处理传输层关注点 |
-| `internal/modules/demo` | Demo Todo 业务模块 | 模块分层示例 |
-| `internal/modules/user` | 用户、认证、RBAC 业务模块 | 当前主要身份模块 |
-| `internal/iam` | IAM 上下文抽象 | 应用特有上下文 |
+| `cmd/main` | CLI 命令、进程入口、信号处理 | 保持轻薄 |
+| `internal/app` | 装配根、生命周期、重载编排 | 连接模块和基础设施 |
+| `internal/config` | 配置结构、加载、环境变量覆盖、校验、监听 | `envname` 标签是环境变量名来源 |
+| `internal/transport/http` | Gin 路由和 HTTP handler 注册 | 连接模块 handler |
+| `internal/middleware` | trace、logger、recovery、i18n、CORS 中间件 | 只处理传输层关注点 |
+| `internal/modules/demo` | Demo Todo 业务模块 | 分层模块示例 |
 
 ## 基础设施包
 
 | 路径 | 职责 | 边界 |
 | --- | --- | --- |
-| `pkg/database` | GORM 数据库管理、ping、reload、事务 | 不知道应用模块 |
+| `pkg/database` | GORM 数据库管理、ping、重载、事务 | 不感知应用模块 |
 | `pkg/cache` | Redis 管理器 | 可选基础设施 |
-| `pkg/logger` | Zap 日志封装 | 被 app 和 package 复用 |
-| `pkg/httpserver` | HTTP server 启停和 reload 包装 | 不定义路由 |
-| `pkg/executor` | goroutine pool 管理器 | 可选支撑设施 |
-| `pkg/auth` | JWT token 服务 | 通用 token 基础设施 |
-| `pkg/rbac` | Casbin 授权适配器 | 通用 RBAC 基础设施 |
-| `pkg/crypto` | 密码哈希 | 通用加密辅助 |
-| `pkg/storage` | 文件存储和 watcher 工具 | 可选存储基础设施 |
-| `pkg/sqlgen` | SQL DDL/代码生成辅助 | 被 DB CLI 和 schema 应用使用 |
-| `pkg/i18n` | 消息包和语言辅助 | 可选本地化支撑 |
-| `pkg/utils` | 零散工具 | 避免膨胀成隐藏业务层 |
+| `pkg/logger` | Zap 日志包装 | 被应用和包复用 |
+| `pkg/httpserver` | HTTP 服务启动/关闭/重载包装 | 不定义路由 |
+| `pkg/executor` | 协程池管理器 | 可选支撑能力 |
+| `pkg/crypto` | 哈希和加密辅助函数 | 通用加密辅助能力 |
+| `pkg/storage` | 文件存储和 watcher 辅助能力 | 可选存储基础设施 |
+| `pkg/sqlgen` | SQL DDL/代码生成辅助能力 | 被 DB CLI 和表结构应用使用 |
+| `pkg/i18n` | 消息包和语言辅助能力 | 可选本地化支撑 |
+| `pkg/utils` | 小型工具函数 | 避免隐藏业务逻辑 |
 
 ## 共享类型
 
-`types` 保存常量、类型化错误和 HTTP result 辅助。注意：`types/result`
-依赖 Gin，所以当前 `types` 不是完全纯净的领域类型层。
+`types` 保存常量、类型化错误和 HTTP 响应辅助类型。`types/result` 当前依赖 Gin，因此还不是完全与传输层无关。
 
-## 文档和运行态
+## 文档和运行时
 
 | 路径 | 职责 |
 | --- | --- |
-| `docs` | 人类工程文档 |
-| `docs/ai` | AI 运行态、任务树、决策、证据、技能和交接 |
-| `AGENTS.md` | Agent 短索引 |
-
-不要把“回读原始 prompt”作为未来恢复路径。如果运行态太薄，应修复
-`docs/ai` 下的物理 artifact。
+| `docs` | 面向人的工程文档 |
+| `docs/ai` | AI 运行时状态、任务树、决策、证据、知识、技能和交接 |
+| `AGENTS.md` | Agent 运行时索引 |

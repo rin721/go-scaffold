@@ -127,6 +127,27 @@ func TestNewRouterReadyEndpoint(t *testing.T) {
 	}
 }
 
+func TestNewRouterDoesNotRegisterRemovedUserManagementRoutes(t *testing.T) {
+	router := newTestRouter(RouterDeps{})
+
+	for _, path := range []string{
+		"/api/v1/auth/login",
+		"/api/v1/auth/register",
+		"/api/v1/users",
+		"/api/v1/roles",
+		"/api/v1/permissions",
+	} {
+		recorder := httptest.NewRecorder()
+		request := httptest.NewRequest(http.MethodGet, path, nil)
+
+		router.ServeHTTP(recorder, request)
+
+		if recorder.Code != http.StatusNotFound {
+			t.Fatalf("expected %s to be unregistered with status %d, got %d", path, http.StatusNotFound, recorder.Code)
+		}
+	}
+}
+
 func newTestRouter(deps RouterDeps) *gin.Engine {
 	gin.SetMode(gin.TestMode)
 	return NewRouter(deps)

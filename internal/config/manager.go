@@ -428,28 +428,11 @@ func (m *manager) copyConfig(src *Config) *Config {
 	dst.I18n.Supported = append([]string(nil), src.I18n.Supported...)
 	dst.Executor.Pools = append([]ExecutorPoolConfig(nil), src.Executor.Pools...)
 	dst.Demo = copyDemoConfig(src.Demo)
-	dst.IAM.Tokens = copyIAMTokens(src.IAM.Tokens)
-	dst.IAM.Policies = append([]IAMPolicyConfig(nil), src.IAM.Policies...)
-	if src.IAM.DefaultDeny != nil {
-		value := *src.IAM.DefaultDeny
-		dst.IAM.DefaultDeny = &value
-	}
-	dst.Auth = copyAuthConfig(src.Auth)
-	dst.RBAC = copyRBACConfig(src.RBAC)
 	dst.CORS.AllowOrigins = append([]string(nil), src.CORS.AllowOrigins...)
 	dst.CORS.AllowMethods = append([]string(nil), src.CORS.AllowMethods...)
 	dst.CORS.AllowHeaders = append([]string(nil), src.CORS.AllowHeaders...)
 	dst.CORS.ExposeHeaders = append([]string(nil), src.CORS.ExposeHeaders...)
 	return &dst
-}
-
-func copyAuthConfig(src AuthConfig) AuthConfig {
-	dst := src
-	if src.PublicRegistration != nil {
-		value := *src.PublicRegistration
-		dst.PublicRegistration = &value
-	}
-	return dst
 }
 
 // RegisterHook 注册配置变更钩子

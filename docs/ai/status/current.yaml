@@ -2,7 +2,7 @@ schema_id: StatusReport
 project_id: vibecoding2labs
 compiler_version: vibe-coding-infra-compiler-v1.8.0
 runtime_version: vibe-runtime-0.1.0
-updated_at: "2026-05-30T12:21:38+08:00"
+updated_at: "2026-05-30T13:33:57+08:00"
 lifecycle_phase: verification
 state: pending_acceptance
 state_machine_version: vibe-state-machine-0.1.0
@@ -12,11 +12,11 @@ current_branch: branch_vibe_coding_infra
 current_tree: docs/ai/tasks/branches/vibe-coding-infra/tree.yaml
 task_forest: docs/ai/tasks/forest.yaml
 mainline_idea_tree: docs/ai/tasks/main-tree.yaml
-current_mode: go_scaffold_extension_runtime_removed
+current_mode: chinese_delivery_rule_synced
 candidate_mode: null
 agency_level: controlled_execution
 current_bootstrap_node: null
-current_slice: slice_011_go_scaffold_engineering_repair
+current_slice: slice_013_chinese_delivery_rule
 requirement_baseline_status: confirmed
 research_status: not_required_for_runtime_workflow_update
 task_analysis_status: confirmed_phase_one_diagnosis
@@ -25,11 +25,11 @@ infra_mode_status: standard_light_for_engineering_repair
 task_tree_status: pending_acceptance
 acceptance_status: validation_passed
 task_tree_closure_status: pending_human_acceptance
-next_allowed_phase: acceptance[go_scaffold_extension_runtime_removed]
+next_allowed_phase: acceptance[chinese_delivery_rule_synced]
 blocked: false
 retry_count: 0
 last_failure_reason: null
-next_human_decision: "Review the extension runtime removal result."
+next_human_decision: "Review the Chinese delivery rule and localized user-management removal follow-up."
 memory_anchor_files:
   - AGENTS.md
   - docs/ai/runtime-rule-index.md
