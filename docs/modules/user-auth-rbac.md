@@ -47,16 +47,15 @@ Bearer token
   -> handler proceeds or returns forbidden
 ```
 
-principal 同时会注入 request context，便于启用 IAM/plugin hook 时读取身份信息。
+principal 同时会注入 request context，便于应用内模块复用身份信息。
 
 ## 种子数据
 
-配置化 RBAC seed 可以在启动时创建默认角色和权限。服务规则可让首个注册用户获得 admin 行为，后续用户按配置获得默认 user 角色。
+配置区 RBAC seed 可以在启动时创建默认角色和权限。服务规则可让首个注册用户获得 admin 行为，后续用户按配置获得默认 user 角色。
 
 ## Token Secret 规则
 
-如果配置了 `auth.token_secret`，长度必须至少 32 bytes。本地开发未配置时，应用可以生成进程内随机 secret。这个 fallback
-不会跨重启稳定保存，不能作为生产密钥策略。
+如果配置了 `auth.token_secret`，长度必须至少 32 bytes。本地开发未配置时，应用可以生成进程内随机 secret。这个 fallback 不会跨重启稳定保存，不能作为生产密钥策略。
 
 ## 当前非目标
 

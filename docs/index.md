@@ -1,7 +1,7 @@
 # 工程文档入口
 
-这里是 `go-scaffold` 的人类工程文档入口，描述当前磁盘上的 Go 服务脚手架。`docs/ai`
-子树是独立的 AI 运行态，保存任务状态、证据、决策、知识和交接信息。
+这里是 `go-scaffold` 的人类工程文档入口，描述当前磁盘上的 Go 服务脚手架。
+`docs/ai` 子树是独立的 AI 运行态，保存任务状态、证据、决策、知识和交接信息。
 
 ## 推荐阅读顺序
 
@@ -30,12 +30,12 @@
 | [environment](environment/configuration.md) | 配置文件、环境变量、`.env` 和生产密钥规则 |
 | [architecture](architecture/layers.md) | 应用分层和模块装配方式 |
 | [runtime](runtime/startup-flow.md) | 启动、HTTP 请求、配置热加载、数据、状态和错误流 |
-| [modules](modules/demo.md) | Demo、用户/认证/RBAC、插件系统文档 |
+| [modules](modules/demo.md) | Demo、用户、认证/RBAC 文档 |
 | [workflows](workflows/db-cli.md) | DB CLI 等开发和运维工作流 |
 | [testing](testing/test-matrix.md) | 测试归属和验证命令 |
 | [build](build/docker-and-ci.md) | CI、本地构建、Docker 构建和质量门禁 |
 | [release](release/deployment.md) | 生产配置、部署脚本、远程 workflow 和发布检查 |
-| [extension](extension/adding-modules.md) | 如何添加模块、配置、API 和插件 |
+| [extension](extension/adding-modules.md) | 如何添加模块、配置和 API |
 | [maintenance](maintenance/maintenance-guide.md) | 长期维护流程和文档卫生 |
 | [ai-agent](ai-agent/runtime-state.md) | `AGENTS.md` 与 `docs/ai` 运行态说明 |
 | [backlog](backlog/known-gaps.md) | 已知实现漂移、文档债和验证缺口 |

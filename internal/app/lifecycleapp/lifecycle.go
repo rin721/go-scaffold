@@ -14,12 +14,6 @@ func Start(ctx context.Context, transport initapp.Transport) error {
 	if err := transport.HTTPServer.Start(ctx); err != nil {
 		return fmt.Errorf("start HTTP server: %w", err)
 	}
-	if transport.PluginHTTPServer != nil {
-		if err := transport.PluginHTTPServer.Start(ctx); err != nil {
-			_ = transport.HTTPServer.Shutdown(ctx)
-			return fmt.Errorf("start plugin HTTP server: %w", err)
-		}
-	}
 	return nil
 }
 
@@ -30,17 +24,6 @@ func Shutdown(ctx context.Context, core initapp.Core, infra initapp.Infrastructu
 	}
 
 	var errs []error
-
-	if transport.PluginHTTPServer != nil {
-		if err := transport.PluginHTTPServer.Shutdown(ctx); err != nil {
-			errs = append(errs, fmt.Errorf("plugin http server shutdown: %w", err))
-			if log != nil {
-				log.Error("failed to shutdown plugin HTTP server", "error", err)
-			}
-		} else if log != nil {
-			log.Info("plugin HTTP server stopped")
-		}
-	}
 
 	if transport.HTTPServer != nil {
 		if err := transport.HTTPServer.Shutdown(ctx); err != nil {
@@ -61,17 +44,6 @@ func Shutdown(ctx context.Context, core initapp.Core, infra initapp.Infrastructu
 			}
 		} else if log != nil {
 			log.Info("storage closed")
-		}
-	}
-
-	if infra.Plugins != nil {
-		if err := infra.Plugins.Close(ctx); err != nil {
-			errs = append(errs, fmt.Errorf("plugin manager close: %w", err))
-			if log != nil {
-				log.Error("failed to close plugin manager", "error", err)
-			}
-		} else if log != nil {
-			log.Info("plugin manager closed")
 		}
 	}
 

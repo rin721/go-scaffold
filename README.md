@@ -1,76 +1,139 @@
-# go-scaffold
+# Go-Scaffold
 
-`go-scaffold` 是一个 Go 后端服务脚手架。当前仓库已经包含可运行的 HTTP
-服务、配置加载、日志、数据库访问、Demo Todo API、本地用户认证、RBAC、插件注册、存储工具、SQL
-生成、Docker 构建、CI 检查和部署示例。
+[![CI](https://github.com/rin721/go-scaffold/actions/workflows/ci.yml/badge.svg)](https://github.com/rin721/go-scaffold/actions/workflows/ci.yml)
+[![Go](https://img.shields.io/badge/Go-1.24.6-00ADD8?logo=go)](https://go.dev/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/rin721/go-scaffold)
 
-项目尚未达到 v1 发布条件。Docker、CI、部署脚本和运行文档都是当前阶段的工程基线，不等同于生产发布承诺。
+`go-scaffold` is a runnable Go backend scaffold for service-oriented projects.
+It includes HTTP serving, configuration loading, structured logging, database
+access, demo CRUD APIs, local user authentication, RBAC, storage helpers, SQL
+generation, Docker build files, CI checks, deployment examples, and AI runtime
+documentation.
 
-## 快速启动
+<p align="center">
+  <img src="./logo.png" alt="go-scaffold logo" width="180">
+</p>
+
+## Highlights
+
+- Runnable service entry with graceful startup and shutdown.
+- Layered module pattern: `handler -> service -> repository -> model`.
+- Local defaults that work with SQLite and no Redis dependency.
+- Production examples for Docker, Compose, environment variables, and remote
+  deployment.
+- Infrastructure packages for auth, RBAC, database, cache, i18n, logging,
+  storage, SQL generation, and HTTP serving.
+- AI collaboration state under `docs/ai` without requiring prompt-history
+  recovery.
+
+## Tech Stack
+
+| Area | Technology |
+| --- | --- |
+| Language and runtime | Go 1.24.6 |
+| HTTP | Gin, gin-contrib/cors |
+| CLI | Local `pkg/cli` command framework |
+| Configuration | Viper, godotenv, YAML, environment overrides |
+| Logging | Zap, lumberjack |
+| Database | GORM with SQLite, MySQL, and PostgreSQL drivers |
+| Cache | go-redis with optional local disablement |
+| Auth | JWT v5, bcrypt |
+| RBAC | Casbin |
+| i18n | go-i18n with `zh-CN` and `en-US` locale files |
+| Storage | afero, mimetype, imaging |
+| SQL and code generation | Local `pkg/sqlgen`, Jennifer |
+| Background work | ants goroutine pool manager |
+| Testing | Go test, miniredis |
+| CI and delivery | GitHub Actions, Docker, Docker Compose examples |
+
+## Quick Start
+
+Run the service with the default local config:
 
 ```bash
 go run ./cmd/main server
 ```
 
-默认配置使用本地 SQLite `./data/app.db`，关闭 Redis，启用 demo 模块，并把 HTTP 服务绑定到
-`127.0.0.1:9999`。
+The default config uses local SQLite at `./data/app.db`, disables Redis, enables
+the demo module, and binds the HTTP service to `127.0.0.1:9999`.
 
 ```bash
 curl http://127.0.0.1:9999/health
 curl http://127.0.0.1:9999/ready
 ```
 
-运行测试：
+Run the full test suite:
 
 ```bash
 go test ./... -count=1
-cd remote_plugins/blog && go test ./... -count=1
 ```
 
-构建服务：
+Build the service binary:
 
 ```bash
 go build -trimpath -ldflags="-s -w" -o bin/go-scaffold-server ./cmd/main
 ```
 
-## 主要入口
+Build the Docker image:
 
-| 范围 | 路径 |
+```bash
+docker build -t go-scaffold:local .
+```
+
+## Main Entries
+
+| Scope | Path |
 | --- | --- |
-| CLI 入口 | `cmd/main` |
-| 应用装配 | `internal/app` |
-| 配置 | `internal/config`, `configs` |
-| HTTP 传输层 | `internal/transport/http` |
-| Demo 模块 | `internal/modules/demo` |
-| 用户、认证、RBAC | `internal/modules/user`, `pkg/auth`, `pkg/rbac` |
-| 基础设施包 | `pkg/database`, `pkg/cache`, `pkg/logger`, `pkg/httpserver`, `pkg/storage`, `pkg/plugin`, `pkg/sqlgen` |
-| 共享响应和错误类型 | `types` |
-| 远程插件示例 | `remote_plugins/blog` |
-| Docker 与部署 | `Dockerfile`, `deploy`, `deploy.sh`, `script/install.sh` |
-| 人类工程文档 | `docs/index.md` |
-| AI 运行态 | `AGENTS.md`, `docs/ai` |
+| CLI entry | `cmd/main` |
+| Application composition | `internal/app` |
+| Configuration | `internal/config`, `configs` |
+| HTTP transport | `internal/transport/http` |
+| Demo module | `internal/modules/demo` |
+| User, auth, RBAC | `internal/modules/user`, `pkg/auth`, `pkg/rbac` |
+| Infrastructure packages | `pkg/database`, `pkg/cache`, `pkg/logger`, `pkg/httpserver`, `pkg/storage`, `pkg/sqlgen` |
+| Shared response and errors | `types` |
+| Docker and deployment | `Dockerfile`, `deploy`, `deploy.sh`, `script/install.sh` |
+| Human docs | `docs/index.md` |
+| AI runtime state | `AGENTS.md`, `docs/ai` |
 
-## API 范围
+## API Surface
 
-主服务当前注册的核心路由：
-
-| 路由 | 用途 |
+| Route | Purpose |
 | --- | --- |
-| `GET /health` | 进程存活检查 |
-| `GET /ready` | 包含数据库 ping 的就绪检查 |
-| `POST /api/v1/demo/todos` | 创建 demo Todo |
-| `GET /api/v1/demo/todos` | 查询 demo Todo 列表 |
-| `GET /api/v1/demo/todos/:id` | 读取单个 demo Todo |
-| `PUT /api/v1/demo/todos/:id` | 更新 demo Todo |
-| `DELETE /api/v1/demo/todos/:id` | 删除 demo Todo |
-| `POST /api/v1/auth/register` | 在允许公开注册时创建本地用户 |
-| `POST /api/v1/auth/login` | 登录并签发 bearer token |
-| `GET /api/v1/auth/me` | 读取当前登录主体 |
-| `/api/v1/users`, `/api/v1/roles`, `/api/v1/permissions` | 需要认证和权限的用户/RBAC 管理 |
+| `GET /health` | Process liveness check |
+| `GET /ready` | Readiness check with database ping |
+| `POST /api/v1/demo/todos` | Create demo Todo |
+| `GET /api/v1/demo/todos` | List demo Todos |
+| `GET /api/v1/demo/todos/:id` | Read one demo Todo |
+| `PUT /api/v1/demo/todos/:id` | Update demo Todo |
+| `DELETE /api/v1/demo/todos/:id` | Delete demo Todo |
+| `POST /api/v1/auth/register` | Create local user when public registration is enabled |
+| `POST /api/v1/auth/login` | Login and receive a bearer token |
+| `GET /api/v1/auth/me` | Read current authenticated principal |
+| `/api/v1/users`, `/api/v1/roles`, `/api/v1/permissions` | Authenticated user and RBAC management |
 
-## 数据库 CLI
+## Configuration
 
-`db` 命令当前聚焦于生成 SQL 和 demo Todo CRUD。
+Local configuration starts from `configs/config.yaml` or
+`configs/config.example.yaml`. Runtime values can also be supplied through
+environment variables and `.env` style files. The most important production
+override is:
+
+```bash
+RIN_APP_AUTH_TOKEN_SECRET=<at-least-32-byte-secret>
+```
+
+Useful references:
+
+- `docs/environment/configuration.md`
+- `.env.example`
+- `deploy/config.production.example.yaml`
+
+## Database CLI
+
+The `db` command can preview or apply generated SQL and run demo Todo
+operations through the application service layer.
 
 ```bash
 go run ./cmd/main db --operation=schema
@@ -78,15 +141,58 @@ go run ./cmd/main db --operation=schema --apply
 go run ./cmd/main db --operation=todo-list
 ```
 
-已移除的 `initdb` 命令和 InitDB 配置段不得在没有新确认任务的情况下恢复。
+The removed `initdb` command and InitDB config block should not be restored
+without a new confirmed task.
 
-## 文档
+## Engineering Workflow
 
-从 [`docs/index.md`](docs/index.md) 开始阅读。文档按真实工程边界组织：项目概览、目录地图、配置、架构、运行流程、模块、工作流、测试、构建、发布、扩展、维护、AI 协作和已知缺口。
+```bash
+gofmt -w ./cmd ./internal ./pkg ./types
+go test ./... -count=1 -mod=readonly
+go build -mod=readonly -o ./tmp/go-scaffold-server ./cmd/main
+docker build -t go-scaffold:ci .
+```
 
-## 生产注意事项
+CI runs formatting drift checks, the Go test suite, service build, Docker image
+build, and whitespace checks on pushes to `main` or `master` and on pull
+requests.
 
-生产配置必须注入至少 32 bytes 的 `RIN_APP_AUTH_TOKEN_SECRET`。本地配置在没有显式 auth secret 时可以回退到进程内随机 token
-secret，这只适合开发调试；服务重启后旧 token 会失效。
+## Deployment
 
-生产示例默认关闭 demo 模块。除非有明确确认，不要在生产环境暴露 demo 路由或隐式创建 demo schema。
+| Target | Entry |
+| --- | --- |
+| Local binary | `go build ... ./cmd/main` |
+| Local container | `Dockerfile` |
+| Production Compose sample | `deploy/docker-compose.production.example.yml` |
+| Production config sample | `deploy/config.production.example.yaml` |
+| Shell deployment helper | `deploy.sh` |
+| Install helper | `script/install.sh` |
+| Remote workflow | `.github/workflows/deploy-remote.yml` |
+
+## Documentation
+
+Start with `docs/index.md`. The docs are organized around the current code
+shape: overview, directory map, configuration, architecture, runtime flows,
+modules, workflows, testing, build, release, maintenance, AI collaboration, and
+known gaps.
+
+DeepWiki is also available from the README badge:
+
+```text
+https://deepwiki.com/rin721/go-scaffold
+```
+
+## Production Notes
+
+Production config must inject at least 32 bytes into
+`RIN_APP_AUTH_TOKEN_SECRET`. Local development can generate an in-process random
+token secret when none is configured, but old tokens will become invalid after a
+restart.
+
+Production examples disable the demo module by default. Do not expose demo
+routes or implicitly create demo schema in production unless that behavior is
+explicitly confirmed.
+
+## License
+
+This project is open source under the [MIT License](LICENSE).

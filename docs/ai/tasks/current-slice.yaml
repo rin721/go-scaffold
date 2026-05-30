@@ -5,73 +5,55 @@ round_id: infra_001
 task_id: task_011_go_scaffold_engineering_repair
 phase: implementation
 module: go_scaffold_engineering_repair
-goal: "Repair the existing Go scaffold so Docker, deployment configuration, auth/RBAC/demo defaults, HTTP lifecycle errors, SQL DDL generation, CI, tests, and runtime documentation form a runnable and verifiable engineering baseline."
+goal: "Remove the current external extension runtime and related service wiring while keeping the Go scaffold runnable, documented, and verifiable."
 inputs:
-  - "Developer confirmation: 全部修复"
+  - "Developer request: remove the current extension system and related services."
   - AGENTS.md
   - README.md
-  - Dockerfile
   - go.mod
   - configs/config.yaml
-  - deploy/config.production.example.yaml
+  - configs/config.example.yaml
   - docs/ai/status/current.yaml
 outputs:
-  - Dockerfile
+  - .env.example
   - .github/workflows/ci.yml
-  - deploy.sh
-  - script/install.sh
-  - deploy/docker-compose.production.example.yml
-  - deploy/config.production.example.yaml
-  - configs/config.yaml
+  - README.md
   - configs/config.example.yaml
   - internal/config/*
-  - internal/app/initapp/modules.go
-  - internal/app/initapp/demo_migration_test.go
-  - internal/transport/http/router.go
-  - internal/modules/user/handler/user.go
-  - pkg/httpserver/*
-  - pkg/sqlgen/*
-  - pkg/plugin/*
+  - internal/app/*
+  - internal/app/initapp/*
+  - internal/app/lifecycleapp/*
+  - internal/app/reloadapp/*
+  - internal/transport/http/*
+  - pkg/iam/*
   - docs/*.md
+  - docs/**/*.md
   - docs/ai/status/current.yaml
   - docs/ai/tasks/current-slice.yaml
+  - docs/ai/evidence/index.md
   - docs/ai/handoff/current.md
 allowed_files:
-  - Dockerfile
-  - .github/workflows/ci.yml
   - .env.example
+  - .github/workflows/ci.yml
   - README.md
-  - deploy.sh
-  - script/install.sh
-  - deploy/docker-compose.production.example.yml
-  - deploy/config.production.example.yaml
-  - configs/config.yaml
   - configs/config.example.yaml
-  - cmd/main/db.go
   - internal/config/*
-  - internal/app/initapp/modules.go
-  - internal/app/initapp/demo_migration_test.go
-  - internal/modules/user/handler/user.go
-  - internal/transport/http/router.go
-  - internal/transport/http/router_test.go
-  - internal/app/dbapp/dbapp_test.go
-  - pkg/httpserver/*
-  - pkg/sqlgen/*
-  - pkg/plugin/*
-  - pkg/yaml2go/README.md
-  - docs/configuration.md
-  - docs/db-cli.md
-  - docs/deployment.md
-  - docs/project-overview.md
-  - docs/maintenance-guide.md
+  - internal/app/*
+  - internal/app/initapp/*
+  - internal/app/lifecycleapp/*
+  - internal/app/reloadapp/*
+  - internal/transport/http/*
+  - pkg/iam/*
+  - docs/*.md
+  - docs/**/*.md
   - docs/ai/status/current.yaml
   - docs/ai/tasks/current-slice.yaml
+  - docs/ai/evidence/index.md
   - docs/ai/handoff/current.md
 forbidden_files:
   - prompt.md
   - go.mod
   - go.sum
-  - remote_plugins/blog/go.mod
 allowed_tools:
   - shell_read
   - shell_validation
@@ -79,40 +61,37 @@ allowed_tools:
 approval_required_actions:
   - "Adding third-party dependencies"
   - "Changing public module path"
-  - "Deleting business logic"
   - "Production deployment or secret handling outside examples"
 risk_level: medium
 agency_level: controlled_execution
 verification_commands:
   - "gofmt on touched Go files"
-  - "go test ./pkg/sqlgen ./internal/app/dbapp ./pkg/httpserver ./internal/transport/http ./internal/config ./pkg/plugin -count=1"
+  - "rg project extension runtime leftovers outside docs/ai"
+  - "go test ./internal/config ./internal/app/initapp ./internal/app/lifecycleapp ./internal/app/reloadapp ./internal/app ./internal/transport/http ./pkg/iam/... -count=1"
   - "go test ./... -count=1 -mod=readonly"
-  - "go build -mod=readonly -o ./tmp/go-scaffold-server ./cmd/main"
-  - "docker build -t go-scaffold:local ."
-  - "cd remote_plugins/blog && go test ./... -count=1"
+  - "go build -mod=readonly -o ./tmp/go-scaffold-server.exe ./cmd/main"
   - "python docs/ai/scripts/validate_runtime.py"
 manual_checks:
-  - "Dockerfile builds ./cmd/main, the only root server entrypoint."
-  - "Production config requires a stable auth token secret and disables demo by default."
-  - "HTTP bind errors surface synchronously from Start."
-  - "MySQL user-role and role-permission tables use composite unique indexes."
+  - "Old external extension package directory and remote example directory are absent."
+  - "HTTP router exposes no extension registration endpoint."
+  - "Lifecycle and reload code no longer start or reload extension services."
+  - "Configuration, environment examples, CI, and human docs no longer advertise the removed runtime."
 acceptance_criteria:
-  - "P0 Docker build target drift is fixed."
-  - "P1 production auth, HTTP lifecycle, SQL DDL, CI coverage, and docs/runtime drift are fixed."
-  - "P2 security/config/test gaps identified in phase one are addressed or guarded by production defaults."
-  - "P3 obsolete initdb marker is removed."
-  - "Validation commands are run and failures are reported honestly."
-rollback_plan: "Revert this repair slice's touched files only; do not revert pre-existing unrelated worktree changes."
+  - "Extension runtime source, hooks, HTTP registration, sample remote service, config block, env vars, CI step, and docs page are removed."
+  - "Application composition, lifecycle, reload, and router code compile without removed service dependencies."
+  - "Go tests, service build, and runtime validation pass."
+  - "Validation failures, if any, are reported honestly."
+rollback_plan: "Revert this removal slice's touched files only; do not revert pre-existing unrelated worktree changes."
 max_iteration_count: 3
 max_retry_count: 3
 retry_count: 0
 last_failure_reason: null
-next_human_decision: "Developer can review the full engineering repair result and request follow-up fixes."
+next_human_decision: "Developer can review the extension runtime removal result and request follow-up fixes."
 audit_evidence:
-  - phase_2_engineering_repair
-human_override: "Developer replied 全部修复 after phase-one diagnosis."
+  - evidence_024_extension_runtime_removal
+human_override: "Developer explicitly requested removal of the current extension system and related services."
 status: pending_acceptance
 knowledge_updates: []
 skill_updates: []
-next_condition: "Developer reviews the phase-two repair result; bash syntax and Docker build need an environment with bash and docker."
-updated_at: "2026-05-30T02:32:38+08:00"
+next_condition: "Developer reviews the removal result; future extension capabilities should be redesigned from fresh requirements."
+updated_at: "2026-05-30T12:21:38+08:00"

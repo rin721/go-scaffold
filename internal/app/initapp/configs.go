@@ -56,13 +56,6 @@ func IsStorageConfigChanged(oldCfg, newCfg *config.Config) bool {
 	return oldCfg.Storage != newCfg.Storage
 }
 
-func IsPluginConfigChanged(oldCfg, newCfg *config.Config) bool {
-	if oldCfg == newCfg {
-		return false
-	}
-	return !reflect.DeepEqual(oldCfg.Plugin, newCfg.Plugin)
-}
-
 func IsIAMConfigChanged(oldCfg, newCfg *config.Config) bool {
 	if oldCfg == newCfg {
 		return false
@@ -129,16 +122,6 @@ func HTTPServerConfig(cfg *config.Config) *httpserver.Config {
 	return &httpserver.Config{
 		Host:         cfg.Server.Host,
 		Port:         cfg.Server.Port,
-		ReadTimeout:  time.Duration(cfg.Server.ReadTimeout) * time.Second,
-		WriteTimeout: time.Duration(cfg.Server.WriteTimeout) * time.Second,
-		IdleTimeout:  time.Duration(cfg.Server.IdleTimeout) * time.Second,
-	}
-}
-
-func PluginHTTPServerConfig(cfg *config.Config) *httpserver.Config {
-	return &httpserver.Config{
-		Host:         cfg.Plugin.Interface.HTTP.Host,
-		Port:         cfg.Plugin.Interface.HTTP.Port,
 		ReadTimeout:  time.Duration(cfg.Server.ReadTimeout) * time.Second,
 		WriteTimeout: time.Duration(cfg.Server.WriteTimeout) * time.Second,
 		IdleTimeout:  time.Duration(cfg.Server.IdleTimeout) * time.Second,

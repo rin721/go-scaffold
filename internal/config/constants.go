@@ -82,7 +82,6 @@ const (
 	AppExecutorName = "executor"
 	AppStorageName  = "storage"
 	AppDemoName     = "demo"
-	AppPluginName   = "plugin"
 	AppIAMName      = "iam"
 	AppAuthName     = "auth"
 	AppRBACName     = "rbac"

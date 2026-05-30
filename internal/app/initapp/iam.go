@@ -67,3 +67,14 @@ func parsePolicyExpiry(value string) time.Time {
 	}
 	return parsed.UTC()
 }
+
+func copyStringMap(src map[string]string) map[string]string {
+	if len(src) == 0 {
+		return nil
+	}
+	dst := make(map[string]string, len(src))
+	for k, v := range src {
+		dst[k] = v
+	}
+	return dst
+}

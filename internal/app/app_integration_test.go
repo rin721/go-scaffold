@@ -60,9 +60,6 @@ func TestNewServerModeBuildsMinimalApplication(t *testing.T) {
 	if application.Infra.IAM != nil {
 		t.Fatal("expected iam to be disabled")
 	}
-	if application.Infra.Plugins != nil {
-		t.Fatal("expected plugin manager to be disabled")
-	}
 
 	if application.Modules.Demo.TodoRepository == nil {
 		t.Fatal("expected demo repository")
@@ -275,17 +272,6 @@ func clearAppIntegrationEnv(t *testing.T) {
 		"STORAGE_BASE_PATH",
 		"STORAGE_ENABLE_WATCH",
 		"STORAGE_WATCH_BUFFER_SIZE",
-		"PLUGIN_ENABLED",
-		"PLUGIN_DEFAULT_TIMEOUT",
-		"PLUGIN_MAX_RESPONSE_BYTES",
-		"PLUGIN_INTERFACE_HTTP_ENABLED",
-		"PLUGIN_INTERFACE_HTTP_HOST",
-		"PLUGIN_INTERFACE_HTTP_PORT",
-		"PLUGIN_INTERFACE_HTTP_PUBLIC_URL",
-		"PLUGIN_INTERFACE_WS_PUBLIC_URL",
-		"PLUGIN_REGISTRATION_ENABLED",
-		"PLUGIN_REGISTRATION_EXPOSE_ON_MAIN_HTTP",
-		"PLUGIN_REGISTRATION_TOKEN",
 		"IAM_ENABLED",
 		"IAM_MODE",
 		"IAM_DEFAULT_DENY",

@@ -458,3 +458,27 @@
   question loops, follow-up triggers, and validator coverage while avoiding
   dependency installation, package manifests, application skeletons, and
   business code.
+
+## evidence_024: Extension Runtime Removal
+
+- Date: `2026-05-30T12:21:38+08:00`
+- Type: `engineering_removal`
+- Status: `completed`
+- Slice: `slice_011_go_scaffold_engineering_repair`
+- Trigger: Developer explicitly requested removing the current extension system
+  and related services.
+- Files:
+  - Deleted source package and hook registry under the old runtime directory.
+  - Deleted remote blog sample service directory.
+  - Removed config schema, env examples, CI step, HTTP registration route,
+    service lifecycle wiring, reload coupling, and stale tests.
+  - Updated human docs and runtime handoff/current slice.
+- Validation:
+  - `rg ... -g '!docs/ai/**'` for old runtime identifiers -> no matches.
+  - `go test ./internal/config ./internal/app/initapp ./internal/app/lifecycleapp ./internal/app/reloadapp ./internal/app ./internal/transport/http ./pkg/iam/... -count=1` -> passed.
+  - `go test ./... -count=1 -mod=readonly` -> passed.
+  - `go build -mod=readonly -o ./tmp/go-scaffold-server.exe ./cmd/main` -> passed.
+  - `python docs/ai/scripts/validate_runtime.py` -> `Runtime validation passed.`
+- Summary: The current project no longer contains the old extension runtime,
+  remote sample service, registration endpoint, config/env/CI surface, or docs
+  page. Future extension work should start from fresh requirements.

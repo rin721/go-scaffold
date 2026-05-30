@@ -428,8 +428,6 @@ func (m *manager) copyConfig(src *Config) *Config {
 	dst.I18n.Supported = append([]string(nil), src.I18n.Supported...)
 	dst.Executor.Pools = append([]ExecutorPoolConfig(nil), src.Executor.Pools...)
 	dst.Demo = copyDemoConfig(src.Demo)
-	dst.Plugin.Plugins = copyPluginDefinitions(src.Plugin.Plugins)
-	dst.Plugin.Hooks = append([]PluginHookBindingConfig(nil), src.Plugin.Hooks...)
 	dst.IAM.Tokens = copyIAMTokens(src.IAM.Tokens)
 	dst.IAM.Policies = append([]IAMPolicyConfig(nil), src.IAM.Policies...)
 	if src.IAM.DefaultDeny != nil {

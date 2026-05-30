@@ -17,7 +17,6 @@ import (
 	"github.com/rei0721/go-scaffold/pkg/i18n"
 	"github.com/rei0721/go-scaffold/pkg/iam"
 	"github.com/rei0721/go-scaffold/pkg/logger"
-	"github.com/rei0721/go-scaffold/pkg/plugin"
 	"github.com/rei0721/go-scaffold/pkg/storage"
 	"github.com/rei0721/go-scaffold/pkg/utils"
 )
@@ -37,7 +36,6 @@ type Infrastructure struct {
 	Executor executor.Manager
 	Storage  storage.Storage
 	IAM      iam.Service
-	Plugins  plugin.Manager
 }
 
 type Modules struct {
@@ -59,7 +57,6 @@ type UserModule struct {
 }
 
 type Transport struct {
-	Router           *gin.Engine
-	HTTPServer       httpserver.HTTPServer
-	PluginHTTPServer httpserver.HTTPServer
+	Router     *gin.Engine
+	HTTPServer httpserver.HTTPServer
 }

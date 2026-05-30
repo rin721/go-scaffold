@@ -15,7 +15,7 @@
 | 缺口 | 影响 | 建议动作 |
 | --- | --- | --- |
 | 部分 package README 含有过时 API 示例 | 读者可能复制不存在的方法或错误签名 | 中心文档稳定后，统一修正 package README |
-| 部署 workflow 变量混用了 `RIN_APP_*` 应用变量和未加前缀 GitHub Variables | 运维配置容易混淆 | 在部署专项任务中对齐 workflow 和文档变量 |
+| 部署 workflow 变量混用 `RIN_APP_*` 应用变量和未加前缀 GitHub Variables | 运维配置容易混淆 | 在部署专项任务中对齐 workflow 和文档变量 |
 | `docs/ai` 对 slice 011 的索引可能不完整 | 未来 Agent 可能缺少 task/evidence 上下文 | 通过已确认的运行态修复任务补齐 artifact |
 
 ## 生产就绪缺口
@@ -24,5 +24,5 @@
 | --- | --- |
 | 没有 refresh token、session revoke、密码重置流程 | 当前 auth 是本地脚手架级能力，不是完整账户生命周期 |
 | 没有完整迁移框架 | 生成 schema 是有用基线，不等于生产迁移体系 |
-| 远程 blog 插件使用内存存储 | 只适合作为演示 |
+| 没有外部扩展运行时 | 当前项目只保留内建模块装配，未来如需扩展能力应重新设计 |
 | 发布/回滚证据尚未形成稳定 v1 流程 | v1 发布仍需验收工作 |

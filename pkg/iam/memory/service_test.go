@@ -30,31 +30,31 @@ func TestAuthenticate(t *testing.T) {
 
 func TestAuthorizeDefaultDenyAllowDenyAndWildcard(t *testing.T) {
 	service := newTestService(t, true, []iam.Policy{
-		{Subject: "admin", Action: "read", Resource: "plugin:echo", Effect: iam.EffectAllow},
+		{Subject: "admin", Action: "read", Resource: "todo:items", Effect: iam.EffectAllow},
 		{Subject: "admin", Action: "delete", Resource: "*", Effect: iam.EffectDeny},
 		{Subject: "*", Action: "health", Resource: "*", Effect: iam.EffectAllow},
 	})
 	admin := iam.Principal{ID: "admin"}
 
-	if decision, err := service.Authorize(context.Background(), admin, "read", "plugin:echo"); err != nil || !decision.Allowed {
+	if decision, err := service.Authorize(context.Background(), admin, "read", "todo:items"); err != nil || !decision.Allowed {
 		t.Fatalf("Authorize(read) = %#v, %v; want allowed", decision, err)
 	}
-	if decision, err := service.Authorize(context.Background(), admin, "delete", "plugin:echo"); !errors.Is(err, iam.ErrPermissionDenied) || decision.Allowed {
+	if decision, err := service.Authorize(context.Background(), admin, "delete", "todo:items"); !errors.Is(err, iam.ErrPermissionDenied) || decision.Allowed {
 		t.Fatalf("Authorize(delete) = %#v, %v; want denied", decision, err)
 	}
-	if decision, err := service.Authorize(context.Background(), iam.Principal{ID: "guest"}, "health", "plugin:any"); err != nil || !decision.Allowed {
+	if decision, err := service.Authorize(context.Background(), iam.Principal{ID: "guest"}, "health", "system:ready"); err != nil || !decision.Allowed {
 		t.Fatalf("Authorize(wildcard) = %#v, %v; want allowed", decision, err)
 	}
-	if decision, err := service.Authorize(context.Background(), admin, "write", "plugin:echo"); !errors.Is(err, iam.ErrPermissionDenied) || decision.Allowed {
+	if decision, err := service.Authorize(context.Background(), admin, "write", "todo:items"); !errors.Is(err, iam.ErrPermissionDenied) || decision.Allowed {
 		t.Fatalf("Authorize(write) = %#v, %v; want default deny", decision, err)
 	}
 }
 
 func TestAuthorizeDefaultAllowAndExpiredPolicy(t *testing.T) {
 	service := newTestService(t, false, []iam.Policy{
-		{Subject: "admin", Action: "write", Resource: "plugin:echo", Effect: iam.EffectDeny, ExpiresAt: time.Now().Add(-time.Minute)},
+		{Subject: "admin", Action: "write", Resource: "todo:items", Effect: iam.EffectDeny, ExpiresAt: time.Now().Add(-time.Minute)},
 	})
-	decision, err := service.Authorize(context.Background(), iam.Principal{ID: "admin"}, "write", "plugin:echo")
+	decision, err := service.Authorize(context.Background(), iam.Principal{ID: "admin"}, "write", "todo:items")
 	if err != nil || !decision.Allowed {
 		t.Fatalf("Authorize(expired deny) = %#v, %v; want default allow", decision, err)
 	}

@@ -15,7 +15,6 @@ type Config struct {
 	Executor ExecutorConfig `mapstructure:"executor"`
 	Storage  StorageConfig  `mapstructure:"storage"`
 	Demo     DemoConfig     `mapstructure:"demo"`
-	Plugin   PluginConfig   `mapstructure:"plugin"`
 	IAM      IAMConfig      `mapstructure:"iam"`
 	Auth     AuthConfig     `mapstructure:"auth"`
 	RBAC     RBACConfig     `mapstructure:"rbac"`
@@ -38,7 +37,6 @@ func (c *Config) Validate() error {
 		&c.Executor,
 		&c.Storage,
 		&c.Demo,
-		&c.Plugin,
 		&c.IAM,
 		&c.Auth,
 		&c.RBAC,

@@ -6,7 +6,7 @@
 - Current round: `infra_001`
 - Current branch: `branch_vibe_coding_infra`
 - Current tree: `docs/ai/tasks/branches/vibe-coding-infra/tree.yaml`
-- Current mode: `go_scaffold_engineering_repair_validated`
+- Current mode: `go_scaffold_extension_runtime_removed`
 - Agency level: `controlled_execution`
 - Current slice: `slice_011_go_scaffold_engineering_repair`
 
@@ -14,11 +14,10 @@
 
 - The repository now contains an existing Go backend scaffold, not only Vibe
   Coding runtime documentation.
-- The active developer instruction is `全部修复`, following a phase-one
-  engineering diagnosis. The authorized repair scope covers Docker/CI/deploy
-  drift, production auth config, demo defaults, HTTP lifecycle errors, SQL DDL
-  generation, ready response semantics, plugin registration hardening, docs
-  drift, and obsolete initdb residue.
+- The active developer instruction is to remove the current extension system
+  and related services. The authorized scope covers source deletion, service
+  composition cleanup, HTTP registration removal, lifecycle/reload cleanup,
+  configuration/env/CI cleanup, human docs cleanup, and validation.
 - Do not treat older notes that say "no business code exists" as authoritative;
   they were superseded by the physical Go scaffold and this repair slice.
 
@@ -83,16 +82,17 @@
   business code generation locked until the proper confirmation gates pass.
 - Completed the authorized phase-two Go scaffold engineering repair for
   Docker/CI/deploy drift, production auth config, demo defaults, HTTP lifecycle
-  errors, ready response semantics, SQL DDL generation, plugin registration
-  hardening, docs/runtime drift, and obsolete initdb residue. Go tests, build,
-  plugin tests, runtime validation, and diff whitespace checks passed; bash and
-  Docker checks are blocked by missing local CLIs on this host.
+  errors, ready response semantics, SQL DDL generation, docs/runtime drift, and
+  obsolete initdb residue.
+- Removed the current extension runtime and related services: source package,
+  remote blog sample, config block, environment variables, CI step, HTTP
+  registration endpoint, lifecycle/reload wiring, stale tests, and docs page.
+  Targeted Go tests, full Go tests, service build, and runtime validation passed.
 
 ## Unfinished
 
-- Phase-two engineering repair is pending developer acceptance after validation
-  passed with local environment gaps for bash syntax checking and Docker image
-  build.
+- Extension runtime removal is pending developer acceptance after validation
+  passed locally.
 - Future product expansion still requires the full-project lifecycle workflow,
   but maintenance of the existing Go scaffold is now an acknowledged repository
   responsibility.
@@ -165,10 +165,10 @@
 
 ## Next Condition
 
-Developer reviews the phase-two repair result for
+Developer reviews the extension runtime removal result for
 `slice_011_go_scaffold_engineering_repair`. If accepted, future work can move to
-follow-up hardening or product expansion while keeping unrelated pre-existing
-worktree changes untouched.
+fresh extension capability design or product expansion while keeping unrelated
+pre-existing worktree changes untouched.
 
 ## Forbidden Actions
 

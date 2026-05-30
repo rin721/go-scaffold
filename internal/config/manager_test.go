@@ -21,9 +21,6 @@ func TestCopyConfigCoversAllFieldsAndDeepCopiesSlices(t *testing.T) {
 	got.I18n.Supported[0] = "ja-JP"
 	got.Executor.Pools[0].Name = "changed"
 	*got.Demo.Enabled = false
-	got.Plugin.Plugins[0].Headers["X-Test"] = "changed"
-	got.Plugin.Plugins[0].Capabilities[0] = "changed"
-	got.Plugin.Hooks[0].Point = "changed"
 	got.IAM.Tokens[0].Principal.Roles[0] = "changed"
 	got.IAM.Tokens[0].Principal.Attributes["team"] = "changed"
 	got.IAM.Policies[0].Action = "changed"
@@ -45,15 +42,6 @@ func TestCopyConfigCoversAllFieldsAndDeepCopiesSlices(t *testing.T) {
 	}
 	if *src.Demo.Enabled == *got.Demo.Enabled {
 		t.Fatal("copyConfig() shares Demo.Enabled pointer with source")
-	}
-	if src.Plugin.Plugins[0].Headers["X-Test"] == got.Plugin.Plugins[0].Headers["X-Test"] {
-		t.Fatal("copyConfig() shares Plugin.Plugins headers map with source")
-	}
-	if src.Plugin.Plugins[0].Capabilities[0] == got.Plugin.Plugins[0].Capabilities[0] {
-		t.Fatal("copyConfig() shares Plugin.Plugins capabilities slice with source")
-	}
-	if src.Plugin.Hooks[0].Point == got.Plugin.Hooks[0].Point {
-		t.Fatal("copyConfig() shares Plugin.Hooks slice with source")
 	}
 	if src.IAM.Tokens[0].Principal.Roles[0] == got.IAM.Tokens[0].Principal.Roles[0] {
 		t.Fatal("copyConfig() shares IAM token roles slice with source")
@@ -287,17 +275,6 @@ func TestOverrideWithEnvUsesEnvnameTagsForNonDatabaseConfigs(t *testing.T) {
 	setTaggedEnv(t, StorageConfig{}, "BasePath", "./env-data")
 	setTaggedEnv(t, StorageConfig{}, "EnableWatch", "false")
 	setTaggedEnv(t, StorageConfig{}, "WatchBufferSize", "32")
-	setTaggedEnv(t, PluginConfig{}, "Enabled", "true")
-	setTaggedEnv(t, PluginConfig{}, "DefaultTimeout", "15")
-	setTaggedEnv(t, PluginConfig{}, "MaxResponseBytes", "2048")
-	setTaggedEnv(t, PluginHTTPInterfaceConfig{}, "Enabled", "true")
-	setTaggedEnv(t, PluginHTTPInterfaceConfig{}, "Host", "127.0.0.1")
-	setTaggedEnv(t, PluginHTTPInterfaceConfig{}, "Port", "19090")
-	setTaggedEnv(t, PluginHTTPInterfaceConfig{}, "PublicURL", "http://127.0.0.1:19090")
-	setTaggedEnv(t, PluginWSInterfaceConfig{}, "PublicURL", "ws://127.0.0.1:19090/plugin/v1/ws")
-	setTaggedEnv(t, PluginRegistrationConfig{}, "Enabled", "true")
-	setTaggedEnv(t, PluginRegistrationConfig{}, "ExposeOnMainHTTP", "false")
-	setTaggedEnv(t, PluginRegistrationConfig{}, "Token", "registration-secret")
 	setTaggedEnv(t, IAMConfig{}, "Enabled", "true")
 	setTaggedEnv(t, IAMConfig{}, "Mode", "memory")
 	setTaggedEnv(t, IAMConfig{}, "DefaultDeny", "false")
@@ -345,14 +322,6 @@ func TestOverrideWithEnvUsesEnvnameTagsForNonDatabaseConfigs(t *testing.T) {
 	if cfg.Storage.Enabled || cfg.Storage.FSType != "basepath" || cfg.Storage.BasePath != "./env-data" ||
 		cfg.Storage.EnableWatch || cfg.Storage.WatchBufferSize != 32 {
 		t.Fatalf("Storage override mismatch: %#v", cfg.Storage)
-	}
-	if !cfg.Plugin.Enabled || cfg.Plugin.DefaultTimeout != 15 || cfg.Plugin.MaxResponseBytes != 2048 ||
-		!cfg.Plugin.Interface.HTTP.Enabled || cfg.Plugin.Interface.HTTP.Host != "127.0.0.1" ||
-		cfg.Plugin.Interface.HTTP.Port != 19090 || cfg.Plugin.Interface.HTTP.PublicURL != "http://127.0.0.1:19090" ||
-		cfg.Plugin.Interface.WS.PublicURL != "ws://127.0.0.1:19090/plugin/v1/ws" ||
-		!cfg.Plugin.Registration.Enabled || cfg.Plugin.Registration.ExposeOnMainHTTP ||
-		cfg.Plugin.Registration.Token != "registration-secret" {
-		t.Fatalf("Plugin override mismatch: %#v", cfg.Plugin)
 	}
 	if !cfg.IAM.Enabled || cfg.IAM.Mode != "memory" || cfg.IAM.DefaultDenyEnabled() {
 		t.Fatalf("IAM override mismatch: %#v", cfg.IAM)
@@ -499,40 +468,6 @@ func testCompleteConfig() *Config {
 			Enabled:            boolPtr(true),
 			ApplySchemaOnStart: boolPtr(true),
 		},
-		Plugin: PluginConfig{
-			Enabled:          true,
-			DefaultTimeout:   10,
-			MaxResponseBytes: 1024,
-			Interface: PluginInterfaceConfig{
-				HTTP: PluginHTTPInterfaceConfig{
-					Enabled:   true,
-					Host:      "127.0.0.1",
-					Port:      18080,
-					PublicURL: "http://127.0.0.1:18080",
-				},
-				WS: PluginWSInterfaceConfig{
-					PublicURL: "ws://127.0.0.1:18080/plugin/v1/ws",
-				},
-			},
-			Registration: PluginRegistrationConfig{
-				Enabled: true,
-				Token:   "registration-secret",
-			},
-			Plugins: []PluginDefinitionConfig{
-				{
-					Name:         "remote",
-					Protocol:     "http",
-					Endpoint:     "http://127.0.0.1:18090/plugin/v1/invoke",
-					Timeout:      5,
-					Headers:      map[string]string{"X-Test": "original"},
-					Capabilities: []string{"hooks"},
-					Labels:       map[string]string{"env": "test"},
-				},
-			},
-			Hooks: []PluginHookBindingConfig{
-				{Point: "plugin.after_invoke", Plugin: "remote", Name: "audit", Priority: 1},
-			},
-		},
 		IAM: IAMConfig{
 			Enabled:     true,
 			Mode:        "memory",
@@ -622,8 +557,6 @@ i18n:
 executor:
   enabled: false
 storage:
-  enabled: false
-plugin:
   enabled: false
 iam:
   enabled: false

@@ -39,10 +39,6 @@ jobs:
       - name: Run tests
         run: go test ./... -count=1 -mod=readonly
 
-      - name: Run blog plugin tests
-        working-directory: remote_plugins/blog
-        run: go test ./... -count=1
-
       - name: Build server
         run: go build -mod=readonly -o /tmp/go-scaffold-server ./cmd/main
 

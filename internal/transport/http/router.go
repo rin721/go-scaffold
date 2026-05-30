@@ -13,19 +13,17 @@ import (
 	"github.com/rei0721/go-scaffold/pkg/database"
 	"github.com/rei0721/go-scaffold/pkg/i18n"
 	"github.com/rei0721/go-scaffold/pkg/logger"
-	"github.com/rei0721/go-scaffold/pkg/plugin"
 	apperrors "github.com/rei0721/go-scaffold/types/errors"
 	"github.com/rei0721/go-scaffold/types/result"
 )
 
 type RouterDeps struct {
-	Logger             logger.Logger
-	I18n               i18n.I18n
-	Database           database.Database
-	Middleware         middleware.MiddlewareConfig
-	TodoHandler        *demohandler.TodoHandler
-	UserHandler        *userhandler.UserHandler
-	PluginRegistration http.Handler
+	Logger      logger.Logger
+	I18n        i18n.I18n
+	Database    database.Database
+	Middleware  middleware.MiddlewareConfig
+	TodoHandler *demohandler.TodoHandler
+	UserHandler *userhandler.UserHandler
 }
 
 func NewRouter(deps RouterDeps) *gin.Engine {
@@ -45,9 +43,6 @@ func NewRouter(deps RouterDeps) *gin.Engine {
 
 	r.GET("/health", health)
 	r.GET("/ready", ready(deps.Database))
-	if deps.PluginRegistration != nil {
-		r.Any(plugin.HTTPRegisterPath, gin.WrapH(deps.PluginRegistration))
-	}
 
 	v1 := r.Group("/api/v1")
 	demo := v1.Group("/demo")
@@ -92,14 +87,6 @@ func NewRouter(deps RouterDeps) *gin.Engine {
 	}
 
 	return r
-}
-
-func NewPluginRouter(registration http.Handler) http.Handler {
-	mux := http.NewServeMux()
-	if registration != nil {
-		mux.Handle(plugin.HTTPRegisterPath, registration)
-	}
-	return mux
 }
 
 func health(c *gin.Context) {

@@ -10,10 +10,7 @@ import (
 	"github.com/rei0721/go-scaffold/pkg/database"
 	"github.com/rei0721/go-scaffold/pkg/executor"
 	"github.com/rei0721/go-scaffold/pkg/httpserver"
-	"github.com/rei0721/go-scaffold/pkg/iam"
-	"github.com/rei0721/go-scaffold/pkg/iam/memory"
 	"github.com/rei0721/go-scaffold/pkg/logger"
-	"github.com/rei0721/go-scaffold/pkg/plugin"
 	storagepkg "github.com/rei0721/go-scaffold/pkg/storage"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -145,50 +142,6 @@ func TestReloadDisablesOptionalComponents(t *testing.T) {
 	}
 }
 
-func TestReloadKeepsOldIAMAndPluginsWhenNewPluginBuildFails(t *testing.T) {
-	clearReloadEnv(t)
-
-	oldCfg := baseReloadConfig()
-	defaultDeny := true
-	oldCfg.IAM = config.IAMConfig{
-		Enabled:     true,
-		Mode:        "memory",
-		DefaultDeny: &defaultDeny,
-		Tokens: []config.IAMTokenConfig{
-			{Token: "old-token", Principal: config.IAMPrincipalConfig{ID: "old-user"}},
-		},
-	}
-	newCfg := cloneReloadConfig(oldCfg)
-	newCfg.IAM.Tokens[0].Principal.ID = "new-user"
-	newCfg.Plugin.Enabled = true
-	newCfg.Plugin.Plugins = []config.PluginDefinitionConfig{
-		{Name: "bad", Protocol: "local", Endpoint: "http://127.0.0.1/plugin/v1/invoke"},
-	}
-
-	core, infra, transport, _ := newReloadFixture(t)
-	oldIAM, err := memory.NewService(memory.Config{
-		DefaultDeny: true,
-		Principals: map[string]iam.Principal{
-			"old-token": {ID: "old-user"},
-		},
-	})
-	if err != nil {
-		t.Fatalf("create old iam: %v", err)
-	}
-	oldPlugins := plugin.NewManager()
-	infra.IAM = oldIAM
-	infra.Plugins = oldPlugins
-
-	Reload(&core, &infra, &transport, oldCfg, newCfg)
-
-	if infra.IAM != oldIAM {
-		t.Fatal("expected old IAM service to be preserved after plugin reload failure")
-	}
-	if infra.Plugins != oldPlugins {
-		t.Fatal("expected old plugin manager to be preserved after new plugin build failure")
-	}
-}
-
 func baseReloadConfig() *config.Config {
 	return &config.Config{
 		Server: config.ServerConfig{
@@ -256,13 +209,6 @@ func cloneReloadConfig(src *config.Config) *config.Config {
 	dst := *src
 	dst.I18n.Supported = append([]string(nil), src.I18n.Supported...)
 	dst.Executor.Pools = append([]config.ExecutorPoolConfig(nil), src.Executor.Pools...)
-	dst.Plugin.Plugins = append([]config.PluginDefinitionConfig(nil), src.Plugin.Plugins...)
-	for i := range dst.Plugin.Plugins {
-		dst.Plugin.Plugins[i].Headers = copyReloadStringMap(src.Plugin.Plugins[i].Headers)
-		dst.Plugin.Plugins[i].Capabilities = append([]string(nil), src.Plugin.Plugins[i].Capabilities...)
-		dst.Plugin.Plugins[i].Labels = copyReloadStringMap(src.Plugin.Plugins[i].Labels)
-	}
-	dst.Plugin.Hooks = append([]config.PluginHookBindingConfig(nil), src.Plugin.Hooks...)
 	dst.IAM.Tokens = append([]config.IAMTokenConfig(nil), src.IAM.Tokens...)
 	for i := range dst.IAM.Tokens {
 		dst.IAM.Tokens[i].Principal.Roles = append([]string(nil), src.IAM.Tokens[i].Principal.Roles...)

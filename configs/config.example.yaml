@@ -50,25 +50,6 @@ demo:
   enabled: true
   apply_schema_on_start: true
 
-plugin:
-  enabled: false
-  default_timeout: 10
-  max_response_bytes: 1048576
-  interface:
-    http:
-      enabled: false
-      host: 127.0.0.1
-      port: 18080
-      public_url: "http://127.0.0.1:18080"
-    ws:
-      public_url: "ws://127.0.0.1:18080/plugin/v1/ws"
-  registration:
-    enabled: false
-    expose_on_main_http: false
-    token: "replace-with-registration-token"
-  plugins: []
-  hooks: []
-
 iam:
   enabled: false
   mode: memory
