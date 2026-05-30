@@ -6,7 +6,6 @@
 
 | 路径 | 职责 | 使用者 |
 | --- | --- | --- |
-| `README.md` | 仓库快速入口 | 人类维护者和 AI agents |
 | `go.mod`, `go.sum` | Go 模块依赖 | 全部 Go 包 |
 | `Dockerfile` | 多阶段 Linux 镜像构建 | CI 和发布流程 |
 | `.github/workflows/ci.yml` | 分支/PR 质量检查 | 维护者 |
@@ -46,6 +45,7 @@
 
 | 路径 | 职责 |
 | --- | --- |
-| `docs` | 面向人的工程文档 |
+| `docs/README.md` | 面向人的工程文档入口 |
+| `docs` | 面向人的结构化工程文档 |
 | `docs/ai` | AI 运行时状态、任务树、决策、证据、知识、技能和交接 |
 | `AGENTS.md` | Agent 运行时索引 |

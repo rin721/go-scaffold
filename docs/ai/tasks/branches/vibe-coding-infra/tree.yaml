@@ -16,8 +16,8 @@ tasks:
     slices:
       - slice_001_docs_guides
     acceptance_criteria:
-      - "README.md gives a fast project overview."
-      - "README.md indexes human-facing docs."
+      - "docs/README.md gives a fast project overview."
+      - "docs/README.md indexes human-facing docs."
       - "Detailed usage, overview, maintenance, and Agent workflow docs exist under structured docs subdirectories."
       - "Runtime validation passes and evidence is recorded."
   - id: task_002_python_scripts

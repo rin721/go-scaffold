@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/rin721/go-scaffold/actions/workflows/ci.yml/badge.svg)](https://github.com/rin721/go-scaffold/actions/workflows/ci.yml)
 [![Go](https://img.shields.io/badge/Go-1.24.6-00ADD8?logo=go)](https://go.dev/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](../LICENSE)
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/rin721/go-scaffold)
 
 `go-scaffold` 是一个可运行的 Go 后端服务脚手架。当前保留 HTTP 服务、配置加载、结构化日志、数据库访问、Demo Todo CRUD、存储辅助能力、SQL 生成、Docker 构建、CI 检查、部署示例和 AI 运行时文档。
@@ -10,7 +10,7 @@
 原本内置的本地用户管理栈已经移除：不再提供 IAM 服务、认证令牌服务、RBAC 适配器、用户模块、用户表结构或用户管理 HTTP API。后续身份认证或访问控制能力需要重新从需求、架构和验收标准开始设计。
 
 <p align="center">
-  <img src="./configs/logo.png" alt="go-scaffold logo" width="180">
+  <img src="../configs/logo.png" alt="go-scaffold logo" width="180">
 </p>
 
 ## 亮点
@@ -68,49 +68,49 @@ docker build -t go-scaffold:local .
 | 基础设施包 | `pkg/database`, `pkg/cache`, `pkg/logger`, `pkg/httpserver`, `pkg/storage`, `pkg/sqlgen` |
 | 共享响应和错误类型 | `types` |
 | Docker 和部署 | `Dockerfile`, `deploy`, `deploy.sh`, `script/install.sh` |
-| 工程文档 | `README.md`, `docs` |
+| 工程文档 | `docs/README.md`, `docs` |
 | AI 运行时 | `AGENTS.md`, `docs/ai` |
 
 ## 工程文档索引
 
-`README.md` 是当前工程文档入口。`docs/ai` 是独立的 AI 运行时状态树，用于保存任务状态、证据、决策、知识和交接信息；普通工程阅读优先从下面的结构化文档开始。
+`docs/README.md` 是当前工程文档入口。`docs/ai` 是独立的 AI 运行时状态树，用于保存任务状态、证据、决策、知识和交接信息；普通工程阅读优先从下面的结构化文档开始。
 
 ### 推荐阅读顺序
 
-1. [项目概述](docs/overview/project.md)
-2. [目录地图](docs/structure/directory-map.md)
-3. [配置说明](docs/environment/configuration.md)
-4. [分层架构](docs/architecture/layers.md)
-5. [启动流程](docs/runtime/startup-flow.md)
-6. [HTTP 流程](docs/runtime/http-flow.md)
-7. [配置流程](docs/runtime/config-flow.md)
-8. [错误流程](docs/runtime/error-flow.md)
-9. [Demo 模块](docs/modules/demo.md)
-10. [测试矩阵](docs/testing/test-matrix.md)
-11. [Docker 和 CI](docs/build/docker-and-ci.md)
-12. [部署说明](docs/release/deployment.md)
-13. [维护指南](docs/maintenance/maintenance-guide.md)
-14. [AI 运行时状态](docs/ai-agent/runtime-state.md)
-15. [已知缺口](docs/backlog/known-gaps.md)
+1. [项目概述](overview/project.md)
+2. [目录地图](structure/directory-map.md)
+3. [配置说明](environment/configuration.md)
+4. [分层架构](architecture/layers.md)
+5. [启动流程](runtime/startup-flow.md)
+6. [HTTP 流程](runtime/http-flow.md)
+7. [配置流程](runtime/config-flow.md)
+8. [错误流程](runtime/error-flow.md)
+9. [Demo 模块](modules/demo.md)
+10. [测试矩阵](testing/test-matrix.md)
+11. [Docker 和 CI](build/docker-and-ci.md)
+12. [部署说明](release/deployment.md)
+13. [维护指南](maintenance/maintenance-guide.md)
+14. [AI 运行时状态](ai-agent/runtime-state.md)
+15. [已知缺口](backlog/known-gaps.md)
 
 ### 文档地图
 
 | 分区 | 内容概述 |
 | --- | --- |
-| [overview](docs/overview/project.md) | 当前能力、非目标和运行时默认假设 |
-| [structure](docs/structure/directory-map.md) | 目录职责和依赖方向 |
-| [environment](docs/environment/configuration.md) | 配置文件、环境变量、`.env` 和生产示例 |
-| [architecture](docs/architecture/layers.md) | 应用分层和装配方式 |
-| [runtime](docs/runtime/startup-flow.md) | 启动、HTTP、配置重载、状态和错误流程 |
-| [modules](docs/modules/demo.md) | Demo 模块说明 |
-| [workflows](docs/workflows/db-cli.md) | DB CLI 和运维型命令 |
-| [testing](docs/testing/test-matrix.md) | 测试归属和验证命令 |
-| [build](docs/build/docker-and-ci.md) | CI、本地构建、Docker 构建和质量门禁 |
-| [release](docs/release/deployment.md) | 生产配置、部署脚本和发布检查 |
-| [extension](docs/extension/adding-modules.md) | 新增模块、配置和 API 的方式 |
-| [maintenance](docs/maintenance/maintenance-guide.md) | 长期维护工作流 |
-| [ai-agent](docs/ai-agent/runtime-state.md) | `AGENTS.md` 和 `docs/ai` 运行时说明 |
-| [backlog](docs/backlog/known-gaps.md) | 当前已知实现和文档缺口 |
+| [overview](overview/project.md) | 当前能力、非目标和运行时默认假设 |
+| [structure](structure/directory-map.md) | 目录职责和依赖方向 |
+| [environment](environment/configuration.md) | 配置文件、环境变量、`.env` 和生产示例 |
+| [architecture](architecture/layers.md) | 应用分层和装配方式 |
+| [runtime](runtime/startup-flow.md) | 启动、HTTP、配置重载、状态和错误流程 |
+| [modules](modules/demo.md) | Demo 模块说明 |
+| [workflows](workflows/db-cli.md) | DB CLI 和运维型命令 |
+| [testing](testing/test-matrix.md) | 测试归属和验证命令 |
+| [build](build/docker-and-ci.md) | CI、本地构建、Docker 构建和质量门禁 |
+| [release](release/deployment.md) | 生产配置、部署脚本和发布检查 |
+| [extension](extension/adding-modules.md) | 新增模块、配置和 API 的方式 |
+| [maintenance](maintenance/maintenance-guide.md) | 长期维护工作流 |
+| [ai-agent](ai-agent/runtime-state.md) | `AGENTS.md` 和 `docs/ai` 运行时说明 |
+| [backlog](backlog/known-gaps.md) | 当前已知实现和文档缺口 |
 
 ## API 范围
 
@@ -130,9 +130,9 @@ docker build -t go-scaffold:local .
 
 推荐参考：
 
-- `docs/environment/configuration.md`
-- `.env.example`
-- `deploy/config.production.example.yaml`
+- `environment/configuration.md`
+- `../.env.example`
+- `../deploy/config.production.example.yaml`
 
 ## 数据库 CLI
 
@@ -161,4 +161,4 @@ docker build -t go-scaffold:ci .
 
 ## 许可证
 
-本项目使用 [MIT License](LICENSE)。
+本项目使用 [MIT License](../LICENSE)。
