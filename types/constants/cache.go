@@ -1,5 +1,7 @@
 package constants
 
+// 本文件定义跨层共享常量，避免内部基础设施包反向污染公共 types 边界。
+
 import "time"
 
 const (

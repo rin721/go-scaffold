@@ -146,3 +146,5 @@
 //   - go-i18n 文档: https://github.com/nicksnyder/go-i18n
 //   - 语言代码标准: https://en.wikipedia.org/wiki/IETF_language_tag
 package i18n
+
+// 本文件承载包级 Godoc 入口，集中说明该包在脚手架架构中的定位、使用边界和非目标能力。

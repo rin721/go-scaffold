@@ -1,5 +1,7 @@
 package initapp
 
+// 本文件属于应用初始化装配层，负责把配置、基础设施、业务模块或传输层拼接为可运行的分层对象。
+
 import (
 	"context"
 	"fmt"
@@ -12,6 +14,10 @@ import (
 	"github.com/rei0721/go-scaffold/pkg/logger"
 )
 
+// NewModules 根据配置装配业务模块。
+//
+// Demo 模块是脚手架示例能力；只有启用 Demo 时才会创建 Todo 仓储、服务和 handler。
+// 启动期是否应用 Demo schema 由 demo.apply_schema_on_start 控制。
 func NewModules(core Core, infra Infrastructure) (Modules, error) {
 	var demoModule DemoModule
 	if core.Config.Demo.EnabledValue() {
@@ -29,19 +35,26 @@ func NewModules(core Core, infra Infrastructure) (Modules, error) {
 	}, nil
 }
 
+// DemoSchemaTrigger 表示触发 Demo 表结构应用策略的运行场景。
 type DemoSchemaTrigger string
 
 const (
+	// DemoSchemaTriggerServerStart 表示服务启动期，可按配置应用 Demo schema。
 	DemoSchemaTriggerServerStart DemoSchemaTrigger = "server-start"
-	DemoSchemaTriggerReload      DemoSchemaTrigger = "reload"
+	// DemoSchemaTriggerReload 表示配置热更新期，不允许隐式修改表结构。
+	DemoSchemaTriggerReload DemoSchemaTrigger = "reload"
 )
 
+// DemoSchemaPolicy 描述某个触发场景是否允许应用 Demo schema 以及原因。
 type DemoSchemaPolicy struct {
 	Trigger DemoSchemaTrigger
 	Apply   bool
 	Reason  string
 }
 
+// DemoSchemaPolicyFor 返回 Demo schema 的场景策略。
+//
+// reload 明确跳过 schema 变更，避免配置热更新时产生不可预期的数据结构副作用。
 func DemoSchemaPolicyFor(trigger DemoSchemaTrigger) DemoSchemaPolicy {
 	switch trigger {
 	case DemoSchemaTriggerServerStart:
@@ -65,11 +78,15 @@ func DemoSchemaPolicyFor(trigger DemoSchemaTrigger) DemoSchemaPolicy {
 	}
 }
 
+// ApplyDemoSchema 使用默认 server-start 策略应用 Demo Todo 表结构。
 func ApplyDemoSchema(db database.Database, driver string, log logger.Logger) error {
 	_, err := ApplyDemoSchemaForTrigger(db, driver, log, DemoSchemaTriggerServerStart)
 	return err
 }
 
+// ApplyDemoSchemaForTrigger 按触发策略应用 Demo Todo 表结构。
+//
+// 返回策略用于测试和审计；当策略不允许应用或数据库为空时不会执行 SQL。
 func ApplyDemoSchemaForTrigger(db database.Database, driver string, log logger.Logger, trigger DemoSchemaTrigger) (DemoSchemaPolicy, error) {
 	policy := DemoSchemaPolicyFor(trigger)
 	if !policy.Apply {
@@ -86,6 +103,7 @@ func ApplyDemoSchemaForTrigger(db database.Database, driver string, log logger.L
 	return policy, nil
 }
 
+// logDemoSchemaApplied 记录 Demo schema 已执行的上下文，帮助区分 server 启动和命令行触发。
 func logDemoSchemaApplied(log logger.Logger, policy DemoSchemaPolicy) {
 	if log == nil {
 		return
@@ -93,6 +111,7 @@ func logDemoSchemaApplied(log logger.Logger, policy DemoSchemaPolicy) {
 	log.Info("demo schema applied", "trigger", policy.Trigger, "reason", policy.Reason)
 }
 
+// logDemoSchemaSkipped 记录 Demo schema 被策略跳过的原因，避免静默忽略配置意图。
 func logDemoSchemaSkipped(log logger.Logger, policy DemoSchemaPolicy) {
 	if log == nil {
 		return
@@ -100,6 +119,7 @@ func logDemoSchemaSkipped(log logger.Logger, policy DemoSchemaPolicy) {
 	log.Debug("demo schema apply skipped", "trigger", policy.Trigger, "reason", policy.Reason)
 }
 
+// NewDemoModule 装配 Demo Todo 的仓储、服务和 HTTP handler。
 func NewDemoModule(db database.Database, log logger.Logger) DemoModule {
 	todoRepo := demorepository.NewTodoRepository()
 	todoService := demoservice.NewTodoService(db, todoRepo)

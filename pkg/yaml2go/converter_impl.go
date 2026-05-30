@@ -1,5 +1,7 @@
 package yaml2go
 
+// 本文件属于 YAML 配置代码生成器，把配置样例解析为可编译的 Go 结构体、标签和辅助方法。
+
 import (
 	"bytes"
 	"fmt"
@@ -50,13 +52,13 @@ func normalizeConfig(config *Config) *Config {
 		config.IndentStyle = DefaultIndentStyle
 	}
 
-	// 设置默认 GenerateMethods（默认启用）
+	// 该版本默认生成辅助方法，以保证拆分后的配置结构仍然具备加载、校验和环境变量绑定入口。
 	if !config.GenerateMethods {
 		config.GenerateMethods = true
 	}
 
-	// 设置默认 SplitFiles（默认启用）
-	// 注意：这是一个breaking change，如果需要兼容旧版本，应该根据实际情况设置
+	// 当前生成链路以多文件输出为主路径，主配置和子配置分离可以降低单文件体积并保留模块边界。
+	// 如果未来恢复旧版单文件输出，需要同步补齐模板、测试和调用侧对 GenerateResult 的解释。
 	config.SplitFiles = true // 强制启用新模式
 
 	return config

@@ -1,5 +1,7 @@
 package sqlgen
 
+// 本测试文件固定 SQL 生成器的方言、DDL、CRUD 和逆向生成契约，防止注释补全和后续重构改变外部可观察行为。
+
 import (
 	"strings"
 	"testing"
@@ -10,6 +12,7 @@ import (
 // 测试模型
 // ============================================================================
 
+// TestUser 固定 SQL 生成器的方言、DDL、CRUD 和逆向生成契约，确保后续注释补全或结构调整不改变该场景。
 type TestUser struct {
 	ID        uint64     `gorm:"column:id;primaryKey;autoIncrement"`
 	Username  string     `gorm:"column:username;size:64;not null"`
@@ -19,16 +22,19 @@ type TestUser struct {
 	DeletedAt *time.Time `gorm:"column:deleted_at"`
 }
 
+// TableName 为 SQL 生成测试模型提供稳定表名，避免测试结果受结构体命名策略变化影响。
 func (TestUser) TableName() string {
 	return "users"
 }
 
+// TestUserRole 固定 SQL 生成器的方言、DDL、CRUD 和逆向生成契约，确保后续注释补全或结构调整不改变该场景。
 type TestUserRole struct {
 	ID     uint `gorm:"column:id;primaryKey;autoIncrement"`
 	UserID uint `gorm:"column:user_id;not null;uniqueIndex:uk_user_roles_user_role"`
 	RoleID uint `gorm:"column:role_id;not null;uniqueIndex:uk_user_roles_user_role"`
 }
 
+// TableName 为 SQL 生成测试模型提供稳定表名，避免测试结果受结构体命名策略变化影响。
 func (TestUserRole) TableName() string {
 	return "user_roles"
 }
@@ -37,6 +43,7 @@ func (TestUserRole) TableName() string {
 // Generator 测试
 // ============================================================================
 
+// TestNew 固定 SQL 生成器的方言、DDL、CRUD 和逆向生成契约，确保后续注释补全或结构调整不改变该场景。
 func TestNew(t *testing.T) {
 	gen := New(nil)
 	if gen == nil {
@@ -53,6 +60,7 @@ func TestNew(t *testing.T) {
 // DDL 测试
 // ============================================================================
 
+// TestTable 固定 SQL 生成器的方言、DDL、CRUD 和逆向生成契约，确保后续注释补全或结构调整不改变该场景。
 func TestTable(t *testing.T) {
 	gen := New(&Config{Dialect: MySQL})
 
@@ -70,6 +78,7 @@ func TestTable(t *testing.T) {
 	}
 }
 
+// TestTableIfNotExists 固定 SQL 生成器的方言、DDL、CRUD 和逆向生成契约，确保后续注释补全或结构调整不改变该场景。
 func TestTableIfNotExists(t *testing.T) {
 	gen := New(&Config{Dialect: SQLite})
 
@@ -89,6 +98,7 @@ func TestTableIfNotExists(t *testing.T) {
 	}
 }
 
+// TestTableGroupsCompositeUniqueIndexes 固定 SQL 生成器的方言、DDL、CRUD 和逆向生成契约，确保后续注释补全或结构调整不改变该场景。
 func TestTableGroupsCompositeUniqueIndexes(t *testing.T) {
 	gen := New(&Config{Dialect: MySQL})
 
@@ -106,6 +116,7 @@ func TestTableGroupsCompositeUniqueIndexes(t *testing.T) {
 	}
 }
 
+// TestDatabaseIfNotExists 固定 SQL 生成器的方言、DDL、CRUD 和逆向生成契约，确保后续注释补全或结构调整不改变该场景。
 func TestDatabaseIfNotExists(t *testing.T) {
 	gen := New(&Config{Dialect: MySQL})
 
@@ -120,6 +131,7 @@ func TestDatabaseIfNotExists(t *testing.T) {
 	}
 }
 
+// TestDrop 固定 SQL 生成器的方言、DDL、CRUD 和逆向生成契约，确保后续注释补全或结构调整不改变该场景。
 func TestDrop(t *testing.T) {
 	gen := New(&Config{Dialect: MySQL})
 
@@ -138,6 +150,7 @@ func TestDrop(t *testing.T) {
 // INSERT 测试
 // ============================================================================
 
+// TestCreate 固定 SQL 生成器的方言、DDL、CRUD 和逆向生成契约，确保后续注释补全或结构调整不改变该场景。
 func TestCreate(t *testing.T) {
 	gen := New(&Config{Dialect: MySQL})
 
@@ -165,6 +178,7 @@ func TestCreate(t *testing.T) {
 	}
 }
 
+// TestCreateBatch 固定 SQL 生成器的方言、DDL、CRUD 和逆向生成契约，确保后续注释补全或结构调整不改变该场景。
 func TestCreateBatch(t *testing.T) {
 	gen := New(&Config{Dialect: MySQL})
 
@@ -192,6 +206,7 @@ func TestCreateBatch(t *testing.T) {
 // SELECT 测试
 // ============================================================================
 
+// TestFirst 固定 SQL 生成器的方言、DDL、CRUD 和逆向生成契约，确保后续注释补全或结构调整不改变该场景。
 func TestFirst(t *testing.T) {
 	gen := New(&Config{Dialect: MySQL, SoftDelete: true})
 
@@ -214,6 +229,7 @@ func TestFirst(t *testing.T) {
 	}
 }
 
+// TestFind 固定 SQL 生成器的方言、DDL、CRUD 和逆向生成契约，确保后续注释补全或结构调整不改变该场景。
 func TestFind(t *testing.T) {
 	gen := New(&Config{Dialect: MySQL, SoftDelete: false})
 
@@ -244,6 +260,7 @@ func TestFind(t *testing.T) {
 	}
 }
 
+// TestUnsupportedQueryBuildersReturnErrors 固定 SQL 生成器的方言、DDL、CRUD 和逆向生成契约，确保后续注释补全或结构调整不改变该场景。
 func TestUnsupportedQueryBuildersReturnErrors(t *testing.T) {
 	tests := []struct {
 		name      string
@@ -309,6 +326,7 @@ func TestUnsupportedQueryBuildersReturnErrors(t *testing.T) {
 	}
 }
 
+// TestUnsupportedQueryBuilderPropagatesToUpdateAndDelete 固定 SQL 生成器的方言、DDL、CRUD 和逆向生成契约，确保后续注释补全或结构调整不改变该场景。
 func TestUnsupportedQueryBuilderPropagatesToUpdateAndDelete(t *testing.T) {
 	gen := New(&Config{Dialect: MySQL})
 
@@ -327,6 +345,7 @@ func TestUnsupportedQueryBuilderPropagatesToUpdateAndDelete(t *testing.T) {
 // UPDATE 测试
 // ============================================================================
 
+// TestUpdates 固定 SQL 生成器的方言、DDL、CRUD 和逆向生成契约，确保后续注释补全或结构调整不改变该场景。
 func TestUpdates(t *testing.T) {
 	gen := New(&Config{Dialect: MySQL})
 
@@ -355,6 +374,7 @@ func TestUpdates(t *testing.T) {
 // DELETE 测试
 // ============================================================================
 
+// TestDelete 固定 SQL 生成器的方言、DDL、CRUD 和逆向生成契约，确保后续注释补全或结构调整不改变该场景。
 func TestDelete(t *testing.T) {
 	gen := New(&Config{Dialect: MySQL, SoftDelete: true})
 
@@ -373,6 +393,7 @@ func TestDelete(t *testing.T) {
 	}
 }
 
+// TestHardDelete 固定 SQL 生成器的方言、DDL、CRUD 和逆向生成契约，确保后续注释补全或结构调整不改变该场景。
 func TestHardDelete(t *testing.T) {
 	gen := New(&Config{Dialect: MySQL, SoftDelete: true})
 
@@ -386,6 +407,7 @@ func TestHardDelete(t *testing.T) {
 	}
 }
 
+// TestDeleteInBatchesUnsupported 固定 SQL 生成器的方言、DDL、CRUD 和逆向生成契约，确保后续注释补全或结构调整不改变该场景。
 func TestDeleteInBatchesUnsupported(t *testing.T) {
 	gen := New(&Config{Dialect: MySQL})
 
@@ -402,6 +424,7 @@ func TestDeleteInBatchesUnsupported(t *testing.T) {
 // 逆向生成测试
 // ============================================================================
 
+// TestParseSQL 固定 SQL 生成器的方言、DDL、CRUD 和逆向生成契约，确保后续注释补全或结构调整不改变该场景。
 func TestParseSQL(t *testing.T) {
 	gen := New(&Config{Dialect: MySQL})
 
@@ -444,6 +467,7 @@ func TestParseSQL(t *testing.T) {
 	}
 }
 
+// TestReverseDBUnsupported 固定 SQL 生成器的方言、DDL、CRUD 和逆向生成契约，确保后续注释补全或结构调整不改变该场景。
 func TestReverseDBUnsupported(t *testing.T) {
 	builder := New(&Config{Dialect: MySQL}).ReverseDB(nil)
 
@@ -462,6 +486,7 @@ func TestReverseDBUnsupported(t *testing.T) {
 // 方言测试
 // ============================================================================
 
+// TestDialectQuote 固定 SQL 生成器的方言、DDL、CRUD 和逆向生成契约，确保后续注释补全或结构调整不改变该场景。
 func TestDialectQuote(t *testing.T) {
 	tests := []struct {
 		dialect  Dialect
@@ -488,6 +513,7 @@ func TestDialectQuote(t *testing.T) {
 // 事务测试
 // ============================================================================
 
+// TestTransaction 固定 SQL 生成器的方言、DDL、CRUD 和逆向生成契约，确保后续注释补全或结构调整不改变该场景。
 func TestTransaction(t *testing.T) {
 	gen := New(&Config{Dialect: MySQL})
 

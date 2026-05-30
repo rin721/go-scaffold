@@ -1,5 +1,7 @@
 package sqlgen
 
+// 本文件属于 SQL 生成器，负责把结构体、schema 或解析结果转换为特定方言的 SQL 文本。
+
 import (
 	"fmt"
 	"reflect"
@@ -140,6 +142,7 @@ func (g *Generator) processStructCondition(cond interface{}) *Generator {
 // SELECT 语句构建
 // ============================================================================
 
+// buildSelect 依据当前生成上下文和方言规则构造 SQL 片段，错误会向上冒泡给公开构建入口。
 func (g *Generator) buildSelect() (string, error) {
 	if err := g.checkUnsupported(); err != nil {
 		return "", err

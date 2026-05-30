@@ -1,5 +1,7 @@
 package config
 
+// 本文件定义一个配置分区及其校验规则，是外部配置进入运行时基础设施前的类型化边界。
+
 import "errors"
 
 // I18nConfig 国际化配置
@@ -22,10 +24,12 @@ type I18nConfig struct {
 	MessagesDir string `mapstructure:"messages_dir" envname:"I18N_MESSAGES_DIR" json:"messages_dir" yaml:"messages_dir" toml:"messages_dir"`
 }
 
+// ValidateName 返回当前配置分区在聚合校验错误中的稳定名称。
 func (c *I18nConfig) ValidateName() string {
 	return AppI18nName
 }
 
+// ValidateRequired 声明当前配置分区是否必须出现在完整应用配置中。
 func (c *I18nConfig) ValidateRequired() bool {
 	return true
 }

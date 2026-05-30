@@ -1,5 +1,7 @@
 package initapp
 
+// 本文件属于应用初始化装配层，负责把配置、基础设施、业务模块或传输层拼接为可运行的分层对象。
+
 import (
 	"reflect"
 	"time"
@@ -13,6 +15,7 @@ import (
 	"github.com/rei0721/go-scaffold/pkg/storage"
 )
 
+// IsRedisConfigChanged 判断 Redis 配置是否发生变化。
 func IsRedisConfigChanged(oldCfg, newCfg *config.Config) bool {
 	if oldCfg == newCfg {
 		return false
@@ -20,6 +23,7 @@ func IsRedisConfigChanged(oldCfg, newCfg *config.Config) bool {
 	return oldCfg.Redis != newCfg.Redis
 }
 
+// IsDatabaseConfigChanged 判断数据库配置是否发生变化。
 func IsDatabaseConfigChanged(oldCfg, newCfg *config.Config) bool {
 	if oldCfg == newCfg {
 		return false
@@ -27,6 +31,7 @@ func IsDatabaseConfigChanged(oldCfg, newCfg *config.Config) bool {
 	return oldCfg.Database != newCfg.Database
 }
 
+// IsServerConfigChanged 判断 HTTP server 配置是否发生变化。
 func IsServerConfigChanged(oldCfg, newCfg *config.Config) bool {
 	if oldCfg == newCfg {
 		return false
@@ -34,6 +39,7 @@ func IsServerConfigChanged(oldCfg, newCfg *config.Config) bool {
 	return oldCfg.Server != newCfg.Server
 }
 
+// IsLoggerConfigChanged 判断日志配置是否发生变化。
 func IsLoggerConfigChanged(oldCfg, newCfg *config.Config) bool {
 	if oldCfg == newCfg {
 		return false
@@ -41,6 +47,9 @@ func IsLoggerConfigChanged(oldCfg, newCfg *config.Config) bool {
 	return oldCfg.Logger != newCfg.Logger
 }
 
+// IsExecutorConfigChanged 判断执行器配置是否发生变化。
+//
+// Pools 是切片字段，不能直接比较，因此使用 DeepEqual 保证池数量和每个池参数都纳入 reload 判断。
 func IsExecutorConfigChanged(oldCfg, newCfg *config.Config) bool {
 	if oldCfg == newCfg {
 		return false
@@ -49,6 +58,7 @@ func IsExecutorConfigChanged(oldCfg, newCfg *config.Config) bool {
 		!reflect.DeepEqual(oldCfg.Executor.Pools, newCfg.Executor.Pools)
 }
 
+// IsStorageConfigChanged 判断存储配置是否发生变化。
 func IsStorageConfigChanged(oldCfg, newCfg *config.Config) bool {
 	if oldCfg == newCfg {
 		return false
@@ -56,6 +66,9 @@ func IsStorageConfigChanged(oldCfg, newCfg *config.Config) bool {
 	return oldCfg.Storage != newCfg.Storage
 }
 
+// RedisCacheConfig 将应用 Redis 配置转换为缓存包配置。
+//
+// 应用配置中的超时单位是秒，传给底层包前必须转换为 time.Duration。
 func RedisCacheConfig(cfg *config.Config) *cache.Config {
 	return &cache.Config{
 		Host:         cfg.Redis.Host,
@@ -71,6 +84,7 @@ func RedisCacheConfig(cfg *config.Config) *cache.Config {
 	}
 }
 
+// DatabaseConfig 将应用数据库配置转换为 database 包配置。
 func DatabaseConfig(cfg *config.Config) *database.Config {
 	return &database.Config{
 		Driver:       database.Driver(cfg.Database.Driver),
@@ -84,6 +98,7 @@ func DatabaseConfig(cfg *config.Config) *database.Config {
 	}
 }
 
+// LoggerConfig 将应用日志配置转换为 logger 包配置。
 func LoggerConfig(cfg *config.Config) *logger.Config {
 	return &logger.Config{
 		Level:         cfg.Logger.Level,
@@ -98,6 +113,9 @@ func LoggerConfig(cfg *config.Config) *logger.Config {
 	}
 }
 
+// ExecutorConfigs 将应用执行器池配置转换为 executor 包配置列表。
+//
+// 每个池的 Expiry 同样以秒为单位配置，进入执行器前统一转换为 time.Duration。
 func ExecutorConfigs(cfg *config.Config) []executor.Config {
 	configs := make([]executor.Config, 0, len(cfg.Executor.Pools))
 	for _, poolCfg := range cfg.Executor.Pools {
@@ -111,6 +129,7 @@ func ExecutorConfigs(cfg *config.Config) []executor.Config {
 	return configs
 }
 
+// HTTPServerConfig 将应用 server 配置转换为 httpserver 包配置。
 func HTTPServerConfig(cfg *config.Config) *httpserver.Config {
 	return &httpserver.Config{
 		Host:         cfg.Server.Host,
@@ -121,6 +140,7 @@ func HTTPServerConfig(cfg *config.Config) *httpserver.Config {
 	}
 }
 
+// NormalizedStorageConfig 返回已补默认值并应用环境覆盖的存储配置。
 func NormalizedStorageConfig(cfg *config.Config) config.StorageConfig {
 	storageCfg := cfg.Storage
 	storageCfg.DefaultConfig()
@@ -128,6 +148,7 @@ func NormalizedStorageConfig(cfg *config.Config) config.StorageConfig {
 	return storageCfg
 }
 
+// StorageConfig 将标准化后的存储配置转换为 storage 包配置。
 func StorageConfig(cfg *config.Config) *storage.Config {
 	storageCfg := NormalizedStorageConfig(cfg)
 	return storageCfg.ToPkgConfig()

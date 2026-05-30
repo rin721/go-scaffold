@@ -1,5 +1,7 @@
 package main
 
+// 本文件是密码哈希包的最小可运行示例，展示配置、哈希、校验和错误处理的推荐调用顺序。
+
 import (
 	"fmt"
 	"log"
@@ -7,6 +9,7 @@ import (
 	"github.com/rei0721/go-scaffold/pkg/crypto"
 )
 
+// main 封装当前文件的内部辅助流程，避免公开入口直接承载重复控制流。
 func main() {
 	fmt.Print("=== pkg/crypto 基础示例 ===\n")
 

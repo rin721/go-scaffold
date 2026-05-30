@@ -1,4 +1,9 @@
+// Package dbapp 提供 Demo Todo 对数据库的 SQLGen 桥接能力。
+//
+// 本包用于脚手架示例和本地验证：它返回生成 SQL 以便测试和审计，但不是生产迁移框架。
 package dbapp
+
+// 本文件连接 Demo 业务与数据库基础设施，用 SQL 生成器为命令行和启动钩子提供受控的数据操作。
 
 import (
 	"context"
@@ -13,24 +18,35 @@ import (
 )
 
 const (
+	// DefaultTodoLimit 是列表查询未传入有效 limit 时的默认条数。
 	DefaultTodoLimit = 100
-	MaxTodoLimit     = 1000
+	// MaxTodoLimit 限制 Demo 列表查询单次返回规模，避免示例接口被超大分页拖垮。
+	MaxTodoLimit = 1000
 )
 
 var (
+	// ErrUnsupportedDriver 表示当前 database driver 无法映射到 sqlgen 方言。
 	ErrUnsupportedDriver = errors.New("unsupported database driver")
-	ErrMissingDatabase   = errors.New("database is nil")
-	ErrMissingTodoTitle  = errors.New("todo title is required")
-	ErrMissingTodoID     = errors.New("todo id is required")
-	ErrNoTodoUpdate      = errors.New("no todo fields to update")
+	// ErrMissingDatabase 表示调用方未注入数据库实例。
+	ErrMissingDatabase = errors.New("database is nil")
+	// ErrMissingTodoTitle 表示创建 Todo 时缺少必填标题。
+	ErrMissingTodoTitle = errors.New("todo title is required")
+	// ErrMissingTodoID 表示需要定位单条 Todo 的操作缺少有效 ID。
+	ErrMissingTodoID = errors.New("todo id is required")
+	// ErrNoTodoUpdate 表示更新请求没有提供任何可变更字段。
+	ErrNoTodoUpdate = errors.New("no todo fields to update")
 )
 
+// TodoCreateInput 描述创建 Demo Todo 所需的业务字段。
 type TodoCreateInput struct {
 	Title       string
 	Description string
 	Completed   bool
 }
 
+// TodoUpdateInput 描述更新 Demo Todo 的局部字段。
+//
+// 指针字段用于区分“未传入”和“传入零值”，例如 Completed=false 仍然是一次有效更新。
 type TodoUpdateInput struct {
 	ID          uint
 	Title       *string
@@ -38,6 +54,7 @@ type TodoUpdateInput struct {
 	Completed   *bool
 }
 
+// DialectForDriver 将应用数据库 driver 映射为 sqlgen 方言。
 func DialectForDriver(driver string) (sqlgen.Dialect, error) {
 	switch database.Driver(driver) {
 	case database.DriverSQLite:
@@ -51,6 +68,9 @@ func DialectForDriver(driver string) (sqlgen.Dialect, error) {
 	}
 }
 
+// NewGenerator 创建 Demo 数据操作使用的 sqlgen 生成器。
+//
+// Demo Todo 使用软删除，并跳过零值字段，以贴近常见业务 CRUD 语义。
 func NewGenerator(driver string) (*sqlgen.Generator, error) {
 	dialect, err := DialectForDriver(driver)
 	if err != nil {
@@ -63,6 +83,7 @@ func NewGenerator(driver string) (*sqlgen.Generator, error) {
 	}), nil
 }
 
+// DemoSchemaSQL 生成 Demo Todo 表结构 SQL。
 func DemoSchemaSQL(driver string) (string, error) {
 	gen, err := NewGenerator(driver)
 	if err != nil {
@@ -71,6 +92,7 @@ func DemoSchemaSQL(driver string) (string, error) {
 	return gen.TableIfNotExists(&model.Todo{})
 }
 
+// DatabaseSQL 生成创建数据库的 SQL。
 func DatabaseSQL(driver, name string) (string, error) {
 	gen, err := NewGenerator(driver)
 	if err != nil {
@@ -79,6 +101,9 @@ func DatabaseSQL(driver, name string) (string, error) {
 	return gen.DatabaseIfNotExists(name)
 }
 
+// ApplyDatabase 执行创建数据库 SQL，并返回实际生成的语句。
+//
+// 返回 SQL 是为了让测试和运维日志能确认 sqlgen 生成结果，而不是隐藏在副作用里。
 func ApplyDatabase(ctx context.Context, db database.Database, driver, name string) (string, error) {
 	if db == nil {
 		return "", ErrMissingDatabase
@@ -93,6 +118,7 @@ func ApplyDatabase(ctx context.Context, db database.Database, driver, name strin
 	return sql, nil
 }
 
+// ApplyDemoSchema 执行 Demo Todo 表结构 SQL，并返回实际生成的语句。
 func ApplyDemoSchema(ctx context.Context, db database.Database, driver string) (string, error) {
 	if db == nil {
 		return "", ErrMissingDatabase
@@ -107,6 +133,7 @@ func ApplyDemoSchema(ctx context.Context, db database.Database, driver string) (
 	return sql, nil
 }
 
+// CreateTodo 通过 sqlgen 生成并执行 Demo Todo 创建语句。
 func CreateTodo(ctx context.Context, db database.Database, driver string, input TodoCreateInput) (string, error) {
 	if db == nil {
 		return "", ErrMissingDatabase
@@ -138,6 +165,9 @@ func CreateTodo(ctx context.Context, db database.Database, driver string, input 
 	return sql, nil
 }
 
+// ListTodos 通过 sqlgen 生成并执行 Demo Todo 分页查询。
+//
+// limit 会被约束在默认值和 MaxTodoLimit 之间，offset 小于 0 时按 0 处理。
 func ListTodos(ctx context.Context, db database.Database, driver string, limit, offset int) ([]model.Todo, string, error) {
 	if db == nil {
 		return nil, "", ErrMissingDatabase
@@ -163,6 +193,9 @@ func ListTodos(ctx context.Context, db database.Database, driver string, limit, 
 	return todos, sql, nil
 }
 
+// GetTodo 通过 sqlgen 生成并执行单条 Demo Todo 查询。
+//
+// 查询无结果时统一返回 gorm.ErrRecordNotFound，便于 handler 层映射为 404。
 func GetTodo(ctx context.Context, db database.Database, driver string, id uint) (*model.Todo, string, error) {
 	if db == nil {
 		return nil, "", ErrMissingDatabase
@@ -191,6 +224,9 @@ func GetTodo(ctx context.Context, db database.Database, driver string, id uint) 
 	return &todo, sql, nil
 }
 
+// UpdateTodo 通过 sqlgen 生成并执行 Demo Todo 局部更新。
+//
+// 只会更新指针字段中非 nil 的值，并始终刷新 updated_at。
 func UpdateTodo(ctx context.Context, db database.Database, driver string, input TodoUpdateInput) (string, error) {
 	if db == nil {
 		return "", ErrMissingDatabase
@@ -228,6 +264,9 @@ func UpdateTodo(ctx context.Context, db database.Database, driver string, input 
 	return sql, nil
 }
 
+// DeleteTodo 通过 sqlgen 生成并执行 Demo Todo 删除语句。
+//
+// 由于生成器启用了 SoftDelete，这里实际写入 deleted_at，而不是物理删除记录。
 func DeleteTodo(ctx context.Context, db database.Database, driver string, id uint) (string, error) {
 	if db == nil {
 		return "", ErrMissingDatabase
@@ -250,6 +289,7 @@ func DeleteTodo(ctx context.Context, db database.Database, driver string, id uin
 	return sql, nil
 }
 
+// normalizeLimit 约束 Demo Todo 查询的分页上限，避免命令行入口发起无界读取。
 func normalizeLimit(limit int) int {
 	if limit <= 0 {
 		return DefaultTodoLimit

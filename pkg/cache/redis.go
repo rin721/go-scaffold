@@ -1,5 +1,7 @@
 package cache
 
+// 本文件属于 Redis 缓存适配器，说明连接生命周期、键值操作、批处理或热重载边界。
+
 import (
 	"context"
 	"errors"

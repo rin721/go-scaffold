@@ -1,5 +1,7 @@
 package storage
 
+// 本测试文件固定存储抽象的文件、复制、监听和媒体辅助能力，防止注释补全和后续重构改变外部可观察行为。
+
 import (
 	"context"
 	"errors"
@@ -12,6 +14,7 @@ import (
 	"github.com/disintegration/imaging"
 )
 
+// TestMemoryFileOperations 固定存储抽象的文件、复制、监听和媒体辅助能力，确保后续注释补全或结构调整不改变该场景。
 func TestMemoryFileOperations(t *testing.T) {
 	fs := newMemoryStorage(t)
 	defer fs.Close()
@@ -56,6 +59,7 @@ func TestMemoryFileOperations(t *testing.T) {
 	}
 }
 
+// TestCopyAndCopyDir 固定存储抽象的文件、复制、监听和媒体辅助能力，确保后续注释补全或结构调整不改变该场景。
 func TestCopyAndCopyDir(t *testing.T) {
 	fs := newMemoryStorage(t)
 	defer fs.Close()
@@ -94,6 +98,7 @@ func TestCopyAndCopyDir(t *testing.T) {
 	}
 }
 
+// TestMIMEExcelAndImageHelpers 固定存储抽象的文件、复制、监听和媒体辅助能力，确保后续注释补全或结构调整不改变该场景。
 func TestMIMEExcelAndImageHelpers(t *testing.T) {
 	fs := newMemoryStorage(t)
 	defer fs.Close()
@@ -159,6 +164,7 @@ func TestMIMEExcelAndImageHelpers(t *testing.T) {
 	}
 }
 
+// TestConfigValidationReloadAndDisabledWatch 固定存储抽象的文件、复制、监听和媒体辅助能力，确保后续注释补全或结构调整不改变该场景。
 func TestConfigValidationReloadAndDisabledWatch(t *testing.T) {
 	var cfg Config
 	if err := cfg.Validate(); !errors.Is(err, ErrInvalidFSType) {
@@ -182,6 +188,7 @@ func TestConfigValidationReloadAndDisabledWatch(t *testing.T) {
 	assertFileContent(t, fs, "stable.txt", "ok")
 }
 
+// newMemoryStorage 构造当前测试场景所需的最小依赖集合，避免测试直接耦合生产装配流程。
 func newMemoryStorage(t *testing.T) Storage {
 	t.Helper()
 	fs, err := New(&Config{FSType: FSTypeMemory, EnableWatch: false})
@@ -191,6 +198,7 @@ func newMemoryStorage(t *testing.T) Storage {
 	return fs
 }
 
+// mustWriteFile 是当前测试文件的辅助函数，用于复用夹具、断言或输入构造逻辑。
 func mustWriteFile(t *testing.T, fs Storage, path, content string) {
 	t.Helper()
 	if err := fs.WriteFile(path, []byte(content), os.FileMode(0644)); err != nil {
@@ -198,6 +206,7 @@ func mustWriteFile(t *testing.T, fs Storage, path, content string) {
 	}
 }
 
+// assertFileContent 校验测试响应或状态中的关键字段，使测试断言聚焦在对外契约而非重复解析细节。
 func assertFileContent(t *testing.T, fs Storage, path, want string) {
 	t.Helper()
 	data, err := fs.ReadFile(path)

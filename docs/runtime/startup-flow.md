@@ -22,7 +22,7 @@ main.go
 | 包 | 作用 |
 | --- | --- |
 | `initapp` | 创建核心服务、基础设施、模块和传输层 |
-| `modeapp` | 构建选定运行模式；当前真实模式是 `server` |
+| `mainapp` | 构建主应用运行模式；当前真实模式是 `server` |
 | `lifecycleapp` | 启动并关闭 HTTP、存储、执行器、缓存、数据库和日志 |
 | `reloadapp` | 将配置变化应用到可重载子系统 |
 

@@ -1,5 +1,7 @@
 package config
 
+// 本文件定义一个配置分区及其校验规则，是外部配置进入运行时基础设施前的类型化边界。
+
 import (
 	"errors"
 	"fmt"
@@ -43,10 +45,12 @@ type ExecutorPoolConfig struct {
 	NonBlocking bool `mapstructure:"non_blocking"`
 }
 
+// ValidateName 返回当前配置分区在聚合校验错误中的稳定名称。
 func (c *ExecutorConfig) ValidateName() string {
 	return AppExecutorName
 }
 
+// ValidateRequired 声明当前配置分区是否必须出现在完整应用配置中。
 func (c *ExecutorConfig) ValidateRequired() bool {
 	return true
 }

@@ -1,5 +1,7 @@
 package httptransport
 
+// 本文件定义 HTTP 传输层装配，把中间件顺序、健康检查和业务路由注册为 Gin Engine。
+
 import (
 	"context"
 	"net/http"
@@ -15,6 +17,7 @@ import (
 	"github.com/rei0721/go-scaffold/types/result"
 )
 
+// RouterDeps 聚合 HTTP 路由装配所需依赖，允许测试或可选模块传入 nil 以裁剪路由。
 type RouterDeps struct {
 	Logger      logger.Logger
 	I18n        i18n.I18n
@@ -23,6 +26,7 @@ type RouterDeps struct {
 	TodoHandler *demohandler.TodoHandler
 }
 
+// NewRouter 按固定顺序注册中间件、健康检查和业务路由，返回可直接交给 HTTPServer 的 Gin Engine。
 func NewRouter(deps RouterDeps) *gin.Engine {
 	r := gin.New()
 
@@ -55,10 +59,12 @@ func NewRouter(deps RouterDeps) *gin.Engine {
 	return r
 }
 
+// health 返回轻量存活探针响应，只证明进程与路由栈仍可处理请求。
 func health(c *gin.Context) {
 	c.JSON(http.StatusOK, result.Success(gin.H{"status": "ok"}))
 }
 
+// ready 执行数据库就绪检查，并把失败原因转化为 503 响应。
 func ready(db database.Database) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if db == nil {
@@ -92,6 +98,7 @@ func ready(db database.Database) gin.HandlerFunc {
 	}
 }
 
+// ReadyCheck 构造就绪探针回调，通过数据库健康检查表达服务是否可以承接流量。
 func ReadyCheck(db database.Database) func(context.Context) error {
 	return func(ctx context.Context) error {
 		if db == nil {

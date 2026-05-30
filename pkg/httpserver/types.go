@@ -1,5 +1,7 @@
 package httpserver
 
+// 本文件属于 HTTP 服务封装层，管理 net/http Server 的启动、关闭、地址选择和配置重载。
+
 import (
 	"context"
 	"net/http"
@@ -28,7 +30,7 @@ type HTTPServer interface {
 	Shutdown(ctx context.Context) error
 
 	// Reload 热重载配置（原子操作）
-	// 使用新配置重新启动服务器，不中断服务
+	// 当前实现会在必要时关闭旧监听再绑定新地址，调用方不应把它理解为严格零停机切换。
 	// 参数:
 	//   ctx: 上下文，用于控制重载过程
 	//   cfg: 新的服务器配置

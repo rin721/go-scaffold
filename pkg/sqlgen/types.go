@@ -1,5 +1,7 @@
 package sqlgen
 
+// 本文件属于 SQL 生成器，负责把结构体、schema 或解析结果转换为特定方言的 SQL 文本。
+
 import (
 	"reflect"
 	"time"

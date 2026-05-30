@@ -1,5 +1,7 @@
 package initapp
 
+// 本测试文件固定应用分层组装和 Demo schema 策略，防止注释补全和后续重构改变外部可观察行为。
+
 import (
 	"context"
 	"fmt"
@@ -14,6 +16,7 @@ import (
 	"gorm.io/gorm"
 )
 
+// TestDemoSchemaPolicyFor 固定应用分层组装和 Demo schema 策略，确保后续注释补全或结构调整不改变该场景。
 func TestDemoSchemaPolicyFor(t *testing.T) {
 	tests := []struct {
 		name    string
@@ -41,6 +44,7 @@ func TestDemoSchemaPolicyFor(t *testing.T) {
 	}
 }
 
+// TestApplyDemoSchemaForTrigger 固定应用分层组装和 Demo schema 策略，确保后续注释补全或结构调整不改变该场景。
 func TestApplyDemoSchemaForTrigger(t *testing.T) {
 	tests := []struct {
 		name     string
@@ -69,6 +73,7 @@ func TestApplyDemoSchemaForTrigger(t *testing.T) {
 	}
 }
 
+// TestApplyDemoSchemaKeepsServerStartDefault 固定应用分层组装和 Demo schema 策略，确保后续注释补全或结构调整不改变该场景。
 func TestApplyDemoSchemaKeepsServerStartDefault(t *testing.T) {
 	db := newTestDatabase(t)
 
@@ -80,6 +85,7 @@ func TestApplyDemoSchemaKeepsServerStartDefault(t *testing.T) {
 	}
 }
 
+// TestNewModulesRespectsDemoConfig 固定应用分层组装和 Demo schema 策略，确保后续注释补全或结构调整不改变该场景。
 func TestNewModulesRespectsDemoConfig(t *testing.T) {
 	tests := []struct {
 		name        string
@@ -123,6 +129,7 @@ func TestNewModulesRespectsDemoConfig(t *testing.T) {
 	}
 }
 
+// TestApplyDemoSchemaForTriggerAllowsMissingDatabase 固定应用分层组装和 Demo schema 策略，确保后续注释补全或结构调整不改变该场景。
 func TestApplyDemoSchemaForTriggerAllowsMissingDatabase(t *testing.T) {
 	policy, err := ApplyDemoSchemaForTrigger(nil, string(database.DriverSQLite), testLogger{}, DemoSchemaTriggerServerStart)
 	if err != nil {
@@ -137,6 +144,7 @@ type testDatabase struct {
 	db *gorm.DB
 }
 
+// newTestDatabase 构造当前测试场景所需的最小依赖集合，避免测试直接耦合生产装配流程。
 func newTestDatabase(t *testing.T) *testDatabase {
 	t.Helper()
 
@@ -155,10 +163,12 @@ func newTestDatabase(t *testing.T) *testDatabase {
 	return testDB
 }
 
+// DB 实现数据库测试桩的底层连接访问入口，按测试场景返回预置的 GORM 句柄。
 func (d *testDatabase) DB() *gorm.DB {
 	return d.db
 }
 
+// Close 实现测试桩的资源关闭入口，用于验证生命周期调用而不释放外部资源。
 func (d *testDatabase) Close() error {
 	sqlDB, err := d.db.DB()
 	if err != nil {
@@ -167,6 +177,7 @@ func (d *testDatabase) Close() error {
 	return sqlDB.Close()
 }
 
+// Ping 实现数据库测试桩的健康检查入口，按测试需要返回成功或预设错误。
 func (d *testDatabase) Ping(ctx context.Context) error {
 	sqlDB, err := d.db.DB()
 	if err != nil {
@@ -175,36 +186,51 @@ func (d *testDatabase) Ping(ctx context.Context) error {
 	return sqlDB.PingContext(ctx)
 }
 
+// WithTx 实现数据库测试桩的事务入口，用于把被测逻辑限制在可观察的回调调用内。
 func (d *testDatabase) WithTx(ctx context.Context, fn database.TxFunc) error {
 	return d.WithTxOptions(ctx, nil, fn)
 }
 
+// WithTxOptions 实现数据库测试桩的事务入口，用于把被测逻辑限制在可观察的回调调用内。
 func (d *testDatabase) WithTxOptions(ctx context.Context, _ *database.TxOptions, fn database.TxFunc) error {
 	return d.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		return fn(ctx, tx)
 	})
 }
 
+// Reload 实现测试桩的配置重载入口，用于验证调用路径而不触发真实资源替换。
 func (d *testDatabase) Reload(_ *database.Config) error {
 	return nil
 }
 
 type testLogger struct{}
 
+// Debug 实现测试日志桩的同名输出入口，当前测试只关心接口满足而不采集日志内容。
 func (testLogger) Debug(string, ...interface{}) {}
-func (testLogger) Info(string, ...interface{})  {}
-func (testLogger) Warn(string, ...interface{})  {}
+
+// Info 实现测试日志桩的同名输出入口，当前测试只关心接口满足而不采集日志内容。
+func (testLogger) Info(string, ...interface{}) {}
+
+// Warn 实现测试日志桩的同名输出入口，当前测试只关心接口满足而不采集日志内容。
+func (testLogger) Warn(string, ...interface{}) {}
+
+// Error 实现测试日志桩的同名输出入口，当前测试只关心接口满足而不采集日志内容。
 func (testLogger) Error(string, ...interface{}) {}
+
+// Fatal 实现测试日志桩的同名输出入口，当前测试只关心接口满足而不采集日志内容。
 func (testLogger) Fatal(string, ...interface{}) {}
 
+// With 实现测试日志桩的字段绑定入口，返回自身以保持 logger.Logger 链式调用契约。
 func (l testLogger) With(...interface{}) logger.Logger {
 	return l
 }
 
+// Sync 实现测试日志桩的刷新入口，测试环境不持有真实缓冲区。
 func (testLogger) Sync() error {
 	return nil
 }
 
+// Reload 实现测试桩的配置重载入口，用于验证调用路径而不触发真实资源替换。
 func (testLogger) Reload(*logger.Config) error {
 	return nil
 }

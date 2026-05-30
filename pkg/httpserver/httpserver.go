@@ -1,5 +1,7 @@
 package httpserver
 
+// 本文件属于 HTTP 服务封装层，管理 net/http Server 的启动、关闭、地址选择和配置重载。
+
 import (
 	"context"
 	"fmt"
@@ -212,7 +214,11 @@ func (s *httpServer) Shutdown(ctx context.Context) error {
 	return nil
 }
 
-// Reload 热重载配置（原子操作）
+// Reload 使用新配置替换 HTTP 服务器运行参数。
+//
+// 当服务尚未运行时，该方法只更新内存配置；当服务已运行且监听地址变化时，
+// 当前实现会先优雅关闭旧 server，再创建新监听并启动 Serve goroutine。
+// 因此它保证的是失败时返回明确错误和状态可见，不声明严格的零停机切换。
 func (s *httpServer) Reload(ctx context.Context, cfg *Config) error {
 	if cfg == nil {
 		return &ServerError{
@@ -257,7 +263,8 @@ func (s *httpServer) Reload(ctx context.Context, cfg *Config) error {
 	oldAddr := fmt.Sprintf("%s:%d", s.config.Host, s.config.Port)
 	portChanged := newAddr != oldAddr
 
-	// 如果端口变化，需要先关闭旧服务器
+	// 地址变化时必须先关闭旧监听，否则同端口重绑会被操作系统拒绝。
+	// 这段路径存在短暂不可接收新连接的窗口，文档层不能将其描述为零停机。
 	if portChanged {
 		s.logger.Info("port changed, shutting down old server first", "old", oldAddr, "new", newAddr)
 

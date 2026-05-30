@@ -1,5 +1,7 @@
 package cache
 
+// 本测试文件固定 Redis 缓存适配器的配置、操作和热重载契约，防止注释补全和后续重构改变外部可观察行为。
+
 import (
 	"context"
 	"strconv"
@@ -15,14 +17,17 @@ type testLogger struct {
 	errors []string
 }
 
+// Info 实现测试日志桩的同名输出入口，当前测试只关心接口满足而不采集日志内容。
 func (l *testLogger) Info(msg string, keysAndValues ...interface{}) {
 	l.infos = append(l.infos, msg)
 }
 
+// Error 实现测试日志桩的同名输出入口，当前测试只关心接口满足而不采集日志内容。
 func (l *testLogger) Error(msg string, keysAndValues ...interface{}) {
 	l.errors = append(l.errors, msg)
 }
 
+// runRedis 启动测试依赖服务或场景，并返回清理函数以保证资源可回收。
 func runRedis(t *testing.T) *miniredis.Miniredis {
 	t.Helper()
 
@@ -35,6 +40,7 @@ func runRedis(t *testing.T) *miniredis.Miniredis {
 	return server
 }
 
+// redisConfig 是当前测试文件的辅助函数，用于复用夹具、断言或输入构造逻辑。
 func redisConfig(t *testing.T, server *miniredis.Miniredis) *Config {
 	t.Helper()
 
@@ -59,6 +65,7 @@ func redisConfig(t *testing.T, server *miniredis.Miniredis) *Config {
 	return cfg
 }
 
+// newTestRedisCache 构造当前测试场景所需的最小依赖集合，避免测试直接耦合生产装配流程。
 func newTestRedisCache(t *testing.T, server *miniredis.Miniredis) Cache {
 	t.Helper()
 
@@ -75,6 +82,7 @@ func newTestRedisCache(t *testing.T, server *miniredis.Miniredis) Cache {
 	return cache
 }
 
+// TestDefaultConfigAndValidate 固定 Redis 缓存适配器的配置、操作和热重载契约，确保后续注释补全或结构调整不改变该场景。
 func TestDefaultConfigAndValidate(t *testing.T) {
 	cfg := DefaultConfig()
 	if cfg.Host != DefaultHost || cfg.Port != DefaultPort || cfg.DB != DefaultDB {
@@ -145,6 +153,7 @@ func TestDefaultConfigAndValidate(t *testing.T) {
 	}
 }
 
+// TestRedisCacheBasicOperations 固定 Redis 缓存适配器的配置、操作和热重载契约，确保后续注释补全或结构调整不改变该场景。
 func TestRedisCacheBasicOperations(t *testing.T) {
 	ctx := context.Background()
 	server := runRedis(t)
@@ -212,6 +221,7 @@ func TestRedisCacheBasicOperations(t *testing.T) {
 	}
 }
 
+// TestRedisCacheBatchAndCounterOperations 固定 Redis 缓存适配器的配置、操作和热重载契约，确保后续注释补全或结构调整不改变该场景。
 func TestRedisCacheBatchAndCounterOperations(t *testing.T) {
 	ctx := context.Background()
 	cache := newTestRedisCache(t, runRedis(t))
@@ -271,6 +281,7 @@ func TestRedisCacheBatchAndCounterOperations(t *testing.T) {
 	}
 }
 
+// TestRedisCacheReloadKeepsOldClientOnFailureAndSwitchesOnSuccess 固定 Redis 缓存适配器的配置、操作和热重载契约，确保后续注释补全或结构调整不改变该场景。
 func TestRedisCacheReloadKeepsOldClientOnFailureAndSwitchesOnSuccess(t *testing.T) {
 	ctx := context.Background()
 	oldServer := runRedis(t)

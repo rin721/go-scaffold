@@ -1,5 +1,7 @@
 package database
 
+// 本测试文件固定数据库连接与事务管理的提交回滚语义，防止注释补全和后续重构改变外部可观察行为。
+
 import (
 	"context"
 	"errors"
@@ -17,6 +19,7 @@ type txTestUser struct {
 	Email string `gorm:"column:email;size:100;uniqueIndex"`
 }
 
+// setupTxTestDB 准备测试数据库和模型，确保每个事务用例拥有独立可控的初始状态。
 func setupTxTestDB(t *testing.T) Database {
 	t.Helper()
 	gdb, err := gorm.Open(sqlite.Open("file::memory:?cache=shared"), &gorm.Config{})
@@ -39,6 +42,7 @@ func setupTxTestDB(t *testing.T) Database {
 	return &database{db: gdb, sqlDB: sqlDB}
 }
 
+// TestWithTxCommit 固定数据库连接与事务管理的提交回滚语义，确保后续注释补全或结构调整不改变该场景。
 func TestWithTxCommit(t *testing.T) {
 	db := setupTxTestDB(t)
 	err := db.WithTx(context.Background(), func(ctx context.Context, tx *gorm.DB) error {
@@ -55,6 +59,7 @@ func TestWithTxCommit(t *testing.T) {
 	}
 }
 
+// TestWithTxRollback 固定数据库连接与事务管理的提交回滚语义，确保后续注释补全或结构调整不改变该场景。
 func TestWithTxRollback(t *testing.T) {
 	db := setupTxTestDB(t)
 	expected := errors.New("stop")
@@ -75,6 +80,7 @@ func TestWithTxRollback(t *testing.T) {
 	}
 }
 
+// TestWithTxNested 固定数据库连接与事务管理的提交回滚语义，确保后续注释补全或结构调整不改变该场景。
 func TestWithTxNested(t *testing.T) {
 	db := setupTxTestDB(t)
 	err := db.WithTx(context.Background(), func(ctx context.Context, tx *gorm.DB) error {
@@ -96,6 +102,7 @@ func TestWithTxNested(t *testing.T) {
 	}
 }
 
+// TestWithTxNestedRollback 固定数据库连接与事务管理的提交回滚语义，确保后续注释补全或结构调整不改变该场景。
 func TestWithTxNestedRollback(t *testing.T) {
 	db := setupTxTestDB(t)
 	innerErr := errors.New("inner failed")
@@ -125,6 +132,7 @@ func TestWithTxNestedRollback(t *testing.T) {
 	}
 }
 
+// TestWithTxDisableNested 固定数据库连接与事务管理的提交回滚语义，确保后续注释补全或结构调整不改变该场景。
 func TestWithTxDisableNested(t *testing.T) {
 	db := setupTxTestDB(t)
 	err := db.WithTx(context.Background(), func(ctx context.Context, tx *gorm.DB) error {

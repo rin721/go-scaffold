@@ -1,5 +1,7 @@
 package cli
 
+// 本测试文件固定轻量 CLI 解析器的命令、flag 和错误输出契约，防止注释补全和后续重构改变外部可观察行为。
+
 import (
 	"bytes"
 	"errors"
@@ -16,22 +18,27 @@ type testCommand struct {
 	err         error
 }
 
+// Name 实现 CLI 测试命令的同名方法，帮助验证命令注册、flag 解析和执行错误路径。
 func (c *testCommand) Name() string {
 	return c.name
 }
 
+// Description 实现 CLI 测试命令的同名方法，帮助验证命令注册、flag 解析和执行错误路径。
 func (c *testCommand) Description() string {
 	return c.description
 }
 
+// Usage 实现 CLI 测试命令的同名方法，帮助验证命令注册、flag 解析和执行错误路径。
 func (c *testCommand) Usage() string {
 	return c.name + " [flags]"
 }
 
+// Flags 实现 CLI 测试命令的同名方法，帮助验证命令注册、flag 解析和执行错误路径。
 func (c *testCommand) Flags() []Flag {
 	return c.flags
 }
 
+// Execute 实现 CLI 测试命令的同名方法，帮助验证命令注册、flag 解析和执行错误路径。
 func (c *testCommand) Execute(ctx *Context) error {
 	c.ctx = ctx
 	if c.err != nil {
@@ -40,6 +47,7 @@ func (c *testCommand) Execute(ctx *Context) error {
 	return nil
 }
 
+// TestRunWithIOParsesFlagsEnvAndArgs 固定轻量 CLI 解析器的命令、flag 和错误输出契约，确保后续注释补全或结构调整不改变该场景。
 func TestRunWithIOParsesFlagsEnvAndArgs(t *testing.T) {
 	t.Setenv("CLI_TEST_OUTPUT", "from-env")
 
@@ -95,6 +103,7 @@ func TestRunWithIOParsesFlagsEnvAndArgs(t *testing.T) {
 	}
 }
 
+// TestRunWithIOMissingRequiredFlagReturnsUsageError 固定轻量 CLI 解析器的命令、flag 和错误输出契约，确保后续注释补全或结构调整不改变该场景。
 func TestRunWithIOMissingRequiredFlagReturnsUsageError(t *testing.T) {
 	cmd := &testCommand{
 		name:  "run",
@@ -115,6 +124,7 @@ func TestRunWithIOMissingRequiredFlagReturnsUsageError(t *testing.T) {
 	}
 }
 
+// TestRunWithIOWrapsCommandExecutionError 固定轻量 CLI 解析器的命令、flag 和错误输出契约，确保后续注释补全或结构调整不改变该场景。
 func TestRunWithIOWrapsCommandExecutionError(t *testing.T) {
 	cause := errors.New("boom")
 	cmd := &testCommand{
@@ -140,6 +150,7 @@ func TestRunWithIOWrapsCommandExecutionError(t *testing.T) {
 	}
 }
 
+// TestAddCommandRejectsDuplicateNames 固定轻量 CLI 解析器的命令、flag 和错误输出契约，确保后续注释补全或结构调整不改变该场景。
 func TestAddCommandRejectsDuplicateNames(t *testing.T) {
 	app := NewApp("tool")
 	if err := app.AddCommand(&testCommand{name: "run"}); err != nil {
@@ -155,6 +166,7 @@ func TestAddCommandRejectsDuplicateNames(t *testing.T) {
 	}
 }
 
+// TestRunWithIOPrintsHelpAndVersion 固定轻量 CLI 解析器的命令、flag 和错误输出契约，确保后续注释补全或结构调整不改变该场景。
 func TestRunWithIOPrintsHelpAndVersion(t *testing.T) {
 	app := NewApp("tool")
 	app.SetVersion("1.2.3")

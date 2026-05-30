@@ -1,5 +1,7 @@
 package config
 
+// 本文件定义一个配置分区及其校验规则，是外部配置进入运行时基础设施前的类型化边界。
+
 import "fmt"
 
 // CORSConfig 跨域资源共享(CORS)配置

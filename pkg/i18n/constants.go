@@ -1,5 +1,7 @@
 package i18n
 
+// 本文件属于国际化组件，定义语言资源加载、模板翻译和默认实例访问边界。
+
 // DefaultLanguage 默认语言
 // 当无法从请求中获取语言时使用
 const DefaultLanguage = "zh-CN"

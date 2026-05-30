@@ -1,5 +1,7 @@
 package sqlgen
 
+// 本文件属于 SQL 生成器，负责把结构体、schema 或解析结果转换为特定方言的 SQL 文本。
+
 import (
 	"fmt"
 	"regexp"
@@ -76,6 +78,7 @@ var (
 	pkConstraintRegex = regexp.MustCompile(`(?i)(?:CONSTRAINT\s+\w+\s+)?PRIMARY\s+KEY\s*\(([^)]+)\)`)
 )
 
+// findCreateTableStatements 在 SQL 文本中定位语法边界，为后续解析步骤提供稳定切片范围。
 func (p *Parser) findCreateTableStatements() []string {
 	var results []string
 
@@ -108,6 +111,7 @@ func (p *Parser) findCreateTableStatements() []string {
 	return results
 }
 
+// parseCreateTable 从 SQL 或标签文本中提取结构化信息，无法识别时返回错误或保守默认值。
 func (p *Parser) parseCreateTable(sql string) (*Schema, error) {
 	matches := createTableStartRegex.FindStringSubmatchIndex(sql)
 	if len(matches) < 4 {
@@ -185,6 +189,7 @@ func (p *Parser) parseCreateTable(sql string) (*Schema, error) {
 	return schema, nil
 }
 
+// findMatchingParen 在 SQL 文本中定位语法边界，为后续解析步骤提供稳定切片范围。
 func findMatchingParen(input string, openIndex int) int {
 	if openIndex < 0 || openIndex >= len(input) || input[openIndex] != '(' {
 		return -1
@@ -225,6 +230,7 @@ func findMatchingParen(input string, openIndex int) int {
 	return -1
 }
 
+// singularizeTableName 将常见复数表名转换为结构体候选名，复杂命名仍允许调用方通过选项覆盖。
 func singularizeTableName(name string) string {
 	if strings.HasSuffix(name, "ies") && len(name) > 3 {
 		return strings.TrimSuffix(name, "ies") + "y"

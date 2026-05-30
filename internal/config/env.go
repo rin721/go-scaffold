@@ -1,5 +1,7 @@
 package config
 
+// 本文件属于配置子系统，处理配置加载、环境变量覆盖、运行时快照或跨分区校验。
+
 import "github.com/joho/godotenv"
 
 // LoadEnv 加载 .env 文件

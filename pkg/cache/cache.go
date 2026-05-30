@@ -1,5 +1,7 @@
 package cache
 
+// 本文件属于 Redis 缓存适配器，说明连接生命周期、键值操作、批处理或热重载边界。
+
 import (
 	"context"
 	"time"
@@ -209,7 +211,7 @@ type Cache interface {
 	Close() error
 
 	// Reload 重新加载配置(原子操作)
-	// 用于配置热更新,不中断服务
+	// 用于配置热更新；新客户端验证通过后才替换旧客户端，调用方仍需承受底层网络切换窗口。
 	// 参数:
 	//   ctx: 上下文
 	//   config: 新的配置

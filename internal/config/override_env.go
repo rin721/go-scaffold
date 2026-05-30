@@ -1,5 +1,7 @@
 package config
 
+// 本文件属于配置子系统，处理配置加载、环境变量覆盖、运行时快照或跨分区校验。
+
 import (
 	"encoding/json"
 	"os"
@@ -10,6 +12,7 @@ import (
 
 const envNameTag = "envname"
 
+// overrideConfigFromEnv 以反射方式遍历配置结构，把匹配 envname 的环境变量写回配置快照。
 func overrideConfigFromEnv(target any) {
 	value := reflect.ValueOf(target)
 	if !value.IsValid() || value.Kind() != reflect.Pointer || value.IsNil() {
@@ -18,6 +21,7 @@ func overrideConfigFromEnv(target any) {
 	overrideStructFields(value.Elem())
 }
 
+// overrideStructFields 递归处理结构体字段，并在叶子字段上应用环境变量覆盖。
 func overrideStructFields(value reflect.Value) {
 	if value.Kind() == reflect.Pointer {
 		if value.IsNil() {
@@ -49,6 +53,7 @@ func overrideStructFields(value reflect.Value) {
 	}
 }
 
+// shouldRecurseEnvField 判断字段是否应继续递归，跳过时间类型和不适合展开的标量字段。
 func shouldRecurseEnvField(field reflect.Value) bool {
 	switch field.Kind() {
 	case reflect.Struct:
@@ -60,6 +65,7 @@ func shouldRecurseEnvField(field reflect.Value) bool {
 	}
 }
 
+// lookupTaggedEnv 按动态前缀优先、无前缀兜底的顺序查找 envname 对应环境变量。
 func lookupTaggedEnv(envName string) (string, bool) {
 	for _, candidate := range envNameCandidates(envName) {
 		if value, ok := os.LookupEnv(candidate); ok && value != "" {
@@ -69,6 +75,7 @@ func lookupTaggedEnv(envName string) (string, bool) {
 	return "", false
 }
 
+// envNameCandidates 构造一个字段可接受的环境变量候选名，保持动态 AppPrefix 与历史无前缀变量兼容。
 func envNameCandidates(envName string) []string {
 	envName = strings.TrimSpace(envName)
 	if envName == "" {
@@ -82,6 +89,7 @@ func envNameCandidates(envName string) []string {
 	return []string{prefixed, envName}
 }
 
+// setValueFromEnv 根据反射字段类型分派环境变量写入逻辑，并忽略无法设置的字段。
 func setValueFromEnv(field reflect.Value, raw string) bool {
 	if !field.CanSet() {
 		return false
@@ -94,6 +102,7 @@ func setValueFromEnv(field reflect.Value, raw string) bool {
 	return setConcreteValueFromEnv(field, raw)
 }
 
+// setPointerValueFromEnv 为指针字段分配目标值后写入环境变量解析结果。
 func setPointerValueFromEnv(field reflect.Value, raw string) bool {
 	elem := reflect.New(field.Type().Elem()).Elem()
 	if !setConcreteValueFromEnv(elem, raw) {
@@ -103,6 +112,7 @@ func setPointerValueFromEnv(field reflect.Value, raw string) bool {
 	return true
 }
 
+// setConcreteValueFromEnv 将字符串环境变量转换为具体标量类型并写入字段。
 func setConcreteValueFromEnv(field reflect.Value, raw string) bool {
 	switch field.Kind() {
 	case reflect.String:
@@ -143,6 +153,7 @@ func setConcreteValueFromEnv(field reflect.Value, raw string) bool {
 	}
 }
 
+// setSliceValueFromEnv 将分隔符表达的环境变量列表转换为切片字段。
 func setSliceValueFromEnv(field reflect.Value, raw string) bool {
 	elemKind := field.Type().Elem().Kind()
 	switch elemKind {
@@ -163,6 +174,7 @@ func setSliceValueFromEnv(field reflect.Value, raw string) bool {
 	}
 }
 
+// splitEnvList 拆分环境变量列表并清理空白项，避免配置切片携带无意义元素。
 func splitEnvList(raw string) []string {
 	parts := strings.Split(raw, DefaultSeparator)
 	values := make([]string, 0, len(parts))

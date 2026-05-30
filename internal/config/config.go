@@ -1,11 +1,15 @@
 package config
 
+// 本文件属于配置子系统，处理配置加载、环境变量覆盖、运行时快照或跨分区校验。
+
 import "fmt"
 
+// Configurable 表示可被聚合配置校验器识别的配置分区契约。
 type Configurable interface {
 	Validate() error
 }
 
+// Config 聚合应用所有运行时配置分区，是配置管理器发布给组装层的完整快照。
 type Config struct {
 	Server   ServerConfig   `mapstructure:"server"`
 	Database DatabaseConfig `mapstructure:"database"`
@@ -18,12 +22,14 @@ type Config struct {
 	CORS     CORSConfig     `mapstructure:"cors"`
 }
 
+// Validator 表示可以对自身执行配置校验的分区接口。
 type Validator interface {
 	Validate() error
 	ValidateName() string
 	ValidateRequired() bool
 }
 
+// Validate 对完整应用配置执行跨分区校验，返回第一个阻断启动的配置错误。
 func (c *Config) Validate() error {
 	validators := []Validator{
 		&c.Server,
@@ -47,6 +53,7 @@ func (c *Config) Validate() error {
 	return nil
 }
 
+// ValidateOld 保留旧版校验入口，供兼容路径在迁移期复用当前校验逻辑。
 func (c *Config) ValidateOld() error {
 	if err := c.Server.Validate(); err != nil {
 		return fmt.Errorf("server config: %w", err)

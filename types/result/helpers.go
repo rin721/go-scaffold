@@ -1,5 +1,7 @@
 package result
 
+// 本文件定义统一 API 响应结构与 Gin 输出助手，约束状态码、traceId 和分页响应格式。
+
 import (
 	"net/http"
 
@@ -41,7 +43,7 @@ func BadRequest(c *gin.Context, message string) {
 	))
 }
 
-// NotFound 返回404资源不found错误响应
+// NotFound 返回 404 资源不存在错误响应
 // 用于资源不存在的场景
 // 参数:
 //
@@ -87,8 +89,11 @@ func OK[T any](c *gin.Context, data T) {
 	c.JSON(http.StatusOK, Success(data))
 }
 
-// GetTraceID 从上下文获取TraceID
-// 如果未设置则返回空字符串
+// GetTraceID 从 Gin 上下文获取响应用 TraceID。
+//
+// 当前 helper 读取的是历史兼容键 "trace_id"，而响应 JSON 字段名仍为 traceId。
+// 若调用链使用 middleware.TraceIDKey("traceId") 写入上下文，应在修复切片中统一这两个键名。
+// 在未设置或类型不为 string 时，该函数返回空字符串。
 // 参数:
 //
 //	c: Gin上下文

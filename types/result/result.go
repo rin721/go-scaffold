@@ -6,6 +6,8 @@
 // - 本包不是纯领域类型包,不要在非 HTTP 层引入 Gin helper。
 package result
 
+// 本文件定义统一 API 响应结构与 Gin 输出助手，约束状态码、traceId 和分页响应格式。
+
 import "time"
 
 // Result 表示通用的 API 响应结构
@@ -55,20 +57,27 @@ type Result[T any] struct {
 // Success 创建一个成功的 Result
 // 这是一个便捷函数,封装了成功响应的创建逻辑
 // 参数:
-//   data: 要返回的数据,可以是任意类型
+//
+//	data: 要返回的数据,可以是任意类型
+//
 // 返回:
-//   *Result[T]: 包含数据的成功响应
+//
+//	*Result[T]: 包含数据的成功响应
+//
 // 使用示例:
-//   return c.JSON(200, result.Success(user))
-//   return c.JSON(200, result.Success(users))
-//   return c.JSON(200, result.Success(pageResult))
+//
+//	return c.JSON(200, result.Success(user))
+//	return c.JSON(200, result.Success(users))
+//	return c.JSON(200, result.Success(pageResult))
+//
 // 响应格式:
-//   {
-//     "code": 0,
-//     "message": "success",
-//     "data": {...},
-//     "serverTime": 1640000000
-//   }
+//
+//	{
+//	  "code": 0,
+//	  "message": "success",
+//	  "data": {...},
+//	  "serverTime": 1640000000
+//	}
 func Success[T any](data T) *Result[T] {
 	return &Result[T]{
 		Code:       0,                 // 0 表示成功
@@ -81,13 +90,18 @@ func Success[T any](data T) *Result[T] {
 // Error 创建一个错误 Result
 // 用于返回不包含 TraceID 的错误响应
 // 参数:
-//   code: 错误码,应使用 errors 包中定义的常量
-//   message: 错误消息,应该是用户友好的描述
+//
+//	code: 错误码,应使用 errors 包中定义的常量
+//	message: 错误消息,应该是用户友好的描述
+//
 // 返回:
-//   *Result[any]: 错误响应(不包含 data)
+//
+//	*Result[any]: 错误响应(不包含 data)
+//
 // 使用场景:
-//   一般不直接使用,推荐使用 ErrorWithTrace
-//   因为大多数场景都需要 TraceID 进行问题追踪
+//
+//	一般不直接使用,推荐使用 ErrorWithTrace
+//	因为大多数场景都需要 TraceID 进行问题追踪
 func Error(code int, message string) *Result[any] {
 	return &Result[any]{
 		Code:       code,              // 错误码
@@ -100,21 +114,29 @@ func Error(code int, message string) *Result[any] {
 // ErrorWithTrace 创建一个包含 TraceID 的错误 Result
 // 这是推荐的创建错误响应的方式
 // 参数:
-//   code: 错误码,应使用 errors 包中定义的常量
-//   message: 错误消息,用户友好的描述
-//   traceID: 请求追踪 ID,从中间件获取
+//
+//	code: 错误码,应使用 errors 包中定义的常量
+//	message: 错误消息,用户友好的描述
+//	traceID: 请求追踪 ID,从中间件获取
+//
 // 返回:
-//   *Result[any]: 包含 TraceID 的错误响应
+//
+//	*Result[any]: 包含 TraceID 的错误响应
+//
 // 使用示例:
-//   traceID := getTraceID(c)
-//   c.JSON(400, result.ErrorWithTrace(errors.ErrInvalidParams, "参数错误", traceID))
+//
+//	traceID := getTraceID(c)
+//	c.JSON(400, result.ErrorWithTrace(errors.ErrInvalidParams, "参数错误", traceID))
+//
 // 响应格式:
-//   {
-//     "code": 1000,
-//     "message": "参数错误",
-//     "traceId": "123456789",
-//     "serverTime": 1640000000
-//   }
+//
+//	{
+//	  "code": 1000,
+//	  "message": "参数错误",
+//	  "traceId": "123456789",
+//	  "serverTime": 1640000000
+//	}
+//
 // 为什么需要 TraceID:
 //   - 用户报告问题时可以提供 TraceID
 //   - 技术支持可以通过 TraceID 查找相关日志

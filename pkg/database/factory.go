@@ -1,5 +1,7 @@
 package database
 
+// 本文件属于数据库基础设施层，定义连接工厂、池参数、事务上下文和热重载资源替换边界。
+
 import (
 	"context"
 	"database/sql"
@@ -117,7 +119,7 @@ func (d *database) Ping(ctx context.Context) error {
 // - 使用写锁保护,确保重载过程原子性
 // - 失败时保持原有连接不变
 // - 新连接建立成功后才关闭旧连接
-// - 确保过渡期间服务不中断
+// - 新连接验证完成前不替换旧连接；真正的切换窗口由调用方的连接复用和数据库驱动行为决定
 func (d *database) Reload(cfg *Config) error {
 	// 1. 使用新配置创建新的数据库实例
 	// 在锁外创建,避免长时间持有锁
@@ -291,6 +293,7 @@ func NewWithHooks(cfg *Config, hooks ...Hook) (Database, error) {
 	}, nil
 }
 
+// ensureSQLiteDir 在打开 SQLite 前创建父目录，避免本地文件数据库因目录缺失启动失败。
 func ensureSQLiteDir(dbName string) error {
 	if dbName == "" || dbName == ":memory:" || strings.HasPrefix(dbName, "file:") {
 		return nil

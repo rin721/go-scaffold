@@ -1,11 +1,14 @@
 package i18n
 
+// 本测试文件固定国际化工具和基础设施辅助函数的边界，防止注释补全和后续重构改变外部可观察行为。
+
 import (
 	"os"
 	"path/filepath"
 	"testing"
 )
 
+// TestNewLoadsMessagesAndTranslates 固定国际化工具和基础设施辅助函数的边界，确保后续注释补全或结构调整不改变该场景。
 func TestNewLoadsMessagesAndTranslates(t *testing.T) {
 	dir := t.TempDir()
 	writeMessageFile(t, filepath.Join(dir, "en-US.json"), `{
@@ -40,6 +43,7 @@ func TestNewLoadsMessagesAndTranslates(t *testing.T) {
 	}
 }
 
+// TestMustTPanicsWhenTranslationIsMissing 固定国际化工具和基础设施辅助函数的边界，确保后续注释补全或结构调整不改变该场景。
 func TestMustTPanicsWhenTranslationIsMissing(t *testing.T) {
 	translator := Default()
 
@@ -52,6 +56,7 @@ func TestMustTPanicsWhenTranslationIsMissing(t *testing.T) {
 	translator.MustT(LanguageEnglish, "missing.key")
 }
 
+// TestLoadMessagesReturnsErrorsForMissingAndEmptyDirectory 固定国际化工具和基础设施辅助函数的边界，确保后续注释补全或结构调整不改变该场景。
 func TestLoadMessagesReturnsErrorsForMissingAndEmptyDirectory(t *testing.T) {
 	translator := Default()
 
@@ -63,6 +68,7 @@ func TestLoadMessagesReturnsErrorsForMissingAndEmptyDirectory(t *testing.T) {
 	}
 }
 
+// writeMessageFile 写入测试夹具文件，并把文件系统准备细节限制在测试辅助层。
 func writeMessageFile(t *testing.T, path string, content string) {
 	t.Helper()
 	if err := os.WriteFile(path, []byte(content), 0o644); err != nil {

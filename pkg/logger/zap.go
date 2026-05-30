@@ -1,5 +1,7 @@
 package logger
 
+// 本文件属于日志基础设施，封装 zap 配置、输出目的地、字段绑定和运行时重载。
+
 import (
 	"fmt"
 	"os"

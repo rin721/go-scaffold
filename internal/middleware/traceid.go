@@ -1,5 +1,7 @@
 package middleware
 
+// 本文件定义 Gin 中间件能力，约束请求进入业务 handler 前后的链路上下文、副作用和错误输出。
+
 import (
 	"github.com/gin-gonic/gin"
 
@@ -20,6 +22,7 @@ const DefaultHeaderName = "X-Request-ID"
 // 这样可以确保生成的 ID 在单个实例中是唯一的
 var traceIDGenerator utils.IDGenerator
 
+// init 为进程级随机源设置种子，保证未传入 trace id 时生成值具备基础离散性。
 func init() {
 	// 在包初始化时创建 TraceID 生成器
 	// init() 函数会在包被导入时自动执行,且只执行一次

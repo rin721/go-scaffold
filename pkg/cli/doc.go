@@ -118,3 +118,5 @@ Extract exit code from error:
 	}
 */
 package cli
+
+// 本文件承载包级 Godoc 入口，集中说明该包在脚手架架构中的定位、使用边界和非目标能力。

@@ -37,3 +37,5 @@
 //   - 可扩展性: 支持 Template、Hooks、自定义转换器
 //   - 多方言: 支持 MySQL, PostgreSQL, SQLite, SQL Server
 package sqlgen
+
+// 本文件承载包级 Godoc 入口，集中说明该包在脚手架架构中的定位、使用边界和非目标能力。

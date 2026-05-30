@@ -1,5 +1,7 @@
 package sqlgen
 
+// 本文件属于 SQL 生成器，负责把结构体、schema 或解析结果转换为特定方言的 SQL 文本。
+
 import (
 	"fmt"
 	"strings"
@@ -36,6 +38,7 @@ func (g *Generator) Delete(value interface{}, conds ...interface{}) (string, err
 // 软删除构建
 // ============================================================================
 
+// buildSoftDelete 依据当前生成上下文和方言规则构造 SQL 片段，错误会向上冒泡给公开构建入口。
 func (g *Generator) buildSoftDelete() (string, error) {
 	if err := g.checkUnsupported(); err != nil {
 		return "", err
@@ -71,6 +74,7 @@ func (g *Generator) buildSoftDelete() (string, error) {
 // 物理删除构建
 // ============================================================================
 
+// buildHardDelete 依据当前生成上下文和方言规则构造 SQL 片段，错误会向上冒泡给公开构建入口。
 func (g *Generator) buildHardDelete() (string, error) {
 	if err := g.checkUnsupported(); err != nil {
 		return "", err

@@ -2,6 +2,8 @@
 // 中间件在请求处理链中起到过滤、增强和监控的作用
 package middleware
 
+// 本文件定义 Gin 中间件能力，约束请求进入业务 handler 前后的链路上下文、副作用和错误输出。
+
 // MiddlewareConfig 包含所有中间件组件的配置
 // 这是一个聚合配置,统一管理所有中间件
 // 好处:
@@ -79,7 +81,9 @@ type TraceIDConfig struct {
 // DefaultMiddlewareConfig 返回一个使用合理默认值的中间件配置
 // 这些默认值适合大多数应用场景
 // 返回:
-//   MiddlewareConfig: 默认配置
+//
+//	MiddlewareConfig: 默认配置
+//
 // 默认行为:
 //   - Recovery: 启用(生产环境必需)
 //   - Logger: 启用,跳过 /health(减少日志量)

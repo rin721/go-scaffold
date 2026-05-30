@@ -1,5 +1,7 @@
 package errors
 
+// 本文件定义跨层业务错误码和错误类型，是 API Result 与业务层之间的稳定错误契约。
+
 import "fmt"
 
 // BizError 表示一个业务错误,包含错误码、错误消息和可选的原因错误
@@ -33,13 +35,18 @@ type BizError struct {
 // NewBizError 创建一个新的业务错误
 // 这是创建 BizError 的推荐方式
 // 参数:
-//   code: 错误码,应该使用 codes.go 中定义的常量
-//   message: 错误消息,应该简洁明确
+//
+//	code: 错误码,应该使用 codes.go 中定义的常量
+//	message: 错误消息,应该简洁明确
+//
 // 返回:
-//   *BizError: 业务错误对象
+//
+//	*BizError: 业务错误对象
+//
 // 示例:
-//   err := NewBizError(ErrUserNotFound, "用户不存在")
-//   err := NewBizError(ErrInvalidParams, "用户名长度必须在3-50之间")
+//
+//	err := NewBizError(ErrUserNotFound, "用户不存在")
+//	err := NewBizError(ErrInvalidParams, "用户名长度必须在3-50之间")
 func NewBizError(code int, message string) *BizError {
 	return &BizError{
 		Code:    code,
@@ -52,6 +59,7 @@ func NewBizError(code int, message string) *BizError {
 // 返回格式:
 //   - 有原因错误: "[错误码] 错误消息: 原因错误"
 //   - 无原因错误: "[错误码] 错误消息"
+//
 // 这种格式既包含了业务信息,又保留了技术细节
 func (e *BizError) Error() string {
 	if e.Cause != nil {
@@ -66,16 +74,22 @@ func (e *BizError) Error() string {
 // WithCause 附加原因错误到 BizError 并返回自身
 // 这是一个链式调用方法,使代码更简洁
 // 参数:
-//   err: 底层错误,通常来自数据库、网络等操作
+//
+//	err: 底层错误,通常来自数据库、网络等操作
+//
 // 返回:
-//   *BizError: 返回自身,支持链式调用
+//
+//	*BizError: 返回自身,支持链式调用
+//
 // 使用场景:
 //   - 数据库操作失败
 //   - 网络请求失败
 //   - 文件操作失败
+//
 // 示例:
-//   return nil, NewBizError(ErrDatabaseError, "查询失败").WithCause(sqlErr)
-//   这样既有友好的业务错误消息,又保留了技术错误详情
+//
+//	return nil, NewBizError(ErrDatabaseError, "查询失败").WithCause(sqlErr)
+//	这样既有友好的业务错误消息,又保留了技术错误详情
 func (e *BizError) WithCause(err error) *BizError {
 	e.Cause = err
 	// 返回自身,支持链式调用
@@ -89,10 +103,12 @@ func (e *BizError) WithCause(err error) *BizError {
 //   - errors.Is() 可以判断错误链中是否包含特定错误
 //   - errors.As() 可以从错误链中提取特定类型的错误
 //   - 错误可以被正确地包装和解包
+//
 // 使用场景:
-//   if errors.Is(err, sql.ErrNoRows) {
-//       // 可以正确判断底层是否是"记录不存在"错误
-//   }
+//
+//	if errors.Is(err, sql.ErrNoRows) {
+//	    // 可以正确判断底层是否是"记录不存在"错误
+//	}
 func (e *BizError) Unwrap() error {
 	return e.Cause
 }

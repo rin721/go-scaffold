@@ -1,5 +1,7 @@
 package result
 
+// 本测试文件固定跨包公共类型的导入边界和响应契约，防止注释补全和后续重构改变外部可观察行为。
+
 import (
 	"encoding/json"
 	"net/http"
@@ -18,6 +20,7 @@ type responseBody struct {
 	ServerTime int64           `json:"serverTime"`
 }
 
+// TestSuccessErrorAndPaginationContracts 固定跨包公共类型的导入边界和响应契约，确保后续注释补全或结构调整不改变该场景。
 func TestSuccessErrorAndPaginationContracts(t *testing.T) {
 	success := Success("ok")
 	if success.Code != 0 {
@@ -55,6 +58,7 @@ func TestSuccessErrorAndPaginationContracts(t *testing.T) {
 	}
 }
 
+// TestGinResponseHelpersContract 固定跨包公共类型的导入边界和响应契约，确保后续注释补全或结构调整不改变该场景。
 func TestGinResponseHelpersContract(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 
@@ -131,6 +135,7 @@ func TestGinResponseHelpersContract(t *testing.T) {
 	}
 }
 
+// TestGetTraceIDContract 固定跨包公共类型的导入边界和响应契约，确保后续注释补全或结构调整不改变该场景。
 func TestGetTraceIDContract(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 

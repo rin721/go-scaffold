@@ -1,5 +1,7 @@
 package storage
 
+// 本文件属于存储抽象层，统一本地/内存文件系统、复制、监听、MIME、Excel 与图片辅助能力。
+
 import (
 	"context"
 	"fmt"
@@ -49,7 +51,9 @@ func (i *impl) Watch(path string, handler WatchHandler) error {
 	}
 	i.watches[path] = entry
 
-	// 启动事件处理 goroutine
+	// 当前实现为每个 watch path 启动一个消费者，并在消费者内按 event.Name 过滤。
+	// fsnotify 的 Events/Errors 是 watcher 级共享通道，因此该模式适合低并发监听场景；
+	// 若未来需要大量路径监听，应改为单一 dispatcher 统一分发，避免多个消费者竞争同一事件流。
 	go i.handleWatchEvents(ctx, entry)
 
 	return nil
@@ -68,7 +72,8 @@ func (i *impl) handleWatchEvents(ctx context.Context, entry *watchEntry) {
 				return
 			}
 
-			// 检查事件路径是否匹配
+			// 事件流来自 watcher 共享通道，这里只把与当前 entry 完全匹配的事件交给 handler。
+			// 子文件事件是否出现取决于 fsnotify 对目录监听的返回路径，调用方不应假设递归监听。
 			if event.Name != entry.path {
 				continue
 			}

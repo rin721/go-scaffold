@@ -528,3 +528,25 @@
   - Removed-stack residual `rg` outside `docs/ai` -> no matches.
   - Added/changed Go comment scan -> only Chinese CORS example comment found.
 - Summary: 后续面向人的交付默认使用中文；新增或修改代码中的解释性注释使用中文；文档以中文概述当前事实，技术标识符和外部专有名词可保留原文。
+
+## evidence_027: modeapp 重命名为 mainapp
+
+- Date: `2026-05-30T14:15:15+08:00`
+- Type: `internal_package_rename`
+- Status: `completed`
+- Requirement: `req_infra_014_modeapp_to_mainapp`
+- Slice: `slice_014_modeapp_to_mainapp`
+- Trigger: 开发者要求将 `modeapp` 改成 `mainapp`。
+- Files:
+  - 将 `internal/app/modeapp` 移动为 `internal/app/mainapp`。
+  - 将 Go package 声明从 `modeapp` 改为 `mainapp`。
+  - 更新 `internal/app/app.go` 和 `internal/app/constants.go` 的导入与调用点。
+  - 更新 `docs/runtime/startup-flow.md` 中的应用子包说明。
+  - 同步 `docs/ai` 的 requirement、current slice、task tree、status、evidence 和 handoff。
+- Validation:
+  - `gofmt -w internal/app/mainapp/mode.go internal/app/app.go internal/app/constants.go` -> passed.
+  - `rg -n "modeapp|ModeApp|mode app|mode_app|internal/app/modeapp" . -S --glob "!docs/ai/**"` -> no matches.
+  - `python docs/ai/scripts/validate_runtime.py` -> `Runtime validation passed.`
+  - `go test ./... -count=1 -mod=readonly` -> passed.
+  - `go build -mod=readonly -o .\\tmp\\go-scaffold-server.exe .\\cmd\\main` -> passed.
+- Summary: 该改动只重命名内部应用子包，不改变 CLI mode 值或服务运行行为。

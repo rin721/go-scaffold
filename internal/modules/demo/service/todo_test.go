@@ -1,5 +1,7 @@
 package service_test
 
+// 本测试文件固定 Demo Todo 领域服务的事务和校验行为，防止注释补全和后续重构改变外部可观察行为。
+
 import (
 	"context"
 	"errors"
@@ -12,6 +14,7 @@ import (
 	"github.com/rei0721/go-scaffold/pkg/database"
 )
 
+// TestTodoServiceCRUD 固定 Demo Todo 领域服务的事务和校验行为，确保后续注释补全或结构调整不改变该场景。
 func TestTodoServiceCRUD(t *testing.T) {
 	todoService := newTodoService(t)
 	ctx := context.Background()
@@ -91,6 +94,7 @@ func TestTodoServiceCRUD(t *testing.T) {
 	}
 }
 
+// TestTodoServiceValidationAndNotFound 固定 Demo Todo 领域服务的事务和校验行为，确保后续注释补全或结构调整不改变该场景。
 func TestTodoServiceValidationAndNotFound(t *testing.T) {
 	todoService := newTodoService(t)
 	ctx := context.Background()
@@ -120,6 +124,7 @@ func TestTodoServiceValidationAndNotFound(t *testing.T) {
 	}
 }
 
+// newTodoService 构造当前测试场景所需的最小依赖集合，避免测试直接耦合生产装配流程。
 func newTodoService(t *testing.T) service.TodoService {
 	t.Helper()
 

@@ -345,3 +345,5 @@ Bcrypt 是 CPU 密集型算法，成本每增加 1，计算时间翻倍:
   - golang.org/x/crypto: https://pkg.go.dev/golang.org/x/crypto
 */
 package crypto
+
+// 本文件承载包级 Godoc 入口，集中说明该包在脚手架架构中的定位、使用边界和非目标能力。

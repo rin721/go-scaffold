@@ -1,5 +1,7 @@
 package yaml2go
 
+// 本文件属于 YAML 配置代码生成器，把配置样例解析为可编译的 Go 结构体、标签和辅助方法。
+
 const (
 	// DefaultPackageName 默认包名
 	DefaultPackageName = "main"

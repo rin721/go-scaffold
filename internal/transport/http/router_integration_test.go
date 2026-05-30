@@ -1,5 +1,7 @@
 package httptransport
 
+// 本测试文件固定 HTTP 路由、中间件顺序和错误响应契约，防止注释补全和后续重构改变外部可观察行为。
+
 import (
 	"context"
 	"encoding/json"
@@ -31,6 +33,7 @@ type integrationResponse struct {
 	ServerTime int64           `json:"serverTime"`
 }
 
+// TestNewRouterDemoTodoIntegration 固定 HTTP 路由、中间件顺序和错误响应契约，确保后续注释补全或结构调整不改变该场景。
 func TestNewRouterDemoTodoIntegration(t *testing.T) {
 	router, db := newDemoIntegrationRouter(t)
 	defer func() {
@@ -126,6 +129,7 @@ func TestNewRouterDemoTodoIntegration(t *testing.T) {
 	}
 }
 
+// TestNewRouterRecoveryIncludesTraceID 固定 HTTP 路由、中间件顺序和错误响应契约，确保后续注释补全或结构调整不改变该场景。
 func TestNewRouterRecoveryIncludesTraceID(t *testing.T) {
 	log := &recordingLogger{}
 	router := newTestRouter(RouterDeps{
@@ -159,6 +163,7 @@ func TestNewRouterRecoveryIncludesTraceID(t *testing.T) {
 	}
 }
 
+// newDemoIntegrationRouter 构造当前测试场景所需的最小依赖集合，避免测试直接耦合生产装配流程。
 func newDemoIntegrationRouter(t *testing.T) (*gin.Engine, database.Database) {
 	t.Helper()
 
@@ -196,6 +201,7 @@ func newDemoIntegrationRouter(t *testing.T) (*gin.Engine, database.Database) {
 	}), db
 }
 
+// performIntegrationRequest 执行测试 HTTP 请求并返回响应记录器，封装路由调用细节。
 func performIntegrationRequest(t *testing.T, router http.Handler, method string, path string, body string, headers map[string]string) (*httptest.ResponseRecorder, integrationResponse) {
 	t.Helper()
 
@@ -207,6 +213,7 @@ func performIntegrationRequest(t *testing.T, router http.Handler, method string,
 	return recorder, response
 }
 
+// performRawRequest 执行测试 HTTP 请求并返回响应记录器，封装路由调用细节。
 func performRawRequest(router http.Handler, method string, path string, body string, headers map[string]string) *httptest.ResponseRecorder {
 	request := httptest.NewRequest(method, path, strings.NewReader(body))
 	request.Host = "api.local"
@@ -222,6 +229,7 @@ func performRawRequest(router http.Handler, method string, path string, body str
 	return recorder
 }
 
+// decodeIntegrationData 解析测试响应中的数据负载，并在格式不符合契约时直接终止用例。
 func decodeIntegrationData[T any](t *testing.T, response integrationResponse) T {
 	t.Helper()
 
@@ -232,6 +240,7 @@ func decodeIntegrationData[T any](t *testing.T, response integrationResponse) T 
 	return data
 }
 
+// assertIntegrationSuccess 校验测试响应或状态中的关键字段，使测试断言聚焦在对外契约而非重复解析细节。
 func assertIntegrationSuccess(t *testing.T, response integrationResponse) {
 	t.Helper()
 
@@ -246,6 +255,7 @@ func assertIntegrationSuccess(t *testing.T, response integrationResponse) {
 	}
 }
 
+// uintPath 是当前测试文件的辅助函数，用于复用夹具、断言或输入构造逻辑。
 func uintPath(id uint) string {
 	return strconv.FormatUint(uint64(id), 10)
 }
@@ -255,44 +265,54 @@ type recordingLogger struct {
 	entries []string
 }
 
+// Debug 实现测试日志桩的同名输出入口，当前测试只关心接口满足而不采集日志内容。
 func (l *recordingLogger) Debug(msg string, keysAndValues ...interface{}) {
 	l.record(msg)
 }
 
+// Info 实现测试日志桩的同名输出入口，当前测试只关心接口满足而不采集日志内容。
 func (l *recordingLogger) Info(msg string, keysAndValues ...interface{}) {
 	l.record(msg)
 }
 
+// Warn 实现测试日志桩的同名输出入口，当前测试只关心接口满足而不采集日志内容。
 func (l *recordingLogger) Warn(msg string, keysAndValues ...interface{}) {
 	l.record(msg)
 }
 
+// Error 实现测试日志桩的同名输出入口，当前测试只关心接口满足而不采集日志内容。
 func (l *recordingLogger) Error(msg string, keysAndValues ...interface{}) {
 	l.record(msg)
 }
 
+// Fatal 实现测试日志桩的同名输出入口，当前测试只关心接口满足而不采集日志内容。
 func (l *recordingLogger) Fatal(msg string, keysAndValues ...interface{}) {
 	l.record(msg)
 }
 
+// With 实现测试日志桩的字段绑定入口，返回自身以保持 logger.Logger 链式调用契约。
 func (l *recordingLogger) With(keysAndValues ...interface{}) logger.Logger {
 	return l
 }
 
+// Sync 实现测试日志桩的刷新入口，测试环境不持有真实缓冲区。
 func (l *recordingLogger) Sync() error {
 	return nil
 }
 
+// Reload 实现测试桩的配置重载入口，用于验证调用路径而不触发真实资源替换。
 func (l *recordingLogger) Reload(*logger.Config) error {
 	return nil
 }
 
+// record 是当前测试文件的辅助函数，用于复用夹具、断言或输入构造逻辑。
 func (l *recordingLogger) record(msg string) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 	l.entries = append(l.entries, msg)
 }
 
+// hasEntry 是当前测试文件的辅助函数，用于复用夹具、断言或输入构造逻辑。
 func (l *recordingLogger) hasEntry(msg string) bool {
 	l.mu.Lock()
 	defer l.mu.Unlock()

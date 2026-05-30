@@ -1,11 +1,14 @@
 package errors
 
+// 本测试文件固定跨包公共类型的导入边界和响应契约，防止注释补全和后续重构改变外部可观察行为。
+
 import (
 	stderrors "errors"
 	"strings"
 	"testing"
 )
 
+// TestBizErrorContract 固定跨包公共类型的导入边界和响应契约，确保后续注释补全或结构调整不改变该场景。
 func TestBizErrorContract(t *testing.T) {
 	cause := stderrors.New("database offline")
 	err := NewBizError(ErrDatabaseError, "database failed").WithCause(cause)
@@ -24,6 +27,7 @@ func TestBizErrorContract(t *testing.T) {
 	}
 }
 
+// TestErrorCodeRangesContract 固定跨包公共类型的导入边界和响应契约，确保后续注释补全或结构调整不改变该场景。
 func TestErrorCodeRangesContract(t *testing.T) {
 	tests := []struct {
 		name string

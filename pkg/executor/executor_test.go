@@ -1,5 +1,7 @@
 package executor
 
+// 本测试文件固定协程池管理器的执行、过载、重载和 panic 恢复语义，防止注释补全和后续重构改变外部可观察行为。
+
 import (
 	"errors"
 	"sync"
@@ -7,6 +9,7 @@ import (
 	"time"
 )
 
+// TestConfigValidateAppliesBoundsAndDefaults 固定协程池管理器的执行、过载、重载和 panic 恢复语义，确保后续注释补全或结构调整不改变该场景。
 func TestConfigValidateAppliesBoundsAndDefaults(t *testing.T) {
 	cfg := Config{Name: "jobs", Size: 0}
 	if err := cfg.Validate(); err != nil {
@@ -33,6 +36,7 @@ func TestConfigValidateAppliesBoundsAndDefaults(t *testing.T) {
 	}
 }
 
+// TestManagerExecuteAndShutdown 固定协程池管理器的执行、过载、重载和 panic 恢复语义，确保后续注释补全或结构调整不改变该场景。
 func TestManagerExecuteAndShutdown(t *testing.T) {
 	mgr, err := NewManager([]Config{{Name: "jobs", Size: 1, Expiry: time.Millisecond, NonBlocking: true}})
 	if err != nil {
@@ -63,6 +67,7 @@ func TestManagerExecuteAndShutdown(t *testing.T) {
 	}
 }
 
+// TestManagerReportsOverloadAndKeepsRunning 固定协程池管理器的执行、过载、重载和 panic 恢复语义，确保后续注释补全或结构调整不改变该场景。
 func TestManagerReportsOverloadAndKeepsRunning(t *testing.T) {
 	mgr, err := NewManager([]Config{{Name: "jobs", Size: 1, Expiry: time.Second, NonBlocking: true}})
 	if err != nil {
@@ -104,6 +109,7 @@ func TestManagerReportsOverloadAndKeepsRunning(t *testing.T) {
 	}
 }
 
+// TestManagerReloadFailureKeepsExistingPools 固定协程池管理器的执行、过载、重载和 panic 恢复语义，确保后续注释补全或结构调整不改变该场景。
 func TestManagerReloadFailureKeepsExistingPools(t *testing.T) {
 	mgr, err := NewManager([]Config{{Name: "old", Size: 1, Expiry: time.Millisecond, NonBlocking: true}})
 	if err != nil {
@@ -129,6 +135,7 @@ func TestManagerReloadFailureKeepsExistingPools(t *testing.T) {
 	}
 }
 
+// TestPanicHandlerObservesRecoveredTaskPanic 固定协程池管理器的执行、过载、重载和 panic 恢复语义，确保后续注释补全或结构调整不改变该场景。
 func TestPanicHandlerObservesRecoveredTaskPanic(t *testing.T) {
 	handler := &recordingPanicHandler{seen: make(chan interface{}, 1)}
 	SetPanicHandler(handler)
@@ -168,6 +175,7 @@ type recordingPanicHandler struct {
 	seen chan interface{}
 }
 
+// HandlePanic 记录协程池测试中捕获到的 panic 值，证明恢复钩子被正确触发。
 func (h *recordingPanicHandler) HandlePanic(_ PoolName, recovered interface{}) {
 	h.mu.Lock()
 	defer h.mu.Unlock()

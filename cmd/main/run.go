@@ -1,5 +1,7 @@
 package main
 
+// 本文件封装主应用启动流程，把 CLI 参数解析、应用构建、信号监听和 shutdown 超时串成进程生命周期。
+
 import (
 	"context"
 	"os"
@@ -10,6 +12,7 @@ import (
 	"github.com/rei0721/go-scaffold/types/constants"
 )
 
+// runApp 装配应用、启动 HTTP 服务并等待系统信号或启动错误，最终按统一超时执行优雅关闭。
 func runApp(configPath string) {
 	application, err := app.New(app.Options{
 		ConfigPath: configPath,

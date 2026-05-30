@@ -1,5 +1,7 @@
 package sqlgen
 
+// 本文件属于 SQL 生成器，负责把结构体、schema 或解析结果转换为特定方言的 SQL 文本。
+
 import (
 	"fmt"
 	"reflect"
@@ -46,16 +48,20 @@ type DialectHandler interface {
 
 type mysqlDialect struct{}
 
+// Name 返回当前 SQL 方言在生成器配置中的稳定标识。
 func (d *mysqlDialect) Name() Dialect { return MySQL }
 
+// Quote 按当前 SQL 方言规则包裹标识符，避免列名或表名与关键字冲突。
 func (d *mysqlDialect) Quote(name string) string {
 	return "`" + name + "`"
 }
 
+// Placeholder 返回当前位置参数的占位符文本，用于后续插值或调试输出。
 func (d *mysqlDialect) Placeholder(index int) string {
 	return "?"
 }
 
+// TypeMapping 将 Go 类型和字段约束映射为当前方言可接受的列类型。
 func (d *mysqlDialect) TypeMapping(goType string, size int) string {
 	switch goType {
 	case "string":
@@ -94,6 +100,7 @@ func (d *mysqlDialect) TypeMapping(goType string, size int) string {
 	}
 }
 
+// ReverseTypeMapping 将数据库列类型反向映射为 Go 字段类型，用于 DDL 解析和代码生成。
 func (d *mysqlDialect) ReverseTypeMapping(sqlType string) string {
 	upper := strings.ToUpper(sqlType)
 
@@ -146,18 +153,22 @@ func (d *mysqlDialect) ReverseTypeMapping(sqlType string) string {
 	}
 }
 
+// Interpolate 将参数值写入 SQL 文本，主要服务生成预览而不是替代数据库驱动参数化执行。
 func (d *mysqlDialect) Interpolate(sql string, args ...interface{}) (string, error) {
 	return interpolateSQL(sql, args, d.Quote)
 }
 
+// AutoIncrementKeyword 返回当前方言声明自增列时使用的关键字。
 func (d *mysqlDialect) AutoIncrementKeyword() string {
 	return "AUTO_INCREMENT"
 }
 
+// DefaultValueKeyword 返回当前方言声明默认值时使用的 SQL 片段。
 func (d *mysqlDialect) DefaultValueKeyword() string {
 	return "DEFAULT"
 }
 
+// EngineClause 返回当前方言的表级存储引擎子句，不需要时返回空字符串。
 func (d *mysqlDialect) EngineClause() string {
 	return "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4"
 }
@@ -168,16 +179,20 @@ func (d *mysqlDialect) EngineClause() string {
 
 type postgresDialect struct{}
 
+// Name 返回当前 SQL 方言在生成器配置中的稳定标识。
 func (d *postgresDialect) Name() Dialect { return PostgreSQL }
 
+// Quote 按当前 SQL 方言规则包裹标识符，避免列名或表名与关键字冲突。
 func (d *postgresDialect) Quote(name string) string {
 	return "\"" + name + "\""
 }
 
+// Placeholder 返回当前位置参数的占位符文本，用于后续插值或调试输出。
 func (d *postgresDialect) Placeholder(index int) string {
 	return fmt.Sprintf("$%d", index)
 }
 
+// TypeMapping 将 Go 类型和字段约束映射为当前方言可接受的列类型。
 func (d *postgresDialect) TypeMapping(goType string, size int) string {
 	switch goType {
 	case "string":
@@ -212,6 +227,7 @@ func (d *postgresDialect) TypeMapping(goType string, size int) string {
 	}
 }
 
+// ReverseTypeMapping 将数据库列类型反向映射为 Go 字段类型，用于 DDL 解析和代码生成。
 func (d *postgresDialect) ReverseTypeMapping(sqlType string) string {
 	upper := strings.ToUpper(sqlType)
 
@@ -252,18 +268,22 @@ func (d *postgresDialect) ReverseTypeMapping(sqlType string) string {
 	}
 }
 
+// Interpolate 将参数值写入 SQL 文本，主要服务生成预览而不是替代数据库驱动参数化执行。
 func (d *postgresDialect) Interpolate(sql string, args ...interface{}) (string, error) {
 	return interpolateSQLPositional(sql, args, d.Quote)
 }
 
+// AutoIncrementKeyword 返回当前方言声明自增列时使用的关键字。
 func (d *postgresDialect) AutoIncrementKeyword() string {
 	return "" // PostgreSQL 使用 SERIAL 类型
 }
 
+// DefaultValueKeyword 返回当前方言声明默认值时使用的 SQL 片段。
 func (d *postgresDialect) DefaultValueKeyword() string {
 	return "DEFAULT"
 }
 
+// EngineClause 返回当前方言的表级存储引擎子句，不需要时返回空字符串。
 func (d *postgresDialect) EngineClause() string {
 	return "" // PostgreSQL 不需要
 }
@@ -274,16 +294,20 @@ func (d *postgresDialect) EngineClause() string {
 
 type sqliteDialect struct{}
 
+// Name 返回当前 SQL 方言在生成器配置中的稳定标识。
 func (d *sqliteDialect) Name() Dialect { return SQLite }
 
+// Quote 按当前 SQL 方言规则包裹标识符，避免列名或表名与关键字冲突。
 func (d *sqliteDialect) Quote(name string) string {
 	return "\"" + name + "\""
 }
 
+// Placeholder 返回当前位置参数的占位符文本，用于后续插值或调试输出。
 func (d *sqliteDialect) Placeholder(index int) string {
 	return "?"
 }
 
+// TypeMapping 将 Go 类型和字段约束映射为当前方言可接受的列类型。
 func (d *sqliteDialect) TypeMapping(goType string, size int) string {
 	switch goType {
 	case "string":
@@ -305,6 +329,7 @@ func (d *sqliteDialect) TypeMapping(goType string, size int) string {
 	}
 }
 
+// ReverseTypeMapping 将数据库列类型反向映射为 Go 字段类型，用于 DDL 解析和代码生成。
 func (d *sqliteDialect) ReverseTypeMapping(sqlType string) string {
 	upper := strings.ToUpper(sqlType)
 
@@ -326,18 +351,22 @@ func (d *sqliteDialect) ReverseTypeMapping(sqlType string) string {
 	}
 }
 
+// Interpolate 将参数值写入 SQL 文本，主要服务生成预览而不是替代数据库驱动参数化执行。
 func (d *sqliteDialect) Interpolate(sql string, args ...interface{}) (string, error) {
 	return interpolateSQL(sql, args, d.Quote)
 }
 
+// AutoIncrementKeyword 返回当前方言声明自增列时使用的关键字。
 func (d *sqliteDialect) AutoIncrementKeyword() string {
 	return "AUTOINCREMENT"
 }
 
+// DefaultValueKeyword 返回当前方言声明默认值时使用的 SQL 片段。
 func (d *sqliteDialect) DefaultValueKeyword() string {
 	return "DEFAULT"
 }
 
+// EngineClause 返回当前方言的表级存储引擎子句，不需要时返回空字符串。
 func (d *sqliteDialect) EngineClause() string {
 	return "" // SQLite 不需要
 }
@@ -348,16 +377,20 @@ func (d *sqliteDialect) EngineClause() string {
 
 type sqlserverDialect struct{}
 
+// Name 返回当前 SQL 方言在生成器配置中的稳定标识。
 func (d *sqlserverDialect) Name() Dialect { return SQLServer }
 
+// Quote 按当前 SQL 方言规则包裹标识符，避免列名或表名与关键字冲突。
 func (d *sqlserverDialect) Quote(name string) string {
 	return "[" + name + "]"
 }
 
+// Placeholder 返回当前位置参数的占位符文本，用于后续插值或调试输出。
 func (d *sqlserverDialect) Placeholder(index int) string {
 	return fmt.Sprintf("@p%d", index)
 }
 
+// TypeMapping 将 Go 类型和字段约束映射为当前方言可接受的列类型。
 func (d *sqlserverDialect) TypeMapping(goType string, size int) string {
 	switch goType {
 	case "string":
@@ -396,6 +429,7 @@ func (d *sqlserverDialect) TypeMapping(goType string, size int) string {
 	}
 }
 
+// ReverseTypeMapping 将数据库列类型反向映射为 Go 字段类型，用于 DDL 解析和代码生成。
 func (d *sqlserverDialect) ReverseTypeMapping(sqlType string) string {
 	upper := strings.ToUpper(sqlType)
 
@@ -432,18 +466,22 @@ func (d *sqlserverDialect) ReverseTypeMapping(sqlType string) string {
 	}
 }
 
+// Interpolate 将参数值写入 SQL 文本，主要服务生成预览而不是替代数据库驱动参数化执行。
 func (d *sqlserverDialect) Interpolate(sql string, args ...interface{}) (string, error) {
 	return interpolateSQLPositional(sql, args, d.Quote)
 }
 
+// AutoIncrementKeyword 返回当前方言声明自增列时使用的关键字。
 func (d *sqlserverDialect) AutoIncrementKeyword() string {
 	return "IDENTITY(1,1)"
 }
 
+// DefaultValueKeyword 返回当前方言声明默认值时使用的 SQL 片段。
 func (d *sqlserverDialect) DefaultValueKeyword() string {
 	return "DEFAULT"
 }
 
+// EngineClause 返回当前方言的表级存储引擎子句，不需要时返回空字符串。
 func (d *sqlserverDialect) EngineClause() string {
 	return "" // SQL Server 不需要
 }

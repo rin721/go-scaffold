@@ -4,7 +4,7 @@ branch_id: branch_vibe_coding_infra
 branch_type: vibe_coding_infra
 round_id: infra_001
 created_at: "2026-05-29T17:54:03+08:00"
-updated_at: "2026-05-30T13:33:57+08:00"
+updated_at: "2026-05-30T14:17:01+08:00"
 status: pending_acceptance
 purpose: "Task tree branch for building and iterating this repository's Vibe Coding infrastructure."
 tasks:
@@ -167,5 +167,17 @@ tasks:
       - "上一轮用户管理栈移除相关文档改为中文概述。"
       - "配置示例、部署帮助和代码注释符合中文交付规则。"
       - "Go 测试、服务构建和运行时校验通过。"
-next_action: "Wait for developer acceptance or requested edits for the Chinese delivery rule and user-management removal follow-up."
+  - id: task_014_modeapp_to_mainapp
+    title: "将 modeapp 重命名为 mainapp"
+    status: validation_passed
+    requirements:
+      - req_infra_014_modeapp_to_mainapp
+    slices:
+      - slice_014_modeapp_to_mainapp
+    acceptance_criteria:
+      - "内部目录从 `internal/app/modeapp` 改为 `internal/app/mainapp`。"
+      - "package 名、导入路径、类型别名和调用点使用 `mainapp`。"
+      - "启动流程文档不再出现 `modeapp`。"
+      - "Go 测试、服务构建和运行时校验通过。"
+next_action: "Wait for developer acceptance or requested edits for the modeapp to mainapp rename."
 no_prompt_runtime_dependency: true

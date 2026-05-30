@@ -1,5 +1,7 @@
 package main
 
+// 本文件定义 db 子命令，承接 SQL 预览、Demo 表结构初始化和 Todo 示例数据操作的命令行入口。
+
 import (
 	"context"
 	"encoding/json"
@@ -53,18 +55,22 @@ func NewDBCommand() *DBCommand {
 	return &DBCommand{}
 }
 
+// Name 返回 db 子命令在 CLI 注册表中的唯一名称。
 func (c *DBCommand) Name() string {
 	return dbCommandName
 }
 
+// Description 返回 db 子命令的短描述，提示该命令面向 SQL 预览和 Demo 数据操作。
 func (c *DBCommand) Description() string {
 	return "Run sqlgen-powered database schema and demo CRUD operations"
 }
 
+// Usage 返回 db 子命令的调用格式，强调 operation 参数决定底层执行路径。
 func (c *DBCommand) Usage() string {
 	return fmt.Sprintf("%s [--operation=<database|schema|todo-create|todo-list|todo-get|todo-update|todo-delete>] [flags]", dbCommandName)
 }
 
+// Flags 声明 db 子命令支持的配置、执行开关、Todo 字段和分页参数。
 func (c *DBCommand) Flags() []cli.Flag {
 	return []cli.Flag{
 		{
@@ -131,6 +137,7 @@ func (c *DBCommand) Flags() []cli.Flag {
 	}
 }
 
+// Execute 将 CLI flag 归一化为 DBCommand 状态，并把实际数据库流程委托给可替换 runner。
 func (c *DBCommand) Execute(ctx *cli.Context) error {
 	opts := dbOptions{
 		ConfigPath:  ctx.GetString("config"),
@@ -153,6 +160,7 @@ func (c *DBCommand) Execute(ctx *cli.Context) error {
 	return runDBCommand(ctx, opts)
 }
 
+// runDBCommand 根据 operation 分派 SQL 预览或数据库执行路径，所有外部错误都会返回给 CLI 层统一打印。
 func runDBCommand(ctx *cli.Context, opts dbOptions) error {
 	core, err := initapp.NewCore(opts.ConfigPath)
 	if err != nil {
@@ -264,10 +272,12 @@ func dbSQLForPrint(opts dbOptions, cfg appconfig.DatabaseConfig) (string, error)
 	}
 }
 
+// ctxWithFallback 为数据库命令提供上下文入口；当前 CLI Context 未暴露 context.Context，因此保守返回后台上下文。
 func ctxWithFallback(ctx *cli.Context) context.Context {
 	return context.Background()
 }
 
+// writeOperationResult 将 db 子命令执行结果写入命令输出流，保持业务执行与展示格式解耦。
 func writeOperationResult(w io.Writer, message, sql string, printSQL bool) {
 	fmt.Fprintln(w, message)
 	if printSQL {
@@ -275,6 +285,7 @@ func writeOperationResult(w io.Writer, message, sql string, printSQL bool) {
 	}
 }
 
+// parseCompleted 解析可选布尔字符串，空值表示调用方未请求更新 completed 字段。
 func parseCompleted(value string, defaultValue bool) (bool, error) {
 	if value == "" {
 		return defaultValue, nil
@@ -286,6 +297,7 @@ func parseCompleted(value string, defaultValue bool) (bool, error) {
 	return parsed, nil
 }
 
+// buildTodoUpdate 把 CLI flag 转换为服务层 UpdateTodoInput，利用指针字段保留未传入与零值的区别。
 func buildTodoUpdate(opts dbOptions) (dbapp.TodoUpdateInput, error) {
 	update := dbapp.TodoUpdateInput{ID: uint(opts.ID)}
 	if opts.Title != "" {

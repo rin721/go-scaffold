@@ -1,5 +1,7 @@
 package main
 
+// 本测试文件固定命令行入口和数据库命令的契约，防止注释补全和后续重构改变外部可观察行为。
+
 import (
 	"bytes"
 	"reflect"
@@ -12,6 +14,7 @@ import (
 	"github.com/rei0721/go-scaffold/types/constants"
 )
 
+// TestDBCommandMetadata 固定命令行入口和数据库命令的契约，确保后续注释补全或结构调整不改变该场景。
 func TestDBCommandMetadata(t *testing.T) {
 	cmd := NewDBCommand()
 
@@ -52,6 +55,7 @@ func TestDBCommandMetadata(t *testing.T) {
 	}
 }
 
+// TestDBSQLForPrintDatabaseOperation 固定命令行入口和数据库命令的契约，确保后续注释补全或结构调整不改变该场景。
 func TestDBSQLForPrintDatabaseOperation(t *testing.T) {
 	sql, err := dbSQLForPrint(dbOptions{Operation: dbOperationDatabase}, appconfig.DatabaseConfig{
 		Driver: "mysql",
@@ -65,6 +69,7 @@ func TestDBSQLForPrintDatabaseOperation(t *testing.T) {
 	}
 }
 
+// TestDBCommandExecutePassesOptionsToRunner 固定命令行入口和数据库命令的契约，确保后续注释补全或结构调整不改变该场景。
 func TestDBCommandExecutePassesOptionsToRunner(t *testing.T) {
 	var got dbOptions
 	cmd := &DBCommand{
@@ -111,6 +116,7 @@ func TestDBCommandExecutePassesOptionsToRunner(t *testing.T) {
 	}
 }
 
+// TestDBCommandExecuteDefaultsOperation 固定命令行入口和数据库命令的契约，确保后续注释补全或结构调整不改变该场景。
 func TestDBCommandExecuteDefaultsOperation(t *testing.T) {
 	var got dbOptions
 	cmd := &DBCommand{

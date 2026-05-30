@@ -1,5 +1,7 @@
 package sqlgen
 
+// 本文件属于 SQL 生成器，负责把结构体、schema 或解析结果转换为特定方言的 SQL 文本。
+
 import (
 	"fmt"
 	"strings"
@@ -72,6 +74,7 @@ func (g *Generator) Migrate(model interface{}) *MigrateBuilder {
 // CREATE TABLE 构建
 // ============================================================================
 
+// buildCreateTable 依据当前生成上下文和方言规则构造 SQL 片段，错误会向上冒泡给公开构建入口。
 func (g *Generator) buildCreateTable(tableName string, fields []FieldInfo, ifNotExists bool) string {
 	var sb strings.Builder
 	quotedTable := g.dialect.Quote(tableName)
@@ -132,6 +135,7 @@ type inlineIndexSpec struct {
 	columns []string
 }
 
+// buildInlineIndexes 依据当前生成上下文和方言规则构造 SQL 片段，错误会向上冒泡给公开构建入口。
 func (g *Generator) buildInlineIndexes(tableName string, fields []FieldInfo) []string {
 	if !g.supportsInlineIndexes() {
 		return nil
@@ -183,6 +187,7 @@ func (g *Generator) buildInlineIndexes(tableName string, fields []FieldInfo) []s
 	return indexes
 }
 
+// buildColumnDef 依据当前生成上下文和方言规则构造 SQL 片段，错误会向上冒泡给公开构建入口。
 func (g *Generator) buildColumnDef(field FieldInfo) string {
 	var parts []string
 
@@ -223,14 +228,17 @@ func (g *Generator) buildColumnDef(field FieldInfo) string {
 	return strings.Join(parts, " ")
 }
 
+// isInlineSQLitePrimaryKey 实现 *Generator 的内部辅助方法，封装该类型的局部控制流和错误边界。
 func (g *Generator) isInlineSQLitePrimaryKey(field FieldInfo) bool {
 	return g.dialect.Name() == SQLite && field.Tag.PrimaryKey && field.Tag.AutoIncrement
 }
 
+// supportsInlineIndexes 实现 *Generator 的内部辅助方法，封装该类型的局部控制流和错误边界。
 func (g *Generator) supportsInlineIndexes() bool {
 	return g.dialect.Name() == MySQL
 }
 
+// buildCreateDatabase 依据当前生成上下文和方言规则构造 SQL 片段，错误会向上冒泡给公开构建入口。
 func (g *Generator) buildCreateDatabase(name string, ifNotExists bool) (string, error) {
 	name = strings.TrimSpace(name)
 	if name == "" {
@@ -262,6 +270,7 @@ func (g *Generator) buildCreateDatabase(name string, ifNotExists bool) (string, 
 // DROP TABLE 构建
 // ============================================================================
 
+// buildDropTable 依据当前生成上下文和方言规则构造 SQL 片段，错误会向上冒泡给公开构建入口。
 func (g *Generator) buildDropTable(tableName string) string {
 	return fmt.Sprintf("DROP TABLE IF EXISTS %s;", g.dialect.Quote(tableName))
 }

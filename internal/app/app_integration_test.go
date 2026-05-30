@@ -1,5 +1,7 @@
 package app
 
+// 本测试文件固定应用组装根的最小可启动契约，防止注释补全和后续重构改变外部可观察行为。
+
 import (
 	"context"
 	"fmt"
@@ -14,6 +16,7 @@ import (
 	"github.com/rei0721/go-scaffold/internal/modules/demo/model"
 )
 
+// TestNewServerModeBuildsMinimalApplication 固定应用组装根的最小可启动契约，确保后续注释补全或结构调整不改变该场景。
 func TestNewServerModeBuildsMinimalApplication(t *testing.T) {
 	clearAppIntegrationEnv(t)
 
@@ -92,6 +95,7 @@ func TestNewServerModeBuildsMinimalApplication(t *testing.T) {
 	}
 }
 
+// writeAppIntegrationConfig 写入测试夹具文件，并把文件系统准备细节限制在测试辅助层。
 func writeAppIntegrationConfig(t *testing.T, dbPath string) string {
 	t.Helper()
 
@@ -182,6 +186,7 @@ cors:
 	return configPath
 }
 
+// shutdownApp 是当前测试文件的辅助函数，用于复用夹具、断言或输入构造逻辑。
 func shutdownApp(t *testing.T, application *App) {
 	t.Helper()
 
@@ -192,10 +197,12 @@ func shutdownApp(t *testing.T, application *App) {
 	}
 }
 
+// yamlString 是当前测试文件的辅助函数，用于复用夹具、断言或输入构造逻辑。
 func yamlString(value string) string {
 	return strconv.Quote(filepath.ToSlash(value))
 }
 
+// clearAppIntegrationEnv 清理测试期间设置的环境变量或全局状态，避免用例之间互相污染。
 func clearAppIntegrationEnv(t *testing.T) {
 	t.Helper()
 

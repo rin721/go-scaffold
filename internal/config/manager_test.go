@@ -1,5 +1,7 @@
 package config
 
+// 本测试文件固定配置复制、环境变量覆盖和热加载行为，防止注释补全和后续重构改变外部可观察行为。
+
 import (
 	"os"
 	"path/filepath"
@@ -7,6 +9,7 @@ import (
 	"testing"
 )
 
+// TestCopyConfigCoversAllFieldsAndDeepCopiesSlices 固定配置复制、环境变量覆盖和热加载行为，确保后续注释补全或结构调整不改变该场景。
 func TestCopyConfigCoversAllFieldsAndDeepCopiesSlices(t *testing.T) {
 	t.Parallel()
 
@@ -49,6 +52,7 @@ func TestCopyConfigCoversAllFieldsAndDeepCopiesSlices(t *testing.T) {
 	}
 }
 
+// TestUpdatePreservesUntouchedFields 固定配置复制、环境变量覆盖和热加载行为，确保后续注释补全或结构调整不改变该场景。
 func TestUpdatePreservesUntouchedFields(t *testing.T) {
 	t.Parallel()
 
@@ -74,6 +78,7 @@ func TestUpdatePreservesUntouchedFields(t *testing.T) {
 	}
 }
 
+// taggedEnvName 是当前测试文件的辅助函数，用于复用夹具、断言或输入构造逻辑。
 func taggedEnvName(t *testing.T, target any, fieldName string) string {
 	t.Helper()
 
@@ -92,18 +97,21 @@ func taggedEnvName(t *testing.T, target any, fieldName string) string {
 	return name
 }
 
+// setTaggedEnv 是当前测试文件的辅助函数，用于复用夹具、断言或输入构造逻辑。
 func setTaggedEnv(t *testing.T, target any, fieldName, value string) {
 	t.Helper()
 
 	t.Setenv(EnvPrefixJoin(taggedEnvName(t, target, fieldName)), value)
 }
 
+// setUnprefixedTaggedEnv 是当前测试文件的辅助函数，用于复用夹具、断言或输入构造逻辑。
 func setUnprefixedTaggedEnv(t *testing.T, target any, fieldName, value string) {
 	t.Helper()
 
 	t.Setenv(taggedEnvName(t, target, fieldName), value)
 }
 
+// TestEnvNamesUseDynamicAppPrefix 固定配置复制、环境变量覆盖和热加载行为，确保后续注释补全或结构调整不改变该场景。
 func TestEnvNamesUseDynamicAppPrefix(t *testing.T) {
 	if EnvPrefix() != "RIN_APP" {
 		t.Fatalf("EnvPrefix() = %q, want RIN_APP", EnvPrefix())
@@ -117,6 +125,7 @@ func TestEnvNamesUseDynamicAppPrefix(t *testing.T) {
 	}
 }
 
+// TestOverrideWithEnvUsesDynamicPrefixFromAppPrefix 固定配置复制、环境变量覆盖和热加载行为，确保后续注释补全或结构调整不改变该场景。
 func TestOverrideWithEnvUsesDynamicPrefixFromAppPrefix(t *testing.T) {
 	cfg := testCompleteConfig()
 
@@ -165,6 +174,7 @@ func TestOverrideWithEnvUsesDynamicPrefixFromAppPrefix(t *testing.T) {
 	}
 }
 
+// TestOverrideWithEnvKeepsUnprefixedFallback 固定配置复制、环境变量覆盖和热加载行为，确保后续注释补全或结构调整不改变该场景。
 func TestOverrideWithEnvKeepsUnprefixedFallback(t *testing.T) {
 	cfg := testCompleteConfig()
 
@@ -205,6 +215,7 @@ func TestOverrideWithEnvKeepsUnprefixedFallback(t *testing.T) {
 	}
 }
 
+// TestOverrideWithEnvUsesEnvnameTagsForNonDatabaseConfigs 固定配置复制、环境变量覆盖和热加载行为，确保后续注释补全或结构调整不改变该场景。
 func TestOverrideWithEnvUsesEnvnameTagsForNonDatabaseConfigs(t *testing.T) {
 	cfg := testCompleteConfig()
 
@@ -292,6 +303,7 @@ func TestOverrideWithEnvUsesEnvnameTagsForNonDatabaseConfigs(t *testing.T) {
 	}
 }
 
+// TestDirectOverrideConfigUsesDynamicPrefix 固定配置复制、环境变量覆盖和热加载行为，确保后续注释补全或结构调整不改变该场景。
 func TestDirectOverrideConfigUsesDynamicPrefix(t *testing.T) {
 	storageCfg := StorageConfig{}
 	setTaggedEnv(t, StorageConfig{}, "FSType", "memory")
@@ -311,6 +323,7 @@ func TestDirectOverrideConfigUsesDynamicPrefix(t *testing.T) {
 	}
 }
 
+// TestManagerLoadAutoLoadsDotEnvWithDynamicPrefix 固定配置复制、环境变量覆盖和热加载行为，确保后续注释补全或结构调整不改变该场景。
 func TestManagerLoadAutoLoadsDotEnvWithDynamicPrefix(t *testing.T) {
 	tempDir := t.TempDir()
 	configPath := filepath.Join(tempDir, "config.yaml")
@@ -348,6 +361,7 @@ func TestManagerLoadAutoLoadsDotEnvWithDynamicPrefix(t *testing.T) {
 	}
 }
 
+// testCompleteConfig 是当前测试文件的辅助函数，用于复用夹具、断言或输入构造逻辑。
 func testCompleteConfig() *Config {
 	return &Config{
 		Server: ServerConfig{
@@ -431,10 +445,12 @@ func testCompleteConfig() *Config {
 	}
 }
 
+// boolPtr 是当前测试文件的辅助函数，用于复用夹具、断言或输入构造逻辑。
 func boolPtr(value bool) *bool {
 	return &value
 }
 
+// writeTestConfig 写入测试夹具文件，并把文件系统准备细节限制在测试辅助层。
 func writeTestConfig(t *testing.T, path string) {
 	t.Helper()
 
@@ -478,6 +494,7 @@ cors:
 	}
 }
 
+// unsetEnvForTest 清理测试期间设置的环境变量或全局状态，避免用例之间互相污染。
 func unsetEnvForTest(t *testing.T, keys ...string) {
 	t.Helper()
 

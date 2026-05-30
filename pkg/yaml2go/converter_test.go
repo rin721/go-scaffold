@@ -1,5 +1,7 @@
 package yaml2go
 
+// 本测试文件固定 YAML 到 Go 配置代码生成链路，防止注释补全和后续重构改变外部可观察行为。
+
 import (
 	"errors"
 	"go/parser"
@@ -8,6 +10,7 @@ import (
 	"testing"
 )
 
+// TestConvertGeneratesMainAndSubConfigFiles 固定 YAML 到 Go 配置代码生成链路，确保后续注释补全或结构调整不改变该场景。
 func TestConvertGeneratesMainAndSubConfigFiles(t *testing.T) {
 	converter := New(&Config{
 		PackageName: "config",
@@ -64,6 +67,7 @@ server:
 	assertValidGoFile(t, sub.Content)
 }
 
+// TestConvertRejectsEmptyAndInvalidYAML 固定 YAML 到 Go 配置代码生成链路，确保后续注释补全或结构调整不改变该场景。
 func TestConvertRejectsEmptyAndInvalidYAML(t *testing.T) {
 	converter := New(nil)
 
@@ -75,6 +79,7 @@ func TestConvertRejectsEmptyAndInvalidYAML(t *testing.T) {
 	}
 }
 
+// TestSetConfigValidatesConfig 固定 YAML 到 Go 配置代码生成链路，确保后续注释补全或结构调整不改变该场景。
 func TestSetConfigValidatesConfig(t *testing.T) {
 	converter := New(nil)
 
@@ -97,6 +102,7 @@ func TestSetConfigValidatesConfig(t *testing.T) {
 	}
 }
 
+// assertContainsAll 校验测试响应或状态中的关键字段，使测试断言聚焦在对外契约而非重复解析细节。
 func assertContainsAll(t *testing.T, text string, substrings ...string) {
 	t.Helper()
 	for _, substring := range substrings {
@@ -106,6 +112,7 @@ func assertContainsAll(t *testing.T, text string, substrings ...string) {
 	}
 }
 
+// assertValidGoFile 校验测试响应或状态中的关键字段，使测试断言聚焦在对外契约而非重复解析细节。
 func assertValidGoFile(t *testing.T, content string) {
 	t.Helper()
 	if _, err := parser.ParseFile(token.NewFileSet(), "generated.go", content, parser.AllErrors); err != nil {

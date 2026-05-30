@@ -1,5 +1,7 @@
 package utils
 
+// 本测试文件固定国际化工具和基础设施辅助函数的边界，防止注释补全和后续重构改变外部可观察行为。
+
 import (
 	"encoding/hex"
 	"net"
@@ -13,6 +15,7 @@ type fakeI18n struct {
 	templateData []map[string]interface{}
 }
 
+// T 实现国际化测试桩的同名方法，保证 utils 代理层只依赖接口契约。
 func (f *fakeI18n) T(lang string, messageID string, templateData ...map[string]interface{}) string {
 	f.lang = lang
 	f.messageID = messageID
@@ -20,22 +23,27 @@ func (f *fakeI18n) T(lang string, messageID string, templateData ...map[string]i
 	return lang + ":" + messageID
 }
 
+// MustT 实现国际化测试桩的同名方法，保证 utils 代理层只依赖接口契约。
 func (f *fakeI18n) MustT(lang string, messageID string, templateData ...map[string]interface{}) string {
 	return f.T(lang, messageID, templateData...)
 }
 
+// IsSupported 实现国际化测试桩的同名方法，保证 utils 代理层只依赖接口契约。
 func (f *fakeI18n) IsSupported(string) bool {
 	return true
 }
 
+// GetDefaultLanguage 实现国际化测试桩的同名方法，保证 utils 代理层只依赖接口契约。
 func (f *fakeI18n) GetDefaultLanguage() string {
 	return "unused"
 }
 
+// LoadMessages 实现国际化测试桩的同名方法，保证 utils 代理层只依赖接口契约。
 func (f *fakeI18n) LoadMessages(string) error {
 	return nil
 }
 
+// TestSnowflakeGeneratesIDsAndRejectsInvalidNode 固定国际化工具和基础设施辅助函数的边界，确保后续注释补全或结构调整不改变该场景。
 func TestSnowflakeGeneratesIDsAndRejectsInvalidNode(t *testing.T) {
 	gen, err := NewSnowflake(1)
 	if err != nil {
@@ -70,6 +78,7 @@ func TestSnowflakeGeneratesIDsAndRejectsInvalidNode(t *testing.T) {
 	}
 }
 
+// TestListenAddrValidation 固定国际化工具和基础设施辅助函数的边界，确保后续注释补全或结构调整不改变该场景。
 func TestListenAddrValidation(t *testing.T) {
 	valid := []string{
 		":8080",
@@ -99,6 +108,7 @@ func TestListenAddrValidation(t *testing.T) {
 	}
 }
 
+// TestHTTPListenAddrValidation 固定国际化工具和基础设施辅助函数的边界，确保后续注释补全或结构调整不改变该场景。
 func TestHTTPListenAddrValidation(t *testing.T) {
 	if err := IsValidHTTPListenAddr("127.0.0.1:0"); err != nil {
 		t.Fatalf("IsValidHTTPListenAddr() with ephemeral loopback error = %v", err)
@@ -113,6 +123,7 @@ func TestHTTPListenAddrValidation(t *testing.T) {
 	}
 }
 
+// TestGetAvailablePortHonorsRangeAndExclude 固定国际化工具和基础设施辅助函数的边界，确保后续注释补全或结构调整不改变该场景。
 func TestGetAvailablePortHonorsRangeAndExclude(t *testing.T) {
 	invalidRanges := [][2]int{
 		{0, 1},
@@ -139,6 +150,7 @@ func TestGetAvailablePortHonorsRangeAndExclude(t *testing.T) {
 	}
 }
 
+// TestGenerateDeviceIDIsStableAndSalted 固定国际化工具和基础设施辅助函数的边界，确保后续注释补全或结构调整不改变该场景。
 func TestGenerateDeviceIDIsStableAndSalted(t *testing.T) {
 	first := GenerateDeviceID("app-a")
 	second := GenerateDeviceID("app-a")
@@ -158,6 +170,7 @@ func TestGenerateDeviceIDIsStableAndSalted(t *testing.T) {
 	}
 }
 
+// TestI18nUtilsUsesDefaultLanguageAndForwardsTemplates 固定国际化工具和基础设施辅助函数的边界，确保后续注释补全或结构调整不改变该场景。
 func TestI18nUtilsUsesDefaultLanguageAndForwardsTemplates(t *testing.T) {
 	backend := &fakeI18n{}
 	utils := NewI18nUtils(backend, "zh-CN")
@@ -181,6 +194,7 @@ func TestI18nUtilsUsesDefaultLanguageAndForwardsTemplates(t *testing.T) {
 	}
 }
 
+// freeLoopbackPort 是当前测试文件的辅助函数，用于复用夹具、断言或输入构造逻辑。
 func freeLoopbackPort(t *testing.T) int {
 	t.Helper()
 
@@ -195,6 +209,7 @@ func freeLoopbackPort(t *testing.T) int {
 	return port
 }
 
+// portOf 是当前测试文件的辅助函数，用于复用夹具、断言或输入构造逻辑。
 func portOf(t *testing.T, addr net.Addr) int {
 	t.Helper()
 

@@ -1,5 +1,5 @@
 /*
-Package togo 提供 YAML 字符串到 Go 结构体代码的转换功能
+Package yaml2go 提供 YAML 字符串到 Go 结构体代码的转换功能
 
 # 设计目标
 
@@ -226,3 +226,5 @@ server:
 - github.com/iancoleman/strcase: 字符串格式转换库
 */
 package yaml2go
+
+// 本文件承载包级 Godoc 入口，集中说明该包在脚手架架构中的定位、使用边界和非目标能力。

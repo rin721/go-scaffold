@@ -1,5 +1,7 @@
 package dbapp
 
+// 本测试文件固定应用组装根的最小可启动契约，防止注释补全和后续重构改变外部可观察行为。
+
 import (
 	"context"
 	"errors"
@@ -12,6 +14,7 @@ import (
 	"gorm.io/gorm"
 )
 
+// TestDemoSchemaSQLUsesSQLGenDDL 固定应用组装根的最小可启动契约，确保后续注释补全或结构调整不改变该场景。
 func TestDemoSchemaSQLUsesSQLGenDDL(t *testing.T) {
 	sql, err := DemoSchemaSQL(string(database.DriverSQLite))
 	if err != nil {
@@ -29,6 +32,7 @@ func TestDemoSchemaSQLUsesSQLGenDDL(t *testing.T) {
 	}
 }
 
+// TestDatabaseSQLUsesSQLGenDDL 固定应用组装根的最小可启动契约，确保后续注释补全或结构调整不改变该场景。
 func TestDatabaseSQLUsesSQLGenDDL(t *testing.T) {
 	sql, err := DatabaseSQL(string(database.DriverMySQL), "demo_app")
 	if err != nil {
@@ -39,6 +43,7 @@ func TestDatabaseSQLUsesSQLGenDDL(t *testing.T) {
 	}
 }
 
+// TestTodoOperationsUseSQLGenCRUD 固定应用组装根的最小可启动契约，确保后续注释补全或结构调整不改变该场景。
 func TestTodoOperationsUseSQLGenCRUD(t *testing.T) {
 	ctx := context.Background()
 	db := newSQLiteDatabase(t)
@@ -118,6 +123,7 @@ func TestTodoOperationsUseSQLGenCRUD(t *testing.T) {
 	}
 }
 
+// TestTodoOperationsValidateInputs 固定应用组装根的最小可启动契约，确保后续注释补全或结构调整不改变该场景。
 func TestTodoOperationsValidateInputs(t *testing.T) {
 	ctx := context.Background()
 	db := newSQLiteDatabase(t)
@@ -133,6 +139,7 @@ func TestTodoOperationsValidateInputs(t *testing.T) {
 	}
 }
 
+// newSQLiteDatabase 构造当前测试场景所需的最小依赖集合，避免测试直接耦合生产装配流程。
 func newSQLiteDatabase(t *testing.T) database.Database {
 	t.Helper()
 

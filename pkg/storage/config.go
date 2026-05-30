@@ -1,5 +1,7 @@
 package storage
 
+// 本文件属于存储抽象层，统一本地/内存文件系统、复制、监听、MIME、Excel 与图片辅助能力。
+
 import (
 	"fmt"
 	"os"

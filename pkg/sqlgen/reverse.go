@@ -1,5 +1,7 @@
 package sqlgen
 
+// 本文件属于 SQL 生成器，负责把结构体、schema 或解析结果转换为特定方言的 SQL 文本。
+
 import (
 	"os"
 	"path/filepath"
@@ -267,6 +269,7 @@ func (r *ReverseBuilder) GenerateToDir(dir string) error {
 // 内部方法
 // ============================================================================
 
+// generateCode 根据 schema 和 ReverseOptions 渲染 Go 结构体源码，是逆向生成的最终出口。
 func (r *ReverseBuilder) generateCode(schema *Schema) (string, error) {
 	// 应用类型映射
 	for i := range schema.Fields {

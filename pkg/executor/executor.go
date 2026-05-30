@@ -7,6 +7,8 @@
 // - 接口化设计,便于依赖注入和单元测试
 package executor
 
+// 本文件属于异步执行器，定义多池隔离、任务提交、panic 恢复、过载反馈和热重载策略。
+
 import "time"
 
 // PoolName 定义池的名称类型

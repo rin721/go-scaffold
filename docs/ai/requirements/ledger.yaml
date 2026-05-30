@@ -1,6 +1,6 @@
 schema_id: RequirementLedger
 ledger_id: req_ledger_001
-updated_at: "2026-05-30T13:33:57+08:00"
+updated_at: "2026-05-30T14:17:01+08:00"
 requirements:
   - id: req_bootstrap_001
     round_id: bootstrap
@@ -280,3 +280,24 @@ requirements:
       - evidence_026
     next_action: "Validate Chinese delivery rule synchronization and request developer acceptance."
     updated_at: "2026-05-30T13:33:57+08:00"
+  - id: req_infra_014_modeapp_to_mainapp
+    round_id: infra_001
+    branch_id: branch_vibe_coding_infra
+    source: developer_message
+    raw_text: "将modeapp改成mainapp"
+    normalized_text: "Rename the application mode-building subpackage from internal/app/modeapp to internal/app/mainapp, updating package names, imports, docs, runtime state, and validation evidence."
+    type: infrastructure_code_rename
+    priority_or_version: P0-infra_001
+    status: confirmed
+    decision: "Proceed as a low-risk internal package rename without changing public CLI behavior or runtime mode values."
+    related_research: []
+    related_task_analysis:
+      - task_014_modeapp_to_mainapp
+    related_architecture: []
+    related_slice:
+      - slice_014_modeapp_to_mainapp
+    conflicts: []
+    evidence:
+      - evidence_027
+    next_action: "Review validation results and request developer acceptance."
+    updated_at: "2026-05-30T14:17:01+08:00"

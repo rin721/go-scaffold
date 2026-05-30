@@ -1,5 +1,7 @@
 package reloadapp
 
+// 本测试文件固定配置热加载的组件替换边界，防止注释补全和后续重构改变外部可观察行为。
+
 import (
 	"context"
 	"testing"
@@ -16,6 +18,7 @@ import (
 	"gorm.io/gorm"
 )
 
+// TestReloadSkipsUnchangedComponents 固定配置热加载的组件替换边界，确保后续注释补全或结构调整不改变该场景。
 func TestReloadSkipsUnchangedComponents(t *testing.T) {
 	clearReloadEnv(t)
 
@@ -40,6 +43,7 @@ func TestReloadSkipsUnchangedComponents(t *testing.T) {
 	}
 }
 
+// TestReloadReloadsOnlyChangedComponent 固定配置热加载的组件替换边界，确保后续注释补全或结构调整不改变该场景。
 func TestReloadReloadsOnlyChangedComponent(t *testing.T) {
 	tests := []struct {
 		name   string
@@ -109,6 +113,7 @@ func TestReloadReloadsOnlyChangedComponent(t *testing.T) {
 	}
 }
 
+// TestReloadDisablesOptionalComponents 固定配置热加载的组件替换边界，确保后续注释补全或结构调整不改变该场景。
 func TestReloadDisablesOptionalComponents(t *testing.T) {
 	clearReloadEnv(t)
 
@@ -142,6 +147,7 @@ func TestReloadDisablesOptionalComponents(t *testing.T) {
 	}
 }
 
+// baseReloadConfig 是当前测试文件的辅助函数，用于复用夹具、断言或输入构造逻辑。
 func baseReloadConfig() *config.Config {
 	return &config.Config{
 		Server: config.ServerConfig{
@@ -205,6 +211,7 @@ func baseReloadConfig() *config.Config {
 	}
 }
 
+// cloneReloadConfig 是当前测试文件的辅助函数，用于复用夹具、断言或输入构造逻辑。
 func cloneReloadConfig(src *config.Config) *config.Config {
 	dst := *src
 	dst.I18n.Supported = append([]string(nil), src.I18n.Supported...)
@@ -225,6 +232,7 @@ type reloadFixture struct {
 	storage    *fakeStorage
 }
 
+// newReloadFixture 构造当前测试场景所需的最小依赖集合，避免测试直接耦合生产装配流程。
 func newReloadFixture(t *testing.T) (initapp.Core, initapp.Infrastructure, initapp.Transport, reloadFixture) {
 	t.Helper()
 
@@ -257,6 +265,7 @@ type reloadCounts struct {
 	storage    int
 }
 
+// assertReloadCounts 校验测试响应或状态中的关键字段，使测试断言聚焦在对外契约而非重复解析细节。
 func assertReloadCounts(t *testing.T, fakes reloadFixture, want reloadCounts) {
 	t.Helper()
 
@@ -287,12 +296,14 @@ type fakeCache struct {
 	lastConfig *cache.Config
 }
 
+// Reload 实现测试桩的配置重载入口，用于验证调用路径而不触发真实资源替换。
 func (c *fakeCache) Reload(_ context.Context, cfg *cache.Config) error {
 	c.reloads++
 	c.lastConfig = cfg
 	return nil
 }
 
+// Close 实现测试桩的资源关闭入口，用于验证生命周期调用而不释放外部资源。
 func (c *fakeCache) Close() error {
 	c.closes++
 	return nil
@@ -306,6 +317,7 @@ type fakeDatabase struct {
 	gormDB     *gorm.DB
 }
 
+// newFakeDatabase 构造当前测试场景所需的最小依赖集合，避免测试直接耦合生产装配流程。
 func newFakeDatabase(t *testing.T) *fakeDatabase {
 	t.Helper()
 
@@ -316,25 +328,30 @@ func newFakeDatabase(t *testing.T) *fakeDatabase {
 	return &fakeDatabase{gormDB: gormDB}
 }
 
+// DB 实现数据库测试桩的底层连接访问入口，按测试场景返回预置的 GORM 句柄。
 func (d *fakeDatabase) DB() *gorm.DB {
 	d.dbCalls++
 	return d.gormDB
 }
 
+// Reload 实现测试桩的配置重载入口，用于验证调用路径而不触发真实资源替换。
 func (d *fakeDatabase) Reload(cfg *database.Config) error {
 	d.reloads++
 	d.lastConfig = cfg
 	return nil
 }
 
+// WithTx 实现数据库测试桩的事务入口，用于把被测逻辑限制在可观察的回调调用内。
 func (d *fakeDatabase) WithTx(ctx context.Context, fn database.TxFunc) error {
 	return fn(ctx, d.gormDB)
 }
 
+// WithTxOptions 实现数据库测试桩的事务入口，用于把被测逻辑限制在可观察的回调调用内。
 func (d *fakeDatabase) WithTxOptions(ctx context.Context, _ *database.TxOptions, fn database.TxFunc) error {
 	return fn(ctx, d.gormDB)
 }
 
+// Close 实现测试桩的资源关闭入口，用于验证生命周期调用而不释放外部资源。
 func (d *fakeDatabase) Close() error {
 	sqlDB, err := d.gormDB.DB()
 	if err != nil {
@@ -343,6 +360,7 @@ func (d *fakeDatabase) Close() error {
 	return sqlDB.Close()
 }
 
+// Ping 实现数据库测试桩的健康检查入口，按测试需要返回成功或预设错误。
 func (d *fakeDatabase) Ping(context.Context) error {
 	return nil
 }
@@ -352,24 +370,32 @@ type fakeLogger struct {
 	lastConfig *logger.Config
 }
 
+// Debug 实现测试日志桩的同名输出入口，当前测试只关心接口满足而不采集日志内容。
 func (l *fakeLogger) Debug(string, ...interface{}) {}
 
+// Info 实现测试日志桩的同名输出入口，当前测试只关心接口满足而不采集日志内容。
 func (l *fakeLogger) Info(string, ...interface{}) {}
 
+// Warn 实现测试日志桩的同名输出入口，当前测试只关心接口满足而不采集日志内容。
 func (l *fakeLogger) Warn(string, ...interface{}) {}
 
+// Error 实现测试日志桩的同名输出入口，当前测试只关心接口满足而不采集日志内容。
 func (l *fakeLogger) Error(string, ...interface{}) {}
 
+// Fatal 实现测试日志桩的同名输出入口，当前测试只关心接口满足而不采集日志内容。
 func (l *fakeLogger) Fatal(string, ...interface{}) {}
 
+// With 实现测试日志桩的字段绑定入口，返回自身以保持 logger.Logger 链式调用契约。
 func (l *fakeLogger) With(...interface{}) logger.Logger {
 	return l
 }
 
+// Sync 实现测试日志桩的刷新入口，测试环境不持有真实缓冲区。
 func (l *fakeLogger) Sync() error {
 	return nil
 }
 
+// Reload 实现测试桩的配置重载入口，用于验证调用路径而不触发真实资源替换。
 func (l *fakeLogger) Reload(cfg *logger.Config) error {
 	l.reloads++
 	l.lastConfig = cfg
@@ -383,12 +409,14 @@ type fakeExecutor struct {
 	lastConfigs []executor.Config
 }
 
+// Reload 实现测试桩的配置重载入口，用于验证调用路径而不触发真实资源替换。
 func (e *fakeExecutor) Reload(configs []executor.Config) error {
 	e.reloads++
 	e.lastConfigs = configs
 	return nil
 }
 
+// Shutdown 实现测试桩的关闭入口，用于覆盖热加载或生命周期编排中的分支。
 func (e *fakeExecutor) Shutdown() {
 	e.shutdowns++
 }
@@ -399,6 +427,7 @@ type fakeHTTPServer struct {
 	lastConfig *httpserver.Config
 }
 
+// Reload 实现测试桩的配置重载入口，用于验证调用路径而不触发真实资源替换。
 func (s *fakeHTTPServer) Reload(_ context.Context, cfg *httpserver.Config) error {
 	s.reloads++
 	s.lastConfig = cfg
@@ -412,17 +441,20 @@ type fakeStorage struct {
 	lastConfig *storagepkg.Config
 }
 
+// Reload 实现测试桩的配置重载入口，用于验证调用路径而不触发真实资源替换。
 func (s *fakeStorage) Reload(_ context.Context, cfg *storagepkg.Config) error {
 	s.reloads++
 	s.lastConfig = cfg
 	return nil
 }
 
+// Close 实现测试桩的资源关闭入口，用于验证生命周期调用而不释放外部资源。
 func (s *fakeStorage) Close() error {
 	s.closes++
 	return nil
 }
 
+// clearReloadEnv 清理测试期间设置的环境变量或全局状态，避免用例之间互相污染。
 func clearReloadEnv(t *testing.T) {
 	t.Helper()
 

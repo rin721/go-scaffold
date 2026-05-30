@@ -1,5 +1,7 @@
 package crypto
 
+// 本测试文件固定密码哈希组件的配置、并发和校验契约，防止注释补全和后续重构改变外部可观察行为。
+
 import (
 	"errors"
 	"strings"

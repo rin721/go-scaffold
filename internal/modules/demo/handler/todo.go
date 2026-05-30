@@ -1,5 +1,7 @@
 package handler
 
+// 本文件定义 Demo Todo 的 HTTP 适配层，负责请求绑定、错误映射和统一 Result 响应。
+
 import (
 	"errors"
 	"net/http"
@@ -11,6 +13,7 @@ import (
 	"github.com/rei0721/go-scaffold/types/result"
 )
 
+// TodoHandler 将 Demo Todo 服务暴露为 HTTP handler，负责请求绑定、状态码选择和统一响应。
 type TodoHandler struct {
 	service service.TodoService
 	logger  logger.Logger
@@ -28,10 +31,12 @@ type updateTodoRequest struct {
 	Completed   *bool   `json:"completed"`
 }
 
+// NewTodoHandler 创建 TodoHandler，并显式注入服务与日志依赖以便测试替换。
 func NewTodoHandler(service service.TodoService, logger logger.Logger) *TodoHandler {
 	return &TodoHandler{service: service, logger: logger}
 }
 
+// Create 处理新建 Todo 请求，绑定 JSON 后把业务校验与事务交给服务层完成。
 func (h *TodoHandler) Create(c *gin.Context) {
 	var req createTodoRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -51,6 +56,7 @@ func (h *TodoHandler) Create(c *gin.Context) {
 	c.JSON(http.StatusCreated, result.Success(todo))
 }
 
+// List 处理 Todo 列表请求，当前示例使用固定分页上限以避免开放无限制查询。
 func (h *TodoHandler) List(c *gin.Context) {
 	todos, err := h.service.List(c.Request.Context())
 	if err != nil {
@@ -60,6 +66,7 @@ func (h *TodoHandler) List(c *gin.Context) {
 	result.OK(c, todos)
 }
 
+// Get 根据路径参数查询单个 Todo，并把不存在场景映射为统一失败响应。
 func (h *TodoHandler) Get(c *gin.Context) {
 	id, ok := parseID(c)
 	if !ok {
@@ -73,6 +80,7 @@ func (h *TodoHandler) Get(c *gin.Context) {
 	result.OK(c, todo)
 }
 
+// Update 处理部分字段更新请求，只有 JSON 中出现的字段会传递给服务层。
 func (h *TodoHandler) Update(c *gin.Context) {
 	id, ok := parseID(c)
 	if !ok {
@@ -97,6 +105,7 @@ func (h *TodoHandler) Update(c *gin.Context) {
 	result.OK(c, todo)
 }
 
+// Delete 根据路径参数删除 Todo，并保持删除成功响应不泄露存储层细节。
 func (h *TodoHandler) Delete(c *gin.Context) {
 	id, ok := parseID(c)
 	if !ok {
@@ -109,6 +118,7 @@ func (h *TodoHandler) Delete(c *gin.Context) {
 	result.OK(c, gin.H{"deleted": true})
 }
 
+// parseID 从路径参数解析 Todo ID，并把非法输入转换为统一的客户端错误响应。
 func parseID(c *gin.Context) (uint, bool) {
 	value, err := strconv.ParseUint(c.Param("id"), 10, 64)
 	if err != nil || value == 0 {
@@ -118,6 +128,7 @@ func parseID(c *gin.Context) (uint, bool) {
 	return uint(value), true
 }
 
+// writeError 将服务层领域错误映射为 Result 响应，避免 handler 泄露存储层错误细节。
 func (h *TodoHandler) writeError(c *gin.Context, err error) {
 	switch {
 	case errors.Is(err, service.ErrTodoTitleRequired):

@@ -1,5 +1,7 @@
 package crypto
 
+// 本文件属于密码哈希组件，约束算法配置、密码长度校验、哈希生成和验证失败模式。
+
 // 密码长度限制常量
 const (
 	// MinPasswordLength 最小密码长度（字节）

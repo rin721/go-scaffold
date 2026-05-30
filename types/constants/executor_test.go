@@ -1,5 +1,7 @@
 package constants
 
+// 本测试文件固定跨包公共类型的导入边界和响应契约，防止注释补全和后续重构改变外部可观察行为。
+
 import "testing"
 
 // TestPoolNameConstants 验证池名常量的值。

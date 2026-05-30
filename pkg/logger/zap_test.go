@@ -1,5 +1,7 @@
 package logger
 
+// 本测试文件固定 zap 日志封装的重载与并发访问契约，防止注释补全和后续重构改变外部可观察行为。
+
 import (
 	"sync"
 	"testing"

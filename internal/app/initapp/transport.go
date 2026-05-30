@@ -1,5 +1,7 @@
 package initapp
 
+// 本文件属于应用初始化装配层，负责把配置、基础设施、业务模块或传输层拼接为可运行的分层对象。
+
 import (
 	"fmt"
 
@@ -14,6 +16,9 @@ import (
 	"github.com/rei0721/go-scaffold/pkg/logger"
 )
 
+// NewTransport 装配 HTTP 传输层。
+//
+// Demo handler 可能为 nil，路由层据此决定是否注册 Demo Todo 接口。
 func NewTransport(core Core, infra Infrastructure, modules Modules) (Transport, error) {
 	corsConfig, err := NewCORS(core.Config, core.Logger)
 	if err != nil {
@@ -38,6 +43,9 @@ func NewTransport(core Core, infra Infrastructure, modules Modules) (Transport, 
 	}, nil
 }
 
+// NewCORS 生成中间件使用的 CORS 配置。
+//
+// 应用配置会先补默认值再应用环境覆盖，最后才校验并转换为 middleware 包结构。
 func NewCORS(cfg *config.Config, log logger.Logger) (middleware.CORSConfig, error) {
 	corsCfg := cfg.CORS
 	corsCfg.DefaultConfig()
@@ -69,6 +77,9 @@ func NewCORS(cfg *config.Config, log logger.Logger) (middleware.CORSConfig, erro
 	}, nil
 }
 
+// NewHTTPServer 创建 Gin router 和 HTTP server 包装器。
+//
+// gin.SetMode 会修改进程级全局状态，因此必须在创建 router 前完成。
 func NewHTTPServer(
 	cfg *config.Config,
 	log logger.Logger,

@@ -1,4 +1,7 @@
+// Package lifecycleapp 管理应用传输层启动和资源关闭顺序。
 package lifecycleapp
+
+// 本文件定义应用运行期生命周期编排，统一处理 HTTP 服务启动、资源关闭和日志同步。
 
 import (
 	"context"
@@ -7,6 +10,9 @@ import (
 	"github.com/rei0721/go-scaffold/internal/app/initapp"
 )
 
+// Start 启动 HTTP server。
+//
+// 传输层必须已完成初始化；nil HTTPServer 表示装配阶段失败或被错误跳过，应立即返回错误。
 func Start(ctx context.Context, transport initapp.Transport) error {
 	if transport.HTTPServer == nil {
 		return fmt.Errorf("http server is not initialized")
@@ -17,6 +23,9 @@ func Start(ctx context.Context, transport initapp.Transport) error {
 	return nil
 }
 
+// Shutdown 按固定顺序释放应用资源。
+//
+// 关闭过程采用最佳努力策略：某个资源关闭失败不会阻断后续资源释放，最终返回错误数量汇总。
 func Shutdown(ctx context.Context, core initapp.Core, infra initapp.Infrastructure, transport initapp.Transport) error {
 	log := core.Logger
 	if log != nil {

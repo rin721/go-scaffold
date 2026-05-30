@@ -1,5 +1,7 @@
 package httptransport
 
+// 本测试文件固定 HTTP 路由、中间件顺序和错误响应契约，防止注释补全和后续重构改变外部可观察行为。
+
 import (
 	"context"
 	"encoding/json"
@@ -18,26 +20,32 @@ type fakeDatabase struct {
 	pingErr error
 }
 
+// DB 实现数据库测试桩的底层连接访问入口，按测试场景返回预置的 GORM 句柄。
 func (db *fakeDatabase) DB() *gorm.DB {
 	return nil
 }
 
+// Close 实现测试桩的资源关闭入口，用于验证生命周期调用而不释放外部资源。
 func (db *fakeDatabase) Close() error {
 	return nil
 }
 
+// Ping 实现数据库测试桩的健康检查入口，按测试需要返回成功或预设错误。
 func (db *fakeDatabase) Ping(context.Context) error {
 	return db.pingErr
 }
 
+// Reload 实现测试桩的配置重载入口，用于验证调用路径而不触发真实资源替换。
 func (db *fakeDatabase) Reload(*database.Config) error {
 	return nil
 }
 
+// WithTx 实现数据库测试桩的事务入口，用于把被测逻辑限制在可观察的回调调用内。
 func (db *fakeDatabase) WithTx(context.Context, database.TxFunc) error {
 	return nil
 }
 
+// WithTxOptions 实现数据库测试桩的事务入口，用于把被测逻辑限制在可观察的回调调用内。
 func (db *fakeDatabase) WithTxOptions(context.Context, *database.TxOptions, database.TxFunc) error {
 	return nil
 }
@@ -48,6 +56,7 @@ type routerResponse struct {
 	Data    map[string]any `json:"data"`
 }
 
+// TestNewRouterHealthEndpoint 固定 HTTP 路由、中间件顺序和错误响应契约，确保后续注释补全或结构调整不改变该场景。
 func TestNewRouterHealthEndpoint(t *testing.T) {
 	router := newTestRouter(RouterDeps{})
 
@@ -60,6 +69,7 @@ func TestNewRouterHealthEndpoint(t *testing.T) {
 	assertDataValue(t, body.Data, "status", "ok")
 }
 
+// TestNewRouterReadyEndpoint 固定 HTTP 路由、中间件顺序和错误响应契约，确保后续注释补全或结构调整不改变该场景。
 func TestNewRouterReadyEndpoint(t *testing.T) {
 	tests := []struct {
 		name           string
@@ -127,6 +137,7 @@ func TestNewRouterReadyEndpoint(t *testing.T) {
 	}
 }
 
+// TestNewRouterDoesNotRegisterRemovedUserManagementRoutes 固定 HTTP 路由、中间件顺序和错误响应契约，确保后续注释补全或结构调整不改变该场景。
 func TestNewRouterDoesNotRegisterRemovedUserManagementRoutes(t *testing.T) {
 	router := newTestRouter(RouterDeps{})
 
@@ -148,11 +159,13 @@ func TestNewRouterDoesNotRegisterRemovedUserManagementRoutes(t *testing.T) {
 	}
 }
 
+// newTestRouter 构造当前测试场景所需的最小依赖集合，避免测试直接耦合生产装配流程。
 func newTestRouter(deps RouterDeps) *gin.Engine {
 	gin.SetMode(gin.TestMode)
 	return NewRouter(deps)
 }
 
+// performRouterRequest 执行测试 HTTP 请求并返回响应记录器，封装路由调用细节。
 func performRouterRequest(t *testing.T, router http.Handler, method string, path string) (*httptest.ResponseRecorder, routerResponse) {
 	t.Helper()
 
@@ -168,6 +181,7 @@ func performRouterRequest(t *testing.T, router http.Handler, method string, path
 	return recorder, body
 }
 
+// assertSuccessResponse 校验测试响应或状态中的关键字段，使测试断言聚焦在对外契约而非重复解析细节。
 func assertSuccessResponse(t *testing.T, body routerResponse) {
 	t.Helper()
 
@@ -182,6 +196,7 @@ func assertSuccessResponse(t *testing.T, body routerResponse) {
 	}
 }
 
+// assertDataValue 校验测试响应或状态中的关键字段，使测试断言聚焦在对外契约而非重复解析细节。
 func assertDataValue(t *testing.T, data map[string]any, key string, want string) {
 	t.Helper()
 

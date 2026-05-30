@@ -1,5 +1,7 @@
 package cli
 
+// 本文件属于轻量 CLI 框架，定义命令注册、flag 解析、环境变量默认值和错误输出契约。
+
 import (
 	"flag"
 	"fmt"

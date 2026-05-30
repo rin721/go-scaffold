@@ -1,5 +1,7 @@
 package yaml2go
 
+// 本文件属于 YAML 配置代码生成器，把配置样例解析为可编译的 Go 结构体、标签和辅助方法。
+
 import (
 	"bytes"
 	"fmt"
@@ -25,6 +27,7 @@ func (c *converter) generateMethods(structInfo *StructInfo, cfg *Config) (string
 	return buf.String(), nil
 }
 
+// appendMethods 按配置为生成文件追加辅助方法，保证主配置和子配置拥有一致的运行时契约。
 func (c *converter) appendMethods(f *jen.File, structInfo *StructInfo, cfg *Config) {
 	// 需要导入的包
 	f.ImportName("os", "os")
@@ -56,7 +59,7 @@ func (c *converter) generateValidateNameMethod(f *jen.File, structInfo *StructIn
 // generateValidateMethod 生成 Validate 方法
 func (c *converter) generateValidateMethod(f *jen.File, structInfo *StructInfo) {
 	f.Comment("Validate 验证配置")
-	f.Comment("TODO: 开发者可在此添加自定义验证逻辑")
+	f.Comment("开发者可在此添加自定义验证逻辑。")
 	f.Func().Params(
 		jen.Id("c").Op("*").Id(structInfo.Name),
 	).Id("Validate").Params().Error().Block(

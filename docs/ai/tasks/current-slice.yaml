@@ -1,32 +1,26 @@
 schema_id: ExecutionSlice
-id: slice_013_chinese_delivery_rule
+id: slice_014_modeapp_to_mainapp
 branch_id: branch_vibe_coding_infra
 round_id: infra_001
-task_id: task_013_chinese_delivery_rule
+task_id: task_014_modeapp_to_mainapp
 phase: verification
-module: delivery_language_and_docs_sync
-goal: "新增中文交付规则，并将上一轮用户管理栈移除的代码注释、文档概述、配置示例和运行时状态同步为中文口径。"
+module: app_package_rename
+goal: "将内部应用子包 `modeapp` 重命名为 `mainapp`，并保持服务行为、CLI mode 值和测试结果不变。"
 inputs:
-  - "Developer request: 新增一条规则，以后用中文内容交付产物，并把上述修改的内容，代码用中文注释，文档用中文概述"
+  - "Developer request: 将modeapp改成mainapp"
   - AGENTS.md
   - docs/ai/runtime-rule-index.md
   - docs/ai/status/current.yaml
   - docs/ai/tasks/current-slice.yaml
-  - README.md
-  - docs/**/*.md
-  - .env.example
-  - configs/config.example.yaml
-  - deploy/config.production.example.yaml
-  - deploy.sh
+  - internal/app/modeapp
+  - internal/app/app.go
+  - internal/app/constants.go
+  - docs/runtime/startup-flow.md
 outputs:
-  - README.md
-  - docs/**/*.md
-  - .env.example
-  - configs/config.example.yaml
-  - deploy/config.production.example.yaml
-  - deploy.sh
-  - internal/config/app_cors.go
-  - docs/ai/runtime-rule-index.md
+  - internal/app/mainapp/mode.go
+  - internal/app/app.go
+  - internal/app/constants.go
+  - docs/runtime/startup-flow.md
   - docs/ai/requirements/ledger.yaml
   - docs/ai/tasks/current-slice.yaml
   - docs/ai/tasks/branches/vibe-coding-infra/tree.yaml
@@ -34,16 +28,11 @@ outputs:
   - docs/ai/evidence/index.md
   - docs/ai/handoff/current.md
 allowed_files:
-  - README.md
-  - docs/**/*.md
-  - .env.example
-  - configs/config.example.yaml
-  - deploy/config.production.example.yaml
-  - deploy.sh
-  - internal/config/app_cors.go
-  - internal/config/manager_test.go
-  - internal/app/app_integration_test.go
-  - docs/ai/runtime-rule-index.md
+  - internal/app/modeapp/*
+  - internal/app/mainapp/*
+  - internal/app/app.go
+  - internal/app/constants.go
+  - docs/runtime/startup-flow.md
   - docs/ai/requirements/ledger.yaml
   - docs/ai/tasks/current-slice.yaml
   - docs/ai/tasks/branches/vibe-coding-infra/tree.yaml
@@ -57,37 +46,36 @@ allowed_tools:
   - shell_validation
   - apply_patch
 approval_required_actions:
-  - "Changing public API identifiers only for language localization"
+  - "Changing public CLI mode values"
   - "Adding third-party dependencies"
   - "Production deployment"
 risk_level: low
 agency_level: controlled_execution
 verification_commands:
   - "gofmt on touched Go files"
+  - "rg modeapp residual references"
   - "go test ./... -count=1 -mod=readonly"
   - "go build -mod=readonly -o ./tmp/go-scaffold-server.exe ./cmd/main"
-  - "rg English delivery leftovers in touched docs/examples"
   - "python docs/ai/scripts/validate_runtime.py"
 manual_checks:
-  - "新增运行时规则明确中文交付、中文代码注释、中文文档概述。"
-  - "上一轮用户管理栈移除相关文档改为中文概述。"
-  - "配置示例和部署帮助文本不再保留旧的英文认证说明。"
+  - "`internal/app/modeapp` no longer exists."
+  - "`internal/app/mainapp` exists and declares package `mainapp`."
+  - "Imports point to `internal/app/mainapp`."
 acceptance_criteria:
-  - "Runtime rule index records the Chinese delivery rule."
-  - "Human-facing docs touched by the removal slice are summarized in Chinese."
-  - "New or changed explanatory code comments are Chinese."
+  - "All code and docs references to `modeapp` are replaced with `mainapp`."
+  - "The user-facing runtime mode value `server` remains unchanged."
   - "Go tests, service build, and runtime validation pass."
-rollback_plan: "Revert this language-rule synchronization slice only; keep the user-management stack removal intact unless explicitly requested."
+rollback_plan: "Rename `internal/app/mainapp` back to `internal/app/modeapp` and restore imports/docs for this slice only."
 max_iteration_count: 3
 max_retry_count: 3
 retry_count: 0
 last_failure_reason: null
-next_human_decision: "Developer reviews the Chinese delivery rule and localized removal follow-up."
+next_human_decision: "Developer reviews the modeapp to mainapp rename."
 audit_evidence:
-  - evidence_026_chinese_delivery_rule
-human_override: "Developer explicitly requested Chinese delivery as future rule and Chinese documentation/comment cleanup for the previous changes."
+  - evidence_027_modeapp_to_mainapp
+human_override: "Developer explicitly requested renaming modeapp to mainapp."
 status: validation_passed
 knowledge_updates: []
 skill_updates: []
-next_condition: "Future human-facing deliverables default to Chinese; code comments and docs follow the new language rule."
-updated_at: "2026-05-30T13:33:57+08:00"
+next_condition: "Developer can accept the internal package rename."
+updated_at: "2026-05-30T14:17:01+08:00"

@@ -1,5 +1,7 @@
 package types
 
+// 本测试文件固定跨包公共类型的导入边界和响应契约，防止注释补全和后续重构改变外部可观察行为。
+
 import (
 	"go/parser"
 	"go/token"
@@ -9,6 +11,7 @@ import (
 	"testing"
 )
 
+// TestTypesPackagesDoNotImportInfrastructurePackages 固定跨包公共类型的导入边界和响应契约，确保后续注释补全或结构调整不改变该场景。
 func TestTypesPackagesDoNotImportInfrastructurePackages(t *testing.T) {
 	files, err := goFilesUnder(".")
 	if err != nil {
@@ -30,6 +33,7 @@ func TestTypesPackagesDoNotImportInfrastructurePackages(t *testing.T) {
 	}
 }
 
+// goFilesUnder 是当前测试文件的辅助函数，用于复用夹具、断言或输入构造逻辑。
 func goFilesUnder(root string) ([]string, error) {
 	var files []string
 	err := filepath.WalkDir(root, func(path string, entry fs.DirEntry, err error) error {

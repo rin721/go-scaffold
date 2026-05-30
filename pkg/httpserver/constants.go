@@ -1,5 +1,7 @@
 package httpserver
 
+// 本文件属于 HTTP 服务封装层，管理 net/http Server 的启动、关闭、地址选择和配置重载。
+
 import "time"
 
 // 默认配置常量

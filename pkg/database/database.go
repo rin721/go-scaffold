@@ -6,6 +6,8 @@
 // - 便于切换数据库类型,无需修改业务代码
 package database
 
+// 本文件属于数据库基础设施层，定义连接工厂、池参数、事务上下文和热重载资源替换边界。
+
 import (
 	"context"
 	"database/sql"

@@ -1,5 +1,7 @@
 package executor
 
+// 本文件属于异步执行器，定义多池隔离、任务提交、panic 恢复、过载反馈和热重载策略。
+
 import (
 	"fmt"
 	"sync"

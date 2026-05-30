@@ -1,5 +1,7 @@
 package initapp
 
+// 本文件属于应用初始化装配层，负责把配置、基础设施、业务模块或传输层拼接为可运行的分层对象。
+
 import (
 	"fmt"
 
@@ -9,6 +11,9 @@ import (
 	"github.com/rei0721/go-scaffold/pkg/utils"
 )
 
+// NewCore 创建后续所有装配层共享的核心服务集合。
+//
+// 配置必须最先加载，因为日志、i18n 和 ID 生成器都依赖配置提供运行参数。
 func NewCore(configPath string) (Core, error) {
 	configManager, cfg, err := LoadConfig(configPath)
 	if err != nil {
@@ -35,6 +40,9 @@ func NewCore(configPath string) (Core, error) {
 	}, nil
 }
 
+// LoadConfig 创建配置管理器并加载指定配置文件。
+//
+// 返回的 Config 是管理器当前快照；后续热更新仍以 ConfigManager 作为权威来源。
 func LoadConfig(configPath string) (config.Manager, *config.Config, error) {
 	configManager := config.NewManager()
 	if err := configManager.Load(configPath); err != nil {
@@ -43,6 +51,7 @@ func LoadConfig(configPath string) (config.Manager, *config.Config, error) {
 	return configManager, configManager.Get(), nil
 }
 
+// NewLogger 根据应用配置创建日志器。
 func NewLogger(cfg *config.Config) (logger.Logger, error) {
 	log, err := logger.New(LoggerConfig(cfg))
 	if err != nil {
@@ -52,6 +61,9 @@ func NewLogger(cfg *config.Config) (logger.Logger, error) {
 	return log, nil
 }
 
+// NewI18n 创建 i18n 应用和业务侧便捷工具。
+//
+// I18nUtils 固定使用配置中的默认语言，避免业务层重复读取配置并产生语言回退分歧。
 func NewI18n(cfg *config.Config) (i18n.I18n, *utils.I18nUtils, error) {
 	i18nCfg := &i18n.Config{
 		DefaultLanguage:    cfg.I18n.Default,
@@ -66,10 +78,14 @@ func NewI18n(cfg *config.Config) (i18n.I18n, *utils.I18nUtils, error) {
 	return i18nApp, utils.NewI18nUtils(i18nApp, cfg.I18n.Default), nil
 }
 
+// NewIDGenerator 创建脚手架默认的 Snowflake ID 生成器。
 func NewIDGenerator() utils.IDGenerator {
 	return utils.DefaultSnowflake()
 }
 
+// DebugConfig 输出启动期关键配置摘要。
+//
+// 日志中只记录定位运行态所需的配置字段，不输出密码等敏感值。
 func DebugConfig(core Core, configPath string) {
 	core.Logger.Debug("configuration loaded successfully",
 		"config_file", configPath,

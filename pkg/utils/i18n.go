@@ -1,5 +1,7 @@
 package utils
 
+// 本文件属于通用工具层，提供无业务状态的地址校验、端口选择、设备标识或国际化代理能力。
+
 import (
 	"github.com/rei0721/go-scaffold/pkg/i18n"
 )

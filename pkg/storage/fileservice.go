@@ -1,5 +1,7 @@
 package storage
 
+// 本文件属于存储抽象层，统一本地/内存文件系统、复制、监听、MIME、Excel 与图片辅助能力。
+
 import (
 	"context"
 	"image"
@@ -325,6 +327,7 @@ const (
 // copyOptionFunc 选项函数适配器
 type copyOptionFunc func(*copyOptions)
 
+// apply 将文件服务选项写入服务实例，用于在默认行为基础上覆写局部能力。
 func (f copyOptionFunc) apply(opts *copyOptions) {
 	f(opts)
 }

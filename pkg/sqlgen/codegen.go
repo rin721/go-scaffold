@@ -1,5 +1,7 @@
 package sqlgen
 
+// 本文件属于 SQL 生成器，负责把结构体、schema 或解析结果转换为特定方言的 SQL 文本。
+
 import (
 	"fmt"
 	"strings"
@@ -217,6 +219,7 @@ func (c *CodeGenerator) GenerateDAO(schema *Schema, methods []string) string {
 	return sb.String()
 }
 
+// writeCreateMethod 向代码生成缓冲区写入 DAO 方法模板，保持模板顺序和缩进可预测。
 func (c *CodeGenerator) writeCreateMethod(sb *strings.Builder, schema *Schema, daoName string) {
 	sb.WriteString(fmt.Sprintf("// Create 创建记录\n"))
 	sb.WriteString(fmt.Sprintf("func (d *%s) Create(entity *%s) error {\n", daoName, schema.Name))
@@ -224,6 +227,7 @@ func (c *CodeGenerator) writeCreateMethod(sb *strings.Builder, schema *Schema, d
 	sb.WriteString("}\n\n")
 }
 
+// writeUpdateMethod 向代码生成缓冲区写入 DAO 方法模板，保持模板顺序和缩进可预测。
 func (c *CodeGenerator) writeUpdateMethod(sb *strings.Builder, schema *Schema, daoName string) {
 	sb.WriteString(fmt.Sprintf("// Update 更新记录\n"))
 	sb.WriteString(fmt.Sprintf("func (d *%s) Update(entity *%s) error {\n", daoName, schema.Name))
@@ -231,6 +235,7 @@ func (c *CodeGenerator) writeUpdateMethod(sb *strings.Builder, schema *Schema, d
 	sb.WriteString("}\n\n")
 }
 
+// writeDeleteMethod 向代码生成缓冲区写入 DAO 方法模板，保持模板顺序和缩进可预测。
 func (c *CodeGenerator) writeDeleteMethod(sb *strings.Builder, schema *Schema, daoName string) {
 	// 查找主键字段
 	var pkField *Field
@@ -252,6 +257,7 @@ func (c *CodeGenerator) writeDeleteMethod(sb *strings.Builder, schema *Schema, d
 	sb.WriteString("}\n\n")
 }
 
+// writeFindByIDMethod 向代码生成缓冲区写入 DAO 方法模板，保持模板顺序和缩进可预测。
 func (c *CodeGenerator) writeFindByIDMethod(sb *strings.Builder, schema *Schema, daoName string) {
 	// 查找主键字段
 	var pkField *Field
@@ -277,6 +283,7 @@ func (c *CodeGenerator) writeFindByIDMethod(sb *strings.Builder, schema *Schema,
 	sb.WriteString("}\n\n")
 }
 
+// writeFindAllMethod 向代码生成缓冲区写入 DAO 方法模板，保持模板顺序和缩进可预测。
 func (c *CodeGenerator) writeFindAllMethod(sb *strings.Builder, schema *Schema, daoName string) {
 	sb.WriteString(fmt.Sprintf("// FindAll 查找所有记录\n"))
 	sb.WriteString(fmt.Sprintf("func (d *%s) FindAll() ([]*%s, error) {\n", daoName, schema.Name))

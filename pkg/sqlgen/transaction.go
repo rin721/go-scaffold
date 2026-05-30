@@ -1,5 +1,7 @@
 package sqlgen
 
+// 本文件属于 SQL 生成器，负责把结构体、schema 或解析结果转换为特定方言的 SQL 文本。
+
 import (
 	"fmt"
 	"strings"
@@ -237,6 +239,7 @@ func (m *MigrationBuilder) BuildRollback() (string, error) {
 	return sb.String(), nil
 }
 
+// buildOperation 依据当前生成上下文和方言规则构造 SQL 片段，错误会向上冒泡给公开构建入口。
 func (m *MigrationBuilder) buildOperation(op migrationOp) string {
 	migrate := m.generator.Migrate(op.model)
 
@@ -257,6 +260,7 @@ func (m *MigrationBuilder) buildOperation(op migrationOp) string {
 	return sql
 }
 
+// buildRollbackOperation 依据当前生成上下文和方言规则构造 SQL 片段，错误会向上冒泡给公开构建入口。
 func (m *MigrationBuilder) buildRollbackOperation(op migrationOp) string {
 	migrate := m.generator.Migrate(op.model)
 
@@ -268,8 +272,8 @@ func (m *MigrationBuilder) buildRollbackOperation(op migrationOp) string {
 		// 回滚删除列 = 添加列 (需要类型信息，这里简化处理)
 		migrate.AddColumn(op.column)
 	case "modify_column":
-		// 回滚修改需要原始类型，这里简化
-		return fmt.Sprintf("-- TODO: Restore original type for column %s", op.column)
+		// 回滚修改需要原始类型，这里返回显式 SQL 注释，避免调用方误以为已生成可执行回滚语句。
+		return fmt.Sprintf("-- 回滚列 %s 的类型修改需要记录原始类型", op.column)
 	case "add_index":
 		migrate.DropIndex(op.indexName)
 	case "drop_index":

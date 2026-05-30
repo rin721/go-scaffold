@@ -1,5 +1,7 @@
 package config
 
+// 本文件属于配置子系统，处理配置加载、环境变量覆盖、运行时快照或跨分区校验。
+
 import (
 	"strings"
 	"unicode"
@@ -47,6 +49,7 @@ func EnvPrefixJoin(field string) string {
 	return prefix + "_" + field
 }
 
+// normalizeEnvToken 将动态应用前缀规整为环境变量安全片段，避免大小写和非法字符影响 env key 拼接。
 func normalizeEnvToken(value string) string {
 	var builder strings.Builder
 	lastUnderscore := false
@@ -65,22 +68,34 @@ func normalizeEnvToken(value string) string {
 }
 
 const (
-	EnvFilePath        = ".env"
+	// EnvFilePath 定义配置管理器自动加载的本地环境变量文件名称。
+	EnvFilePath = ".env"
+	// EnvFilePathExample 定义环境变量示例文件名称，用于文档和初始化模板。
 	EnvFilePathExample = ".env.example"
 )
 
 const (
+	// DefaultSeparator 定义环境变量中切片配置的默认分隔符。
 	DefaultSeparator = ","
 )
 
 const (
-	AppServerName   = "server"
+	// AppServerName 定义聚合配置中的分区名称，供加载、校验和热更新差异判断复用。
+	AppServerName = "server"
+	// AppDatabaseName 定义聚合配置中的分区名称，供加载、校验和热更新差异判断复用。
 	AppDatabaseName = "database"
-	AppRedisName    = "redis"
-	AppLoggerName   = "logger"
-	AppI18nName     = "i18n"
+	// AppRedisName 定义聚合配置中的分区名称，供加载、校验和热更新差异判断复用。
+	AppRedisName = "redis"
+	// AppLoggerName 定义聚合配置中的分区名称，供加载、校验和热更新差异判断复用。
+	AppLoggerName = "logger"
+	// AppI18nName 定义聚合配置中的分区名称，供加载、校验和热更新差异判断复用。
+	AppI18nName = "i18n"
+	// AppExecutorName 定义聚合配置中的分区名称，供加载、校验和热更新差异判断复用。
 	AppExecutorName = "executor"
-	AppStorageName  = "storage"
-	AppDemoName     = "demo"
-	AppCORSName     = "cors"
+	// AppStorageName 定义聚合配置中的分区名称，供加载、校验和热更新差异判断复用。
+	AppStorageName = "storage"
+	// AppDemoName 定义聚合配置中的分区名称，供加载、校验和热更新差异判断复用。
+	AppDemoName = "demo"
+	// AppCORSName 定义聚合配置中的分区名称，供加载、校验和热更新差异判断复用。
+	AppCORSName = "cors"
 )
